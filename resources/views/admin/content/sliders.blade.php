@@ -50,11 +50,7 @@
                     </span>
                 </div>
                 <div class="p-4 space-y-3">
-                    <h4 class="text-xs font-bold text-slate-900 line-clamp-1">{{ $slide->title ?? __('messages.untitled_banner') }}</h4>
-                    @if($slide->subtitle)
-                        <p class="text-[10px] text-slate-400 font-medium line-clamp-1">{{ $slide->subtitle }}</p>
-                    @endif
-                    <div class="flex items-center justify-between text-[9px] text-slate-400 font-bold pt-1 border-t border-slate-50">
+                    <div class="flex items-center justify-between text-[9px] text-slate-400 font-bold pt-1">
                         <span>{{ __('messages.priority') }}: {{ $slide->display_order }}</span>
                         @if($slide->button_text)
                             <span class="text-primary-500">Btn: {{ $slide->button_text }}</span>
@@ -117,14 +113,7 @@
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.banner_image_label') }}</label>
                     <input type="file" name="image" required class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
                 </div>
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.title_optional') }}</label>
-                    <input type="text" name="title" placeholder="e.g. Annual Gathering 2026" class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                </div>
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.subtitle_optional') }}</label>
-                    <input type="text" name="subtitle" placeholder="e.g. Join us in celebration" class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-0.5">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.button_text') }}</label>
@@ -170,14 +159,7 @@
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.replace_image_label') }}</label>
                     <input type="file" name="image" class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
                 </div>
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.title_optional') }}</label>
-                    <input type="text" name="title" :value="editSlider.title" placeholder="e.g. Annual Gathering 2026" class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                </div>
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.subtitle_optional') }}</label>
-                    <input type="text" name="subtitle" :value="editSlider.subtitle" placeholder="e.g. Join us in celebration" class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-0.5">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.button_text') }}</label>

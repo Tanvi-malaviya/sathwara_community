@@ -64,14 +64,17 @@ class EventController extends Controller
             'venue' => 'required|string|max:255',
             'date' => 'required|date',
             'time' => 'required',
-            'banner' => 'required|image|max:3072',
+            'banner' => 'nullable|image|max:3072',
             'has_registration_form' => 'required|boolean',
             'pass_fee' => 'nullable|numeric|min:0',
             'max_participants' => 'nullable|integer|min:0',
             'status' => 'required|in:draft,published,cancelled',
         ]);
 
-        $bannerPath = $request->file('banner')->store('events/banners', 'public');
+        $bannerPath = null;
+        if ($request->hasFile('banner')) {
+            $bannerPath = $request->file('banner')->store('events/banners', 'public');
+        }
 
         Event::create([
             'title' => $request->title,
@@ -80,7 +83,7 @@ class EventController extends Controller
             'venue' => $request->venue,
             'date' => $request->date,
             'time' => $request->time,
-            'banner_path' => $bannerPath,
+            'banner_path' => $bannerPath ?? '',
             'registration_option' => $request->has_registration_form,
             'has_registration_form' => $request->has_registration_form,
             'pass_fee' => $request->pass_fee ?? 0.00,
@@ -136,7 +139,7 @@ class EventController extends Controller
             'venue' => $request->venue,
             'date' => $request->date,
             'time' => $request->time,
-            'banner_path' => $bannerPath,
+            'banner_path' => $bannerPath ?? '',
             'registration_option' => $request->has_registration_form,
             'has_registration_form' => $request->has_registration_form,
             'pass_fee' => $request->pass_fee ?? 0.00,

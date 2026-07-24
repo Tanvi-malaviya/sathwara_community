@@ -122,6 +122,7 @@
                         <th class="py-2 px-3">{{ __('messages.phone') }}</th>
                         <th class="py-2 px-3">{{ __('messages.category') }}</th>
                         <th class="py-2 px-3">{{ __('messages.status') }}</th>
+                        <th class="py-2 px-3">Subscription Dates</th>
                         <th class="py-2 px-3">{{ __('messages.membership_status') }}</th>
                         <th class="py-2 px-3 text-right">{{ __('messages.actions') }}</th>
                     </tr>
@@ -145,6 +146,16 @@
                             @if($b->status=='approved') <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[10px]">{{ __('messages.approved') }}</span>
                             @elseif($b->status=='rejected') <span class="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-full font-bold text-[10px]">{{ __('messages.rejected') }}</span>
                             @else <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-full font-bold text-[10px]">{{ __('messages.pending') }}</span>
+                            @endif
+                        </td>
+                        <td class="py-2 px-3">
+                            @if($b->approved_at)
+                                <div class="text-[10px] leading-snug">
+                                    <div class="font-bold text-slate-700">P: {{ $b->approved_at->format('d M Y') }}</div>
+                                    <div class="font-semibold text-slate-400">E: {{ $b->approved_at->addYear()->format('d M Y') }}</div>
+                                </div>
+                            @else
+                                <span class="text-slate-400">—</span>
                             @endif
                         </td>
                         <td class="py-2 px-3">

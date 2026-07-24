@@ -173,34 +173,4 @@
     </div>
 </section>
 
-<!-- Committee Members -->
-<section class="py-6 md:py-8 bg-slate-50 border-t border-slate-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-3xl mx-auto mb-8 space-y-1">
-            <span class="text-xs font-bold text-primary-500 uppercase tracking-widest">{{ __('messages.committee') }}</span>
-            <h2 class="text-xl md:text-3xl font-extrabold text-slate-900 tracking-tight">{{ __('messages.active_committee') }}</h2>
-            <p class="text-xs text-slate-500">{{ __('messages.committee_subtitle') }}</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-            @foreach($committee as $member)
-                <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm text-center p-5 group hover:shadow-md transition-shadow">
-                    @if($member->photo_path)
-                        <img class="w-24 h-24 rounded-full mx-auto object-cover bg-slate-50 border border-slate-100 shadow-inner group-hover:scale-102 transition-transform" 
-                             src="{{ str_starts_with($member->photo_path, 'http') ? $member->photo_path : asset('storage/' . $member->photo_path) }}" 
-                             alt="{{ $member->name }}">
-                    @else
-                        <div class="w-24 h-24 rounded-full mx-auto bg-slate-100 flex items-center justify-center text-slate-400 font-extrabold text-xl">
-                            {{ substr($member->name, 0, 1) }}
-                        </div>
-                    @endif
-                    <div class="mt-4 space-y-1">
-                        <h3 class="text-sm font-bold text-slate-900">{{ $member->name }}</h3>
-                        <p class="text-[11px] text-primary-500 font-semibold">{{ $member->designation }}</p>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
 @endsection

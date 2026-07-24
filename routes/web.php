@@ -66,6 +66,10 @@ Route::middleware(['auth', 'role:Member', 'approved'])->prefix('member')->name('
     Route::get('/profile', [MemberDashboard::class, 'editProfile'])->name('profile.edit');
     Route::post('/profile', [MemberDashboard::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/password', [MemberDashboard::class, 'updatePassword'])->name('profile.update_password');
+    Route::get('/account-settings', [MemberDashboard::class, 'accountSettings'])->name('account.settings');
+    Route::post('/account-settings/email/send-otp', [MemberDashboard::class, 'sendEmailOtp'])->name('account.settings.send_otp');
+    Route::post('/account-settings/email/verify-otp', [MemberDashboard::class, 'verifyEmailOtp'])->name('account.settings.verify_otp');
+    Route::post('/account-settings/password', [MemberDashboard::class, 'updatePassword'])->name('account.settings.update_password');
     Route::get('/membership-card', [MemberDashboard::class, 'membershipCard'])->name('card');
 
     // Family CRUD

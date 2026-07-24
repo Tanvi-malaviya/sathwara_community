@@ -159,6 +159,7 @@ class BusinessController extends Controller
             'linkedin' => 'nullable|string|max:255',
             'status' => 'required|in:pending,approved,rejected',
             'membership_status' => 'required|in:active,inactive',
+            'approved_at' => 'nullable|date',
             'logo' => 'nullable|image|max:2048',
             'payment_screenshot' => 'nullable|image|max:2048',
             'gallery.*' => 'nullable|image|max:10240',
@@ -173,7 +174,7 @@ class BusinessController extends Controller
             'description' => $request->description,
             'address' => $request->address,
             'phone' => $request->phone,
-            'whatsapp' => $request->whatsapp,
+            'whatsapp' => $request->phone,
             'email' => $request->email,
             'website' => $request->website,
             'facebook' => $request->facebook,
@@ -184,7 +185,9 @@ class BusinessController extends Controller
             'membership_status' => $request->membership_status,
         ];
 
-        if ($request->status === 'approved' && $business->status !== 'approved') {
+        if ($request->filled('approved_at')) {
+            $data['approved_at'] = $request->approved_at;
+        } elseif ($request->status === 'approved' && !$business->approved_at) {
             $data['approved_at'] = now();
         } elseif ($request->status !== 'approved') {
             $data['approved_at'] = null;

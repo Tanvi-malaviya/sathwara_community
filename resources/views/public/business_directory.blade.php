@@ -8,7 +8,7 @@
 ])
 
 <!-- Search and Directory Grid -->
-<section class="py-10 bg-slate-50/60">
+<section class="py-10 bg-transparent">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Filters Sidebar -->
@@ -72,9 +72,16 @@
                                          src="{{ str_starts_with($biz->logo_path, 'http') ? $biz->logo_path : asset('storage/' . $biz->logo_path) }}" 
                                          alt="{{ $biz->business_name }}">
                                     
-                                    <span class="text-[9px] font-extrabold text-primary-700 bg-primary-50 border border-primary-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
-                                        {{ $biz->category?->name ?? 'General' }}
-                                    </span>
+                                    <div class="flex flex-col items-end gap-1.5 shrink-0">
+                                        <span class="text-[9px] font-extrabold text-primary-700 bg-primary-50 border border-primary-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                                            {{ $biz->category?->name ?? 'General' }}
+                                        </span>
+                                        @if($biz->membership_status === 'active')
+                                            <span class="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">Active</span>
+                                        @else
+                                            <span class="text-[9px] font-extrabold text-rose-700 bg-rose-50 border border-rose-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">Expired</span>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <!-- Info Content (Compact Spacing) -->
@@ -91,6 +98,13 @@
                                                 <span class="mx-1 text-slate-300">•</span> ID: <span class="text-slate-700">{{ $biz->member_id }}</span>
                                             @endif
                                         </p>
+                                        @if($biz->approved_at)
+                                            <p class="text-[9px] text-slate-400 font-bold mt-1">
+                                                Purchase: <span class="text-slate-600">{{ $biz->approved_at->format('d M Y') }}</span>
+                                                <span class="mx-1 text-slate-300">•</span>
+                                                Expires: <span class="text-slate-600">{{ $biz->approved_at->addYear()->format('d M Y') }}</span>
+                                            </p>
+                                        @endif
                                     </div>
 
                                     <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed min-h-[30px]">

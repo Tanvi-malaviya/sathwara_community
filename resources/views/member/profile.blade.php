@@ -128,16 +128,9 @@
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="space-y-1">
-                        <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.phone_number_digits') }} *</label>
+                        <label class="text-[11px] font-bold text-slate-500 uppercase">Phone / WhatsApp Number *</label>
                         <input type="text" name="phone" value="{{ old('phone', $profile->phone ?? '') }}" required maxlength="10" 
                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="{{ __('messages.phone') }}"
-                               class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
-                    </div>
-
-                    <div class="space-y-1">
-                        <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.whatsapp_number_digits') }}</label>
-                        <input type="text" name="whatsapp" value="{{ old('whatsapp', $profile->whatsapp ?? '') }}" maxlength="10" 
-                               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="WhatsApp Number"
                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
                     </div>
 
@@ -194,47 +187,6 @@
                 <button type="submit" 
                         class="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors uppercase tracking-wider">
                     {{ __('messages.save_profile_changes') }}
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- CARD 2: SEPARATE PASSWORD & SECURITY CREDENTIALS FORM -->
-    <div class="bg-white border border-slate-100 rounded-xl p-5 shadow-sm space-y-4">
-        <div class="border-b border-slate-100 pb-3">
-            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <span>🔐</span> {{ __('messages.security_credentials_sec') }}
-            </h3>
-            <p class="text-[11px] text-slate-400 font-medium mt-0.5">Manage your account login password and security settings.</p>
-        </div>
-
-        <form method="POST" action="{{ route('member.profile.update_password') }}" class="space-y-4">
-            @csrf
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase">Current Password *</label>
-                    <input type="password" name="current_password" required placeholder="••••••••"
-                           class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase">New Password *</label>
-                    <input type="password" name="password" required placeholder="••••••••"
-                           class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.confirm_password') }} *</label>
-                    <input type="password" name="password_confirmation" required placeholder="••••••••"
-                           class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
-                </div>
-            </div>
-
-            <div class="pt-3 border-t border-slate-100 flex justify-end">
-                <button type="submit" 
-                        class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors uppercase tracking-wider">
-                    Update Password
                 </button>
             </div>
         </form>

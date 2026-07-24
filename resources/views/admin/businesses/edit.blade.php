@@ -59,6 +59,12 @@
                         <option value="inactive" {{ old('membership_status', $business->membership_status) == 'inactive' ? 'selected' : '' }}>{{ __('messages.inactive') }}</option>
                     </select>
                 </div>
+
+                <div class="space-y-0.5">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Subscription Purchase Date</label>
+                    <input type="date" name="approved_at" value="{{ old('approved_at', $business->approved_at ? $business->approved_at->format('Y-m-d') : '') }}" 
+                           class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
+                </div>
             </div>
         </div>
 
@@ -89,14 +95,8 @@
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Phone Number</label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Phone / WhatsApp Number</label>
                     <input type="text" name="phone" value="{{ old('phone', $business->phone) }}" required placeholder="e.g. 9876543210" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
-                           class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
-                </div>
-
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">WhatsApp Number</label>
-                    <input type="text" name="whatsapp" value="{{ old('whatsapp', $business->whatsapp) }}" placeholder="e.g. 9876543210" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 

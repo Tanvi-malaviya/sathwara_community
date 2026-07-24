@@ -44,7 +44,14 @@
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col overflow-x-hidden max-w-full">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col overflow-x-hidden max-w-full relative">
+    <!-- Soft Decorative Background Gradients -->
+    <div class="fixed inset-0 bg-slate-50 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-30" style="background-color: var(--primary-hex);"></div>
+        <div class="absolute top-1/2 left-[-150px] w-[350px] h-[350px] bg-indigo-500 rounded-full blur-3xl opacity-20"></div>
+        <div class="absolute bottom-[-100px] right-20 w-80 h-80 bg-rose-500 rounded-full blur-3xl opacity-20"></div>
+    </div>
+
     <!-- Header/Navbar (Fixed Top) -->
     <header
         class="fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-100/80 shadow-sm transition-all duration-300"
@@ -354,7 +361,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow pt-20">
+    <main class="flex-grow pt-20 relative z-10">
         <!-- Toast Alerts -->
         @if (session('success') || session('error') || session('warning') || session('info'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-2" x-data="{ show: true }"
@@ -410,7 +417,7 @@
     </main>
 
     <!-- Modern Sober Global Footer -->
-    <footer class="bg-white border-t border-slate-200/80 relative overflow-hidden py-10 sm:py-12">
+    <footer class="bg-slate-50 border-t border-slate-200/80 relative z-10 overflow-hidden py-10 sm:py-12">
         <!-- Top Gradient Accent Bar -->
         <!-- <div class="h-1 w-full bg-gradient-to-r from-primary-500 via-rose-400 to-primary-500 absolute top-0 left-0"></div> -->
 

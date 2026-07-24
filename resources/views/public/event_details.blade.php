@@ -3,9 +3,13 @@
 @section('content')
     <!-- Event Header Banner -->
     <section class="relative h-96 w-full bg-slate-900 overflow-hidden">
-        <img class="absolute inset-0 w-full h-full object-cover opacity-40 bg-center"
-            src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}"
-            alt="{{ $event->title }}">
+        @if(!empty($event->banner_path) && (str_starts_with($event->banner_path, 'http') || file_exists(public_path('storage/' . $event->banner_path))))
+            <img class="absolute inset-0 w-full h-full object-cover opacity-40 bg-center"
+                src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}"
+                alt="{{ $event->title }}">
+        @else
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-indigo-900 to-slate-950 opacity-90"></div>
+        @endif
         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-end pb-12 text-white">
             <div class="max-w-4xl space-y-4">
@@ -98,7 +102,7 @@
                             @endif
                         </h3>
 
-                        @if($event->registration_option)
+                        @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
                             <div class="space-y-4">
                                 @if($event->date < now()->toDateString())
                                     <!-- Finished Event -->

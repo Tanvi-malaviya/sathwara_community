@@ -80,7 +80,7 @@
                 <div class="space-y-0.5">
                     <label class="text-[10px] font-bold text-slate-500 uppercase">{{ __('messages.banner_image') }}</label>
                     <div class="flex items-center gap-2">
-                        <input type="file" name="banner" required
+                        <input type="file" name="banner"
                             @change="if ($event.target.files.length) { bannerPreview = URL.createObjectURL($event.target.files[0]) }"
                             class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
                         <template x-if="bannerPreview">

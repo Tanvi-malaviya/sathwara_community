@@ -18,7 +18,7 @@ class GalleryController extends Controller
         if ($request->filled('search')) {
             $query->where('caption', 'like', "%{$request->search}%");
         }
-        $photos = $query->orderBy('display_order')->paginate(12)->withQueryString();
+        $photos = $query->orderBy('display_order')->paginate(15)->withQueryString();
         return view('admin.gallery.index', compact('photos'));
     }
 

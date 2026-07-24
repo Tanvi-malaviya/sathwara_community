@@ -99,12 +99,8 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <div class="space-y-1">
-                            <label class="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Mobile Number <span class="text-rose-500">*</span></label>
+                            <label class="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Mobile / WhatsApp Number <span class="text-rose-500">*</span></label>
                             <input type="text" name="phone" value="{{ old('phone') }}" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" class="w-full text-xs font-medium px-2 py-1.5 bg-slate-50/50 border border-slate-200 rounded-md focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">WhatsApp (Optional)</label>
-                            <input type="text" name="whatsapp" value="{{ old('whatsapp') }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" class="w-full text-xs font-medium px-2 py-1.5 bg-slate-50/50 border border-slate-200 rounded-md focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
                         </div>
                         <div class="space-y-1">
                             <label class="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Email Address <span class="text-rose-500">*</span></label>

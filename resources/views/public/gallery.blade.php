@@ -8,7 +8,7 @@
 ])
 
 <!-- Gallery Section -->
-<section class="py-6 bg-slate-50/60" x-data="{ 
+<section class="py-6 bg-transparent" x-data="{ 
     activeTab: '{{ request()->has('events_page') ? 'events' : 'general' }}',
     activeEventId: null,
     activeEventTitle: '',

@@ -31,47 +31,6 @@
                          style="background-image: url('{{ str_starts_with($slide->image_path, 'http') ? $slide->image_path : asset('storage/' . $slide->image_path) }}');">
                     </div>
 
-                    <!-- Modern Gradient Overlays for High Text Contrast -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-slate-950/30 lg:to-transparent z-10"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/50 z-10"></div>
-
-                    <!-- Slide Foreground Content Container (Aligned with Grid) -->
-                    <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-6 sm:py-8">
-                        <div class="max-w-3xl space-y-4 text-left text-white">
-                            
-                            <!-- Live Community Indicator Pill -->
-                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white text-[11px] font-bold shadow-md">
-                                <span class="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
-                                <span class="uppercase tracking-widest text-[10px] sm:text-[11px] font-bold">Sathwara Community Portal</span>
-                            </div>
-
-                            <!-- Slide Title & Subtitle -->
-                            <div class="space-y-2.5">
-                                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1] drop-shadow-lg">
-                                    {{ $slide->title }}
-                                </h1>
-                                <p class="text-slate-200 text-sm sm:text-base lg:text-lg font-medium leading-relaxed max-w-2xl drop-shadow-sm">
-                                    {{ $slide->subtitle }}
-                                </p>
-                            </div>
-
-                            @if(!empty($slide->button_text))
-                                <div class="pt-3">
-                                    {{-- <a href="{{ $slide->button_link ?? route('events') }}" 
-                                       class="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0">
-                                        <span>{{ $slide->button_text }}</span>
-                                        <span class="w-6 h-6 rounded-lg bg-white/20 group-hover:bg-white/30 text-white flex items-center justify-center transition-all duration-200">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
-                                            </svg>
-                                        </span>
-                                    </a> --}}
-                                </div>
-                            @endif
-
-                        </div>
-                    </div>
-
                 </div>
             @endforeach
 
@@ -135,7 +94,7 @@
 </section>
 
 <!-- Agendas / Our Core Mission & Values Section -->
-<section class="py-6 sm:py-8 bg-white border-b border-slate-100">
+<section class="py-6 sm:py-8 bg-transparent">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Clean Section Header -->
         <div class="text-center max-w-2xl mx-auto mb-10 space-y-2">
@@ -175,7 +134,7 @@
 
 
 <!-- Upcoming Events Section -->
-<section class="py-6 sm:py-8 bg-slate-50/60 border-b border-slate-100">
+<section class="py-6 sm:py-8 bg-transparent">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Clean Section Header -->
         <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
@@ -199,10 +158,21 @@
                 <a href="{{ route('event.details', $event->id) }}" class="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col block cursor-pointer">
                     
                     <!-- Image -->
-                    <div class="relative h-44 w-full overflow-hidden shrink-0">
-                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 bg-slate-100" 
-                             src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
-                             alt="{{ $event->title }}">
+                    <div class="relative h-44 w-full overflow-hidden shrink-0" x-data="{ imageError: false }">
+                        @if(!empty($event->banner_path))
+                            <img x-show="!imageError" 
+                                 x-on:error="imageError = true"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 bg-slate-100" 
+                                 src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
+                                 alt="{{ $event->title }}">
+                        @endif
+                        
+                        <div x-show="imageError || !'{{ $event->banner_path }}'" 
+                             class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-slate-900 flex flex-col items-center justify-center p-4 group-hover:scale-105 transition-transform duration-500"
+                             x-cloak>
+                            <span class="text-4xl">📅</span>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-primary-100 mt-2">Community Event</span>
+                        </div>
                         
                         <!-- Date Badge (Top-Left overlay) -->
                         <div class="absolute top-3 left-3 z-10">
@@ -256,7 +226,7 @@
 </section>
 
 <!-- Latest Updates / Community Bulletins Section -->
-<section class="py-6 sm:py-8 bg-white border-b border-slate-100">
+<section class="py-6 sm:py-8 bg-transparent">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Clean Section Header -->
         <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
@@ -315,7 +285,7 @@
 
 
 <!-- Gallery Preview Section -->
-<section class="py-6 sm:py-8 bg-white" x-data="{ activeImageModal: null }">
+<section class="py-6 sm:py-8 bg-transparent" x-data="{ activeImageModal: null }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Clean Section Header -->
         <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">

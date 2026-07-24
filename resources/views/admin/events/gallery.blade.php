@@ -83,7 +83,9 @@
 
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase">Select Image / ZIP (Max 50MB)</label>
-                    <input type="file" name="image" required accept=".jpg,.jpeg,.png,.webp,.gif,.zip" class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                    <input type="file" name="images[]" multiple required accept=".jpg,.jpeg,.png,.webp,.gif,.zip"
+                        @change="$el.name = ($el.files.length === 1 && $el.files[0].name.toLowerCase().endsWith('.zip')) ? 'image' : 'images[]'"
+                        class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
                 </div>
 
 

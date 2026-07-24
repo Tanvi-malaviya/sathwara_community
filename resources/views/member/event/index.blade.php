@@ -31,10 +31,22 @@
         @forelse($events as $event)
             <div class="group bg-white rounded-xl border border-slate-100 shadow-sm flex flex-col overflow-hidden hover:shadow-md transition-all">
                 <!-- Event Banner (Clickable to website details) -->
-                <a href="{{ route('event.details', $event->id) }}" class="relative h-40 bg-slate-100 overflow-hidden block">
-                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                         src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
-                         alt="{{ $event->title }}">
+                <a href="{{ route('event.details', $event->id) }}" class="relative h-40 bg-slate-100 overflow-hidden block" x-data="{ imageError: false }">
+                    @if(!empty($event->banner_path))
+                        <img x-show="!imageError" 
+                             x-on:error="imageError = true"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                             src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
+                             alt="{{ $event->title }}">
+                    @endif
+                    
+                    <div x-show="imageError || !'{{ $event->banner_path }}'" 
+                         class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-slate-900 flex flex-col items-center justify-center p-4 group-hover:scale-105 transition-transform duration-500"
+                         x-cloak>
+                        <span class="text-3xl">📅</span>
+                        <span class="text-[9px] font-extrabold uppercase tracking-widest text-primary-100 mt-2">Community Event</span>
+                    </div>
+
                     <div class="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 flex-wrap">
                         @if($event->date < now()->toDateString())
                             <span class="text-[9px] font-extrabold text-slate-500 bg-white/95 backdrop-blur-sm border border-slate-200 px-2 py-0.5 rounded-full uppercase tracking-wider">{{ __('messages.passed') }}</span>

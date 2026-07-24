@@ -173,38 +173,5 @@
     </div>
 </section>
 
-@if(session('success'))
-<div id="toast-success"
-     style="position:fixed;top:24px;right:24px;z-index:9999;display:flex;align-items:center;gap:12px;min-width:300px;max-width:420px;
-            background:#ffffff;border:1px solid #d1fae5;border-left:4px solid #10b981;border-radius:14px;
-            padding:14px 18px;box-shadow:0 10px 40px rgba(0,0,0,0.12);animation:slideInToast 0.4s ease;"
-     role="alert">
-    <div style="width:36px;height:36px;background:#ecfdf5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">✅</div>
-    <div style="flex:1;min-width:0;">
-        <p style="margin:0;font-size:12px;font-weight:800;color:#065f46;line-height:1.3;">{{ session('success') }}</p>
-    </div>
-    <button onclick="document.getElementById('toast-success').remove()" style="background:none;border:none;cursor:pointer;color:#6b7280;font-size:16px;padding:0;line-height:1;flex-shrink:0;">×</button>
-</div>
-<style>
-@keyframes slideInToast {
-    from { opacity: 0; transform: translateX(60px); }
-    to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes fadeOutToast {
-    from { opacity: 1; transform: translateX(0); }
-    to   { opacity: 0; transform: translateX(60px); }
-}
-</style>
-<script>
-    (function() {
-        var toast = document.getElementById('toast-success');
-        if (toast) {
-            setTimeout(function() {
-                toast.style.animation = 'fadeOutToast 0.4s ease forwards';
-                setTimeout(function() { toast.remove(); }, 400);
-            }, 4000);
-        }
-    })();
-</script>
-@endif
+
 @endsection

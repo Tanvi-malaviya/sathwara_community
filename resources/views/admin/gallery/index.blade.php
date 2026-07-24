@@ -27,8 +27,8 @@
             @forelse($photos as $photo)
                 <div
                     class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-                    <div class=" w-full overflow-hidden bg-slate-50 relative">
-                        <img class="w-full  object-cover"
+                    <div class="aspect-square w-full overflow-hidden bg-slate-50 relative">
+                        <img class="w-full h-full object-cover"
                             src="{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}"
                             alt="Gallery Image">
                     </div>
@@ -85,7 +85,8 @@
 
                     <div class="space-y-0.5">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.select_image_zip') }}</label>
-                        <input type="file" name="image" required accept=".jpg,.jpeg,.png,.webp,.gif,.zip"
+                        <input type="file" name="images[]" multiple required accept=".jpg,.jpeg,.png,.webp,.gif,.zip"
+                            @change="$el.name = ($el.files.length === 1 && $el.files[0].name.toLowerCase().endsWith('.zip')) ? 'image' : 'images[]'"
                             class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
                     </div>
 

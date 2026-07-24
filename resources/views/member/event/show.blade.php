@@ -38,9 +38,22 @@
                 </div>
 
                 <!-- Left: Banner Image -->
-                <img class="md:w-1/2 h-52 md:h-full object-cover transition-transform duration-500 hover:scale-105 z-0" 
-                     src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
-                     alt="{{ $event->title }}">
+                <div class="md:w-1/2 h-52 md:h-auto overflow-hidden shrink-0 relative" x-data="{ imageError: false }">
+                    @if(!empty($event->banner_path))
+                        <img x-show="!imageError" 
+                             x-on:error="imageError = true"
+                             class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
+                             src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
+                             alt="{{ $event->title }}">
+                    @endif
+                    
+                    <div x-show="imageError || !'{{ $event->banner_path }}'" 
+                         class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-slate-900 flex flex-col items-center justify-center p-4"
+                         x-cloak>
+                        <span class="text-4xl">📅</span>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-primary-100 mt-2">Community Event</span>
+                    </div>
+                </div>
                 
                 <!-- Right: Content & Metadata Overview -->
                 <div class="md:w-1/2 p-5 flex flex-col justify-between space-y-4 bg-gradient-to-br from-white to-slate-50/30 relative z-10">
@@ -191,7 +204,7 @@
 
                 <!-- Ticket Bottom Section -->
                 <div class="px-4 pt-1 space-y-3">
-                    @if($event->has_registration_form ?? $event->registration_option)
+                    @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
                         <div class="space-y-3">
                             @if($event->date < now()->toDateString())
                                 <!-- Concluded -->

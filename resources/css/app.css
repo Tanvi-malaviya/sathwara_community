@@ -3,89 +3,173 @@
 @tailwind utilities;
 
 [x-cloak] {
-    display: none !important;
+  display: none !important;
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(2deg); }
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-12px) rotate(2deg);
+  }
 }
+
 @keyframes float-reverse {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(12px) rotate(-2deg); }
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(12px) rotate(-2deg);
+  }
 }
+
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.35; transform: scale(1); }
-  50% { opacity: 0.65; transform: scale(1.1); }
+
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.65;
+    transform: scale(1.1);
+  }
 }
+
 @keyframes progress-bar {
-  0% { width: 0%; }
-  100% { width: 100%; }
+  0% {
+    width: 0%;
+  }
+
+  100% {
+    width: 100%;
+  }
 }
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
 .animate-float-reverse {
   animation: float-reverse 7s ease-in-out infinite 1s;
 }
+
 .animate-pulse-glow {
   animation: pulse-glow 8s ease-in-out infinite;
 }
+
 .animate-progress-bar {
   animation: progress-bar 6s linear infinite;
 }
 
 /* Rich Text / Quill Content Renderer Styling */
 .rich-text p {
-    margin-bottom: 0.5rem;
-}
-.rich-text p:last-child {
-    margin-bottom: 0;
-}
-.rich-text ol {
-    list-style-type: decimal !important;
-    padding-left: 1.25rem !important;
-    margin-top: 0.25rem !important;
-    margin-bottom: 0.5rem !important;
-}
-.rich-text ul {
-    list-style-type: disc !important;
-    padding-left: 1.25rem !important;
-    margin-top: 0.25rem !important;
-    margin-bottom: 0.5rem !important;
-}
-.rich-text li {
-    margin-bottom: 0.25rem !important;
-}
-.rich-text h1 {
-    font-size: 1.25rem;
-    font-weight: 800;
-    margin-top: 0.75rem;
-    margin-bottom: 0.5rem;
-}
-.rich-text h2 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-top: 0.5rem;
-    margin-bottom: 0.25rem;
-}
-.rich-text h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-top: 0.5rem;
-    margin-bottom: 0.25rem;
-}
-.rich-text strong, .rich-text b {
-    font-weight: 700;
-}
-.rich-text em, .rich-text i {
-    font-style: italic;
-}
-.rich-text u {
-    text-decoration: underline;
-}
-.rich-text s {
-    text-decoration: line-through;
+  margin-bottom: 0.5rem;
 }
 
+.rich-text p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-text ol {
+  list-style-type: decimal !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.rich-text ul {
+  list-style-type: disc !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.rich-text li {
+  margin-bottom: 0.25rem !important;
+}
+
+.rich-text h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.rich-text h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.rich-text h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.rich-text strong,
+.rich-text b {
+  font-weight: 700;
+}
+
+.rich-text em,
+.rich-text i {
+  font-style: italic;
+}
+
+.rich-text u {
+  text-decoration: underline;
+}
+
+.rich-text s {
+  text-decoration: line-through;
+}
+
+/* Make all inputs, selects, textareas text black, bold, and highly readable */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="file"],
+select,
+textarea {
+  color: #000000 !important;
+  border-color: #bfc7d3 !important;
+  /* Force darker, crisp borders */
+  font-weight: 700 !important;
+  /* Force bold font weight */
+  font-size: 13px !important;
+  /* Make font slightly larger and sharper */
+  text-shadow: none !important;
+  /* Prevent any blur effects */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* For labels, make them pure black and sharper */
+label,
+form label {
+  color: #000000 !important;
+  /* Pure black for maximum contrast */
+  font-weight: 700 !important;
+  text-shadow: none !important;
+}
+
+/* Also for placeholders, make them darker so they are readable but distinct */
+::placeholder {
+  color: #475569 !important;
+  /* Darker slate-600 */
+  opacity: 1 !important;
+}

@@ -356,10 +356,10 @@ class PublicController extends Controller
     public function businessDirectory(Request $request)
     {
         $categories = BusinessCategory::withCount(['businesses' => function ($query) {
-            $query->active();
+            $query->where('status', 'approved');
         }])->get();
 
-        $query = Business::active();
+        $query = Business::where('status', 'approved');
 
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
@@ -386,7 +386,7 @@ class PublicController extends Controller
      */
     public function businessDetails($id)
     {
-        $business = Business::active()->findOrFail($id);
+        $business = Business::where('status', 'approved')->findOrFail($id);
         return view('public.business_details', compact('business'));
     }
 

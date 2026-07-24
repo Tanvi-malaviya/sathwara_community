@@ -66,13 +66,8 @@
 
                 <!-- Row 3: Contacts -->
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Phone Number <span class="text-rose-500">*</span></label>
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Phone / WhatsApp Number <span class="text-rose-500">*</span></label>
                     <input type="text" name="phone" required value="{{ old('phone') }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10 Digits" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
-                </div>
-
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">WhatsApp Number (Optional)</label>
-                    <input type="text" name="whatsapp" value="{{ old('whatsapp') }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10 Digits" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
                 </div>
 
                 <div class="space-y-0.5">

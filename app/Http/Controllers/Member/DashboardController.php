@@ -9,6 +9,8 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyEmailOtpMail;
 
 class DashboardController extends Controller
 {
@@ -104,7 +106,7 @@ class DashboardController extends Controller
             'education' => $request->education,
             'occupation' => $request->occupation,
             'phone' => $request->phone,
-            'whatsapp' => $request->whatsapp,
+            'whatsapp' => $request->phone,
             'address' => $request->address,
             'city' => $request->city,
             'state' => $request->state,
@@ -112,7 +114,9 @@ class DashboardController extends Controller
             'photo_path' => $photoPath,
         ]);
 
-        return redirect()->back()->with('success', 'Profile updated successfully.');
+        session()->flash('success', 'Profile updated successfully.');
+        session()->save();
+        return redirect()->back();
     }
 
     /**
@@ -135,7 +139,9 @@ class DashboardController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->back()->with('success', 'Password updated successfully.');
+        session()->flash('success', 'Password updated successfully.');
+        session()->save();
+        return redirect()->back();
     }
 
     /**
@@ -151,5 +157,103 @@ class DashboardController extends Controller
         }
 
         return view('member.card', compact('user', 'profile'));
+    }
+
+    /**
+     * Account Settings Form (Email/Password Update)
+     */
+    public function accountSettings()
+    {
+        $user = auth()->user();
+        return view('member.account_settings', compact('user'));
+    }
+
+    /**
+     * Send OTP for Email Update
+     */
+    public function sendEmailOtp(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . $user->id,
+        ], [
+            'email.unique' => 'This email address is already in use by another account.',
+        ]);
+
+        if ($request->email === $user->email) {
+            return redirect()->back()->withErrors(['email' => 'This is already your current email address.']);
+        }
+
+        $otp = (string) mt_rand(100000, 999999);
+
+        // Store OTP details in session
+        session([
+            'pending_email' => $request->email,
+            'email_otp_code' => $otp,
+            'email_otp_expires' => now()->addMinutes(15),
+        ]);
+
+        // Log OTP code for local debugging/testing
+        \Illuminate\Support\Facades\Log::info("Email Update OTP generated for {$request->email}: {$otp}");
+
+        // Send Email
+        try {
+            Mail::to($request->email)->send(new VerifyEmailOtpMail($otp, $request->email));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send Email OTP: " . $e->getMessage());
+            return redirect()->back()->withErrors(['email' => 'Failed to send verification email. Please check your mail settings.']);
+        }
+
+        session()->flash('success', 'OTP sent successfully.');
+        session()->flash('success_otp', 'A 6-digit verification code has been sent to ' . $request->email . '. Please enter it below to confirm.');
+        session()->save();
+        return redirect()->back();
+    }
+
+    /**
+     * Verify OTP and Update Email Address
+     */
+    public function verifyEmailOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|string|size:6',
+        ]);
+
+        $user = auth()->user();
+        $pendingEmail = session('pending_email');
+        $otpCode = session('email_otp_code');
+        $expiresAt = session('email_otp_expires');
+
+        if (!$pendingEmail || !$otpCode || !$expiresAt) {
+            return redirect()->back()->withErrors(['otp' => 'No pending email change request found. Please request a new OTP.']);
+        }
+
+        if (now()->greaterThan($expiresAt)) {
+            session()->forget(['pending_email', 'email_otp_code', 'email_otp_expires']);
+            return redirect()->back()->withErrors(['otp' => 'The verification code has expired. Please request a new code.']);
+        }
+
+        if ($request->otp !== $otpCode) {
+            return redirect()->back()->withErrors(['otp' => 'The verification code you entered is invalid.']);
+        }
+
+        // Check uniqueness once more before updating
+        if (User::where('email', $pendingEmail)->where('id', '!=', $user->id)->exists()) {
+            session()->forget(['pending_email', 'email_otp_code', 'email_otp_expires']);
+            return redirect()->back()->withErrors(['otp' => 'This email address is already taken. Please try another one.']);
+        }
+
+        // Perform the update
+        $user->update([
+            'email' => $pendingEmail,
+        ]);
+
+        // Clear session
+        session()->forget(['pending_email', 'email_otp_code', 'email_otp_expires']);
+
+        session()->flash('success', 'Your login email address has been updated successfully.');
+        session()->save();
+        return redirect()->route('member.account.settings');
     }
 }
