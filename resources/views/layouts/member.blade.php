@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    class="{{ app()->getLocale() == 'gu' ? 'font-gujarati' : 'font-sans' }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ $title ?? App\Models\Setting::get('website_name', 'Member Dashboard') }}</title>
+    @if(App\Models\Setting::get('website_favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . App\Models\Setting::get('website_favicon')) }}">
+    @endif
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles / Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @php
+        $primaryColor = App\Models\Setting::get('primary_color', '#ef4444');
+    @endphp
+    <style>
+        :root {
+            --primary-hex:
+                {{ $primaryColor }}
+            ;
+        }
+
+        .text-primary-500,
+        .group-hover\:text-primary-500:hover,
+        .hover\:text-primary-500:hover {
+            color: var(--primary-hex) !important;
+        }
+
+        .text-primary-600 {
+            color: var(--primary-hex) !important;
+            filter: brightness(90%);
+        }
+
+        .bg-primary-50 {
+            background-color: color-mix(in srgb, var(--primary-hex) 10%, transparent) !important;
+        }
+
+        .bg-primary-500 {
+            background-color: var(--primary-hex) !important;
+        }
+
+        .hover\:bg-primary-600:hover {
+            background-color: var(--primary-hex) !important;
+            filter: brightness(90%);
+        }
+
+        .border-primary-500 {
+            border-color: var(--primary-hex) !important;
+        }
+
+        .from-primary-500 {
+            --tw-gradient-from: var(--primary-hex) var(--tw-gradient-from-position, ) !important;
+            --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position, ) !important;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+        }
+
+        .to-primary-500 {
+            --tw-gradient-to: var(--primary-hex) var(--tw-gradient-to-position, ) !important;
+        }
+    </style>
+
+    <style>
+        .font-gujarati {
+            font-family: 'Noto Sans Gujarati', sans-serif !important;
+        }
+
+        .font-sans {
+            font-family: 'Manrope', sans-serif !important;
+        }
+    </style>
+</head>
+
+<body x-data class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col md:flex-row">
+    <!-- Sidebar -->
+    <aside
+        class="w-full md:w-64 bg-white border-r border-slate-100 flex flex-col shrink-0 md:h-screen md:sticky md:top-0 overflow-hidden"
+        x-data="{ sidebarOpen: false }">
+        <!-- Sidebar Header -->
+        <div class="h-16 flex items-center justify-between px-5 border-b border-slate-50">
+            <a href="{{ route('home') }}" class="flex items-center space-x-2.5">
+                @if(App\Models\Setting::get('website_logo'))
+                    <img class="w-7 h-7 rounded-lg object-contain bg-white p-0.5 shadow-sm"
+                        src="{{ asset('storage/' . App\Models\Setting::get('website_logo')) }}" alt="Logo">
+                @else
+                    <div
+                        class="w-7 h-7 rounded-lg bg-gradient-to-tr from-primary-500 to-secondary-500 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
+                        S
+                    </div>
+                @endif
+                <span class="font-extrabold text-sm text-slate-900">{{ __('messages.member_portal') }}</span>
+            </a>
+            <!-- Mobile Toggle -->
+            <button @click="sidebarOpen = !sidebarOpen"
+                class="md:hidden text-slate-400 hover:text-slate-600 focus:outline-none">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+ 
+        <!-- Sidebar User Card -->
+        <div class="px-5 py-3.5 border-b border-slate-50 flex items-center space-x-3">
+            <img class="w-9 h-9 rounded-full object-cover shadow-sm bg-slate-100"
+                src="{{ auth()->user()->memberProfile && auth()->user()->memberProfile->photo_path ? (str_starts_with(auth()->user()->memberProfile->photo_path, 'http') ? auth()->user()->memberProfile->photo_path : asset('storage/' . auth()->user()->memberProfile->photo_path)) : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100' }}"
+                alt="User avatar">
+            <div>
+                <h4 class="text-xs font-bold text-slate-900 leading-tight">{{ auth()->user()->name }}</h4>
+                <div class="flex items-center space-x-1.5 mt-0.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.approved_member') }}</span>
+                </div>
+            </div>
+        </div>
+ 
+        <!-- Sidebar Navigation -->
+        <div class="flex-grow p-3 space-y-2 overflow-y-auto"
+            :class="{'block': sidebarOpen, 'hidden md:block': !sidebarOpen}">
+            <a href="{{ route('member.dashboard') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.dashboard') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2" />
+                </svg>
+                <span>{{ __('messages.dashboard') }}</span>
+            </a>
+            <a href="{{ route('member.profile.edit') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.profile.edit') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span>{{ __('messages.profile') }}</span>
+            </a>
+            <a href="{{ route('member.family.index') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.family.*') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span>{{ __('messages.family_members') }}</span>
+            </a>
+            <a href="{{ route('member.events.index') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.events.*') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>{{ __('messages.register_event') }}</span>
+            </a>
+            {{-- <a href="{{ route('member.awards.index') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.awards.*') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                </svg>
+                <span>{{ __('messages.award_form') }}</span>
+            </a> --}}
+            <a href="{{ route('member.card') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.card') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8h2m-2 2h4" />
+                </svg>
+                <span>{{ __('messages.membership_card') }}</span>
+            </a>
+            <div class="border-t border-slate-100 my-2"></div>
+            <a href="{{ route('home') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span>{{ __('messages.back_to_website') }}</span>
+            </a>
+
+            <!-- Logout -->
+            <form method="POST" action="{{ route('logout') }}" class="w-full">
+                @csrf
+                <button type="submit"
+                    class="w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors text-left">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>{{ __('messages.logout') }}</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Member Content Area -->
+    <div class="flex-grow flex flex-col min-w-0">
+        <!-- Top Navigation -->
+        <header class="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-8 shrink-0">
+            <h2 class="font-extrabold text-xl text-slate-950">@yield('page_title', 'Dashboard')</h2>
+
+            <div class="flex items-center space-x-4">
+                <!-- Language Toggle -->
+                <div class="relative" x-data="{ showLang: false }">
+                    <button @click="showLang = !showLang"
+                        class="inline-flex items-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors">
+                        🌐 {{ app()->getLocale() == 'en' ? 'English' : 'ગુજરાતી' }}
+                    </button>
+                    <div x-show="showLang" @click.away="showLang = false"
+                        class="absolute right-0 mt-2 w-32 bg-white border border-slate-100 rounded-lg shadow-lg py-1 z-50"
+                        x-cloak>
+                        <a href="{{ route('locale.set', 'en') }}"
+                            class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">English</a>
+                        <a href="{{ route('locale.set', 'gu') }}"
+                            class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 font-gujarati">ગુજરાતી</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Body -->
+        <main class="flex-grow px-4 pb-4 pt-3 overflow-y-auto">
+            <!-- Toast Alerts -->
+            @if (session('success') || session('error') || session('warning') || session('info'))
+                <div class="mb-6" x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show"
+                    x-transition>
+                    @if (session('success'))
+                        <div
+                            class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between">
+                            <span class="text-sm font-semibold">✅ {{ session('success') }}</span>
+                            <button @click="show = false" class="text-emerald-500 font-bold">&times;</button>
+                        </div>
+                    @endif
+                    @if (session('error'))
+                        <div
+                            class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center justify-between">
+                            <span class="text-sm font-semibold">❌ {{ session('error') }}</span>
+                            <button @click="show = false" class="text-rose-500 font-bold">&times;</button>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            @yield('content')
+        </main>
+    </div>
+    @include('partials.global_loader')
+    @include('partials.delete_confirm_modal')
+</body>
+
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    class="overflow-x-hidden {{ app()->getLocale() == 'gu' ? 'font-gujarati' : 'font-sans' }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>
+        {{ $title ?? App\Models\Setting::get('seo_title', App\Models\Setting::get('website_name', 'Sathwara Community Portal')) }}
+    </title>
+    @if(App\Models\Setting::get('seo_description'))
+        <meta name="description" content="{{ App\Models\Setting::get('seo_description') }}">
+    @endif
+    @if(App\Models\Setting::get('website_favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . App\Models\Setting::get('website_favicon')) }}">
+    @endif
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles / Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        .font-gujarati {
+            font-family: 'Noto Sans Gujarati', sans-serif !important;
+        }
+
+        .font-sans {
+            font-family: 'Manrope', sans-serif !important;
+        }
+
+        html,
+        body {
+            max-width: 100vw;
+            overflow-x: hidden !important;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col overflow-x-hidden max-w-full">
+    <!-- Header/Navbar (Fixed Top) -->
+    <header
+        class="fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-100/80 shadow-sm transition-all duration-300"
+        x-data="{ open: false }">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 w-full"> 
+            <div class="flex justify-between items-center h-20 gap-1.5 xl:gap-3">
+
+                <!-- Logo / Brand Name -->
+                <div class="flex items-center shrink-0">
+                    <a href="{{ route('home') }}" class="flex items-center group py-1">
+                        @if(App\Models\Setting::get('website_logo'))
+                            <img class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-md shadow-primary-500/10 border border-slate-100 group-hover:scale-105 transition-transform duration-300"
+                                src="{{ asset('storage/' . App\Models\Setting::get('website_logo')) }}"
+                                alt="{{ App\Models\Setting::get('website_name', 'Sathwara') }}">
+                        @else
+                            <div
+                                class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-primary-600 via-primary-500 to-rose-500 flex items-center justify-center text-white font-black text-xl shadow-md shadow-primary-500/20 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
+                                S
+                            </div>
+                        @endif
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden lg:flex items-center space-x-1 xl:space-x-1.5 font-sans shrink-0">
+                    <a href="{{ route('home') }}"
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('home') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        {{ __('messages.home') }}
+                    </a>
+                    <a href="{{ route('events') }}"
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('events') || Route::is('event.details') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        {{ __('messages.events') }}
+                    </a>
+                    <a href="{{ route('updates') }}"
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('updates') || Route::is('update.details') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        {{ __('messages.updates') }}
+                    </a>
+                    <a href="{{ route('gallery') }}"
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('gallery') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        {{ __('messages.gallery') }}
+                    </a>
+                    <a href="{{ route('business.directory') }}"
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('business.directory') || Route::is('business.details') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        {{ __('messages.business_directory') }}
+                    </a>
+
+                    <!-- About & Contact Combined Dropdown -->
+                    <div class="relative" x-data="{ openAbout: false }" @mouseenter="openAbout = true" @mouseleave="openAbout = false">
+                        <button @click="openAbout = !openAbout"
+                            class="inline-flex items-center gap-1 px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('about') || Route::is('management_desk') || Route::is('contact') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                            <span>
+                                @if(Route::is('management_desk'))
+                                    {{ __('messages.management_desk') }}
+                                @elseif(Route::is('contact'))
+                                    {{ __('messages.contact_us') }}
+                                @else
+                                    {{ __('messages.about_us') }}
+                                @endif
+                            </span>
+                            <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="openAbout ? 'rotate-180 text-primary-500' : 'text-slate-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+
+                        <div x-show="openAbout"
+                             x-transition:enter="transition ease-out duration-200 transform"
+                             x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150 transform"
+                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                             class="absolute right-0 mt-1 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 space-y-1"
+                             x-cloak>
+                            
+                            <a href="{{ route('about') }}"
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs xl:text-[13px] font-bold transition-all duration-150 {{ Route::is('about') ? 'bg-primary-50 text-primary-600' : 'text-slate-700 hover:bg-slate-50 hover:text-primary-500' }}">
+                                <svg class="w-4 h-4 text-primary-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>{{ __('messages.about_us') }}</span>
+                            </a>
+
+                            <a href="{{ route('management_desk') }}"
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs xl:text-[13px] font-bold transition-all duration-150 {{ Route::is('management_desk') ? 'bg-primary-50 text-primary-600' : 'text-slate-700 hover:bg-slate-50 hover:text-primary-500' }}">
+                                <svg class="w-4 h-4 text-primary-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                                <span>{{ __('messages.management_desk') }}</span>
+                            </a>
+
+                            <a href="{{ route('contact') }}"
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs xl:text-[13px] font-bold transition-all duration-150 {{ Route::is('contact') ? 'bg-primary-50 text-primary-600' : 'text-slate-700 hover:bg-slate-50 hover:text-primary-500' }}">
+                                <svg class="w-4 h-4 text-primary-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <span>{{ __('messages.contact_us') }}</span>
+                            </a>
+
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Actions (Language toggle + Auth buttons) -->
+                <div class="hidden lg:flex items-center space-x-1.5 xl:space-x-2 shrink-0">
+                    <!-- Language Selector Dropdown -->
+                    <div class="relative" x-data="{ showLang: false }">
+                        <button @click="showLang = !showLang"
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 border border-slate-200/90 text-xs font-bold rounded-xl text-slate-700 bg-slate-50/80 hover:bg-white hover:border-slate-300 hover:shadow-xs transition-all duration-200 focus:outline-none">
+                            <svg class="w-3.5 h-3.5 text-primary-500" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3.6 9h16.8M3.6 15h16.8" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11.5 3a17 17 0 000 18M12.5 3a17 17 0 010 18" />
+                            </svg>
+                            <span>{{ app()->getLocale() == 'en' ? 'English' : 'ગુજરાતી' }}</span>
+                            <svg class="w-3 h-3 text-slate-400 transition-transform duration-200"
+                                :class="{ 'rotate-180': showLang }" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="showLang" @click.away="showLang = false"
+                            x-transition:enter="transition ease-out duration-150 transform"
+                            x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-100 transform"
+                            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                            class="absolute right-0 mt-2 w-36 bg-white border border-slate-100 rounded-xl shadow-xl py-1 z-50 overflow-hidden"
+                            x-cloak>
+                            <a href="{{ route('locale.set', 'en') }}"
+                                class="flex items-center justify-between px-4 py-2.5 text-xs font-bold transition-colors {{ app()->getLocale() == 'en' ? 'text-primary-500 bg-primary-50/60' : 'text-slate-700 hover:bg-slate-50' }}">
+                                <span>English</span>
+                                @if(app()->getLocale() == 'en')
+                                    <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
+                                @endif
+                            </a>
+                            <a href="{{ route('locale.set', 'gu') }}"
+                                class="flex items-center justify-between px-4 py-2.5 text-xs font-bold font-gujarati transition-colors {{ app()->getLocale() == 'gu' ? 'text-primary-500 bg-primary-50/60' : 'text-slate-700 hover:bg-slate-50' }}">
+                                <span>ગુજરાતી</span>
+                                @if(app()->getLocale() == 'gu')
+                                    <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
+                                @endif
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Auth / Dashboard Action Button -->
+                    @auth
+                        @if(auth()->user()->hasRole('Administrator'))
+                            <a href="{{ route('admin.dashboard') }}"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-transparent rounded-xl font-extrabold text-xs text-white uppercase tracking-wider hover:bg-slate-800 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-md shadow-slate-900/10 whitespace-nowrap">
+                                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span>Admin Desk</span>
+                            </a>
+                        @else
+                            <a href="{{ route('member.dashboard') }}"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-primary-600 to-primary-500 border border-transparent rounded-xl font-extrabold text-xs text-white uppercase tracking-wider hover:from-primary-700 hover:to-primary-600 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-md shadow-primary-500/25 whitespace-nowrap">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                </svg>
+                                <span>{{ __('messages.view_dashboard') }}</span>
+                            </a>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}"
+                            class="text-xs font-extrabold text-slate-700 hover:text-primary-500 px-2 py-1.5 rounded-xl hover:bg-slate-50 transition-colors uppercase tracking-wider whitespace-nowrap">
+                            {{ __('messages.login') }}
+                        </a>
+                        <a href="{{ route('register.member') }}"
+                            class="inline-flex items-center gap-1 px-3.5 py-1.5 bg-gradient-to-r from-primary-600 to-primary-500 border border-transparent rounded-xl font-extrabold text-xs text-white uppercase tracking-wider hover:from-primary-700 hover:to-primary-600 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-md shadow-primary-500/25 whitespace-nowrap">
+                            <span>{{ __('messages.register') }}</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </a>
+                    @endauth
+                </div>
+
+                <!-- Hamburger menu button -->
+                <div class="flex items-center lg:hidden">
+                    <button @click="open = !open"
+                        class="inline-flex items-center justify-center p-2 rounded-xl text-slate-600 hover:text-primary-500 hover:bg-slate-100 focus:outline-none transition-colors">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path :class="{'hidden': open, 'inline-flex': !open }" class="inline-flex"
+                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                            <path :class="{'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
+                                stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile / Tablet Navigation Menu (XL hidden) -->
+        <div x-show="open" x-transition:enter="transition ease-out duration-200 transform"
+            x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150 transform"
+            x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
+            class="xl:hidden bg-white/98 backdrop-blur-lg border-t border-slate-100 px-4 pt-3 pb-6 shadow-xl" x-cloak>
+            <div class="space-y-1 sm:px-2">
+                <a href="{{ route('home') }}"
+                    class="block px-4 py-2.5 rounded-xl text-sm font-bold transition-all {{ Route::is('home') ? 'bg-primary-50 text-primary-500' : 'text-slate-700 hover:bg-slate-50' }}">
+                    {{ __('messages.home') }}
+                </a>
+                <a href="{{ route('events') }}"
+                    class="block px-4 py-2.5 rounded-xl text-sm font-bold transition-all {{ Route::is('events') || Route::is('event.details') ? 'bg-primary-50 text-primary-500' : 'text-slate-700 hover:bg-slate-50' }}">
+                    {{ __('messages.events') }}
+                </a>
+                <a href="{{ route('updates') }}"
+                    class="block px-4 py-2.5 rounded-xl text-sm font-bold transition-all {{ Route::is('updates') || Route::is('update.details') ? 'bg-primary-50 text-primary-500' : 'text-slate-700 hover:bg-slate-50' }}">
+                    {{ __('messages.updates') }}
+                </a>
+                <a href="{{ route('gallery') }}"
+                    class="block px-4 py-2.5 rounded-xl text-sm font-bold transition-all {{ Route::is('gallery') ? 'bg-primary-50 text-primary-500' : 'text-slate-700 hover:bg-slate-50' }}">
+                    {{ __('messages.gallery') }}
+                </a>
+                <a href="{{ route('business.directory') }}"
+                    class="block px-4 py-2.5 rounded-xl text-sm font-bold transition-all {{ Route::is('business.directory') || Route::is('business.details') ? 'bg-primary-50 text-primary-500' : 'text-slate-700 hover:bg-slate-50' }}">
+                    {{ __('messages.business_directory') }}
+                </a>
+
+                <!-- Mobile Accordion for About Us, Management Desk & Contact Us -->
+                <div x-data="{ openSubMenu: {{ Route::is('about') || Route::is('management_desk') || Route::is('contact') ? 'true' : 'false' }} }" class="space-y-1">
+                    <button @click="openSubMenu = !openSubMenu"
+                        class="flex items-center justify-between w-full px-4 py-2.5 rounded-xl text-sm font-bold transition-all {{ Route::is('about') || Route::is('management_desk') || Route::is('contact') ? 'bg-primary-50 text-primary-500' : 'text-slate-700 hover:bg-slate-50' }}">
+                        <span>
+                            @if(Route::is('management_desk'))
+                                {{ __('messages.management_desk') }}
+                            @elseif(Route::is('contact'))
+                                {{ __('messages.contact_us') }}
+                            @else
+                                {{ __('messages.about_us') }}
+                            @endif
+                        </span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="openSubMenu ? 'rotate-180 text-primary-500' : 'text-slate-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    
+                    <div x-show="openSubMenu" class="pl-4 space-y-1 border-l-2 border-primary-100 ml-4 my-1" x-cloak>
+                        <a href="{{ route('about') }}"
+                            class="block px-3 py-2 rounded-lg text-xs font-bold transition-all {{ Route::is('about') ? 'bg-primary-50 text-primary-600 font-extrabold' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50' }}">
+                            {{ __('messages.about_us') }}
+                        </a>
+                        <a href="{{ route('management_desk') }}"
+                            class="block px-3 py-2 rounded-lg text-xs font-bold transition-all {{ Route::is('management_desk') ? 'bg-primary-50 text-primary-600 font-extrabold' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50' }}">
+                            {{ __('messages.management_desk') }}
+                        </a>
+                        <a href="{{ route('contact') }}"
+                            class="block px-3 py-2 rounded-lg text-xs font-bold transition-all {{ Route::is('contact') ? 'bg-primary-50 text-primary-600 font-extrabold' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50' }}">
+                            {{ __('messages.contact_us') }}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-100 my-3 pt-3 px-2 flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Language:</span>
+                    <div class="flex space-x-2">
+                        <a href="{{ route('locale.set', 'en') }}"
+                            class="px-3 py-1.5 text-xs font-extrabold rounded-lg transition-colors {{ app()->getLocale() == 'en' ? 'bg-primary-500 text-white shadow-xs' : 'bg-slate-100 text-slate-700' }}">EN</a>
+                        <a href="{{ route('locale.set', 'gu') }}"
+                            class="px-3 py-1.5 text-xs font-extrabold rounded-lg font-gujarati transition-colors {{ app()->getLocale() == 'gu' ? 'bg-primary-500 text-white shadow-xs' : 'bg-slate-100 text-slate-700' }}">GU</a>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3">
+                    @auth
+                        <div class="pt-1">
+                            @if(auth()->user()->hasRole('Administrator'))
+                                <a href="{{ route('admin.dashboard') }}"
+                                    class="block w-full text-center px-4 py-3 bg-slate-900 text-white font-extrabold rounded-xl text-sm uppercase tracking-wider shadow-md">
+                                    Admin Desk
+                                </a>
+                            @else
+                                <a href="{{ route('member.dashboard') }}"
+                                    class="block w-full text-center px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-extrabold rounded-xl text-sm uppercase tracking-wider shadow-md shadow-primary-500/25">
+                                    {{ __('messages.view_dashboard') }}
+                                </a>
+                            @endif
+                        </div>
+                    @else
+                        <div class="space-y-2 pt-1">
+                            <a href="{{ route('login') }}"
+                                class="block w-full text-center px-4 py-2.5 border border-slate-200 text-slate-700 font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-slate-50 transition-colors">
+                                {{ __('messages.login') }}
+                            </a>
+                            <a href="{{ route('register.member') }}"
+                                class="block w-full text-center px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-extrabold rounded-xl text-sm uppercase tracking-wider shadow-md shadow-primary-500/25">
+                                {{ __('messages.register') }}
+                            </a>
+                        </div>
+                    @endauth
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow pt-20">
+        <!-- Toast Alerts -->
+        @if (session('success') || session('error') || session('warning') || session('info'))
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-2" x-data="{ show: true }"
+                x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition>
+                @if (session('success'))
+                    <div
+                        class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span>✅</span>
+                            <span class="text-sm font-semibold">{{ session('success') }}</span>
+                        </div>
+                        <button @click="show = false"
+                            class="text-emerald-500 hover:text-emerald-700 font-bold text-lg">&times;</button>
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div
+                        class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span>❌</span>
+                            <span class="text-sm font-semibold">{{ session('error') }}</span>
+                        </div>
+                        <button @click="show = false"
+                            class="text-rose-500 hover:text-rose-700 font-bold text-lg">&times;</button>
+                    </div>
+                @endif
+                @if (session('warning'))
+                    <div
+                        class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span>⚠️</span>
+                            <span class="text-sm font-semibold">{{ session('warning') }}</span>
+                        </div>
+                        <button @click="show = false"
+                            class="text-amber-500 hover:text-amber-700 font-bold text-lg">&times;</button>
+                    </div>
+                @endif
+                @if (session('info'))
+                    <div
+                        class="p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span>ℹ️</span>
+                            <span class="text-sm font-semibold">{{ session('info') }}</span>
+                        </div>
+                        <button @click="show = false"
+                            class="text-blue-500 hover:text-blue-700 font-bold text-lg">&times;</button>
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        @yield('content')
+    </main>
+
+    <!-- Modern Sober Global Footer -->
+    <footer class="bg-white border-t border-slate-200/80 relative overflow-hidden py-10 sm:py-12">
+        <!-- Top Gradient Accent Bar -->
+        <!-- <div class="h-1 w-full bg-gradient-to-r from-primary-500 via-rose-400 to-primary-500 absolute top-0 left-0"></div> -->
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10">
+                <!-- Brand Info -->
+                <div class="space-y-3 md:col-span-1">
+                    <div class="flex items-center gap-2.5">
+                        @if(App\Models\Setting::get('website_logo'))
+                            <img class="h-8 w-auto object-contain rounded-lg"
+                                src="{{ asset('storage/' . App\Models\Setting::get('website_logo')) }}"
+                                alt="{{ App\Models\Setting::get('website_name', 'Sathwara') }}">
+                        @else
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary-600 via-primary-500 to-rose-500 flex items-center justify-center text-white font-black text-sm shadow-md shadow-primary-500/20">
+                                S
+                            </div>
+                        @endif
+                        <span class="font-extrabold text-lg text-slate-900 tracking-tight">
+                            {{ App\Models\Setting::get('website_name', 'Sathwara Community') }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        {{ App\Models\Setting::get('seo_description', 'Connecting families and empowering local community-owned businesses.') }}
+                    </p>
+                </div>
+
+                <!-- Quick Navigation (Fixed Double About Us) -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">
+                        {{ __('messages.quick_navigation') }}
+                    </h3>
+                    <ul class="space-y-2 text-xs font-medium">
+                        <li>
+                            <a href="{{ route('about') }}" class="group flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary-500 group-hover:scale-125 transition-all duration-200"></span>
+                                <span class="group-hover:translate-x-1 transition-transform duration-200">{{ __('messages.about_us') }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('management_desk') }}" class="group flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary-500 group-hover:scale-125 transition-all duration-200"></span>
+                                <span class="group-hover:translate-x-1 transition-transform duration-200">{{ __('messages.management_desk') }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('events') }}" class="group flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary-500 group-hover:scale-125 transition-all duration-200"></span>
+                                <span class="group-hover:translate-x-1 transition-transform duration-200">{{ __('messages.events') }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('gallery') }}" class="group flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary-500 group-hover:scale-125 transition-all duration-200"></span>
+                                <span class="group-hover:translate-x-1 transition-transform duration-200">{{ __('messages.gallery') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Directories -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">
+                        {{ __('messages.directories_links') }}
+                    </h3>
+                    <ul class="space-y-2 text-xs font-medium">
+                        <li>
+                            <a href="{{ route('business.directory') }}" class="group flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary-500 group-hover:scale-125 transition-all duration-200"></span>
+                                <span class="group-hover:translate-x-1 transition-transform duration-200">{{ __('messages.business_directory') }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('register.business') }}" class="group flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary-500 group-hover:scale-125 transition-all duration-200"></span>
+                                <span class="group-hover:translate-x-1 transition-transform duration-200">{{ __('messages.business_registration') }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('register.member') }}" class="group flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary-500 group-hover:scale-125 transition-all duration-200"></span>
+                                <span class="group-hover:translate-x-1 transition-transform duration-200">{{ __('messages.member_registration') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Modernized Contact Us Section -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">
+                        {{ __('messages.contact_us') }}
+                    </h3>
+                    <div class="space-y-2.5">
+                        <!-- Address -->
+                        @if(App\Models\Setting::get('contact_address'))
+                            <div class="group flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200/60 transition-all duration-200">
+                                <div class="w-7 h-7 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-200 shadow-2xs">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-slate-600 leading-snug group-hover:text-slate-900 transition-colors">
+                                    {{ App\Models\Setting::get('contact_address') }}
+                                </span>
+                            </div>
+                        @endif
+
+                        <!-- Phone -->
+                        @if(App\Models\Setting::get('contact_phone'))
+                            <a href="tel:{{ App\Models\Setting::get('contact_phone') }}" class="group flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200/60 transition-all duration-200">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200 shadow-2xs">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-bold text-slate-700 group-hover:text-emerald-600 transition-colors">
+                                    {{ App\Models\Setting::get('contact_phone') }}
+                                </span>
+                            </a>
+                        @endif
+
+                        <!-- Email -->
+                        @if(App\Models\Setting::get('contact_email'))
+                            <a href="mailto:{{ App\Models\Setting::get('contact_email') }}" class="group flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200/60 transition-all duration-200">
+                                <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-rose-600 group-hover:text-white transition-colors duration-200 shadow-2xs">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-bold text-slate-700 group-hover:text-rose-600 transition-colors truncate">
+                                    {{ App\Models\Setting::get('contact_email') }}
+                                </span>
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom Bar -->
+            <div class="border-t border-slate-100 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
+                <span>
+                    {{ App\Models\Setting::get('footer_text', '© ' . date('Y') . ' Sathwara Community. All rights reserved.') }}
+                </span>
+                
+                <div class="flex items-center gap-2">
+                    @if(App\Models\Setting::get('social_facebook'))
+                        <a href="{{ App\Models\Setting::get('social_facebook') }}" target="_blank"
+                            class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-primary-500 hover:text-white border border-slate-200 text-slate-600 text-xs font-bold transition-all shadow-2xs hover:-translate-y-0.5">
+                            Facebook
+                        </a>
+                    @endif
+                    @if(App\Models\Setting::get('social_twitter'))
+                        <a href="{{ App\Models\Setting::get('social_twitter') }}" target="_blank"
+                            class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-primary-500 hover:text-white border border-slate-200 text-slate-600 text-xs font-bold transition-all shadow-2xs hover:-translate-y-0.5">
+                            Twitter
+                        </a>
+                    @endif
+                    @if(App\Models\Setting::get('social_instagram'))
+                        <a href="{{ App\Models\Setting::get('social_instagram') }}" target="_blank"
+                            class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-rose-500 hover:text-white border border-slate-200 text-slate-600 text-xs font-bold transition-all shadow-2xs hover:-translate-y-0.5">
+                            Instagram
+                        </a>
+                    @endif
+                    @if(App\Models\Setting::get('social_youtube', 'https://youtube.com'))
+                        <a href="{{ App\Models\Setting::get('social_youtube', 'https://youtube.com') }}" target="_blank"
+                            class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-rose-600 hover:text-white border border-slate-200 text-slate-600 text-xs font-bold transition-all shadow-2xs hover:-translate-y-0.5">
+                            YouTube
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </footer>
+    @include('partials.global_loader')
+</body>
+
+</html>
