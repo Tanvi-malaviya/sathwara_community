@@ -7,6 +7,8 @@
         showTreeModal: false,
         search: '',
         addRelationship: '{{ old('relationship') }}',
+        addGender: '{{ old('gender', 'Male') }}',
+        addMaritalStatus: '{{ old('marital_status', 'Unmarried') }}',
         editMember: {
             id: '{{ old('id', session('edit_id')) }}',
             parent_id: '{{ old('parent_id') }}',
@@ -14,12 +16,12 @@
             relationship: '{{ old('relationship') }}',
             gender: '{{ old('gender') }}',
             marital_status: '{{ old('marital_status') }}',
-            dob: '{{ old('dob') }}',
             education: '{{ old('education') }}',
             occupation: '{{ old('occupation') }}',
             phone: '{{ old('phone') }}',
             email: '{{ old('email') }}',
             blood_group: '{{ old('blood_group') }}',
+            dob: '{{ old('dob') }}',
             update_url: '{{ session('edit_id') ? route('member.family.update', session('edit_id')) : '' }}'
         },
         openEdit(memberItem) {
@@ -30,6 +32,31 @@
             this.$watch('showAddModal', value => {
                 if (!value) {
                     document.getElementById('add-member-form')?.reset();
+                    this.addRelationship = '';
+                    this.addGender = 'Male';
+                    this.addMaritalStatus = 'Unmarried';
+                }
+            });
+            this.$watch('addRelationship', value => {
+                if (['Wife', 'Daughter-in-law', 'Daughter', 'Granddaughter (Son\'s Daughter)', 'Granddaughter (Daughter\'s Daughter)', 'પત્ની', 'દીકરી', 'વહુ', 'પૌત્રી', 'દોહિત્રી'].includes(value)) {
+                    this.addGender = 'Female';
+                } else if (['Husband', 'Son', 'Son-in-law', 'Grandson (Son\'s Son)', 'Grandson (Daughter\'s Son)', 'पति', 'પતિ', 'દીકરો', 'જમાઈ', 'પૌત્ર', 'દોહિત્ર'].includes(value)) {
+                    this.addGender = 'Male';
+                }
+                
+                if (['Wife', 'Husband', 'Daughter-in-law', 'Son-in-law', 'પત્ની', 'पति', 'પતિ', 'વહુ', 'જમાઈ'].includes(value)) {
+                    this.addMaritalStatus = 'Married';
+                }
+            });
+            this.$watch('editMember.relationship', value => {
+                if (['Wife', 'Daughter-in-law', 'Daughter', 'Granddaughter (Son\'s Daughter)', 'Granddaughter (Daughter\'s Daughter)', 'પત્ની', 'દીકરી', 'વહુ', 'પૌત્રી', 'દોહિત્રી'].includes(value)) {
+                    this.editMember.gender = 'Female';
+                } else if (['Husband', 'Son', 'Son-in-law', 'Grandson (Son\'s Son)', 'Grandson (Daughter\'s Son)', 'पति', 'પતિ', 'દીકરો', 'જમાઈ', 'પૌત્ર', 'દોહિત્ર'].includes(value)) {
+                    this.editMember.gender = 'Male';
+                }
+                
+                if (['Wife', 'Husband', 'Daughter-in-law', 'Son-in-law', 'પત્ની', 'पति', 'પતિ', 'વહુ', 'જમાઈ'].includes(value)) {
+                    this.editMember.marital_status = 'Married';
                 }
             });
         }
@@ -210,20 +237,20 @@
                                 <div class="space-y-0.5">
                                     <label
                                         class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.relationship') }}</label>
-                                    <select name="relationship" required @change="addRelationship = $event.target.value"
+                                    <select name="relationship" required x-model="addRelationship"
                                         class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
-                                        <option value="" disabled {{ old('relationship') ? '' : 'selected' }}>{{ __('messages.select_relationship') }}</option>
-                                        <option value="Wife" {{ old('relationship') == 'Wife' ? 'selected' : '' }}>{{ __('messages.rel_wife') }}</option>
-                                        <option value="Husband" {{ old('relationship') == 'Husband' ? 'selected' : '' }}>{{ __('messages.rel_husband') }}</option>
-                                        <option value="Son" {{ old('relationship') == 'Son' ? 'selected' : '' }}>{{ __('messages.rel_son') }}</option>
-                                        <option value="Daughter" {{ old('relationship') == 'Daughter' ? 'selected' : '' }}>{{ __('messages.rel_daughter') }}</option>
-                                        <option value="Daughter-in-law" {{ old('relationship') == 'Daughter-in-law' ? 'selected' : '' }}>{{ __('messages.rel_daughter_in_law') }}</option>
-                                        <option value="Son-in-law" {{ old('relationship') == 'Son-in-law' ? 'selected' : '' }}>{{ __('messages.rel_son_in_law') }}</option>
-                                        <option value="Grandson (Son's Son)" {{ old('relationship') == "Grandson (Son's Son)" ? 'selected' : '' }}>{{ __('messages.rel_grandson_sons_son') }}</option>
-                                        <option value="Granddaughter (Son's Daughter)" {{ old('relationship') == "Granddaughter (Son's Daughter)" ? 'selected' : '' }}>{{ __('messages.rel_granddaughter_sons_daughter') }}</option>
-                                        <option value="Grandson (Daughter's Son)" {{ old('relationship') == "Grandson (Daughter's Son)" ? 'selected' : '' }}>{{ __('messages.rel_grandson_daughters_son') }}</option>
-                                        <option value="Granddaughter (Daughter's Daughter)" {{ old('relationship') == "Granddaughter (Daughter's Daughter)" ? 'selected' : '' }}>{{ __('messages.rel_granddaughter_daughters_daughter') }}</option>
-                                        <option value="Other" {{ old('relationship') == 'Other' ? 'selected' : '' }}>{{ __('messages.rel_other') }}</option>
+                                        <option value="" disabled>{{ __('messages.select_relationship') }}</option>
+                                        <option value="Wife">{{ __('messages.rel_wife') }}</option>
+                                        <option value="Husband">{{ __('messages.rel_husband') }}</option>
+                                        <option value="Son">{{ __('messages.rel_son') }}</option>
+                                        <option value="Daughter">{{ __('messages.rel_daughter') }}</option>
+                                        <option value="Daughter-in-law">{{ __('messages.rel_daughter_in_law') }}</option>
+                                        <option value="Son-in-law">{{ __('messages.rel_son_in_law') }}</option>
+                                        <option value="Grandson (Son's Son)">{{ __('messages.rel_grandson_sons_son') }}</option>
+                                        <option value="Granddaughter (Son's Daughter)">{{ __('messages.rel_granddaughter_sons_daughter') }}</option>
+                                        <option value="Grandson (Daughter's Son)">{{ __('messages.rel_grandson_daughters_son') }}</option>
+                                        <option value="Granddaughter (Daughter's Daughter)">{{ __('messages.rel_granddaughter_daughters_daughter') }}</option>
+                                        <option value="Other">{{ __('messages.rel_other') }}</option>
                                     </select>
 
                                     @php
@@ -255,7 +282,7 @@
                                 <div class="space-y-0.5">
                                     <label
                                         class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.gender') }}</label>
-                                    <select name="gender" required
+                                    <select name="gender" required x-model="addGender"
                                         class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
                                         <option value="Male">{{ __('messages.gender_male') }}</option>
                                         <option value="Female">{{ __('messages.gender_female') }}</option>
@@ -267,10 +294,10 @@
                             <div class="grid grid-cols-2 gap-2.5">
                                 <div class="space-y-0.5">
                                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.marital_status') }}</label>
-                                    <select name="marital_status" required
+                                    <select name="marital_status" required x-model="addMaritalStatus"
                                         class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
-                                        <option value="Unmarried" {{ old('marital_status') == 'Unmarried' ? 'selected' : '' }}>{{ __('messages.unmarried') }}</option>
-                                        <option value="Married" {{ old('marital_status') == 'Married' ? 'selected' : '' }}>{{ __('messages.married') }}</option>
+                                        <option value="Unmarried">{{ __('messages.unmarried') }}</option>
+                                        <option value="Married">{{ __('messages.married') }}</option>
                                     </select>
                                 </div>
 

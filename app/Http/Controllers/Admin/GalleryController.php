@@ -24,10 +24,38 @@ class GalleryController extends Controller
 
     public function store(Request $request)
     {
+        // Pre-check for PHP file upload errors (e.g. Disk Full, Temp Dir errors)
+        $filesToCheck = [];
+        if ($request->hasFile('images')) {
+            $filesToCheck = is_array($request->file('images')) ? $request->file('images') : [$request->file('images')];
+        } elseif ($request->hasFile('image')) {
+            $filesToCheck = [$request->file('image')];
+        }
+
+        foreach ($filesToCheck as $file) {
+            if ($file && !$file->isValid()) {
+                $errorCode = $file->getError();
+                if ($errorCode === UPLOAD_ERR_CANT_WRITE) {
+                    return redirect()->back()->withErrors([
+                        'images' => 'File upload failed: Server disk space (C: drive) is completely FULL! Please free up disk space on your computer.'
+                    ])->withInput();
+                } elseif ($errorCode === UPLOAD_ERR_NO_TMP_DIR) {
+                    return redirect()->back()->withErrors([
+                        'images' => 'File upload failed: PHP temporary folder is missing or not writable.'
+                    ])->withInput();
+                }
+            }
+        }
+
         $request->validate([
             'image' => 'nullable|file|mimes:zip,jpeg,png,jpg,gif,svg,webp|max:51200',
-            'images.*' => 'nullable|image|max:4096',
+            'images.*' => 'nullable|image|max:51200',
             'caption' => 'nullable|string|max:255',
+        ], [
+            'images.*.uploaded' => 'One of the images failed to upload. Please verify that your computer drive has free disk space.',
+            'images.*.image' => 'All selected files must be valid images.',
+            'images.*.max' => 'Each image must be less than 50MB in size.',
+            'image.uploaded' => 'The ZIP file failed to upload. Please verify that your computer drive has free disk space.',
         ]);
 
         $eventId = $request->input('event_id');

@@ -16,7 +16,25 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('member.family.update', $member->id) }}" class="grid grid-cols-1 gap-4">
+    <form method="POST" action="{{ route('member.family.update', $member->id) }}" class="grid grid-cols-1 gap-4"
+        x-data="{
+            rel: '{{ old('relationship', $member->relationship) }}',
+            gender: '{{ old('gender', $member->gender) }}',
+            maritalStatus: '{{ old('marital_status', $member->marital_status) }}',
+            init() {
+                this.$watch('rel', value => {
+                    if (['Wife', 'Daughter-in-law', 'Daughter', 'Granddaughter (Son\'s Daughter)', 'Granddaughter (Daughter\'s Daughter)', 'પત્ની', 'દીકરી', 'વહુ', 'પૌત્રી', 'દોહિત્રી'].includes(value)) {
+                        this.gender = 'Female';
+                    } else if (['Husband', 'Son', 'Son-in-law', 'Grandson (Son\'s Son)', 'Grandson (Daughter\'s Son)', 'पति', 'પતિ', 'દીકરો', 'જમાઈ', 'પૌત્ર', 'દોહિત્ર'].includes(value)) {
+                        this.gender = 'Male';
+                    }
+                    
+                    if (['Wife', 'Husband', 'Daughter-in-law', 'Son-in-law', 'પત્ની', 'पति', 'પતિ', 'વહુ', 'જમાઈ'].includes(value)) {
+                        this.maritalStatus = 'Married';
+                    }
+                });
+            }
+        }">
         @csrf
         @method('PUT')
         
@@ -25,11 +43,11 @@
             <input type="text" name="name" value="{{ old('name', $member->name) }}" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
         </div>
 
-        <div x-data="{ rel: '{{ old('relationship', $member->relationship) }}' }" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1">
                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Relationship</label>
                 @php $rel = old('relationship', $member->relationship); @endphp
-                <select name="relationship" required @change="rel = $event.target.value" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                <select name="relationship" required x-model="rel" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
                     <option value="Wife" {{ in_array($rel, ['Wife', 'Spouse', 'પત્ની']) ? 'selected' : '' }}>{{ __('messages.rel_wife') }}</option>
                     <option value="Husband" {{ in_array($rel, ['Husband', 'પતિ']) ? 'selected' : '' }}>{{ __('messages.rel_husband') }}</option>
                     <option value="Son" {{ in_array($rel, ['Son', 'દીકરો']) ? 'selected' : '' }}>{{ __('messages.rel_son') }}</option>
@@ -76,10 +94,10 @@
 
             <div class="space-y-1">
                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Gender</label>
-                <select name="gender" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-                    <option value="Male" {{ $member->gender == 'Male' ? 'selected' : '' }}>Male</option>
-                    <option value="Female" {{ $member->gender == 'Female' ? 'selected' : '' }}>Female</option>
-                    <option value="Other" {{ $member->gender == 'Other' ? 'selected' : '' }}>Other</option>
+                <select name="gender" required x-model="gender" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                 </select>
             </div>
         </div>
@@ -87,9 +105,9 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1">
                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Marital Status</label>
-                <select name="marital_status" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-                    <option value="Unmarried" {{ old('marital_status', $member->marital_status) == 'Unmarried' ? 'selected' : '' }}>Unmarried</option>
-                    <option value="Married" {{ old('marital_status', $member->marital_status) == 'Married' ? 'selected' : '' }}>Married</option>
+                <select name="marital_status" required x-model="maritalStatus" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                    <option value="Unmarried">Unmarried</option>
+                    <option value="Married">Married</option>
                 </select>
             </div>
 

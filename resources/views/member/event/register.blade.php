@@ -3,7 +3,23 @@
 @section('page_title', $event->title . ' Registration')
 
 @section('content')
-<div class="space-y-4 w-full">
+<div class="space-y-4 w-full"
+     x-data="{ 
+         selectedStudent: '{{ old('student_name', '') }}',
+         totalMarks: '{{ old('total_marks', '') }}', 
+         receivedMarks: '{{ old('received_marks', '') }}', 
+         percentage: '{{ old('percentage', '') }}',
+         yuvaTab: 1,
+         showDetailsModal: false,
+         selectedRegistration: {},
+         calcPercentage() {
+             let t = parseFloat(this.totalMarks);
+             let r = parseFloat(this.receivedMarks);
+             if (!isNaN(t) && !isNaN(r) && t > 0) {
+                 this.percentage = ((r / t) * 100).toFixed(2) + '%';
+             }
+         }
+     }">
     
     <!-- Top Navigation -->
     <div class="flex items-center justify-between">
@@ -20,22 +36,8 @@
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden w-full">
         <div class="p-4 sm:p-6 space-y-4">
 
-            <!-- Registration Form (ALWAYS VISIBLE) -->
-            <form method="POST" action="{{ route('member.events.register', $event->id) }}" enctype="multipart/form-data" class="space-y-4"
-                  x-data="{ 
-                      selectedStudent: '{{ old('student_name', '') }}',
-                      totalMarks: '{{ old('total_marks', '') }}', 
-                      receivedMarks: '{{ old('received_marks', '') }}', 
-                      percentage: '{{ old('percentage', '') }}',
-                      yuvaTab: 1,
-                      calcPercentage() {
-                          let t = parseFloat(this.totalMarks);
-                          let r = parseFloat(this.receivedMarks);
-                          if (!isNaN(t) && !isNaN(r) && t > 0) {
-                              this.percentage = ((r / t) * 100).toFixed(2) + '%';
-                          }
-                      }
-                  }">
+            <!-- Registration Form (ALWAYS VISIBLE - FRESH & RESET) -->
+            <form method="POST" action="{{ route('member.events.register', $event->id) }}" enctype="multipart/form-data" class="space-y-4">
                 @csrf
 
                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
@@ -170,18 +172,19 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.surname') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="surname" value="{{ old('surname', $registration->form_data['surname'] ?? '') }}" required placeholder="Enter surname" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="surname" value="{{ old('surname') }}" required placeholder="Enter surname" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.first_name') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="first_name" value="{{ old('first_name', $registration->form_data['first_name'] ?? '') }}" required placeholder="Enter first name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="first_name" value="{{ old('first_name') }}" required placeholder="Enter first name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.gender') }} <span class="text-rose-500">*</span></label>
                                 <select name="gender" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    <option value="Male" {{ old('gender', $registration->form_data['gender'] ?? '') === 'Male' ? 'selected' : '' }}>Male</option>
-                                    <option value="Female" {{ old('gender', $registration->form_data['gender'] ?? '') === 'Female' ? 'selected' : '' }}>Female</option>
-                                    <option value="Other" {{ old('gender', $registration->form_data['gender'] ?? '') === 'Other' ? 'selected' : '' }}>Other</option>
+                                    <option value="" disabled {{ old('gender') ? '' : 'selected' }}>Select Gender</option>
+                                    <option value="Male" {{ old('gender') === 'Male' ? 'selected' : '' }}>Male</option>
+                                    <option value="Female" {{ old('gender') === 'Female' ? 'selected' : '' }}>Female</option>
+                                    <option value="Other" {{ old('gender') === 'Other' ? 'selected' : '' }}>Other</option>
                                 </select>
                             </div>
                         </div>
@@ -189,84 +192,106 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.birth_date') }} <span class="text-rose-500">*</span></label>
-                                <input type="date" name="birth_date" value="{{ old('birth_date', $registration->form_data['birth_date'] ?? '') }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="date" name="birth_date" value="{{ old('birth_date') }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.age') }} <span class="text-rose-500">*</span></label>
-                                <input type="number" name="age" value="{{ old('age', $registration->form_data['age'] ?? '') }}" required placeholder="e.g. 25" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="number" name="age" value="{{ old('age') }}" required placeholder="e.g. 25" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.height') }}</label>
-                                <input type="text" name="height" value="{{ old('height', $registration->form_data['height'] ?? '') }}" placeholder="e.g. 5'6\"" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="height" value="{{ old('height') }}" placeholder="e.g. 5'6\"" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.weight') }}</label>
-                                <input type="text" name="weight" value="{{ old('weight', $registration->form_data['weight'] ?? '') }}" placeholder="e.g. 60 kg" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="weight" value="{{ old('weight') }}" placeholder="e.g. 60 kg" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.state') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="state" value="{{ old('state', $registration->form_data['state'] ?? 'Gujarat') }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="state" value="{{ old('state', 'Gujarat') }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.district') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="district" value="{{ old('district', $registration->form_data['district'] ?? '') }}" required placeholder="Enter district" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="district" value="{{ old('district') }}" required placeholder="Enter district" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.association') }}</label>
-                                <input type="text" name="association" value="{{ old('association', $registration->form_data['association'] ?? '') }}" placeholder="Enter mandal/association" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="association" value="{{ old('association') }}" placeholder="Enter mandal/association" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
                         <div class="space-y-1">
                             <label class="text-[11px] font-bold text-slate-700">{{ __('messages.address') }} <span class="text-rose-500">*</span></label>
-                            <textarea name="address" rows="2" required placeholder="Enter full address" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">{{ old('address', $registration->form_data['address'] ?? '') }}</textarea>
+                            <textarea name="address" rows="2" required placeholder="Enter full address" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">{{ old('address') }}</textarea>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.mobile') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="mobile_no" value="{{ old('mobile_no', $registration->form_data['mobile_no'] ?? auth()->user()->memberProfile->phone ?? '') }}" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10-digit number" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="mobile_no" value="{{ old('mobile_no', auth()->user()->memberProfile->phone ?? '') }}" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10-digit number" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.whatsapp_no') }}</label>
-                                <input type="text" name="whatsapp" value="{{ old('whatsapp', $registration->form_data['whatsapp'] ?? '') }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10-digit whatsapp number" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="whatsapp" value="{{ old('whatsapp') }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10-digit whatsapp number" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.qualification') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="qualification" value="{{ old('qualification', $registration->form_data['qualification'] ?? '') }}" required placeholder="e.g. Graduate / B.E." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="qualification" value="{{ old('qualification') }}" required placeholder="e.g. Graduate / B.E." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.occupation') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="occupation" value="{{ old('occupation', $registration->form_data['occupation'] ?? '') }}" required placeholder="e.g. Job / Business" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="occupation" value="{{ old('occupation') }}" required placeholder="e.g. Job / Business" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.monthly_income') }}</label>
-                                <input type="text" name="monthly_income" value="{{ old('monthly_income', $registration->form_data['monthly_income'] ?? '') }}" placeholder="e.g. Rs. 25,000" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="monthly_income" value="{{ old('monthly_income') }}" placeholder="e.g. Rs. 25,000" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
                         <div class="space-y-1">
                             <label class="text-[11px] font-bold text-slate-700">{{ __('messages.occupation_address') }}</label>
-                            <input type="text" name="occupation_address" value="{{ old('occupation_address', $registration->form_data['occupation_address'] ?? '') }}" placeholder="Enter job/business address" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            <input type="text" name="occupation_address" value="{{ old('occupation_address') }}" placeholder="Enter job/business address" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.divorce_status') }} <span class="text-rose-500">*</span></label>
                                 <select name="divorce" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    <option value="No" {{ old('divorce', $registration->form_data['divorce'] ?? '') === 'No' ? 'selected' : '' }}>No (ના)</option>
-                                    <option value="Yes" {{ old('divorce', $registration->form_data['divorce'] ?? '') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
+                                    <option value="No" {{ old('divorce', 'No') === 'No' ? 'selected' : '' }}>No (ના)</option>
+                                    <option value="Yes" {{ old('divorce') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
                                 </select>
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.special_need') }}</label>
-                                <input type="text" name="special_need" value="{{ old('special_need', $registration->form_data['special_need'] ?? '') }}" placeholder="e.g. None / Physical Disability details" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="special_need" value="{{ old('special_need') }}" placeholder="e.g. None / Physical Disability details" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.physical_disability') }}</label>
+                                <input type="text" name="physical_disability" value="{{ old('physical_disability') }}" placeholder="e.g. None / Details" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.disability_duration') }}</label>
+                                <input type="text" name="disability_duration" value="{{ old('disability_duration') }}" placeholder="e.g. Since birth / N/A" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.special_info') }}</label>
+                                <input type="text" name="special_info" value="{{ old('special_info') }}" placeholder="Any special achievement or information" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.other_info') }}</label>
+                                <input type="text" name="other_info" value="{{ old('other_info') }}" placeholder="Additional notes or remarks" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
@@ -275,42 +300,18 @@
                             <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
                                 <label class="text-[10px] font-bold text-slate-600 block">{{ __('messages.member_photo') }}</label>
                                 <input type="file" name="member_photo" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
-                                @if(isset($registration->form_data['member_photo_url']))
-                                    <div class="mt-1 flex items-center gap-1.5">
-                                        <img src="{{ $registration->form_data['member_photo_url'] }}" class="w-8 h-8 object-cover rounded border">
-                                        <span class="text-[9px] text-emerald-600 font-bold">Uploaded</span>
-                                    </div>
-                                @endif
                             </div>
                             <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
                                 <label class="text-[10px] font-bold text-slate-600 block">{{ __('messages.aadhaar_photo') }}</label>
                                 <input type="file" name="aadhaar_photo" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
-                                @if(isset($registration->form_data['aadhaar_photo_url']))
-                                    <div class="mt-1 flex items-center gap-1.5">
-                                        <img src="{{ $registration->form_data['aadhaar_photo_url'] }}" class="w-8 h-8 object-cover rounded border">
-                                        <span class="text-[9px] text-emerald-600 font-bold">Uploaded</span>
-                                    </div>
-                                @endif
                             </div>
                             <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
                                 <label class="text-[10px] font-bold text-slate-600 block">{{ __('messages.selfie') }}</label>
                                 <input type="file" name="selfie" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
-                                @if(isset($registration->form_data['selfie_url']))
-                                    <div class="mt-1 flex items-center gap-1.5">
-                                        <img src="{{ $registration->form_data['selfie_url'] }}" class="w-8 h-8 object-cover rounded border">
-                                        <span class="text-[9px] text-emerald-600 font-bold">Uploaded</span>
-                                    </div>
-                                @endif
                             </div>
                             <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
                                 <label class="text-[10px] font-bold text-slate-600 block">{{ __('messages.whatsapp_image') }}</label>
                                 <input type="file" name="whatsapp_image" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
-                                @if(isset($registration->form_data['whatsapp_image_url']))
-                                    <div class="mt-1 flex items-center gap-1.5">
-                                        <img src="{{ $registration->form_data['whatsapp_image_url'] }}" class="w-8 h-8 object-cover rounded border">
-                                        <span class="text-[9px] text-emerald-600 font-bold">Uploaded</span>
-                                    </div>
-                                @endif
                             </div>
                         </div>
 
@@ -330,41 +331,52 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.father_name') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="father_name" value="{{ old('father_name', $registration->form_data['father_name'] ?? '') }}" required placeholder="Enter father's full name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="father_name" value="{{ old('father_name') }}" required placeholder="Enter father's full name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.grandfather_name') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="grandfather_name" value="{{ old('grandfather_name', $registration->form_data['grandfather_name'] ?? '') }}" required placeholder="Enter grandfather's full name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="grandfather_name" value="{{ old('grandfather_name') }}" required placeholder="Enter grandfather's full name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.father_age') }}</label>
-                                <input type="number" name="father_age" value="{{ old('father_age', $registration->form_data['father_age'] ?? '') }}" placeholder="e.g. 52" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="number" name="father_age" value="{{ old('father_age') }}" placeholder="e.g. 52" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.father_occupation') }}</label>
-                                <input type="text" name="father_occupation" value="{{ old('father_occupation', $registration->form_data['father_occupation'] ?? '') }}" placeholder="e.g. Farming / Business" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="father_occupation" value="{{ old('father_occupation') }}" placeholder="e.g. Farming / Business" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.father_income') }}</label>
-                                <input type="text" name="father_income" value="{{ old('father_income', $registration->form_data['father_income'] ?? '') }}" placeholder="Annual or Monthly Income" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="father_income" value="{{ old('father_income') }}" placeholder="Annual or Monthly Income" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.father_occupation_address') }}</label>
+                                <input type="text" name="father_occupation_address" value="{{ old('father_occupation_address') }}" placeholder="Enter father's job/business address" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.father_mobile') }}</label>
+                                <input type="text" name="father_mobile" value="{{ old('father_mobile') }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10-digit mobile number" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.mother_name') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="mother_name" value="{{ old('mother_name', $registration->form_data['mother_name'] ?? '') }}" required placeholder="Enter mother's name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="mother_name" value="{{ old('mother_name') }}" required placeholder="Enter mother's name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.mother_occupation') }}</label>
-                                <input type="text" name="mother_occupation" value="{{ old('mother_occupation', $registration->form_data['mother_occupation'] ?? 'Housewife') }}" placeholder="e.g. Housewife" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="mother_occupation" value="{{ old('mother_occupation', 'Housewife') }}" placeholder="e.g. Housewife" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.native_place') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="native_place" value="{{ old('native_place', $registration->form_data['native_place'] ?? '') }}" required placeholder="Enter native village/city" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="native_place" value="{{ old('native_place') }}" required placeholder="Enter native village/city" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
@@ -374,54 +386,62 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-bold text-slate-700">{{ __('messages.elder_brother') }}</label>
-                                    <input type="text" name="elder_brother" value="{{ old('elder_brother', $registration->form_data['elder_brother'] ?? '') }}" placeholder="e.g. 1 Brother (Married)" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                    <input type="text" name="elder_brother" value="{{ old('elder_brother') }}" placeholder="e.g. 1 Brother" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
                                 </div>
                                 <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.retired') }}</label>
-                                    <input type="text" name="retired" value="{{ old('retired', $registration->form_data['retired'] ?? '') }}" placeholder="Retired members details" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.elder_brother_married') }}</label>
+                                    <select name="elder_brother_married" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                        <option value="" disabled {{ old('elder_brother_married') ? '' : 'selected' }}>Select status</option>
+                                        <option value="No" {{ old('elder_brother_married') === 'No' ? 'selected' : '' }}>No (ના)</option>
+                                        <option value="Yes" {{ old('elder_brother_married') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-bold text-slate-700">{{ __('messages.younger_brother') }}</label>
-                                    <input type="text" name="younger_brother" value="{{ old('younger_brother', $registration->form_data['younger_brother'] ?? '') }}" placeholder="e.g. 1 Brother" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                    <input type="text" name="younger_brother" value="{{ old('younger_brother') }}" placeholder="e.g. 1 Brother" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-bold text-slate-700">{{ __('messages.younger_brother_married') }}</label>
                                     <select name="younger_brother_married" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                        <option value="" disabled selected>Select status</option>
-                                        <option value="No" {{ old('younger_brother_married', $registration->form_data['younger_brother_married'] ?? '') === 'No' ? 'selected' : '' }}>No (ના)</option>
-                                        <option value="Yes" {{ old('younger_brother_married', $registration->form_data['younger_brother_married'] ?? '') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
+                                        <option value="" disabled {{ old('younger_brother_married') ? '' : 'selected' }}>Select status</option>
+                                        <option value="No" {{ old('younger_brother_married') === 'No' ? 'selected' : '' }}>No (ના)</option>
+                                        <option value="Yes" {{ old('younger_brother_married') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-bold text-slate-700">{{ __('messages.elder_sister') }}</label>
-                                    <input type="text" name="elder_sister" value="{{ old('elder_sister', $registration->form_data['elder_sister'] ?? '') }}" placeholder="e.g. 2 Sisters" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                    <input type="text" name="elder_sister" value="{{ old('elder_sister') }}" placeholder="e.g. 2 Sisters" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-bold text-slate-700">{{ __('messages.elder_sister_married') }}</label>
                                     <select name="elder_sister_married" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                        <option value="" disabled selected>Select status</option>
-                                        <option value="No" {{ old('elder_sister_married', $registration->form_data['elder_sister_married'] ?? '') === 'No' ? 'selected' : '' }}>No (ના)</option>
-                                        <option value="Yes" {{ old('elder_sister_married', $registration->form_data['elder_sister_married'] ?? '') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
+                                        <option value="" disabled {{ old('elder_sister_married') ? '' : 'selected' }}>Select status</option>
+                                        <option value="No" {{ old('elder_sister_married') === 'No' ? 'selected' : '' }}>No (ના)</option>
+                                        <option value="Yes" {{ old('elder_sister_married') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-bold text-slate-700">{{ __('messages.younger_sister') }}</label>
-                                    <input type="text" name="younger_sister" value="{{ old('younger_sister', $registration->form_data['younger_sister'] ?? '') }}" placeholder="e.g. 1 Sister" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                    <input type="text" name="younger_sister" value="{{ old('younger_sister') }}" placeholder="e.g. 1 Sister" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[11px] font-bold text-slate-700">{{ __('messages.younger_sister_married') }}</label>
                                     <select name="younger_sister_married" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                        <option value="" disabled selected>Select status</option>
-                                        <option value="No" {{ old('younger_sister_married', $registration->form_data['younger_sister_married'] ?? '') === 'No' ? 'selected' : '' }}>No (ના)</option>
-                                        <option value="Yes" {{ old('younger_sister_married', $registration->form_data['younger_sister_married'] ?? '') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
+                                        <option value="" disabled {{ old('younger_sister_married') ? '' : 'selected' }}>Select status</option>
+                                        <option value="No" {{ old('younger_sister_married') === 'No' ? 'selected' : '' }}>No (ના)</option>
+                                        <option value="Yes" {{ old('younger_sister_married') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.retired') }}</label>
+                                <input type="text" name="retired" value="{{ old('retired') }}" placeholder="Retired members details" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
@@ -429,11 +449,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.business_details') }}</label>
-                                <input type="text" name="business" value="{{ old('business', $registration->form_data['business'] ?? '') }}" placeholder="Family business info" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="business" value="{{ old('business') }}" placeholder="Family business info" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.house_type') }}</label>
-                                <input type="text" name="house" value="{{ old('house', $registration->form_data['house'] ?? '') }}" placeholder="e.g. Flat / Tenement" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="house" value="{{ old('house') }}" placeholder="e.g. Flat / Tenement" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
@@ -441,13 +461,13 @@
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.own_house') }}</label>
                                 <select name="own_house" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    <option value="Yes" {{ old('own_house', $registration->form_data['own_house'] ?? '') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
-                                    <option value="No" {{ old('own_house', $registration->form_data['own_house'] ?? '') === 'No' ? 'selected' : '' }}>No (ના)</option>
+                                    <option value="Yes" {{ old('own_house') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
+                                    <option value="No" {{ old('own_house', 'No') === 'No' ? 'selected' : '' }}>No (ના)</option>
                                 </select>
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.vehicle_details') }}</label>
-                                <input type="text" name="vehicle" value="{{ old('vehicle', $registration->form_data['vehicle'] ?? '') }}" placeholder="e.g. Two Wheeler / Car model" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="vehicle" value="{{ old('vehicle') }}" placeholder="e.g. Two Wheeler / Car model" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
@@ -470,11 +490,41 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_uncle_name') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="maternal_uncle_name" value="{{ old('maternal_uncle_name', $registration->form_data['maternal_uncle_name'] ?? '') }}" required placeholder="Enter maternal uncle's name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="maternal_uncle_name" value="{{ old('maternal_uncle_name') }}" required placeholder="Enter maternal uncle's name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_grandfather_name') }} <span class="text-rose-500">*</span></label>
-                                <input type="text" name="maternal_grandfather_name" value="{{ old('maternal_grandfather_name', $registration->form_data['maternal_grandfather_name'] ?? '') }}" required placeholder="Enter maternal grandfather's name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <input type="text" name="maternal_grandfather_name" value="{{ old('maternal_grandfather_name') }}" required placeholder="Enter maternal grandfather's name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_grandfather_address') }}</label>
+                                <input type="text" name="maternal_grandfather_address" value="{{ old('maternal_grandfather_address') }}" placeholder="Enter maternal grandfather address" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_grandfather_occupation') }}</label>
+                                <input type="text" name="maternal_grandfather_occupation" value="{{ old('maternal_grandfather_occupation') }}" placeholder="e.g. Farming / Retired" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Member & Payment Verification Section -->
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-3">
+                            <h4 class="font-extrabold text-[11px] text-slate-600 uppercase tracking-wider">Member ID & Payment Details</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                <div class="space-y-1">
+                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.member_number') }}</label>
+                                    <input type="text" name="member_number" value="{{ old('member_number', '#' . sprintf('%05d', auth()->user()->id)) }}" placeholder="e.g. #00005" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.payment_number') }}</label>
+                                    <input type="text" name="payment_number" value="{{ old('payment_number') }}" placeholder="e.g. UTR / UPI Ref / Transaction No." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700 block">{{ __('messages.payment_image') }}</label>
+                                <input type="file" name="payment_image" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
                             </div>
                         </div>
 
@@ -534,7 +584,7 @@
     </div>
 
     @if(isset($registrations) && $registrations->count() > 0)
-        <!-- COMPACT CARD-STYLE SUBMITTED DETAILS LIST (3 CARDS PER ROW) -->
+        <!-- COMPACT CARD-STYLE SUBMITTED DETAILS LIST (CLICKABLE FOR FULL MODAL VIEW) -->
         <div class="space-y-3 pt-2">
             <div class="flex items-center justify-between px-1">
                 <div class="flex items-center gap-2">
@@ -543,131 +593,79 @@
                         Submitted Registration Details ({{ $registrations->count() }})
                     </h3>
                 </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Click card to view full submitted details</span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($registrations as $index => $reg)
                     @if(!empty($reg->form_data))
-                        <div class="bg-white border border-slate-200/90 rounded-xl p-4 space-y-3 shadow-xs hover:shadow-md transition-shadow">
+                        @php $fd = $reg->form_data; @endphp
+                        <div @click="selectedRegistration = {{ json_encode([
+                                'id' => $reg->id,
+                                'index' => $registrations->count() - $index,
+                                'date' => $fd['submission_date'] ?? ($reg->created_at ? $reg->created_at->format('d-M-Y h:i A') : '-'),
+                                'status' => $reg->status,
+                                'form_data' => $fd
+                             ]) }}; showDetailsModal = true"
+                             class="bg-white border border-slate-200/90 rounded-xl p-4 space-y-3 shadow-xs hover:shadow-md hover:border-primary-400 transition-all cursor-pointer group">
+                            
                             <!-- Card Header: #Index & Candidate Name -->
                             <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
                                 <div class="flex items-center gap-1.5 min-w-0">
                                     <span class="text-xs font-black text-slate-400">#{{ $registrations->count() - $index }}</span>
-                                    <h4 class="text-xs font-black text-slate-900 truncate">
-                                        {{ $reg->form_data['student_name'] ?? $reg->form_data['full_name'] ?? 'Registration' }}
+                                    <h4 class="text-xs font-black text-slate-900 truncate group-hover:text-primary-600 transition-colors">
+                                        {{ $fd['full_name'] ?? $fd['student_name'] ?? 'Registration' }}
                                     </h4>
                                 </div>
+                                <span class="text-[9px] font-extrabold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                                    Submitted
+                                </span>
                             </div>
 
-                            <!-- Card Body: Clean Specified Fields Only -->
-                            <div class="space-y-2.5 text-[11px] text-slate-600">
-                                @php $fd = $reg->form_data; @endphp
-
+                            <!-- Card Body Snippet -->
+                            <div class="space-y-2 text-[11px] text-slate-600">
                                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                     <div>
                                         <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Student Name</span>
                                         <span class="font-extrabold text-slate-900 text-xs block">{{ $fd['student_name'] ?? '-' }}</span>
                                     </div>
-
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Education</span>
+                                            <span class="text-[9px] font-bold text-slate-400 uppercase block">Education</span>
                                             <span class="font-bold text-slate-800">{{ $fd['education'] ?? '-' }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">School / College</span>
-                                            <span class="font-bold text-slate-800 truncate block" title="{{ $fd['school_college'] ?? '-' }}">{{ $fd['school_college'] ?? '-' }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-3 gap-1.5 bg-slate-50/90 p-2 rounded-lg border border-slate-100">
-                                        <div>
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase block">Total Marks</span>
-                                            <span class="font-bold text-slate-800">{{ $fd['total_marks'] ?? '-' }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase block">Obtained</span>
-                                            <span class="font-bold text-slate-800">{{ $fd['received_marks'] ?? '-' }}</span>
                                         </div>
                                         <div>
                                             <span class="text-[9px] font-bold text-slate-400 uppercase block">Percentage</span>
                                             <span class="font-black text-amber-700 bg-amber-50 px-1 py-0.5 rounded border border-amber-200 inline-block text-[10px]">{{ $fd['percentage'] ?? '-' }}</span>
                                         </div>
                                     </div>
-
-                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                        <div>
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Marksheet File</span>
-                                            @if(!empty($fd['marksheet_url']))
-                                                <a href="{{ $fd['marksheet_url'] }}" target="_blank" class="inline-flex items-center gap-1 font-bold text-primary-600 hover:text-primary-700 underline text-[11px]">
-                                                    View File ↗
-                                                </a>
-                                            @else
-                                                <span class="text-slate-400">-</span>
-                                            @endif
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Submission Date</span>
-                                            <span class="font-bold text-slate-800 text-[10px]">{{ $fd['submission_date'] ?? ($reg->created_at ? $reg->created_at->format('d-M-Y') : '-') }}</span>
-                                        </div>
-                                    </div>
-
                                 @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
                                     <div>
                                         <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Full Name</span>
                                         <span class="font-extrabold text-slate-900 text-xs block">{{ $fd['full_name'] ?? '-' }}</span>
                                     </div>
-
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Age</span>
-                                            <span class="font-bold text-slate-800">{{ $fd['age'] ?? '-' }} Years</span>
+                                            <span class="text-[9px] font-bold text-slate-400 uppercase block">Age / Gender</span>
+                                            <span class="font-bold text-slate-800">{{ $fd['age'] ?? '-' }} Yrs ({{ $fd['gender'] ?? '-' }})</span>
                                         </div>
                                         <div>
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Education / Occupation</span>
-                                            <span class="font-bold text-slate-800 truncate block">{{ $fd['education_occupation'] ?? '-' }}</span>
+                                            <span class="text-[9px] font-bold text-slate-400 uppercase block">Mobile</span>
+                                            <span class="font-bold text-slate-800">{{ $fd['mobile_no'] ?? '-' }}</span>
                                         </div>
                                     </div>
-
-                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                        @if(!empty($fd['contact_number']))
-                                            <div>
-                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Contact Number</span>
-                                                <span class="font-bold text-slate-800">{{ $fd['contact_number'] }}</span>
-                                            </div>
-                                        @endif
-                                        <div class="text-right">
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Submission Date</span>
-                                            <span class="font-bold text-slate-800 text-[10px]">{{ $fd['submission_date'] ?? ($reg->created_at ? $reg->created_at->format('d-M-Y') : '-') }}</span>
-                                        </div>
-                                    </div>
-
                                 @else
                                     <div>
                                         <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Participant Name</span>
                                         <span class="font-extrabold text-slate-900 text-xs block">{{ $fd['full_name'] ?? '-' }}</span>
                                     </div>
-
-                                    @if(!empty($fd['remarks']))
-                                        <div>
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Remarks</span>
-                                            <span class="font-semibold text-slate-700 truncate block">{{ $fd['remarks'] }}</span>
-                                        </div>
-                                    @endif
-
-                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                        @if(!empty($fd['contact_number']))
-                                            <div>
-                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Contact Number</span>
-                                                <span class="font-bold text-slate-800">{{ $fd['contact_number'] }}</span>
-                                            </div>
-                                        @endif
-                                        <div class="text-right">
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Submission Date</span>
-                                            <span class="font-bold text-slate-800 text-[10px]">{{ $fd['submission_date'] ?? ($reg->created_at ? $reg->created_at->format('d-M-Y') : '-') }}</span>
-                                        </div>
-                                    </div>
                                 @endif
+                            </div>
+
+                            <!-- Card Footer Action CTA -->
+                            <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-primary-600 font-extrabold group-hover:text-primary-700">
+                                <span>🔍 View Full Registration Details</span>
+                                <span>&rarr;</span>
                             </div>
                         </div>
                     @endif
@@ -675,5 +673,87 @@
             </div>
         </div>
     @endif
+
+    <!-- FULL REGISTRATION DETAILS MODAL POPUP (COMPACT SPACING & HIGH DENSITY) -->
+    <template x-teleport="body">
+        <div x-show="showDetailsModal" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm"
+             x-transition:enter="ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             x-cloak>
+            <div @click.away="showDetailsModal = false" 
+                 class="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden relative">
+                
+                <!-- Modal Header -->
+                <div class="px-4 py-3 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                    <div>
+                        <h3 class="text-xs font-extrabold flex items-center gap-2">
+                            <span>Submitted Registration Details</span>
+                            <span class="px-2 py-0.5 rounded bg-primary-500 text-white text-[10px]" x-text="'#' + selectedRegistration.index"></span>
+                        </h3>
+                        <p class="text-[10px] text-slate-400 font-medium mt-0.5" x-text="'Submitted on: ' + (selectedRegistration.date || '')"></p>
+                    </div>
+                    <button type="button" @click="showDetailsModal = false" 
+                            class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs">
+                        ✕
+                    </button>
+                </div>
+
+                <!-- Modal Body (Scrollable Compact Padding) -->
+                <div class="p-3.5 space-y-3 overflow-y-auto text-xs">
+                    
+                    <!-- Uploaded Documents & Photos Compact Strip -->
+                    <template x-if="Object.keys(selectedRegistration.form_data || {}).some(k => k.endsWith('_url'))">
+                        <div class="space-y-1">
+                            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Uploaded Documents & Photos</h4>
+                            <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                <template x-for="(val, key) in (selectedRegistration.form_data || {})" :key="key">
+                                    <template x-if="key.endsWith('_url') && val">
+                                        <div class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                                            <a :href="val" target="_blank" class="block w-8 h-8 shrink-0 overflow-hidden rounded bg-slate-100 border border-slate-200">
+                                                <img :src="val" class="w-full h-full object-cover">
+                                            </a>
+                                            <div class="min-w-0">
+                                                <span class="text-[9px] font-bold text-slate-700 uppercase block truncate max-w-[100px]" x-text="key.replace('_url', '').replace(/_/g, ' ')"></span>
+                                                <a :href="val" target="_blank" class="text-[9px] font-bold text-primary-600 hover:underline">View File ↗</a>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Complete Form Data Grid - Compact 3 to 4 Columns -->
+                    <div class="space-y-1.5">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Submitted Form Fields</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
+                            <template x-for="(val, key) in (selectedRegistration.form_data || {})" :key="key">
+                                <template x-if="!key.endsWith('_url') && key !== 'submission_date'">
+                                    <div class="bg-slate-50/90 px-2.5 py-1.5 rounded-lg border border-slate-100 hover:bg-slate-100/80 transition-colors">
+                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-wider block truncate" x-text="key.replace(/_/g, ' ')"></span>
+                                        <span class="font-bold text-slate-900 text-[11px] block break-words leading-tight mt-0.5" x-text="val || '-'"></span>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-end shrink-0">
+                    <button type="button" @click="showDetailsModal = false" 
+                            class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                        Close Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>
 @endsection

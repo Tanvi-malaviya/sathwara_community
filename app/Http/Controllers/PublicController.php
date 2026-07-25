@@ -193,16 +193,18 @@ class PublicController extends Controller
                 'state', 'district', 'association', 'surname', 'first_name', 'gender',
                 'father_name', 'grandfather_name', 'address', 'mobile_no', 'whatsapp',
                 'birth_date', 'age', 'height', 'weight', 'qualification', 'occupation',
-                'occupation_address', 'monthly_income', 'elder_brother', 'retired',
+                'occupation_address', 'monthly_income', 'elder_brother', 'elder_brother_married', 'retired',
                 'younger_brother', 'younger_brother_married', 'elder_sister', 'elder_sister_married',
-                'younger_sister', 'younger_sister_married', 'father_occupation', 'father_age',
+                'younger_sister', 'younger_sister_married', 'father_occupation', 'father_occupation_address', 'father_mobile', 'father_age',
                 'father_income', 'native_place', 'mother_name', 'mother_occupation',
-                'maternal_uncle_name', 'maternal_grandfather_name', 'business', 'house',
-                'own_house', 'vehicle', 'divorce', 'special_need'
+                'maternal_uncle_name', 'maternal_grandfather_name', 'maternal_grandfather_address', 'maternal_grandfather_occupation',
+                'business', 'house', 'own_house', 'vehicle', 'divorce', 'special_need',
+                'physical_disability', 'disability_duration', 'special_info', 'other_info',
+                'member_number', 'payment_number'
             ]);
 
             // Handle Yuva Melo file uploads
-            $fileFields = ['member_photo', 'aadhaar_photo', 'selfie', 'whatsapp_image'];
+            $fileFields = ['member_photo', 'aadhaar_photo', 'selfie', 'whatsapp_image', 'payment_image'];
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
                     $file = $request->file($field);
@@ -268,7 +270,7 @@ class PublicController extends Controller
 
             // Preserve old files for Yuva Melo if new ones weren't uploaded
             if ($event->event_type === 'yuva_melo') {
-                foreach (['member_photo_url', 'aadhaar_photo_url', 'selfie_url', 'whatsapp_image_url'] as $fileUrlField) {
+                foreach (['member_photo_url', 'aadhaar_photo_url', 'selfie_url', 'whatsapp_image_url', 'payment_image_url'] as $fileUrlField) {
                     if (empty($formData[$fileUrlField]) && !empty($existingRegistration->form_data[$fileUrlField])) {
                         $formData[$fileUrlField] = $existingRegistration->form_data[$fileUrlField];
                     }

@@ -285,7 +285,25 @@
 
 
 <!-- Gallery Preview Section -->
-<section class="py-6 sm:py-8 bg-transparent" x-data="{ activeImageModal: null }">
+<section class="py-6 sm:py-8 bg-transparent" x-data="{ 
+    lightbox: false,
+    lightboxIndex: 0,
+    currentGallery: {{ json_encode(collect($galleryPreview)->map(function($item) { return ['src' => str_starts_with($item->image_path, 'http') ? $item->image_path : asset('storage/' . $item->image_path), 'caption' => $item->caption ?? '']; })->values()) }},
+    openLightbox(index) {
+        this.lightboxIndex = index;
+        this.lightbox = true;
+    },
+    nextImage() {
+        if (this.currentGallery.length > 1) {
+            this.lightboxIndex = (this.lightboxIndex + 1) % this.currentGallery.length;
+        }
+    },
+    prevImage() {
+        if (this.currentGallery.length > 1) {
+            this.lightboxIndex = (this.lightboxIndex - 1 + this.currentGallery.length) % this.currentGallery.length;
+        }
+    }
+}" @keydown.window.escape="lightbox = false" @keydown.window.right="if(lightbox) nextImage()" @keydown.window.left="if(lightbox) prevImage()">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Clean Section Header -->
         <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
@@ -320,7 +338,7 @@
                         $shapeClass = $shapes[$index % count($shapes)];
                         $imageUrl = str_starts_with($item->image_path, 'http') ? $item->image_path : asset('storage/' . $item->image_path);
                     @endphp
-                    <div @click="activeImageModal = '{{ $imageUrl }}'"
+                    <div @click="openLightbox({{ $index }})"
                          class="break-inside-avoid group relative w-full overflow-hidden bg-slate-900 border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer {{ $shapeClass }}">
                         
                         <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100" 
@@ -350,25 +368,40 @@
             <div class="text-center py-12 bg-slate-50 rounded-3xl border border-slate-200/80 text-slate-500">
                 <p class="text-sm font-bold">{{ __('messages.no_photos_uploaded') }}</p>
             </div>
-        @endifiv>
         @endif
 
-        <!-- Image Lightbox Modal -->
-        <div x-show="activeImageModal" 
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
-             @keydown.escape.window="activeImageModal = null"
-             x-cloak>
-            <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center" @click.away="activeImageModal = null">
-                <button @click="activeImageModal = null" class="absolute -top-10 right-0 text-white/80 hover:text-white text-3xl font-bold transition-colors">&times;</button>
-                <img :src="activeImageModal" class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain border border-white/20">
+        <!-- Lightbox Modal -->
+        <template x-teleport="body">
+            <div x-show="lightbox" class="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center p-4" style="z-index: 9999;" x-cloak>
+                
+                <!-- Close button -->
+                <button @click="lightbox = false" class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full transition-all p-2 border border-white/10 hover:border-rose-500 cursor-pointer hover:scale-105 shadow-lg" style="z-index: 10000;">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+
+                <!-- Prev Arrow -->
+                <button x-show="currentGallery.length > 1" @click.stop="prevImage()" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 p-2.5 sm:p-4 bg-white/10 hover:bg-primary-500 rounded-full text-white backdrop-blur-md border border-white/20 hover:border-primary-500 transition-all shadow-xl hover:scale-110 cursor-pointer" style="z-index: 10000;">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+
+                <!-- Centered Medium Image Container -->
+                <div class="relative w-full max-w-3xl flex flex-col items-center justify-center px-12 sm:px-16" @click.stop>
+                    <img :src="currentGallery[lightboxIndex]?.src" class="w-auto max-w-full rounded-xl shadow-2xl object-contain border border-white/10 bg-black/20" style="max-height: 60vh;">
+                    <p class="text-white/90 text-sm sm:text-base font-semibold mt-4 text-center max-w-xl px-4" x-text="currentGallery[lightboxIndex]?.caption"></p>
+                </div>
+                
+                <!-- Next Arrow -->
+                <button x-show="currentGallery.length > 1" @click.stop="nextImage()" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 p-2.5 sm:p-4 bg-white/10 hover:bg-primary-500 rounded-full text-white backdrop-blur-md border border-white/20 hover:border-primary-500 transition-all shadow-xl hover:scale-110 cursor-pointer" style="z-index: 10000;">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+
+                <!-- Counter -->
+                <div x-show="currentGallery.length > 1" class="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/80 bg-black/60 px-5 py-2 rounded-full text-xs font-bold tracking-widest border border-white/10 backdrop-blur-sm shadow-md" style="z-index: 10000;">
+                    <span x-text="lightboxIndex + 1"></span> / <span x-text="currentGallery.length"></span>
+                </div>
+
             </div>
-        </div>
+        </template>
     </div>
 </section>
 @endsection
