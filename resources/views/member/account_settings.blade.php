@@ -1,11 +1,8 @@
 @extends('layouts.member')
-@section('page_title', 'Account Settings')
+@section('page_title', __('messages.account_settings'))
 
 @section('content')
 <div class="max-w-4xl space-y-6">
-
-    <!-- Success & Error Alert Messages -->
-
 
     @if($errors->any())
         <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 6000)" x-show="show" x-transition
@@ -26,19 +23,19 @@
     <div class="bg-white border border-slate-100 rounded-xl p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3">
             <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <span>📧</span> Update Email Address
+                <span>📧</span> {{ __('messages.update_email_address') }}
             </h3>
-            <p class="text-[11px] text-slate-400 font-medium mt-0.5">Change your login email address. This will require verification via OTP.</p>
+            <p class="text-[11px] text-slate-400 font-medium mt-0.5">{{ __('messages.update_email_desc') }}</p>
         </div>
 
         <!-- Current Email Display -->
         <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-                <span class="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Current Email Address</span>
+                <span class="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">{{ __('messages.current_email_address') }}</span>
                 <p class="text-xs font-bold text-slate-800 mt-0.5">{{ $user->email }}</p>
             </div>
             <div>
-                <span class="text-[9px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">Verified Login</span>
+                <span class="text-[9px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">{{ __('messages.verified_login') }}</span>
             </div>
         </div>
 
@@ -54,14 +51,14 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
                     <div class="space-y-1">
-                        <label class="text-[11px] font-bold text-slate-500 uppercase">Verification Code (OTP) *</label>
+                        <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.verification_code_otp') }} *</label>
                         <input type="text" name="otp" required maxlength="6" placeholder="Enter 6-digit OTP"
                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none tracking-widest text-center font-mono">
                     </div>
                     <div class="flex items-center gap-2">
                         <button type="submit" 
                                 class="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors uppercase tracking-wider w-full">
-                            Verify & Update
+                            {{ __('messages.verify_and_update') }}
                         </button>
                     </div>
                 </div>
@@ -70,7 +67,7 @@
             <!-- Option to cancel and start over -->
             <div class="pt-2 flex justify-start text-[11px]">
                 <a href="{{ route('member.account.settings') }}" class="text-rose-500 hover:text-rose-600 font-bold transition-colors">
-                    &larr; Cancel and change email again
+                    &larr; {{ __('messages.cancel_email_change') }}
                 </a>
             </div>
         @else
@@ -79,14 +76,14 @@
                 @csrf
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                     <div class="space-y-1 sm:col-span-2">
-                        <label class="text-[11px] font-bold text-slate-500 uppercase">New Email Address *</label>
+                        <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.new_email_address') }} *</label>
                         <input type="email" name="email" required value="{{ old('email') }}" placeholder="example@newemail.com"
                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
                     </div>
                     <div>
                         <button type="submit" 
                                 class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors uppercase tracking-wider w-full">
-                            Send Verification OTP
+                            {{ __('messages.send_verification_otp') }}
                         </button>
                     </div>
                 </div>
@@ -98,9 +95,9 @@
     <div class="bg-white border border-slate-100 rounded-xl p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3">
             <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <span>🔐</span> Update Account Password
+                <span>🔐</span> {{ __('messages.update_account_password') }}
             </h3>
-            <p class="text-[11px] text-slate-400 font-medium mt-0.5">Change your login password. Keep it secure and private.</p>
+            <p class="text-[11px] text-slate-400 font-medium mt-0.5">{{ __('messages.update_password_desc') }}</p>
         </div>
 
         <form method="POST" action="{{ route('member.account.settings.update_password') }}" class="space-y-4">
@@ -108,19 +105,19 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase">Current Password *</label>
+                    <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.current_password') }} *</label>
                     <input type="password" name="current_password" required placeholder="••••••••"
                            class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase">New Password *</label>
+                    <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.new_password') }} *</label>
                     <input type="password" name="password" required placeholder="••••••••"
                            class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase">Confirm Password *</label>
+                    <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.confirm_new_password') }} *</label>
                     <input type="password" name="password_confirmation" required placeholder="••••••••"
                            class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
                 </div>
@@ -129,7 +126,7 @@
             <div class="pt-3 border-t border-slate-100 flex justify-end">
                 <button type="submit" 
                         class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors uppercase tracking-wider">
-                    Update Password
+                    {{ __('messages.update_password_btn') }}
                 </button>
             </div>
         </form>

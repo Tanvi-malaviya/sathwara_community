@@ -142,7 +142,7 @@
                                 </svg>
                             </button>
                             <button type="button"
-                                @click="$dispatch('confirm-delete', { action: '{{ route('member.family.destroy', $member->id) }}', message: 'Are you sure you want to remove this family member from your profile?' })"
+                                @click="$dispatch('confirm-delete', { action: '{{ route('member.family.destroy', $member->id) }}', message: '{{ __('messages.delete_confirm_family_member') }}' })"
                                 title="Delete"
                                 class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
