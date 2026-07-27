@@ -40,39 +40,55 @@
     </div>
 
     <!-- Events List Table -->
-    <div class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm">
-        <table class="w-full text-left border-collapse">
+    <div class="bg-white border border-slate-100 rounded-xl overflow-x-auto shadow-sm">
+        <table class="w-full text-left border-collapse min-w-[720px] lg:min-w-0">
             <thead>
                 <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
-                    <th class="py-2.5 px-3.5">{{ __('messages.event_name') }}</th>
-                    <th class="py-2.5 px-3.5">{{ __('messages.venue') }}</th>
-                    <th class="py-2.5 px-3.5">{{ __('messages.date') }}</th>
-                    <th class="py-2.5 px-3.5">{{ __('messages.participants') }}</th>
-                    <th class="py-2.5 px-3.5">{{ __('messages.status') }}</th>
-                    <th class="py-2.5 px-3.5 text-right">{{ __('messages.actions') }}</th>
+                    <th class="py-2.5 px-2.5">{{ __('messages.event_name') }}</th>
+                    <th class="py-2.5 px-2.5">{{ __('messages.event_type') }}</th>
+                    <th class="py-2.5 px-2.5">{{ __('messages.venue') }}</th>
+                    <th class="py-2.5 px-2.5">{{ __('messages.date') }}</th>
+                    <th class="py-2.5 px-2.5">{{ __('messages.participants') }}</th>
+                    <th class="py-2.5 px-2.5">{{ __('messages.status') }}</th>
+                    <th class="py-2.5 px-2.5 text-right">{{ __('messages.actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                 @forelse($events as $e)
                     <tr class="hover:bg-slate-50/60 transition-colors">
-                        <td class="py-2.5 px-3.5">
-                            <div class="flex items-center gap-3">
-                                <img class="w-10 h-10 rounded-lg object-cover bg-slate-100 border border-slate-200/60 shrink-0" 
+                        <td class="py-2 px-2.5">
+                            <div class="flex items-center gap-2">
+                                <img class="w-8 h-8 rounded-lg object-cover bg-slate-100 border border-slate-200/60 shrink-0" 
                                      src="{{ str_starts_with($e->banner_path, 'http') ? $e->banner_path : asset('storage/' . $e->banner_path) }}" 
                                      alt="Banner">
                                  <div class="min-w-0">
-                                      <span class="text-slate-900 font-bold text-xs truncate max-w-[280px] block" title="{{ $e->title }}">{{ $e->title }}</span>
+                                      <span class="text-slate-900 font-bold text-xs truncate max-w-[180px] lg:max-w-[220px] block" title="{{ $e->title }}">{{ $e->title }}</span>
                                  </div>
                             </div>
                         </td>
-                        <td class="py-2.5 px-3.5 text-slate-600 font-medium max-w-[220px] truncate" title="{{ $e->venue }}">
+                        <td class="py-2 px-2.5 whitespace-nowrap">
+                            @if($e->event_type === 'yuva_melo')
+                                <span class="px-2 py-0.5 text-[10px] font-extrabold bg-purple-50 text-purple-700 rounded-md border border-purple-200/80 inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span> Yuva Melo
+                                </span>
+                            @elseif($e->event_type === 'inam_vitaran')
+                                <span class="px-2 py-0.5 text-[10px] font-extrabold bg-amber-50 text-amber-700 rounded-md border border-amber-200/80 inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Inam Vitaran
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 text-[10px] font-extrabold bg-slate-100 text-slate-600 rounded-md border border-slate-200 inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> General
+                                </span>
+                            @endif
+                        </td>
+                        <td class="py-2 px-2.5 text-slate-600 font-medium max-w-[150px] lg:max-w-[190px] truncate text-[11px]" title="{{ $e->venue }}">
                             {{ $e->venue }}
                         </td>
-                        <td class="py-2.5 px-3.5 text-[11px] text-slate-700 whitespace-nowrap font-medium">
+                        <td class="py-2 px-2.5 text-[11px] text-slate-700 whitespace-nowrap font-medium">
                             {{ date('d-M-Y', strtotime($e->date)) }}
                         </td>
-                        <td class="py-2.5 px-3.5">
-                            @if($e->registration_option)
+                        <td class="py-2 px-2.5 whitespace-nowrap text-[11px]">
+                            @if(($e->event_type ?? 'normal') !== 'normal' && ($e->has_registration_form || $e->registration_option))
                                 <a href="{{ route('admin.events.registrations', $e->id) }}" class="text-primary-600 font-bold hover:underline">
                                     {{ $e->registrations_count }} {{ __('messages.registered') }}
                                 </a>
@@ -80,16 +96,16 @@
                                 <span class="text-slate-400 font-medium">{{ __('messages.open_entry') }}</span>
                             @endif
                         </td>
-                        <td class="py-2.5 px-3.5">
+                        <td class="py-2 px-2.5 whitespace-nowrap">
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
                                 {{ $e->status == 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($e->status == 'cancelled' ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-slate-100 text-slate-600 border border-slate-200') }}">
                                 {{ $e->status }}
                             </span>
                         </td>
-                        <td class="py-2.5 px-3.5 text-right">
-                            <div class="flex justify-end items-center space-x-1.5">
+                        <td class="py-2 px-2.5 text-right whitespace-nowrap">
+                            <div class="flex justify-end items-center space-x-1">
                                 <a href="{{ route('admin.events.show', $e->id) }}" 
-                                   class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors flex items-center justify-center" 
+                                   class="w-6.5 h-6.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors flex items-center justify-center" 
                                    title="{{ __('messages.view_details') }}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path>
@@ -97,14 +113,14 @@
                                     </svg>
                                 </a>
                                 <a href="{{ route('admin.events.gallery', $e->id) }}" 
-                                   class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors flex items-center justify-center" 
+                                   class="w-6.5 h-6.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors flex items-center justify-center" 
                                    title="{{ __('messages.gallery') }}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </a>
                                 <a href="{{ route('admin.events.edit', $e->id) }}" 
-                                   class="w-7 h-7 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors flex items-center justify-center" 
+                                   class="w-6.5 h-6.5 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors flex items-center justify-center" 
                                    title="{{ __('messages.edit') }}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -112,7 +128,7 @@
                                 </a>
                                 <button type="button" 
                                         @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.destroy', $e->id) }}', message: '{{ __('messages.delete_confirm_event', ['name' => $e->title]) }}' })" 
-                                        class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors flex items-center justify-center" 
+                                        class="w-6.5 h-6.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors flex items-center justify-center" 
                                         title="{{ __('messages.delete') }}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -123,7 +139,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="py-8 text-center text-slate-400 font-medium">{{ __('messages.no_events_scheduled') }}</td>
+                        <td colspan="7" class="py-8 text-center text-slate-400 font-medium">{{ __('messages.no_events_scheduled') }}</td>
                     </tr>
                 @endforelse
             </tbody>

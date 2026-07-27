@@ -190,18 +190,25 @@ class PublicController extends Controller
             ];
         } elseif ($event->event_type === 'yuva_melo') {
             $formData = $request->only([
-                'state', 'district', 'association', 'surname', 'first_name', 'gender',
-                'father_name', 'grandfather_name', 'address', 'mobile_no', 'whatsapp',
+                'state', 'district', 'area_id', 'association', 'surname', 'first_name', 'gender',
+                'father_name', 'grandfather_name', 'father_gyanti', 'address', 'mobile_no', 'whatsapp',
                 'birth_date', 'age', 'height', 'weight', 'qualification', 'occupation',
                 'occupation_address', 'monthly_income', 'elder_brother', 'elder_brother_married', 'retired',
                 'younger_brother', 'younger_brother_married', 'elder_sister', 'elder_sister_married',
-                'younger_sister', 'younger_sister_married', 'father_occupation', 'father_occupation_address', 'father_mobile', 'father_age',
-                'father_income', 'native_place', 'mother_name', 'mother_occupation',
+                'younger_sister', 'younger_sister_married', 'siblings_json', 'father_occupation', 'father_occupation_address', 'father_mobile', 'father_age',
+                'father_income', 'native_place', 'mother_name', 'mother_gyanti', 'mother_occupation',
                 'maternal_uncle_name', 'maternal_grandfather_name', 'maternal_grandfather_address', 'maternal_grandfather_occupation',
                 'business', 'house', 'own_house', 'vehicle', 'divorce', 'special_need',
                 'physical_disability', 'disability_duration', 'special_info', 'other_info',
                 'member_number', 'payment_number'
             ]);
+
+            if ($request->filled('area_id')) {
+                $areaObj = \App\Models\Area::find($request->area_id);
+                if ($areaObj) {
+                    $formData['area'] = $areaObj->name;
+                }
+            }
 
             // Handle Yuva Melo file uploads
             $fileFields = ['member_photo', 'aadhaar_photo', 'selfie', 'whatsapp_image', 'payment_image'];

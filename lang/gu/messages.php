@@ -44,6 +44,7 @@ return [
     'approved' => 'મંજૂર કરેલ',
     'rejected' => 'નામંજૂર કરેલ',
     'address' => 'સરનામું',
+    'age' => 'ઉંમર (Age)',
     'email' => 'ઈમેલ',
     'phone' => 'ફોન',
     'whatsapp' => 'વોટ્સએપ',

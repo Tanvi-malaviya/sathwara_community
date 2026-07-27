@@ -145,7 +145,7 @@
     <!-- Registration Details Pop-up Modal -->
     <template x-teleport="body">
         <div x-show="showDetailsModal" 
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm"
              x-transition:enter="ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -154,72 +154,97 @@
              x-transition:leave-end="opacity-0"
              x-cloak>
             <div @click.away="showDetailsModal = false" 
-                 class="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-lg w-full overflow-hidden relative">
+                 class="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden relative">
                 
                 <!-- Modal Header -->
-                <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+                <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
                     <div>
-                        <h3 class="text-sm font-extrabold" x-text="selectedRegistration.user_name + ' - ' + '{{ __('messages.submitted_details') }}'"></h3>
+                        <h3 class="text-sm font-extrabold flex items-center gap-2" x-text="selectedRegistration.user_name + ' - ' + '{{ __('messages.submitted_details') }}'"></h3>
                         <p class="text-[11px] text-slate-400 font-medium mt-0.5" x-text="'{{ __('messages.registered_date') }}: ' + (selectedRegistration.date || '')"></p>
                     </div>
                     <button type="button" @click="showDetailsModal = false" 
-                            class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs">
+                            class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs font-bold">
                         ✕
                     </button>
                 </div>
 
                 <!-- Modal Content Body -->
-                <div class="p-5 space-y-4">
+                <div class="p-5 space-y-4 overflow-y-auto max-h-[78vh] text-xs">
                     <!-- Member Summary Card -->
-                    <div class="grid grid-cols-2 gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 text-xs">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.applicant_email') }}</span>
-                            <span class="font-bold text-slate-800 text-[11px]" x-text="selectedRegistration.email"></span>
+                            <span class="font-extrabold text-slate-800 text-xs truncate block" x-text="selectedRegistration.email"></span>
                         </div>
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.contact_info') }}</span>
-                            <span class="font-bold text-slate-800 text-[11px]" x-text="selectedRegistration.phone"></span>
+                            <span class="font-extrabold text-slate-800 text-xs block" x-text="selectedRegistration.phone"></span>
                         </div>
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.city') }}</span>
-                            <span class="font-bold text-slate-800 text-[11px]" x-text="selectedRegistration.city"></span>
+                            <span class="font-extrabold text-slate-800 text-xs block" x-text="selectedRegistration.city"></span>
                         </div>
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Selection Status</span>
-                            <span class="font-extrabold text-[10px] uppercase tracking-wider px-2 py-0.5 rounded inline-block mt-0.5"
-                                  :class="selectedRegistration.is_selected ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-800'" 
+                            <span class="font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded inline-block mt-0.5"
+                                  :class="selectedRegistration.is_selected ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-200 text-slate-700'" 
                                   x-text="selectedRegistration.is_selected ? 'Selected' : 'Not Selected'"></span>
                         </div>
                     </div>
 
-                    <!-- Form Data Grid -->
-                    <div class="space-y-2">
+                    <!-- Uploaded Documents & Media Grid -->
+                    <template x-if="Object.keys(selectedRegistration.form_data || {}).some(k => k.endsWith('_url') || k.endsWith('_image') || k.endsWith('_photo'))">
+                        <div class="space-y-1.5">
+                            <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-wider">Uploaded Documents & Attachments</h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 bg-slate-50/80 p-3 rounded-xl border border-slate-200/60">
+                                <template x-for="(val, key) in (selectedRegistration.form_data || {})" :key="key">
+                                    <template x-if="(key.endsWith('_url') || key.endsWith('_image') || key.endsWith('_photo')) && val">
+                                        <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex items-center gap-2">
+                                            <a :href="val" target="_blank" class="block w-10 h-10 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200">
+                                                <img :src="val" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\'/></svg>'">
+                                            </a>
+                                            <div class="min-w-0 flex-1">
+                                                <span class="text-[9px] font-black text-slate-700 uppercase block truncate" x-text="key.replace('_url', '').replace('_photo', '').replace('_image', '').replace(/_/g, ' ')"></span>
+                                                <a :href="val" target="_blank" class="text-[10px] font-bold text-primary-600 hover:underline">Open File ↗</a>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Form Fields Grid (4 Columns) -->
+                    <div class="space-y-1.5">
                         <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-wider">{{ __('messages.candidate_form_details') }}</h4>
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto pr-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
                             <template x-for="(val, key) in (selectedRegistration.form_data || {})" :key="key">
-                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block" x-text="key.replace(/_/g, ' ')"></span>
-                                    <template x-if="key === 'marksheet_url' && val">
-                                        <a :href="val" target="_blank" class="text-xs font-extrabold text-primary-600 hover:text-primary-700 hover:underline inline-flex items-center gap-1 mt-1">
-                                            <span>📄 {{ __('messages.open_marksheet_file') }} &rarr;</span>
-                                        </a>
-                                    </template>
-                                    <template x-if="key !== 'marksheet_url'">
-                                        <span class="font-bold text-slate-800 text-xs block mt-0.5" x-text="val"></span>
-                                    </template>
-                                </div>
+                                <template x-if="!key.endsWith('_url') && !key.endsWith('_image') && !key.endsWith('_photo') && key !== 'submission_date'">
+                                    <div class="bg-slate-50/90 p-2.5 rounded-xl border border-slate-200/80 hover:bg-slate-100/70 transition-colors">
+                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block truncate" x-text="key.replace(/_/g, ' ')"></span>
+                                        
+                                        <!-- If json formatted data (e.g. siblings_json) -->
+                                        <template x-if="typeof val === 'string' && (val.startsWith('[') || val.startsWith('{'))">
+                                            <span class="font-bold text-slate-800 text-xs block break-words mt-1 bg-white p-1.5 rounded border border-slate-200 font-mono text-[10px]" x-text="val"></span>
+                                        </template>
+                                        
+                                        <template x-if="!(typeof val === 'string' && (val.startsWith('[') || val.startsWith('{')))">
+                                            <span class="font-bold text-slate-900 text-xs block break-words mt-0.5" x-text="val || '-'"></span>
+                                        </template>
+                                    </div>
+                                </template>
                             </template>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Footer Action Buttons -->
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
-                        <button type="button" @click="showDetailsModal = false" 
-                                class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
-                            {{ __('messages.close') }}
-                        </button>
-                    </div>
+                <!-- Footer Action Buttons -->
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end shrink-0">
+                    <button type="button" @click="showDetailsModal = false" 
+                            class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">
+                        {{ __('messages.close') }}
+                    </button>
                 </div>
             </div>
         </div>

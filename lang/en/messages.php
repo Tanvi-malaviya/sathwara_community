@@ -44,6 +44,7 @@ return [
     'approved' => 'Approved',
     'rejected' => 'Rejected',
     'address' => 'Address',
+    'age' => 'Age',
     'email' => 'Email',
     'phone' => 'Phone',
     'whatsapp' => 'WhatsApp',

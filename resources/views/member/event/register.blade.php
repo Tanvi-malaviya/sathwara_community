@@ -3,23 +3,96 @@
 @section('page_title', $event->title . ' Registration')
 
 @section('content')
-<div class="space-y-4 w-full"
-     x-data="{ 
-         selectedStudent: '{{ old('student_name', '') }}',
-         totalMarks: '{{ old('total_marks', '') }}', 
-         receivedMarks: '{{ old('received_marks', '') }}', 
-         percentage: '{{ old('percentage', '') }}',
-         yuvaTab: 1,
-         showDetailsModal: false,
-         selectedRegistration: {},
-         calcPercentage() {
-             let t = parseFloat(this.totalMarks);
-             let r = parseFloat(this.receivedMarks);
-             if (!isNaN(t) && !isNaN(r) && t > 0) {
-                 this.percentage = ((r / t) * 100).toFixed(2) + '%';
-             }
-         }
-     }">
+@php
+    $initialSiblingsArr = [];
+    $existingSiblings = old('siblings_json');
+    if (empty($existingSiblings) && isset($registration) && !empty($registration->form_data['siblings_json'])) {
+        $existingSiblings = is_string($registration->form_data['siblings_json']) ? $registration->form_data['siblings_json'] : json_encode($registration->form_data['siblings_json']);
+    }
+    if (!empty($existingSiblings)) {
+        if (is_array($existingSiblings)) {
+            $initialSiblingsArr = $existingSiblings;
+        } else {
+            $decoded = json_decode($existingSiblings, true);
+            if (is_array($decoded)) {
+                $initialSiblingsArr = $decoded;
+            }
+        }
+    }
+    if (empty($initialSiblingsArr) && isset($registration) && !empty($registration->form_data)) {
+        $fd = $registration->form_data;
+        if (!empty($fd['elder_brother'])) $initialSiblingsArr[] = ['relation' => 'Elder Brother', 'details' => $fd['elder_brother'], 'married' => $fd['elder_brother_married'] ?? 'No'];
+        if (!empty($fd['younger_brother'])) $initialSiblingsArr[] = ['relation' => 'Younger Brother', 'details' => $fd['younger_brother'], 'married' => $fd['younger_brother_married'] ?? 'No'];
+        if (!empty($fd['elder_sister'])) $initialSiblingsArr[] = ['relation' => 'Elder Sister', 'details' => $fd['elder_sister'], 'married' => $fd['elder_sister_married'] ?? 'No'];
+        if (!empty($fd['younger_sister'])) $initialSiblingsArr[] = ['relation' => 'Younger Sister', 'details' => $fd['younger_sister'], 'married' => $fd['younger_sister_married'] ?? 'No'];
+    }
+@endphp
+
+<script>
+function eventRegistrationData() {
+    return {
+        selectedStudent: @json(old('student_name', '')),
+        totalMarks: @json(old('total_marks', '')), 
+        receivedMarks: @json(old('received_marks', '')), 
+        percentage: @json(old('percentage', '')),
+        yuvaTab: 1,
+        showDetailsModal: false,
+        showSiblingModal: false,
+        siblings: @json($initialSiblingsArr),
+        legacyElderB: '',
+        legacyElderBM: '',
+        legacyYoungerB: '',
+        legacyYoungerBM: '',
+        legacyElderS: '',
+        legacyElderSM: '',
+        legacyYoungerS: '',
+        legacyYoungerSM: '',
+        newSibling: {
+            relation: 'Elder Brother',
+            details: '',
+            married: 'No',
+            occupation: ''
+        },
+        init() {
+            this.syncSiblingFields();
+        },
+        addSibling() {
+            if (!this.newSibling.relation) return;
+            this.siblings.push({ ...this.newSibling });
+            this.newSibling = { relation: 'Elder Brother', details: '', married: 'No', occupation: '' };
+            this.showSiblingModal = false;
+            this.syncSiblingFields();
+        },
+        removeSibling(index) {
+            this.siblings.splice(index, 1);
+            this.syncSiblingFields();
+        },
+        syncSiblingFields() {
+            this.legacyElderB = this.siblings.filter(s => s.relation === 'Elder Brother').map(s => s.details || '1').join(', ');
+            this.legacyElderBM = this.siblings.some(s => s.relation === 'Elder Brother' && s.married === 'Yes') ? 'Yes' : (this.siblings.some(s => s.relation === 'Elder Brother') ? 'No' : '');
+
+            this.legacyYoungerB = this.siblings.filter(s => s.relation === 'Younger Brother').map(s => s.details || '1').join(', ');
+            this.legacyYoungerBM = this.siblings.some(s => s.relation === 'Younger Brother' && s.married === 'Yes') ? 'Yes' : (this.siblings.some(s => s.relation === 'Younger Brother') ? 'No' : '');
+
+            this.legacyElderS = this.siblings.filter(s => s.relation === 'Elder Sister').map(s => s.details || '1').join(', ');
+            this.legacyElderSM = this.siblings.some(s => s.relation === 'Elder Sister' && s.married === 'Yes') ? 'Yes' : (this.siblings.some(s => s.relation === 'Elder Sister') ? 'No' : '');
+
+            this.legacyYoungerS = this.siblings.filter(s => s.relation === 'Younger Sister').map(s => s.details || '1').join(', ');
+            this.legacyYoungerSM = this.siblings.some(s => s.relation === 'Younger Sister' && s.married === 'Yes') ? 'Yes' : (this.siblings.some(s => s.relation === 'Younger Sister') ? 'No' : '');
+        },
+        selectedRegistration: {},
+        calcPercentage() {
+            let t = parseFloat(this.totalMarks);
+            let r = parseFloat(this.receivedMarks);
+            if (!isNaN(t) && !isNaN(r) && t > 0) {
+                this.percentage = ((r / t) * 100).toFixed(2) + '%';
+            }
+        }
+    };
+}
+</script>
+
+<div class="space-y-4 w-full" x-data="eventRegistrationData()">
     
     <!-- Top Navigation -->
     <div class="flex items-center justify-between">
@@ -208,7 +281,12 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.address') }} <span class="text-rose-500">*</span></label>
+                            <textarea name="address" rows="2" required placeholder="Enter full address" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">{{ old('address') }}</textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.state') }} <span class="text-rose-500">*</span></label>
                                 <input type="text" name="state" value="{{ old('state', 'Gujarat') }}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
@@ -218,14 +296,22 @@
                                 <input type="text" name="district" value="{{ old('district') }}" required placeholder="Enter district" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">Area <span class="text-rose-500">*</span></label>
+                                <select name="area_id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                    <option value="">-- Select Area --</option>
+                                    @if(isset($areas))
+                                        @foreach($areas as $areaItem)
+                                            <option value="{{ $areaItem->id }}" {{ old('area_id') == $areaItem->id ? 'selected' : '' }}>
+                                                {{ $areaItem->name }}{{ $areaItem->pincode ? ' ('.$areaItem->pincode.')' : '' }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.association') }}</label>
                                 <input type="text" name="association" value="{{ old('association') }}" placeholder="Enter mandal/association" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
-                        </div>
-
-                        <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.address') }} <span class="text-rose-500">*</span></label>
-                            <textarea name="address" rows="2" required placeholder="Enter full address" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">{{ old('address') }}</textarea>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
@@ -328,7 +414,7 @@
                         <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-100 font-bold text-primary-800">
                             {{ __('messages.yuva_sec_2') }}
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.father_name') }} <span class="text-rose-500">*</span></label>
                                 <input type="text" name="father_name" value="{{ old('father_name') }}" required placeholder="Enter father's full name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
@@ -336,6 +422,10 @@
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.grandfather_name') }} <span class="text-rose-500">*</span></label>
                                 <input type="text" name="grandfather_name" value="{{ old('grandfather_name') }}" required placeholder="Enter grandfather's full name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">Father's Gyanti (Gnati)</label>
+                                <input type="text" name="father_gyanti" value="{{ old('father_gyanti') }}" placeholder="e.g. Sathwara / Patel" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                         </div>
 
@@ -365,10 +455,14 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.mother_name') }} <span class="text-rose-500">*</span></label>
                                 <input type="text" name="mother_name" value="{{ old('mother_name') }}" required placeholder="Enter mother's name" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700">Mother's Gyanti (Gnati)</label>
+                                <input type="text" name="mother_gyanti" value="{{ old('mother_gyanti') }}" placeholder="e.g. Sathwara / Patel" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.mother_occupation') }}</label>
@@ -380,69 +474,70 @@
                             </div>
                         </div>
 
-                        <!-- Brother and Sister Details -->
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-3">
-                            <h4 class="font-extrabold text-[11px] text-slate-600 uppercase tracking-wider">{{ __('messages.siblings_details') }}</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.elder_brother') }}</label>
-                                    <input type="text" name="elder_brother" value="{{ old('elder_brother') }}" placeholder="e.g. 1 Brother" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                        <!-- Brother and Sister Details (Siblings Section with Modal + Cards) -->
+                        <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80 space-y-2.5">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <div>
+                                    <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
+                                        {{ __('messages.siblings_details') }}
+                                    </h4>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">Add brother(s) and sister(s) details using the button</p>
                                 </div>
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.elder_brother_married') }}</label>
-                                    <select name="elder_brother_married" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                        <option value="" disabled {{ old('elder_brother_married') ? '' : 'selected' }}>Select status</option>
-                                        <option value="No" {{ old('elder_brother_married') === 'No' ? 'selected' : '' }}>No (ના)</option>
-                                        <option value="Yes" {{ old('elder_brother_married') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
-                                    </select>
-                                </div>
+                                <button type="button" 
+                                        @click="showSiblingModal = true" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    <span>Add Sibling</span>
+                                </button>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.younger_brother') }}</label>
-                                    <input type="text" name="younger_brother" value="{{ old('younger_brother') }}" placeholder="e.g. 1 Brother" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.younger_brother_married') }}</label>
-                                    <select name="younger_brother_married" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                        <option value="" disabled {{ old('younger_brother_married') ? '' : 'selected' }}>Select status</option>
-                                        <option value="No" {{ old('younger_brother_married') === 'No' ? 'selected' : '' }}>No (ના)</option>
-                                        <option value="Yes" {{ old('younger_brother_married') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
-                                    </select>
-                                </div>
+
+                            <!-- Sibling Cards List (Compact Small Cards) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-1" x-show="siblings.length > 0">
+                                <template x-for="(s, index) in siblings" :key="index">
+                                    <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-between min-w-0">
+                                        <div class="min-w-0 space-y-0.5">
+                                            <div class="flex items-center gap-1.5 truncate">
+                                                <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md text-white tracking-tight shrink-0"
+                                                      :class="{
+                                                          'bg-blue-600': s.relation.includes('Brother'),
+                                                          'bg-pink-600': s.relation.includes('Sister')
+                                                      }"
+                                                      x-text="s.relation"></span>
+                                                <span class="text-[11px] font-extrabold text-slate-800 truncate" x-text="s.details || '1 Member'"></span>
+                                            </div>
+                                            <div class="flex items-center gap-1 text-[10px] text-slate-500 font-medium truncate">
+                                                <span x-text="s.married === 'Yes' ? 'Married' : 'Unmarried'"></span>
+                                                <template x-if="s.occupation">
+                                                    <span class="truncate" x-text="'• ' + s.occupation"></span>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="removeSibling(index)" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors shrink-0 ml-1" title="Remove Sibling">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.elder_sister') }}</label>
-                                    <input type="text" name="elder_sister" value="{{ old('elder_sister') }}" placeholder="e.g. 2 Sisters" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.elder_sister_married') }}</label>
-                                    <select name="elder_sister_married" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                        <option value="" disabled {{ old('elder_sister_married') ? '' : 'selected' }}>Select status</option>
-                                        <option value="No" {{ old('elder_sister_married') === 'No' ? 'selected' : '' }}>No (ના)</option>
-                                        <option value="Yes" {{ old('elder_sister_married') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
-                                    </select>
-                                </div>
+
+                            <!-- Empty State -->
+                            <div x-show="siblings.length === 0" class="p-3 border border-dashed border-slate-200 rounded-xl text-center text-xs text-slate-400 font-semibold bg-white/60">
+                                No siblings added yet. Click <strong class="text-primary-600">"+ Add Sibling"</strong> to add details.
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.younger_sister') }}</label>
-                                    <input type="text" name="younger_sister" value="{{ old('younger_sister') }}" placeholder="e.g. 1 Sister" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.younger_sister_married') }}</label>
-                                    <select name="younger_sister_married" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                        <option value="" disabled {{ old('younger_sister_married') ? '' : 'selected' }}>Select status</option>
-                                        <option value="No" {{ old('younger_sister_married') === 'No' ? 'selected' : '' }}>No (ના)</option>
-                                        <option value="Yes" {{ old('younger_sister_married') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.retired') }}</label>
-                                <input type="text" name="retired" value="{{ old('retired') }}" placeholder="Retired members details" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                            </div>
+
+                            <!-- Hidden Sync Fields -->
+                            <input type="hidden" name="siblings_json" :value="JSON.stringify(siblings)">
+                            <input type="hidden" name="elder_brother" :value="legacyElderB">
+                            <input type="hidden" name="elder_brother_married" :value="legacyElderBM">
+                            <input type="hidden" name="younger_brother" :value="legacyYoungerB">
+                            <input type="hidden" name="younger_brother_married" :value="legacyYoungerBM">
+                            <input type="hidden" name="elder_sister" :value="legacyElderS">
+                            <input type="hidden" name="elder_sister_married" :value="legacyElderSM">
+                            <input type="hidden" name="younger_sister" :value="legacyYoungerS">
+                            <input type="hidden" name="younger_sister_married" :value="legacyYoungerSM">
                         </div>
 
                         <!-- Family Business, Property, Vehicle Info -->
@@ -461,8 +556,8 @@
                             <div class="space-y-1">
                                 <label class="text-[11px] font-bold text-slate-700">{{ __('messages.own_house') }}</label>
                                 <select name="own_house" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    <option value="Yes" {{ old('own_house') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
-                                    <option value="No" {{ old('own_house', 'No') === 'No' ? 'selected' : '' }}>No (ના)</option>
+                                    <option value="Yes" {{ old('own_house') === 'Yes' ? 'selected' : '' }}>Yes</option>
+                                    <option value="No" {{ old('own_house', 'No') === 'No' ? 'selected' : '' }}>No</option>
                                 </select>
                             </div>
                             <div class="space-y-1">
@@ -750,6 +845,87 @@
                     <button type="button" @click="showDetailsModal = false" 
                             class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer">
                         Close Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- SIBLING ADD POPUP MODAL -->
+    <template x-teleport="body">
+        <div x-show="showSiblingModal" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             x-cloak>
+            
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-2xl w-full max-w-md overflow-hidden"
+                 @click.away="showSiblingModal = false">
+                
+                <!-- Modal Header -->
+                <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+                    <h3 class="font-extrabold text-xs uppercase tracking-wider">
+                        + Add Sibling Details
+                    </h3>
+                    <button type="button" @click="showSiblingModal = false" class="text-slate-400 hover:text-white font-bold text-lg leading-none">
+                        &times;
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-5 space-y-4 text-xs">
+                    <!-- Relation Dropdown -->
+                    <div class="space-y-1">
+                        <label class="font-bold text-slate-700 block text-[11px]">
+                            Relation <span class="text-rose-500">*</span>
+                        </label>
+                        <select x-model="newSibling.relation" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            <option value="Elder Brother">Elder Brother</option>
+                            <option value="Younger Brother">Younger Brother</option>
+                            <option value="Elder Sister">Elder Sister</option>
+                            <option value="Younger Sister">Younger Sister</option>
+                        </select>
+                    </div>
+
+                    <!-- Name / Details -->
+                    <div class="space-y-1">
+                        <label class="font-bold text-slate-700 block text-[11px]">
+                            Name / Count / Details
+                        </label>
+                        <input type="text" x-model="newSibling.details" placeholder="e.g. Ramesh Bhai / 1 Brother" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                    </div>
+
+                    <!-- Marital Status -->
+                    <div class="space-y-1">
+                        <label class="font-bold text-slate-700 block text-[11px]">
+                            Marital Status <span class="text-rose-500">*</span>
+                        </label>
+                        <select x-model="newSibling.married" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                            <option value="No">Unmarried</option>
+                            <option value="Yes">Married</option>
+                        </select>
+                    </div>
+
+                    <!-- Occupation / Notes -->
+                    <div class="space-y-1">
+                        <label class="font-bold text-slate-700 block text-[11px]">
+                            Occupation / Notes (Optional)
+                        </label>
+                        <input type="text" x-model="newSibling.occupation" placeholder="e.g. Job in IT / Student" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" @click="showSiblingModal = false" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 font-bold text-slate-700 rounded-xl transition-colors text-xs cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="button" @click="addSibling()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 font-bold text-white rounded-xl shadow-xs transition-colors text-xs cursor-pointer">
+                        + Add Sibling
                     </button>
                 </div>
             </div>

@@ -53,7 +53,8 @@ class EventController extends Controller
         $registrations = $user->eventRegistrations()->where('event_id', $id)->orderBy('created_at', 'desc')->get();
         $registration = $registrations->first();
         $familyMembers = $user->familyMembers()->orderBy('name')->get();
+        $areas = \App\Models\Area::orderBy('name')->get();
 
-        return view('member.event.register', compact('event', 'registration', 'registrations', 'familyMembers'));
+        return view('member.event.register', compact('event', 'registration', 'registrations', 'familyMembers', 'areas'));
     }
 }

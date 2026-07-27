@@ -158,30 +158,47 @@
                 <a href="{{ route('event.details', $event->id) }}" class="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col block cursor-pointer">
                     
                     <!-- Image -->
-                    <div class="relative h-44 w-full overflow-hidden shrink-0" x-data="{ imageError: false }">
-                        @if(!empty($event->banner_path))
-                            <img x-show="!imageError" 
-                                 x-on:error="imageError = true"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 bg-slate-100" 
-                                 src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
-                                 alt="{{ $event->title }}">
-                        @endif
-                        
-                        <div x-show="imageError || !'{{ $event->banner_path }}'" 
-                             class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-slate-900 flex flex-col items-center justify-center p-4 group-hover:scale-105 transition-transform duration-500"
-                             x-cloak>
-                            <span class="text-4xl">📅</span>
-                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-primary-100 mt-2">Community Event</span>
+                    <div class="relative h-44 w-full overflow-hidden shrink-0">
+                        {{-- Always-visible Red Background + Calendar Icon (base layer) --}}
+                        <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 16px 12px; background: linear-gradient(135deg, #dc2626 0%, #e11d48 60%, #be123c 100%);">
+                            <div style="position:absolute; inset:0; background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px); background-size: 14px 14px; pointer-events:none;"></div>
+                            <div style="position:relative; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                                <div style="width:60px; height:64px; border-radius:12px; background:#fff; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 6px 20px rgba(0,0,0,0.28), 0 0 0 2px rgba(255,255,255,0.35);">
+                                    <div style="background: linear-gradient(90deg, #dc2626, #e11d48); padding: 4px 0; text-align:center; flex-shrink:0;">
+                                        <span style="font-size:10px; font-weight:900; color:#fff; letter-spacing:0.14em; text-transform:uppercase; display:block; line-height:1;">
+                                            {{ date('M', strtotime($event->date)) }}
+                                        </span>
+                                    </div>
+                                    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                                        <span style="font-size:22px; font-weight:900; color:#1e293b; line-height:1;">
+                                            {{ date('d', strtotime($event->date)) }}
+                                        </span>
+                                        <span style="font-size:7px; font-weight:700; color:#94a3b8; margin-top:2px; line-height:1;">
+                                            {{ date('Y', strtotime($event->date)) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <span style="font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#fff; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); padding:2px 8px; border-radius:999px; white-space:nowrap;">Community Event</span>
+                            </div>
                         </div>
-                        
-                        <!-- Date Badge (Top-Left overlay) -->
+
+                        {{-- Actual image on top (covers calendar when loaded successfully) --}}
+                        @if(!empty($event->banner_path))
+                            <img
+                                class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}"
+                                alt="{{ $event->title }}"
+                                onerror="this.style.display='none'">
+                        @endif
+
+                        {{-- Date Badge (Top-Left overlay) --}}
                         <div class="absolute top-3 left-3 z-10">
                             <span class="text-[9px] font-extrabold text-white bg-slate-900/80 backdrop-blur-md px-2 py-1 rounded-lg uppercase tracking-wider shadow-sm">
                                 {{ date('d M, Y', strtotime($event->date)) }}
                             </span>
                         </div>
 
-                        <!-- Status Badge (Top-Right overlay) -->
+                        {{-- Status Badge (Top-Right overlay) --}}
                         <div class="absolute top-3 right-3 z-10">
                             @if($event->date < now()->toDateString())
                                 <span class="text-[8px] font-black text-slate-700 bg-slate-100/90 backdrop-blur-sm px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">{{ __('messages.passed') }}</span>
