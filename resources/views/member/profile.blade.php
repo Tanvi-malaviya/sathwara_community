@@ -83,8 +83,18 @@
 
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.blood_group') }}</label>
-                        <input type="text" name="blood_group" value="{{ old('blood_group', $profile->blood_group ?? '') }}" placeholder="e.g. B+"
+                        <select name="blood_group"
                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                            <option value="">-- {{ __('messages.select_blood_group') }} --</option>
+                            <option value="A+" {{ old('blood_group', $profile->blood_group ?? '') == 'A+' ? 'selected' : '' }}>A+</option>
+                            <option value="A-" {{ old('blood_group', $profile->blood_group ?? '') == 'A-' ? 'selected' : '' }}>A-</option>
+                            <option value="B+" {{ old('blood_group', $profile->blood_group ?? '') == 'B+' ? 'selected' : '' }}>B+</option>
+                            <option value="B-" {{ old('blood_group', $profile->blood_group ?? '') == 'B-' ? 'selected' : '' }}>B-</option>
+                            <option value="AB+" {{ old('blood_group', $profile->blood_group ?? '') == 'AB+' ? 'selected' : '' }}>AB+</option>
+                            <option value="AB-" {{ old('blood_group', $profile->blood_group ?? '') == 'AB-' ? 'selected' : '' }}>AB-</option>
+                            <option value="O+" {{ old('blood_group', $profile->blood_group ?? '') == 'O+' ? 'selected' : '' }}>O+</option>
+                            <option value="O-" {{ old('blood_group', $profile->blood_group ?? '') == 'O-' ? 'selected' : '' }}>O-</option>
+                        </select>
                     </div>
 
                     <div class="space-y-1">
