@@ -309,17 +309,33 @@ class MemberController extends Controller
             // Add UTF-8 BOM for Excel to display Noto Sans Gujarati text correctly
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            fputcsv($file, ['ID', 'Name', 'Email', 'Status', 'Phone', 'Gender', 'DOB', 'City', 'State', 'Pincode', 'Address', 'Family Count']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_name'),
+                __('messages.csv_email'),
+                __('messages.csv_status'),
+                __('messages.csv_phone'),
+                __('messages.csv_gender'),
+                __('messages.csv_dob'),
+                __('messages.csv_city'),
+                __('messages.csv_state'),
+                __('messages.csv_pincode'),
+                __('messages.csv_address'),
+                __('messages.csv_family_count')
+            ]);
 
             foreach ($members as $member) {
                 $profile = $member->memberProfile;
+                $gender = $profile ? strtolower($profile->gender ?? '') : '';
+                $statusKey = strtolower($member->status ?? '');
+
                 fputcsv($file, [
                     $member->id,
                     $member->name,
                     $member->email,
-                    ucfirst($member->status),
+                    __('messages.' . $statusKey) != 'messages.' . $statusKey ? __('messages.' . $statusKey) : ucfirst($member->status),
                     $profile ? $profile->phone : '',
-                    $profile ? $profile->gender : '',
+                    $gender && __('messages.' . $gender) != 'messages.' . $gender ? __('messages.' . $gender) : ($profile ? $profile->gender : ''),
                     $profile ? $profile->dob : '',
                     $profile ? $profile->city : '',
                     $profile ? $profile->state : '',

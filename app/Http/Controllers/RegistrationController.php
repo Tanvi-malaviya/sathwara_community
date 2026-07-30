@@ -129,15 +129,41 @@ class RegistrationController extends Controller
             'youtube' => 'nullable|string|max:255',
             'linkedin' => 'nullable|string|max:255',
             'logo' => 'required|image|max:2048', // Attach a Business Details / V.Card
-            // 'payment_screenshot' => 'required|image|max:2048', // Attach a Payment Screen Shot/file
             'gallery.*' => 'nullable|image|max:10240',
         ]);
 
+        // Validate Member ID against Database
+        $rawMemberId = trim($request->member_id);
+        $numericId = (int) preg_replace('/[^0-9]/', '', $rawMemberId);
+
+        $memberUser = null;
+        if ($numericId > 0) {
+            $memberUser = User::find($numericId);
+        }
+        
+        if (!$memberUser) {
+            $profile = MemberProfile::where('id', $numericId)
+                        ->orWhere('phone', $rawMemberId)
+                        ->first();
+            if ($profile) {
+                $memberUser = $profile->user;
+            }
+        }
+
+        if (!$memberUser) {
+            return back()->withInput()->withErrors([
+                'member_id' => __('messages.invalid_member_id')
+            ]);
+        }
+
+        if ($memberUser->status !== 'approved') {
+            return back()->withInput()->withErrors([
+                'member_id' => __('messages.pending_member_id')
+            ]);
+        }
+
         // Upload Logo
         $logoPath = $request->file('logo')->store('businesses/logos', 'public');
-
-        // Upload Payment Screenshot
-        // $paymentPath = $request->file('payment_screenshot')->store('businesses/payments', 'public');
 
         // Upload Gallery Images
         $galleryPaths = [];
@@ -148,12 +174,12 @@ class RegistrationController extends Controller
             }
         }
 
-        // Create Business (unlinked to user if not logged in, otherwise link to auth id)
+        // Create Business (linked to verified member user_id)
         Business::create([
-            'user_id' => auth()->check() ? auth()->id() : null,
+            'user_id' => $memberUser->id,
             'category_id' => $request->category_id,
             'area_id' => $request->area_id,
-            'member_id' => $request->member_id,
+            'member_id' => $rawMemberId,
             'business_name' => $request->business_name,
             'owner_name' => $request->owner_name,
             'description' => $request->description,
@@ -167,7 +193,6 @@ class RegistrationController extends Controller
             'youtube' => $request->youtube,
             'linkedin' => $request->linkedin,
             'logo_path' => $logoPath,
-            // 'payment_screenshot_path' => $paymentPath,
             'gallery_images' => $galleryPaths,
             'status' => 'pending',
         ]);

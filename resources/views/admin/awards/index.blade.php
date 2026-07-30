@@ -30,7 +30,7 @@
                 </button>
                 <a href="{{ route('admin.awards.export', request()->all()) }}" 
                    class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-colors shrink-0 whitespace-nowrap">
-                    📊 <span>Export Excel</span>
+                    📊 <span>{{ __('messages.export_csv') }}</span>
                 </a>
             </form>
 

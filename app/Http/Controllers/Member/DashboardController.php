@@ -250,10 +250,19 @@ class DashboardController extends Controller
         ]);
 
         // Clear session
-        session()->forget(['pending_email', 'email_otp_code', 'email_otp_expires']);
+        session()->forget(['pending_email', 'email_otp_code', 'email_otp_expires', 'success_otp']);
 
         session()->flash('success', 'Your login email address has been updated successfully.');
         session()->save();
+        return redirect()->route('member.account.settings');
+    }
+
+    /**
+     * Cancel Pending Email Change Request
+     */
+    public function cancelEmailOtp()
+    {
+        session()->forget(['pending_email', 'email_otp_code', 'email_otp_expires', 'success_otp']);
         return redirect()->route('member.account.settings');
     }
 }

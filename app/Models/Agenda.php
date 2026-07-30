@@ -11,8 +11,26 @@ class Agenda extends Model
 
     protected $fillable = [
         'title',
+        'title_gu',
         'description',
+        'description_gu',
         'icon',
         'display_order',
     ];
+
+    public function getLocalizedTitleAttribute()
+    {
+        if (app()->getLocale() === 'gu' && !empty($this->title_gu)) {
+            return $this->title_gu;
+        }
+        return $this->title;
+    }
+
+    public function getLocalizedDescriptionAttribute()
+    {
+        if (app()->getLocale() === 'gu' && !empty($this->description_gu)) {
+            return $this->description_gu;
+        }
+        return $this->description;
+    }
 }

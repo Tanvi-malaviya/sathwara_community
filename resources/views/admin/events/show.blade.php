@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('page_title', 'Event Details')
+@section('page_title', __('messages.event_details'))
 
 @section('content')
 <div class="space-y-2" x-data="{ activeTab: 'all', showDetailsModal: false, showDescModal: false, selectedRegistration: {} }">
@@ -9,7 +9,7 @@
         <div class="flex items-center gap-2.5">
             <a href="{{ route('admin.events.index') }}" 
                class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors flex items-center justify-center font-bold text-xs" 
-               title="Back to Events">
+               title="{{ __('messages.back_to_website') }}">
                 &larr;
             </a>
             <div>
@@ -17,10 +17,10 @@
                     <h1 class="text-sm font-extrabold text-slate-900 leading-tight">{{ $event->title }}</h1>
                     <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider
                         {{ $event->status == 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($event->status == 'cancelled' ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-slate-100 text-slate-600 border border-slate-200') }}">
-                        {{ $event->status }}
+                        {{ __('messages.' . strtolower($event->status)) != 'messages.' . strtolower($event->status) ? __('messages.' . strtolower($event->status)) : ucfirst($event->status) }}
                     </span>
                 </div>
-                <p class="text-[11px] text-slate-400 font-medium">Created on {{ $event->created_at->format('d M Y, h:i A') }}</p>
+                <p class="text-[11px] text-slate-400 font-medium">{{ __('messages.created_on') }} {{ $event->created_at->format('d M Y, h:i A') }}</p>
             </div>
         </div>
 
@@ -31,13 +31,13 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
-                    <span>Registrations ({{ count($registrations) }})</span>
+                    <span>{{ __('messages.registrations') }} ({{ count($registrations) }})</span>
                 </a>
             @endif
 
             <a href="{{ route('admin.events.gallery', $event->id) }}"
                class="px-3 py-1.5 bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200/60 font-extrabold text-xs rounded-lg transition-colors">
-                <span>Gallery</span>
+                <span>{{ __('messages.gallery') }}</span>
             </a>
 
             <a href="{{ route('admin.events.edit', $event->id) }}" 
@@ -45,7 +45,7 @@
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
-                <span>Edit</span>
+                <span>{{ __('messages.edit') }}</span>
             </a>
 
             <button type="button" 
@@ -54,7 +54,7 @@
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                 </svg>
-                <span>Delete</span>
+                <span>{{ __('messages.delete') }}</span>
             </button>
         </div>
     </div>
@@ -73,11 +73,11 @@
                     <!-- Badges overlay -->
                     <div class="absolute bottom-3.5 left-3.5 right-3.5 flex items-center gap-1.5 flex-wrap">
                         @if($event->event_type === 'inam_vitaran')
-                            <span class="px-2.5 py-1 rounded-md bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">🏆 Inam Vitaran</span>
+                            <span class="px-2.5 py-1 rounded-md bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">🏆 {{ __('messages.inam_vitaran') }}</span>
                         @elseif($event->event_type === 'yuva_melo')
-                            <span class="px-2.5 py-1 rounded-md bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">⚡ Yuva Melo</span>
+                            <span class="px-2.5 py-1 rounded-md bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">⚡ {{ __('messages.yuva_melo') }}</span>
                         @else
-                            <span class="px-2.5 py-1 rounded-md bg-slate-800 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">📢 Standard Event</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-800 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">📢 {{ __('messages.general_event') }}</span>
                         @endif
 
                         @if($event->pass_fee > 0)
@@ -92,7 +92,7 @@
         <div class="lg:col-span-1 space-y-4 flex flex-col justify-between">
             <!-- Event Schedule & Location Grid -->
             <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3.5">
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">Event Schedule & Location</h3>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">{{ __('messages.event_schedule_location') }}</h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <!-- Date & Time -->
@@ -101,7 +101,7 @@
                             📅
                         </div>
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Date & Time</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.date_and_time') }}</p>
                             <p class="font-extrabold text-slate-900 text-xs">{{ date('d M Y (l)', strtotime($event->date)) }}</p>
                             <p class="font-semibold text-slate-600 text-[11px]">{{ date('h:i A', strtotime($event->time)) }}</p>
                         </div>
@@ -113,7 +113,7 @@
                             📍
                         </div>
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Venue / Location</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.venue_location') }}</p>
                             <p class="font-extrabold text-slate-900 text-xs leading-snug">{{ $event->venue }}</p>
                         </div>
                     </div>
@@ -122,10 +122,10 @@
 
             <!-- Description Card -->
             <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-2 grow">
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Description</h3>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">{{ __('messages.description') }}</h3>
                 
                 <div class="rich-text text-xs text-slate-700 leading-relaxed font-medium">
-                    {!! $event->description ?: 'No detailed description provided.' !!}
+                    {!! $event->description ?: __('messages.no_description_provided') !!}
                 </div>
             </div>
         </div>
@@ -145,10 +145,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                 <div>
                     <h2 class="text-sm font-black text-slate-900 flex items-center gap-2">
-                        <span>Event Registrations</span>
-                        <span class="px-2 py-0.5 rounded-full text-xs font-black bg-primary-50 text-primary-700 border border-primary-100">{{ $totalCount }} Submitted</span>
+                        <span>{{ __('messages.event_registrations') }}</span>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-black bg-primary-50 text-primary-700 border border-primary-100">{{ $totalCount }} {{ __('messages.submitted') }}</span>
                     </h2>
-                    <p class="text-[11px] text-slate-400 font-medium">Review and manage candidate registration applications for this event.</p>
+                    <p class="text-[11px] text-slate-400 font-medium">{{ __('messages.review_manage_registrations_desc') }}</p>
                 </div>
 
                 <!-- Status Filter Tabs -->
@@ -156,28 +156,28 @@
                     <button type="button" @click="activeTab = 'all'" 
                             :class="activeTab === 'all' ? 'bg-white text-slate-900 shadow-xs font-extrabold border border-slate-200/80' : 'text-slate-600 hover:text-slate-900 font-semibold'"
                             class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5">
-                        <span>All</span>
+                        <span>{{ __('messages.all') }}</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700" :class="activeTab === 'all' ? 'bg-slate-200' : ''">{{ $totalCount }}</span>
                     </button>
 
                     <button type="button" @click="activeTab = 'pending'" 
                             :class="activeTab === 'pending' ? 'bg-white text-amber-700 shadow-xs font-extrabold border border-amber-200/80' : 'text-slate-600 hover:text-slate-900 font-semibold'"
                             class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5">
-                        <span>Pending</span>
+                        <span>{{ __('messages.pending') }}</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-amber-100 text-amber-800">{{ $pendingCount }}</span>
                     </button>
 
                     <button type="button" @click="activeTab = 'approved'" 
                             :class="activeTab === 'approved' ? 'bg-white text-emerald-700 shadow-xs font-extrabold border border-emerald-200/80' : 'text-slate-600 hover:text-slate-900 font-semibold'"
                             class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5">
-                        <span>Approved</span>
+                        <span>{{ __('messages.approved') }}</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">{{ $approvedCount }}</span>
                     </button>
 
                     <button type="button" @click="activeTab = 'rejected'" 
                             :class="activeTab === 'rejected' ? 'bg-white text-rose-700 shadow-xs font-extrabold border border-rose-200/80' : 'text-slate-600 hover:text-slate-900 font-semibold'"
                             class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5">
-                        <span>Rejected</span>
+                        <span>{{ __('messages.rejected') }}</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-100 text-rose-800">{{ $rejectedCount }}</span>
                     </button>
                 </div>
@@ -188,13 +188,13 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
-                            <th class="py-2.5 px-4">Member Name</th>
-                            <th class="py-2.5 px-4">Submitted Details</th>
-                            <th class="py-2.5 px-4">Contact Info</th>
-                            <th class="py-2.5 px-4">City</th>
-                            <th class="py-2.5 px-4">Registered Date</th>
-                            <th class="py-2.5 px-4">Status</th>
-                            <th class="py-2.5 px-4 text-right">Actions</th>
+                            <th class="py-2.5 px-4">{{ __('messages.member_name') }}</th>
+                            <th class="py-2.5 px-4">{{ __('messages.submitted_details') }}</th>
+                            <th class="py-2.5 px-4">{{ __('messages.contact_info') }}</th>
+                            <th class="py-2.5 px-4">{{ __('messages.city') }}</th>
+                            <th class="py-2.5 px-4">{{ __('messages.registered_date') }}</th>
+                            <th class="py-2.5 px-4">{{ __('messages.status') }}</th>
+                            <th class="py-2.5 px-4 text-right">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
@@ -222,7 +222,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path>
                                         </svg>
-                                        <span>View Form Details</span>
+                                        <span>{{ __('messages.view_form_details') }}</span>
                                     </button>
                                 </td>
                                 <td class="py-3 px-4 space-y-0.5">
@@ -239,15 +239,15 @@
                                 <td class="py-3 px-4 whitespace-nowrap">
                                     @if($reg->status === 'approved')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
-                                            Approved
+                                            {{ __('messages.approved') }}
                                         </span>
                                     @elseif($reg->status === 'rejected')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200 uppercase">
-                                            Rejected
+                                            {{ __('messages.rejected') }}
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 uppercase">
-                                            Pending
+                                            {{ __('messages.pending') }}
                                         </span>
                                     @endif
                                 </td>
@@ -256,7 +256,7 @@
                                         @if($reg->status !== 'approved')
                                             <form method="POST" action="{{ route('admin.events.registrations.approve', $reg->id) }}" class="inline">
                                                 @csrf
-                                                <button type="submit" title="Approve Registration" 
+                                                <button type="submit" title="{{ __('messages.approve') }}" 
                                                         class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-800 transition-colors flex items-center justify-center">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
@@ -267,7 +267,7 @@
                                         @if($reg->status !== 'rejected')
                                             <form method="POST" action="{{ route('admin.events.registrations.reject', $reg->id) }}" class="inline">
                                                 @csrf
-                                                <button type="submit" title="Reject Registration" 
+                                                <button type="submit" title="{{ __('messages.reject') }}" 
                                                         class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-800 transition-colors flex items-center justify-center">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -281,7 +281,7 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="py-10 text-center text-slate-400 font-medium">
-                                    No registrations submitted for this event yet.
+                                    {{ __('messages.no_registrations_yet') }}
                                 </td>
                             </tr>
                         @endforelse
@@ -322,19 +322,19 @@
                     <!-- Member Summary Card -->
                     <div class="grid grid-cols-2 gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Applicant Email</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.applicant_email') }}</span>
                             <span class="font-bold text-slate-800 text-[11px]" x-text="selectedRegistration.email"></span>
                         </div>
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Contact Number</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.contact_number') }}</span>
                             <span class="font-bold text-slate-800 text-[11px]" x-text="selectedRegistration.phone"></span>
                         </div>
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">City</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.city') }}</span>
                             <span class="font-bold text-slate-800 text-[11px]" x-text="selectedRegistration.city"></span>
                         </div>
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Application Status</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.application_status') }}</span>
                             <span class="font-extrabold text-[10px] uppercase tracking-wider px-2 py-0.5 rounded inline-block mt-0.5"
                                   :class="{
                                       'bg-emerald-100 text-emerald-800': selectedRegistration.status === 'approved',
@@ -347,7 +347,7 @@
 
                     <!-- Form Data Grid -->
                     <div class="space-y-2">
-                        <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-wider">Candidate Form Details:</h4>
+                        <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-wider">{{ __('messages.candidate_form_details') }}</h4>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto pr-1">
                             <template x-for="(val, key) in (selectedRegistration.form_data || {})" :key="key">
@@ -367,7 +367,7 @@
                                     @csrf
                                     <button type="submit" 
                                             class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1">
-                                        <span>✓ Approve Application</span>
+                                        <span>✓ {{ __('messages.approve_application') }}</span>
                                     </button>
                                 </form>
                             </template>
@@ -376,7 +376,7 @@
                                     @csrf
                                     <button type="submit" 
                                             class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1">
-                                        <span>✕ Reject Application</span>
+                                        <span>✕ {{ __('messages.reject_application') }}</span>
                                     </button>
                                 </form>
                             </template>
@@ -384,7 +384,7 @@
 
                         <button type="button" @click="showDetailsModal = false" 
                                 class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
-                            Close
+                            {{ __('messages.close') }}
                         </button>
                     </div>
                 </div>
@@ -409,7 +409,7 @@
                 <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
                     <div>
                         <h3 class="text-sm font-extrabold">{{ $event->title }}</h3>
-                        <p class="text-[11px] text-slate-400 font-medium mt-0.5">Full Event Description</p>
+                        <p class="text-[11px] text-slate-400 font-medium mt-0.5">{{ __('messages.description') }}</p>
                     </div>
                     <button type="button" @click="showDescModal = false" 
                             class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs">
@@ -426,7 +426,7 @@
                     <div class="pt-3 border-t border-slate-100 flex justify-end">
                         <button type="button" @click="showDescModal = false" 
                                 class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
-                            Close
+                            {{ __('messages.close') }}
                         </button>
                     </div>
                 </div>

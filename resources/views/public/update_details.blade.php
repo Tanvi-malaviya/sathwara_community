@@ -18,7 +18,8 @@
                         <div class="relative w-full max-h-[420px] rounded-2xl overflow-hidden mb-6 bg-slate-100 border border-slate-100 shadow-xs">
                             <img class="w-full h-full object-cover" 
                                  src="{{ str_starts_with($update->image_path, 'http') ? $update->image_path : asset('storage/' . $update->image_path) }}" 
-                                 alt="{{ $update->title }}">
+                                 alt=""
+                                 onerror="this.style.display='none'">
                         </div>
                     @endif
 

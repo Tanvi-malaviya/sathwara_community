@@ -110,7 +110,13 @@ class AreaController extends Controller
         $callback = function() use ($areas) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Area Name', 'Pincode', 'Assigned Members Count', 'Created At']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_area_name'),
+                __('messages.csv_pincode'),
+                __('messages.csv_assigned_members_count'),
+                __('messages.csv_created_at')
+            ]);
 
             foreach ($areas as $area) {
                 fputcsv($file, [

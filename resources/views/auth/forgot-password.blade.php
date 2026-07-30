@@ -15,10 +15,10 @@
 
                 <div class="space-y-0.5">
                     <h2 class="text-base font-black text-slate-900 tracking-tight">
-                        Reset Password
+                        {{ __('messages.reset_password') }}
                     </h2>
                     <p class="text-[11px] font-medium text-slate-500 max-w-xs mx-auto">
-                        Enter your email address and we'll send you a password reset link.
+                        {{ __('messages.forgot_password_subtitle') }}
                     </p>
                 </div>
             </div>
@@ -32,7 +32,7 @@
                 <!-- Email Field -->
                 <div class="space-y-0.5">
                     <label for="email" class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                        Email Address <span class="text-rose-500">*</span>
+                        {{ __('messages.email_address_label') }} <span class="text-rose-500">*</span>
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -41,7 +41,7 @@
                             </svg>
                         </div>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                            placeholder="your.email@example.com"
+                            placeholder="{{ __('messages.email_placeholder') }}"
                             class="w-full text-xs font-semibold pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0 text-slate-800 transition-all outline-hidden">
                     </div>
                     <x-input-error :messages="$errors->get('email')" class="mt-1" />
@@ -50,7 +50,7 @@
                 <div class="pt-1">
                     <button type="submit" 
                         class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-lg shadow-xs transition-all cursor-pointer gap-1.5">
-                        <span>Send Password Reset Link</span>
+                        <span>{{ __('messages.send_password_reset_link') }}</span>
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                         </svg>
@@ -60,7 +60,7 @@
 
             <div class="pt-3 border-t border-slate-100 text-center">
                 <a href="{{ route('login') }}" class="text-[11px] font-bold text-slate-600 hover:text-primary-600 transition-colors">
-                    &larr; Back to Login
+                    &larr; {{ __('messages.back_to_login') }}
                 </a>
             </div>
 

@@ -3,12 +3,12 @@
 @section('content')
     <!-- Event Header Banner -->
     <section class="relative h-96 w-full bg-slate-900 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-indigo-900 to-slate-950 opacity-90"></div>
         @if(!empty($event->banner_path) && (str_starts_with($event->banner_path, 'http') || file_exists(public_path('storage/' . $event->banner_path))))
             <img class="absolute inset-0 w-full h-full object-cover opacity-40 bg-center"
                 src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}"
-                alt="{{ $event->title }}">
-        @else
-            <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-indigo-900 to-slate-950 opacity-90"></div>
+                alt=""
+                onerror="this.remove()">
         @endif
         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-end pb-12 text-white">
@@ -138,20 +138,8 @@
                                             </svg>
                                         </button>
 
-                                        <!-- Top Bar: Counter & Close Button -->
-                                        <div class="w-full flex items-center justify-between z-[10000000] max-w-7xl mx-auto pt-1 px-2" @click.stop>
-                                            <div x-show="galleryImages.length > 0" 
-                                                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-white/20 text-white text-[11px] font-bold shadow-xl backdrop-blur-md">
-                                                <span class="text-primary-400">🖼️</span>
-                                                <span>
-                                                    <span class="text-white" x-text="lightboxIndex + 1"></span>
-                                                    <span class="text-white/40"> / </span>
-                                                    <span class="text-white/70" x-text="galleryImages.length"></span>
-                                                </span>
-                                            </div>
-
-                                            <div x-show="galleryImages.length <= 0"></div>
-
+                                        <!-- Top Bar: Close Button -->
+                                        <div class="w-full flex items-center justify-end z-[10000000] max-w-7xl mx-auto pt-1 px-2" @click.stop>
                                             <button @click="lightbox = false" 
                                                     class="group p-2 rounded-full bg-slate-900/80 hover:bg-rose-500 text-white border border-white/20 hover:border-rose-400 transition-all duration-300 cursor-pointer shadow-xl hover:rotate-90 hover:scale-110 active:scale-95"
                                                     title="Close (Esc)">
@@ -162,21 +150,27 @@
                                         </div>
 
                                         <!-- Main Section: Centered Image -->
-                                        <div class="relative w-full flex-1 flex items-center justify-center my-auto max-w-5xl mx-auto px-4" @click.stop>
+                                        <div class="relative w-full flex-1 flex items-center justify-center my-auto max-w-5xl mx-auto px-4 pb-14" @click.stop>
                                             <div class="relative flex flex-col items-center justify-center max-w-full max-h-full">
                                                 <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-900/50">
                                                     <img :src="galleryImages[lightboxIndex]?.src" 
                                                          :alt="galleryImages[lightboxIndex]?.caption || 'Gallery Image'" 
                                                          class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
-                                                         style="max-height: 72vh; max-width: 78vw;">
+                                                         style="max-height: 68vh; max-width: 80vw;">
                                                 </div>
-
-                                                <template x-if="galleryImages[lightboxIndex]?.caption">
-                                                    <div class="mt-4 px-6 py-2.5 rounded-2xl bg-slate-900/80 border border-white/20 backdrop-blur-md shadow-2xl max-w-2xl text-center">
-                                                        <p class="text-white/90 text-xs sm:text-sm font-semibold tracking-wide" x-text="galleryImages[lightboxIndex]?.caption"></p>
-                                                    </div>
-                                                </template>
                                             </div>
+                                        </div>
+
+                                        <!-- Bottom Bar: Image Numbers Counter (Bottom Center) -->
+                                        <div x-show="galleryImages.length > 0" 
+                                             style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 10000000;"
+                                             class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-white/20 text-white text-xs font-bold shadow-2xl backdrop-blur-md">
+                                            <span class="text-primary-400">🖼️</span>
+                                            <span>
+                                                <span class="text-white" x-text="lightboxIndex + 1"></span>
+                                                <span class="text-white/40"> / </span>
+                                                <span class="text-white/70" x-text="galleryImages.length"></span>
+                                            </span>
                                         </div>
                                     </div>
                                 </template>
@@ -198,91 +192,84 @@
                             @endif
                         </h3>
 
-                        @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
-                            <div class="space-y-4">
-                                @if($event->date < now()->toDateString())
-                                    <!-- Finished Event -->
-                                    <div class="p-4 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold text-center">
-                                        {{ __('messages.event_concluded') }}
-                                    </div>
-                                @elseif($event->status === 'cancelled')
-                                    <!-- Cancelled Event -->
-                                    <div
-                                        class="p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold text-center">
-                                        {{ __('messages.event_cancelled') }}
+                        <div class="space-y-4">
+                            @if($event->date < now()->toDateString())
+                                <!-- Finished Event -->
+                                <div class="p-4 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold text-center">
+                                    {{ __('messages.event_concluded') }}
+                                </div>
+                            @elseif($event->status === 'cancelled')
+                                <!-- Cancelled Event -->
+                                <div
+                                    class="p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold text-center">
+                                    {{ __('messages.event_cancelled') }}
+                                </div>
+                            @else
+                                <!-- Active Event Registration check -->
+                                @if(auth()->guest())
+                                    <div class="space-y-4">
+                                        <p class="text-xs text-slate-500 text-center">{{ __('messages.please_login_to_register') }}</p>
+                                        <a href="{{ route('login') }}"
+                                            class="w-full flex items-center justify-center px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center">
+                                            {{ __('messages.login_to_register') }}
+                                        </a>
                                     </div>
                                 @else
-                                    <!-- Active Event Registration check -->
-                                    @guest
-                                        <div class="space-y-4">
-                                            <p class="text-xs text-slate-500 text-center">{{ __('messages.please_login_to_register') }}</p>
-                                            <a href="{{ route('login') }}"
-                                                class="w-full flex items-center justify-center px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center">
-                                                {{ __('messages.login_to_register') }}
-                                            </a>
+                                    @if(auth()->user()->hasRole('Administrator'))
+                                        <div class="p-4 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold text-center">
+                                            {{ __('messages.administrator_account') }}
+                                        </div>
+                                    @elseif(auth()->user()->status !== 'approved')
+                                        <div
+                                            class="p-4 rounded-xl bg-amber-50 border border-amber-100 text-amber-800 text-xs font-bold text-center leading-relaxed">
+                                            {!! __('messages.account_status_currently', ['status' => '<strong>'.e(auth()->user()->status).'</strong>']) !!} {{ __('messages.register_once_approved') }}
                                         </div>
                                     @else
-                                        @if(auth()->user()->hasRole('Administrator'))
-                                            <div class="p-4 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold text-center">
-                                                {{ __('messages.administrator_account') }}
-                                            </div>
-                                        @elseif(auth()->user()->status !== 'approved')
-                                            <div
-                                                class="p-4 rounded-xl bg-amber-50 border border-amber-100 text-amber-800 text-xs font-bold text-center leading-relaxed">
-                                                {!! __('messages.account_status_currently', ['status' => '<strong>'.e(auth()->user()->status).'</strong>']) !!} {{ __('messages.register_once_approved') }}
-                                            </div>
-                                        @else
-                                            <!-- Approved Member Registration check -->
-                                            @if($registration)
-                                                @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
-                                                    <div class="space-y-2">
-                                                        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center">
-                                                            <span>{{ __('messages.registered_check') }}</span>
-                                                        </div>
-                                                        @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                                                            <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
-                                                                {{ __('messages.fill_inam_form') }}
-                                                            </a>
-                                                        @else
-                                                            <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
-                                                                {{ __('messages.fill_yuva_form') }}
-                                                            </a>
-                                                        @endif
+                                        <!-- Approved Member Registration check -->
+                                        @if($registration)
+                                            @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
+                                                <div class="space-y-2">
+                                                    <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center">
+                                                        <span>{{ __('messages.registered_check') }}</span>
                                                     </div>
-                                                @else
-                                                    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1">
-                                                        <span>{{ __('messages.you_are_registered') }}</span>
-                                                        <span class="text-[10px] text-emerald-600 font-semibold">{{ __('messages.seat_confirmed') }}</span>
-                                                    </div>
-                                                @endif
+                                                    @if(($event->event_type ?? 'normal') === 'inam_vitaran')
+                                                        <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
+                                                            {{ __('messages.fill_inam_form') }}
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
+                                                            {{ __('messages.fill_yuva_form') }}
+                                                        </a>
+                                                    @endif
+                                                </div>
                                             @else
-                                                @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                                                    <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
-                                                        🏆 Fill Inam Form &rarr;
-                                                    </a>
-                                                @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                                    <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
-                                                        ⚡ Fill Yuva Form &rarr;
-                                                    </a>
-                                                @else
-                                                    <form method="POST" action="{{ route('member.events.register', $event->id) }}">
-                                                        @csrf
-                                                        <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center cursor-pointer">
-                                                            {{ __('messages.register_seat_now') }}
-                                                        </button>
-                                                    </form>
-                                                @endif
+                                                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1">
+                                                    <span>{{ __('messages.you_are_registered') }}</span>
+                                                    <span class="text-[10px] text-emerald-600 font-semibold">{{ __('messages.seat_confirmed') }}</span>
+                                                </div>
+                                            @endif
+                                        @else
+                                            @if(($event->event_type ?? 'normal') === 'inam_vitaran')
+                                                <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
+                                                    🏆 Fill Inam Form &rarr;
+                                                </a>
+                                            @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
+                                                <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
+                                                    ⚡ Fill Yuva Form &rarr;
+                                                </a>
+                                            @else
+                                                <form method="POST" action="{{ route('member.events.register', $event->id) }}">
+                                                    @csrf
+                                                    <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center cursor-pointer">
+                                                        {{ __('messages.register_seat_now') }}
+                                                    </button>
+                                                </form>
                                             @endif
                                         @endif
-                                    @endguest
+                                    @endif
                                 @endif
-                            </div>
-                        @else
-                            <!-- No registration required -->
-                            <div class="p-4 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold text-center">
-                                {{ __('messages.open_entry_no_preregistration_required') }}
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

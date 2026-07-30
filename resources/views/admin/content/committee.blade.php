@@ -29,14 +29,21 @@
                 </button>
             </form>
 
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="{{ route('admin.content.committee.export', request()->all()) }}" 
+               class="inline-flex items-center justify-center px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-all whitespace-nowrap">
+                📊 <span>{{ __('messages.export_csv') }}</span>
+            </a>
+
             <button @click="showAddModal = true"
-                class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-95 shrink-0 whitespace-nowrap">
+                class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-95 whitespace-nowrap">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
                 {{ __('messages.add_member') }}
             </button>
+        </div>
         </div>
 
         <!-- Card Grid -->

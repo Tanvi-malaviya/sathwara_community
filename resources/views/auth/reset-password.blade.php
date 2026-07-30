@@ -16,10 +16,10 @@
 
                 <div class="space-y-0.5">
                     <h2 class="text-base font-black text-slate-900 tracking-tight">
-                        Create New Password
+                        {{ __('messages.create_new_password') }}
                     </h2>
                     <p class="text-[11px] font-medium text-slate-500 max-w-xs mx-auto">
-                        Please enter and confirm your new password below.
+                        {{ __('messages.create_new_password_subtitle') }}
                     </p>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                 <!-- Password Field -->
                 <div class="space-y-0.5">
                     <label for="password" class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                        New Password <span class="text-rose-500">*</span>
+                        {{ __('messages.new_password') }} <span class="text-rose-500">*</span>
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -55,7 +55,7 @@
                 <!-- Confirm Password Field -->
                 <div class="space-y-0.5">
                     <label for="password_confirmation" class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                        Confirm Password <span class="text-rose-500">*</span>
+                        {{ __('messages.confirm_password') }} <span class="text-rose-500">*</span>
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -73,7 +73,7 @@
                 <div class="pt-1">
                     <button type="submit" 
                         class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-lg shadow-xs transition-all cursor-pointer gap-1.5">
-                        <span>Reset Password & Login</span>
+                        <span>{{ __('messages.reset_password_login') }}</span>
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>

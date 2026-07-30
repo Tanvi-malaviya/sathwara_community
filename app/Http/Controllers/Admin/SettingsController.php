@@ -47,7 +47,7 @@ class SettingsController extends Controller
     {
         $request->validate([
             'website_name' => 'required|string|max:255',
-            'primary_color' => 'required|string|max:10',
+            'primary_color' => 'nullable|string|max:10',
             'contact_email' => 'nullable|email|max:255',
             'website_logo' => 'nullable|image|max:1024',
             'website_favicon' => 'nullable|image|max:512',

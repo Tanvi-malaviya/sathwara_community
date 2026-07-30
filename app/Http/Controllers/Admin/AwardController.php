@@ -118,9 +118,21 @@ class AwardController extends Controller
         $callback = function() use ($applications) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Student Name', 'Parent Member', 'Standard', 'School', 'Total Marks', 'Obtained Marks', 'Percentage', 'Status', 'Submitted Date']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_student_name'),
+                __('messages.csv_parent_member'),
+                __('messages.csv_standard'),
+                __('messages.csv_school'),
+                __('messages.csv_total_marks'),
+                __('messages.csv_obtained_marks'),
+                __('messages.csv_percentage'),
+                __('messages.csv_status'),
+                __('messages.csv_submission_date')
+            ]);
 
             foreach ($applications as $app) {
+                $statusKey = strtolower($app->status ?? '');
                 fputcsv($file, [
                     $app->id,
                     $app->student_name,
@@ -130,7 +142,7 @@ class AwardController extends Controller
                     $app->total_marks ?? '',
                     $app->received_marks ?? '',
                     $app->percentage ? $app->percentage.'%' : '',
-                    ucfirst($app->status),
+                    __('messages.' . $statusKey) != 'messages.' . $statusKey ? __('messages.' . $statusKey) : ucfirst($app->status),
                     $app->created_at ? $app->created_at->format('Y-m-d H:i') : '',
                 ]);
             }

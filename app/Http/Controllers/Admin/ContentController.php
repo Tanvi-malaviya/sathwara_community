@@ -112,10 +112,12 @@ class ContentController extends Controller
     public function storeAgenda(Request $request)
     {
         $request->validate([
-            'title'         => 'required|string|max:255',
-            'description'   => 'required|string',
-            'icon'          => 'required|string|max:100',
-            'display_order' => 'required|integer',
+            'title'          => 'required|string|max:255',
+            'title_gu'       => 'nullable|string|max:255',
+            'description'    => 'required|string',
+            'description_gu' => 'nullable|string',
+            'icon'           => 'required|string|max:100',
+            'display_order'  => 'required|integer',
         ]);
 
         Agenda::create($request->all());
@@ -126,17 +128,21 @@ class ContentController extends Controller
     {
         $agenda = Agenda::findOrFail($id);
         $request->validate([
-            'title'         => 'required|string|max:255',
-            'description'   => 'required|string',
-            'icon'          => 'required|string|max:100',
-            'display_order' => 'required|integer',
+            'title'          => 'required|string|max:255',
+            'title_gu'       => 'nullable|string|max:255',
+            'description'    => 'required|string',
+            'description_gu' => 'nullable|string',
+            'icon'           => 'required|string|max:100',
+            'display_order'  => 'required|integer',
         ]);
 
         $agenda->update([
-            'title'         => $request->title,
-            'description'   => $request->description,
-            'icon'          => $request->icon,
-            'display_order' => $request->display_order,
+            'title'          => $request->title,
+            'title_gu'       => $request->title_gu,
+            'description'    => $request->description,
+            'description_gu' => $request->description_gu,
+            'icon'           => $request->icon,
+            'display_order'  => $request->display_order,
         ]);
 
         return redirect()->route('admin.content.agendas')->with('success', 'Agenda updated.');
@@ -453,10 +459,26 @@ class ContentController extends Controller
         $callback = function() use ($sliders) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Title', 'Subtitle', 'Button Text', 'Button Link', 'Display Order', 'Status', 'Created At']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_title'),
+                __('messages.csv_subtitle'),
+                __('messages.csv_button_text'),
+                __('messages.csv_button_link'),
+                __('messages.csv_display_order'),
+                __('messages.csv_status'),
+                __('messages.csv_created_at')
+            ]);
             foreach ($sliders as $s) {
                 fputcsv($file, [
-                    $s->id, $s->title ?? '', $s->subtitle ?? '', $s->button_text ?? '', $s->button_link ?? '', $s->display_order ?? 0, $s->status ? 'Active' : 'Inactive', $s->created_at ? $s->created_at->format('Y-m-d H:i') : ''
+                    $s->id,
+                    $s->title ?? '',
+                    $s->subtitle ?? '',
+                    $s->button_text ?? '',
+                    $s->button_link ?? '',
+                    $s->display_order ?? 0,
+                    $s->status ? __('messages.active') : __('messages.inactive'),
+                    $s->created_at ? $s->created_at->format('Y-m-d H:i') : ''
                 ]);
             }
             fclose($file);
@@ -483,10 +505,24 @@ class ContentController extends Controller
         $callback = function() use ($agendas) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Title', 'Description', 'Icon', 'Display Order', 'Status', 'Created At']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_title'),
+                __('messages.csv_description'),
+                __('messages.csv_icon'),
+                __('messages.csv_display_order'),
+                __('messages.csv_status'),
+                __('messages.csv_created_at')
+            ]);
             foreach ($agendas as $a) {
                 fputcsv($file, [
-                    $a->id, $a->title ?? '', $a->description ?? '', $a->icon ?? '', $a->display_order ?? 0, $a->status ? 'Active' : 'Inactive', $a->created_at ? $a->created_at->format('Y-m-d H:i') : ''
+                    $a->id,
+                    $a->title ?? '',
+                    $a->description ?? '',
+                    $a->icon ?? '',
+                    $a->display_order ?? 0,
+                    $a->status ? __('messages.active') : __('messages.inactive'),
+                    $a->created_at ? $a->created_at->format('Y-m-d H:i') : ''
                 ]);
             }
             fclose($file);
@@ -508,10 +544,24 @@ class ContentController extends Controller
         $callback = function() use ($desks) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Name', 'Designation', 'Message', 'Display Order', 'Status', 'Created At']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_name'),
+                __('messages.csv_designation'),
+                __('messages.csv_message'),
+                __('messages.csv_display_order'),
+                __('messages.csv_status'),
+                __('messages.csv_created_at')
+            ]);
             foreach ($desks as $d) {
                 fputcsv($file, [
-                    $d->id, $d->name ?? '', $d->designation ?? '', $d->message ?? '', $d->display_order ?? 0, $d->status ? 'Active' : 'Inactive', $d->created_at ? $d->created_at->format('Y-m-d H:i') : ''
+                    $d->id,
+                    $d->name ?? '',
+                    $d->designation ?? '',
+                    $d->message ?? '',
+                    $d->display_order ?? 0,
+                    $d->status ? __('messages.active') : __('messages.inactive'),
+                    $d->created_at ? $d->created_at->format('Y-m-d H:i') : ''
                 ]);
             }
             fclose($file);
@@ -533,10 +583,28 @@ class ContentController extends Controller
         $callback = function() use ($committee) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Name', 'Designation', 'Phone', 'Email', 'City', 'Display Order', 'Status', 'Created At']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_name'),
+                __('messages.csv_designation'),
+                __('messages.csv_phone'),
+                __('messages.csv_email'),
+                __('messages.csv_city'),
+                __('messages.csv_display_order'),
+                __('messages.csv_status'),
+                __('messages.csv_created_at')
+            ]);
             foreach ($committee as $c) {
                 fputcsv($file, [
-                    $c->id, $c->name ?? '', $c->designation ?? '', $c->phone ?? '', $c->email ?? '', $c->city ?? '', $c->display_order ?? 0, $c->status ? 'Active' : 'Inactive', $c->created_at ? $c->created_at->format('Y-m-d H:i') : ''
+                    $c->id,
+                    $c->name ?? '',
+                    $c->designation ?? '',
+                    $c->phone ?? '',
+                    $c->email ?? '',
+                    $c->city ?? '',
+                    $c->display_order ?? 0,
+                    $c->status ? __('messages.active') : __('messages.inactive'),
+                    $c->created_at ? $c->created_at->format('Y-m-d H:i') : ''
                 ]);
             }
             fclose($file);
@@ -558,10 +626,22 @@ class ContentController extends Controller
         $callback = function() use ($timelines) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Year', 'Title', 'Description', 'Status', 'Created At']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_year'),
+                __('messages.csv_title'),
+                __('messages.csv_description'),
+                __('messages.csv_status'),
+                __('messages.csv_created_at')
+            ]);
             foreach ($timelines as $t) {
                 fputcsv($file, [
-                    $t->id, $t->year ?? '', $t->title ?? '', $t->description ?? '', $t->status ? 'Active' : 'Inactive', $t->created_at ? $t->created_at->format('Y-m-d H:i') : ''
+                    $t->id,
+                    $t->year ?? '',
+                    $t->title ?? '',
+                    $t->description ?? '',
+                    $t->status ? __('messages.active') : __('messages.inactive'),
+                    $t->created_at ? $t->created_at->format('Y-m-d H:i') : ''
                 ]);
             }
             fclose($file);
@@ -583,10 +663,23 @@ class ContentController extends Controller
         $callback = function() use ($updates) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Title', 'Description', 'Publish Date', 'Status', 'Created At']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_title'),
+                __('messages.csv_description'),
+                __('messages.csv_publish_date'),
+                __('messages.csv_status'),
+                __('messages.csv_created_at')
+            ]);
             foreach ($updates as $u) {
+                $statusKey = strtolower($u->status ?? 'active');
                 fputcsv($file, [
-                    $u->id, $u->title ?? '', $u->description ?? '', $u->publish_date ?? '', ucfirst($u->status ?? ''), $u->created_at ? $u->created_at->format('Y-m-d H:i') : ''
+                    $u->id,
+                    $u->title ?? '',
+                    $u->description ?? '',
+                    $u->publish_date ?? '',
+                    __('messages.' . $statusKey) != 'messages.' . $statusKey ? __('messages.' . $statusKey) : ucfirst($u->status ?? 'active'),
+                    $u->created_at ? $u->created_at->format('Y-m-d H:i') : ''
                 ]);
             }
             fclose($file);

@@ -1,15 +1,16 @@
 @extends('layouts.admin')
 
 @section('page_title', __('messages.member_approvals_listings'))
- 
+
 @section('content')
     <div class="space-y-4">
         <!-- Single Integrated Toolbar Line -->
         <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
             <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-                
+
                 <!-- Left: Search Box & Form + Filter Status Tabs -->
-                <form method="GET" action="{{ route('admin.members.index') }}" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1">
+                <form method="GET" action="{{ route('admin.members.index') }}"
+                    class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1">
                     @if(request('status'))
                         <input type="hidden" name="status" value="{{ request('status') }}">
                     @endif
@@ -19,31 +20,34 @@
                         <input type="text" name="search" value="{{ request('search') }}"
                             placeholder="{{ __('messages.search_placeholder') }}"
                             class="h-9 w-full text-xs font-semibold pl-9 pr-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
-                        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
 
                     <!-- Filter Status Tabs in Same Line -->
-                    <div class="flex items-center p-1 rounded-xl bg-slate-100/80 border border-slate-200/60 shrink-0 overflow-x-auto">
-                        <a href="{{ route('admin.members.index', array_merge(request()->except('status', 'page'))) }}" 
-                           class="px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ !request('status') ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
-                            All ({{ $allCount ?? 0 }})
+                    <div
+                        class="flex items-center p-1 rounded-xl bg-slate-100/80 border border-slate-200/60 shrink-0 overflow-x-auto">
+                        <a href="{{ route('admin.members.index', array_merge(request()->except('status', 'page'))) }}"
+                            class="px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ !request('status') ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
+                            {{ __('messages.all') }} ({{ $allCount ?? 0 }})
                         </a>
 
-                        <a href="{{ route('admin.members.index', array_merge(request()->except('page'), ['status' => 'pending'])) }}" 
-                           class="px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'pending' ? 'bg-amber-500 text-white shadow-xs' : 'text-amber-700 hover:bg-amber-100/50' }}">
-                            Pending ({{ $pendingCount ?? 0 }})
+                        <a href="{{ route('admin.members.index', array_merge(request()->except('page'), ['status' => 'pending'])) }}"
+                            class="px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'pending' ? 'bg-amber-500 text-white shadow-xs' : 'text-amber-700 hover:bg-amber-100/50' }}">
+                            {{ __('messages.pending') }} ({{ $pendingCount ?? 0 }})
                         </a>
 
-                        <a href="{{ route('admin.members.index', array_merge(request()->except('page'), ['status' => 'approved'])) }}" 
-                           class="px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'approved' ? 'bg-emerald-600 text-white shadow-xs' : 'text-emerald-700 hover:bg-emerald-100/50' }}">
-                            Approved ({{ $approvedCount ?? 0 }})
+                        <a href="{{ route('admin.members.index', array_merge(request()->except('page'), ['status' => 'approved'])) }}"
+                            class="px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'approved' ? 'bg-emerald-600 text-white shadow-xs' : 'text-emerald-700 hover:bg-emerald-100/50' }}">
+                            {{ __('messages.approved') }} ({{ $approvedCount ?? 0 }})
                         </a>
 
-                        <a href="{{ route('admin.members.index', array_merge(request()->except('page'), ['status' => 'rejected'])) }}" 
-                           class="px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'rejected' ? 'bg-rose-600 text-white shadow-xs' : 'text-rose-700 hover:bg-rose-100/50' }}">
-                            Rejected ({{ $rejectedCount ?? 0 }})
+                        <a href="{{ route('admin.members.index', array_merge(request()->except('page'), ['status' => 'rejected'])) }}"
+                            class="px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'rejected' ? 'bg-rose-600 text-white shadow-xs' : 'text-rose-700 hover:bg-rose-100/50' }}">
+                            {{ __('messages.rejected') }} ({{ $rejectedCount ?? 0 }})
                         </a>
                     </div>
                 </form>
@@ -52,12 +56,13 @@
                 <div class="flex items-center gap-2 shrink-0">
                     <a href="{{ route('admin.members.export', request()->all()) }}"
                         class="h-9 px-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl transition-colors inline-flex items-center justify-center gap-1.5 shadow-xs whitespace-nowrap border border-emerald-200/60">
-                        📥 <span>{{ __('messages.export_csv') }}</span>
+                        📥 <span>{{ __('messages.export_excel') }}</span>
                     </a>
 
                     <a href="{{ route('admin.members.create') }}"
                         class="h-9 inline-flex items-center justify-center px-4 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors gap-1.5 whitespace-nowrap">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                         <span>{{ __('messages.add_member') }}</span>
@@ -66,7 +71,7 @@
 
             </div>
         </div>
- 
+
         <!-- Table Grid -->
         <div class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm">
             <table class="w-full text-left border-collapse">
@@ -95,16 +100,16 @@
                             <td class="py-2.5 px-4">{{ $m->memberProfile->phone ?? __('messages.not_set') }}</td>
                             <td class="py-2.5 px-4">{{ $m->memberProfile->city ?? __('messages.not_set') }}</td>
                             <td class="py-2.5 px-4 text-slate-400 font-medium">{{ $m->created_at->format('d-M-Y') }}</td>
-                            <td class="py-2.5 px-4">
+                            <td class="py-2.5 px-4 whitespace-nowrap">
                                 @if($m->status == 'approved')
                                     <span
-                                        class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg font-bold text-[10px] uppercase">{{ __('messages.approved') }}</span>
+                                        class="inline-flex items-center px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg font-bold text-[10px] uppercase whitespace-nowrap">{{ __('messages.approved') }}</span>
                                 @elseif($m->status == 'rejected')
                                     <span
-                                        class="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-100 rounded-lg font-bold text-[10px] uppercase">{{ __('messages.rejected') }}</span>
+                                        class="inline-flex items-center px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-100 rounded-lg font-bold text-[10px] uppercase whitespace-nowrap">{{ __('messages.rejected') }}</span>
                                 @else
                                     <span
-                                        class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg font-bold text-[10px] uppercase">{{ __('messages.pending') }}</span>
+                                        class="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg font-bold text-[10px] uppercase whitespace-nowrap">{{ __('messages.pending') }}</span>
                                 @endif
                             </td>
                             <td class="py-2.5 px-4 text-right">
@@ -135,7 +140,7 @@
                                                 <circle cx="12" cy="12" r="3" />
                                             </svg>
                                         </a>
- 
+
                                         <!-- Edit -->
                                         <a href="{{ route('admin.members.edit', $m->id) }}"
                                             class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
@@ -146,13 +151,14 @@
                                                     d="M16.862 3.487a2.25 2.25 0 113.182 3.182L8.25 18.463 3 20.25l1.787-5.25L16.862 3.487z" />
                                             </svg>
                                         </a>
- 
+
                                         <!-- Delete -->
                                         <button type="button" @click="$dispatch('confirm-delete', {
-                                        action: '{{ route('admin.members.destroy', $m->id) }}',
-                                        message: '{{ __('messages.delete_confirm_member', ['name' => $m->name]) }}'
-                                    })" class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
-                                             title="{{ __('messages.delete') }}">
+                                                action: '{{ route('admin.members.destroy', $m->id) }}',
+                                                message: '{{ __('messages.delete_confirm_member', ['name' => $m->name]) }}'
+                                            })"
+                                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                                            title="{{ __('messages.delete') }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"

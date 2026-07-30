@@ -66,7 +66,7 @@
 
             <!-- Option to cancel and start over -->
             <div class="pt-2 flex justify-start text-[11px]">
-                <a href="{{ route('member.account.settings') }}" class="text-rose-500 hover:text-rose-600 font-bold transition-colors">
+                <a href="{{ route('member.account.settings.cancel_otp') }}" class="text-rose-500 hover:text-rose-600 font-bold transition-colors">
                     &larr; {{ __('messages.cancel_email_change') }}
                 </a>
             </div>

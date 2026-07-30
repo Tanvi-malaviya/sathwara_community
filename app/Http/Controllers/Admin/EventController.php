@@ -268,9 +268,20 @@ class EventController extends Controller
         $callback = function() use ($events) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Event Title', 'Event Type', 'Date', 'Time', 'Venue', 'Pass Fee', 'Registrations Count', 'Status']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_event_title'),
+                __('messages.csv_event_type'),
+                __('messages.csv_date'),
+                __('messages.csv_time'),
+                __('messages.csv_venue'),
+                __('messages.csv_pass_fee'),
+                __('messages.csv_registrations_count'),
+                __('messages.csv_status')
+            ]);
 
             foreach ($events as $e) {
+                $statusKey = strtolower($e->status ?? 'active');
                 fputcsv($file, [
                     $e->id,
                     $e->title,
@@ -280,7 +291,7 @@ class EventController extends Controller
                     $e->venue,
                     $e->pass_fee ?? 0,
                     $e->registrations_count ?? 0,
-                    ucfirst($e->status ?? 'active'),
+                    __('messages.' . $statusKey) != 'messages.' . $statusKey ? __('messages.' . $statusKey) : ucfirst($e->status ?? 'active'),
                 ]);
             }
             fclose($file);

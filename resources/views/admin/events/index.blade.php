@@ -69,15 +69,15 @@
                         <td class="py-2 px-2.5 whitespace-nowrap">
                             @if($e->event_type === 'yuva_melo')
                                 <span class="px-2 py-0.5 text-[10px] font-extrabold bg-purple-50 text-purple-700 rounded-md border border-purple-200/80 inline-flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span> Yuva Melo
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span> {{ __('messages.yuva_melo') }}
                                 </span>
                             @elseif($e->event_type === 'inam_vitaran')
                                 <span class="px-2 py-0.5 text-[10px] font-extrabold bg-amber-50 text-amber-700 rounded-md border border-amber-200/80 inline-flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Inam Vitaran
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> {{ __('messages.inam_vitaran') }}
                                 </span>
                             @else
                                 <span class="px-2 py-0.5 text-[10px] font-extrabold bg-slate-100 text-slate-600 rounded-md border border-slate-200 inline-flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> General
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> {{ __('messages.general') }}
                                 </span>
                             @endif
                         </td>
@@ -99,7 +99,7 @@
                         <td class="py-2 px-2.5 whitespace-nowrap">
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
                                 {{ $e->status == 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($e->status == 'cancelled' ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-slate-100 text-slate-600 border border-slate-200') }}">
-                                {{ $e->status }}
+                                {{ __('messages.' . strtolower($e->status)) != 'messages.' . strtolower($e->status) ? __('messages.' . strtolower($e->status)) : ucfirst($e->status) }}
                             </span>
                         </td>
                         <td class="py-2 px-2.5 text-right whitespace-nowrap">

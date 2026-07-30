@@ -121,7 +121,7 @@
                 src="{{ auth()->user()->memberProfile && auth()->user()->memberProfile->photo_path ? (str_starts_with(auth()->user()->memberProfile->photo_path, 'http') ? auth()->user()->memberProfile->photo_path : asset('storage/' . auth()->user()->memberProfile->photo_path)) : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100' }}"
                 alt="User avatar">
             <div>
-                <h4 class="text-xs font-bold text-slate-900 leading-tight">{{ auth()->user()->name }}</h4>
+                <h4 class="text-xs font-bold text-slate-900 leading-tight">{{ \Illuminate\Support\Facades\Lang::has('messages.' . auth()->user()->name) ? __('messages.' . auth()->user()->name) : auth()->user()->name }}</h4>
                 <div class="flex items-center space-x-1.5 mt-0.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                     <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.approved_member') }}</span>

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\EventController as AdminEvent;
 use App\Http\Controllers\Admin\GalleryController as AdminGallery;
 use App\Http\Controllers\Admin\ContentController as AdminContent;
 use App\Http\Controllers\Admin\SettingsController as AdminSettings;
+use App\Http\Controllers\Admin\EmailSettingsController as AdminEmailSettings;
 use App\Http\Controllers\Admin\AwardController as AdminAward;
 use App\Http\Controllers\Admin\AreaController as AdminArea;
 use Illuminate\Support\Facades\Route;
@@ -69,6 +70,7 @@ Route::middleware(['auth', 'role:Member', 'approved'])->prefix('member')->name('
     Route::get('/account-settings', [MemberDashboard::class, 'accountSettings'])->name('account.settings');
     Route::post('/account-settings/email/send-otp', [MemberDashboard::class, 'sendEmailOtp'])->name('account.settings.send_otp');
     Route::post('/account-settings/email/verify-otp', [MemberDashboard::class, 'verifyEmailOtp'])->name('account.settings.verify_otp');
+    Route::get('/account-settings/email/cancel-otp', [MemberDashboard::class, 'cancelEmailOtp'])->name('account.settings.cancel_otp');
     Route::post('/account-settings/password', [MemberDashboard::class, 'updatePassword'])->name('account.settings.update_password');
     Route::get('/membership-card', [MemberDashboard::class, 'membershipCard'])->name('card');
 
@@ -195,6 +197,11 @@ Route::middleware(['auth', 'role:Administrator'])->prefix('admin')->name('admin.
     // Site Settings (contact information, maps, colors, SEO, logo)
     Route::get('/settings', [AdminSettings::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettings::class, 'update'])->name('settings.update');
+
+    // Email / SMTP Settings (manage .env email configuration)
+    Route::get('/email-settings', [AdminEmailSettings::class, 'index'])->name('email_settings.index');
+    Route::post('/email-settings', [AdminEmailSettings::class, 'update'])->name('email_settings.update');
+    Route::post('/email-settings/test', [AdminEmailSettings::class, 'sendTestMail'])->name('email_settings.test');
 });
 
 // Fallback to Breeze default auth routes

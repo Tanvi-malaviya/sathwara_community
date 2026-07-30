@@ -177,19 +177,25 @@ class DatabaseSeeder extends Seeder
         Agenda::truncate();
         Agenda::create([
             'title' => 'Social Integration',
+            'title_gu' => 'સામાજિક એકતા',
             'description' => 'Uniting families through annual gatherings, cultural events, and social initiatives.',
+            'description_gu' => 'વાર્ષિક સ્નેહ મિલન, સાંસ્કૃતિક કાર્યક્રમો અને સામાજિક પહેલો દ્વારા પરિવારોને એકત્રિત કરવા.',
             'icon' => 'users',
             'display_order' => 1
         ]);
         Agenda::create([
             'title' => 'Educational Excellence',
+            'title_gu' => 'શૈક્ષણિક શ્રેષ્ઠતા',
             'description' => 'Honoring students, offering scholarships, and guiding youth towards successful careers.',
+            'description_gu' => 'વિદ્યાર્થીઓનું સન્માન, શિષ્યવૃત્તિ અને યુવાનોને સફળ કારકિર્દી તરફ માર્ગદર્શન આપવું.',
             'icon' => 'academic-cap',
             'display_order' => 2
         ]);
         Agenda::create([
             'title' => 'Economic Empowerment',
+            'title_gu' => 'આર્થિક સશક્તિકરણ',
             'description' => 'Fostering growth by promoting community businesses and professional collaborations.',
+            'description_gu' => 'સમુદાયના ઉદ્યોગસાહસિકોને ટેકો આપવો અને વ્યવસાયિક નેટવર્કિંગની તકો ઊભી કરવી.',
             'icon' => 'briefcase',
             'display_order' => 3
         ]);

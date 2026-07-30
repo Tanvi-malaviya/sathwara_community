@@ -16,10 +16,10 @@
 
                 <div class="space-y-0.5">
                     <h2 class="text-base font-black text-slate-900 tracking-tight">
-                        Verify OTP
+                        {{ __('messages.verify_otp') }}
                     </h2>
                     <p class="text-[11px] font-medium text-slate-500 max-w-xs mx-auto">
-                        Please enter the 6-digit verification code sent to your email address.
+                        {{ __('messages.verify_otp_subtitle') }}
                     </p>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                 <!-- OTP Code Field -->
                 <div class="space-y-0.5">
                     <label for="otp" class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                        6-Digit Code <span class="text-rose-500">*</span>
+                        {{ __('messages.six_digit_code') }} <span class="text-rose-500">*</span>
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -55,7 +55,7 @@
                 <div class="pt-1">
                     <button type="submit" 
                         class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-lg shadow-xs transition-all cursor-pointer gap-1.5">
-                        <span>Verify Code & Continue</span>
+                        <span>{{ __('messages.verify_code_continue') }}</span>
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
@@ -65,10 +65,10 @@
 
             <div class="pt-3 border-t border-slate-100 text-center flex justify-between items-center text-[11px] font-bold text-slate-500">
                 <a href="{{ route('password.request') }}" class="text-slate-600 hover:text-primary-600 transition-colors">
-                    &larr; Request New OTP
+                    &larr; {{ __('messages.request_new_otp') }}
                 </a>
                 <a href="{{ route('login') }}" class="text-slate-600 hover:text-primary-600 transition-colors">
-                    Back to Login
+                    {{ __('messages.back_to_login') }}
                 </a>
             </div>
 

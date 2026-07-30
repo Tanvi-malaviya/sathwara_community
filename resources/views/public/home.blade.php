@@ -120,10 +120,10 @@
                         </div>
 
                         <h3 class="text-base font-bold text-slate-900">
-                            {{ $agenda->title }}
+                            {{ $agenda->localized_title }}
                         </h3>
                         <p class="text-xs text-slate-600 leading-relaxed">
-                            {{ $agenda->description }}
+                            {{ $agenda->localized_description }}
                         </p>
                     </div>
                 </div>
@@ -389,31 +389,65 @@
 
         <!-- Lightbox Modal -->
         <template x-teleport="body">
-            <div x-show="lightbox" class="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center p-4" style="z-index: 9999;" x-cloak>
+            <div x-show="lightbox" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 style="position: fixed; inset: 0; z-index: 999999; background-color: rgba(0, 0, 0, 0.95);"
+                 class="flex flex-col items-center justify-between p-4 sm:p-6 select-none" 
+                 @click="lightbox = false" 
+                 x-cloak>
                 
-                <!-- Close button -->
-                <button @click="lightbox = false" class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full transition-all p-2 border border-white/10 hover:border-rose-500 cursor-pointer hover:scale-105 shadow-lg" style="z-index: 10000;">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <!-- Close button (Top Right) -->
+                <button @click="lightbox = false" 
+                        style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: 1000000;"
+                        class="p-2.5 rounded-full bg-black/60 hover:bg-rose-600 text-white border border-white/20 hover:border-rose-500 transition-all duration-200 cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+                        title="Close (Esc)">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
 
-                <!-- Prev Arrow -->
-                <button x-show="currentGallery.length > 1" @click.stop="prevImage()" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 p-2.5 sm:p-4 bg-white/10 hover:bg-primary-500 rounded-full text-white backdrop-blur-md border border-white/20 hover:border-primary-500 transition-all shadow-xl hover:scale-110 cursor-pointer" style="z-index: 10000;">
-                    <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                <!-- PREVIOUS ARROW BUTTON (Left Side) -->
+                <button x-show="currentGallery.length > 1" 
+                        @click.stop="prevImage()" 
+                        style="position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 1000000;"
+                        class="p-3 sm:p-4 rounded-full bg-black/60 hover:bg-primary-600 text-white border border-white/20 hover:border-primary-400 shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+                        title="Previous Image">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+                    </svg>
                 </button>
 
-                <!-- Centered Medium Image Container -->
-                <div class="relative w-full max-w-3xl flex flex-col items-center justify-center px-12 sm:px-16" @click.stop>
-                    <img :src="currentGallery[lightboxIndex]?.src" class="w-auto max-w-full rounded-xl shadow-2xl object-contain border border-white/10 bg-black/20" style="max-height: 60vh;">
-                    <p class="text-white/90 text-sm sm:text-base font-semibold mt-4 text-center max-w-xl px-4" x-text="currentGallery[lightboxIndex]?.caption"></p>
+                <!-- NEXT ARROW BUTTON (Right Side) -->
+                <button x-show="currentGallery.length > 1" 
+                        @click.stop="nextImage()" 
+                        style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 1000000;"
+                        class="p-3 sm:p-4 rounded-full bg-black/60 hover:bg-primary-600 text-white border border-white/20 hover:border-primary-400 shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+                        title="Next Image">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+
+                <!-- Center Content: Image -->
+                <div class="relative w-full flex-1 flex flex-col items-center justify-center my-auto max-w-4xl mx-auto px-12 sm:px-20 pb-14" @click.stop>
+                    <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-slate-900/40">
+                        <img :src="currentGallery[lightboxIndex]?.src" 
+                             :alt="currentGallery[lightboxIndex]?.caption || 'Gallery Image'" 
+                             class="w-auto max-w-full object-contain rounded-xl shadow-2xl"
+                             style="max-height: 68vh;">
+                    </div>
                 </div>
-                
-                <!-- Next Arrow -->
-                <button x-show="currentGallery.length > 1" @click.stop="nextImage()" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 p-2.5 sm:p-4 bg-white/10 hover:bg-primary-500 rounded-full text-white backdrop-blur-md border border-white/20 hover:border-primary-500 transition-all shadow-xl hover:scale-110 cursor-pointer" style="z-index: 10000;">
-                    <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                </button>
 
-                <!-- Counter -->
-                <div x-show="currentGallery.length > 1" class="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/80 bg-black/60 px-5 py-2 rounded-full text-xs font-bold tracking-widest border border-white/10 backdrop-blur-sm shadow-md" style="z-index: 10000;">
+                <!-- Bottom Bar: Image Numbers Counter (Bottom Center) -->
+                <div x-show="currentGallery.length > 1" 
+                     style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 1000000;"
+                     class="text-white/90 bg-black/80 px-5 py-1.5 rounded-full text-xs font-bold tracking-widest border border-white/20 backdrop-blur-md shadow-2xl">
+                    <span class="text-primary-400">🖼️</span> 
                     <span x-text="lightboxIndex + 1"></span> / <span x-text="currentGallery.length"></span>
                 </div>
 

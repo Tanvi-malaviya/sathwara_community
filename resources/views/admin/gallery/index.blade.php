@@ -7,9 +7,9 @@
         <!-- Header Actions & Search bar -->
         <!-- Header Actions -->
         <div class="flex justify-end items-center gap-2 bg-white p-3 rounded-xl border border-slate-100 shadow-sm mb-4">
-            <a href="{{ route('admin.gallery.export', request()->all()) }}" 
-               class="inline-flex items-center justify-center px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-all shrink-0 whitespace-nowrap">
-                📊 <span>Export Excel</span>
+            <a href="{{ route('admin.gallery.export', request()->all()) }}"
+                class="inline-flex items-center justify-center px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-all shrink-0 whitespace-nowrap">
+                📊 <span>{{ __('messages.export_excel') }}</span>
             </a>
 
             <button @click="showAddModal = true"
@@ -84,7 +84,8 @@
                     @endif
 
                     <div class="space-y-0.5">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.select_image_zip') }}</label>
+                        <label
+                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.select_image_zip') }}</label>
                         <input type="file" name="images[]" multiple required accept=".jpg,.jpeg,.png,.webp,.gif,.zip"
                             @change="$el.name = ($el.files.length === 1 && $el.files[0].name.toLowerCase().endsWith('.zip')) ? 'image' : 'images[]'"
                             class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">

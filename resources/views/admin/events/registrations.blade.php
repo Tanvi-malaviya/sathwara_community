@@ -12,7 +12,7 @@
                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                     <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-black uppercase">🏆 {{ __('messages.award_form') }}</span>
                 @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                    <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-black uppercase">⚡ Yuva Melo</span>
+                    <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-black uppercase">⚡ {{ __('messages.yuva_melo') }}</span>
                 @endif
             </div>
             <p class="text-xs text-slate-500 font-medium mt-1">📅 {{ date('F d, Y', strtotime($event->date)) }} • 📍 {{ $event->venue }}</p>
@@ -63,7 +63,7 @@
 
             <a href="{{ route('admin.events.registrations.export', $event->id) }}" 
                class="h-9 px-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap">
-                📊 <span>Export Excel</span>
+                📊 <span>{{ __('messages.export_csv') }}</span>
             </a>
         </div>
     </div>

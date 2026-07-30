@@ -206,7 +206,13 @@ class GalleryController extends Controller
         $callback = function() use ($photos) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Caption', 'Image Path', 'Display Order', 'Uploaded At']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_caption'),
+                __('messages.csv_image_path'),
+                __('messages.csv_display_order'),
+                __('messages.csv_uploaded_at')
+            ]);
 
             foreach ($photos as $p) {
                 fputcsv($file, [

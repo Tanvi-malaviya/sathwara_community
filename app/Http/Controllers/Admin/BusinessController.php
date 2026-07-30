@@ -327,9 +327,21 @@ class BusinessController extends Controller
         $callback = function() use ($businesses) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['ID', 'Business Name', 'Owner Name', 'Category', 'Phone', 'Email', 'City', 'State', 'Status', 'Created At']);
+            fputcsv($file, [
+                __('messages.csv_id'),
+                __('messages.csv_business_name'),
+                __('messages.csv_owner_name'),
+                __('messages.csv_category'),
+                __('messages.csv_phone'),
+                __('messages.csv_email'),
+                __('messages.csv_city'),
+                __('messages.csv_state'),
+                __('messages.csv_status'),
+                __('messages.csv_created_at')
+            ]);
 
             foreach ($businesses as $b) {
+                $statusKey = strtolower($b->status ?? '');
                 fputcsv($file, [
                     $b->id,
                     $b->business_name,
@@ -339,7 +351,7 @@ class BusinessController extends Controller
                     $b->email ?? '',
                     $b->city ?? '',
                     $b->state ?? '',
-                    ucfirst($b->status),
+                    __('messages.' . $statusKey) != 'messages.' . $statusKey ? __('messages.' . $statusKey) : ucfirst($b->status),
                     $b->created_at ? $b->created_at->format('Y-m-d H:i') : '',
                 ]);
             }
