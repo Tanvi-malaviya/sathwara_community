@@ -1,6 +1,13 @@
 @extends('layouts.admin')
 @section('page_title', __('messages.business_directory'))
 @section('content')
+    @php
+        $user = auth()->user();
+        $userPerms = $user->permissions->pluck('name');
+        $canAddBusiness = $user->hasRole('Administrator') || $userPerms->contains('businesses_manage') || $userPerms->contains('businesses_add');
+        $canEditBusiness = $user->hasRole('Administrator') || $userPerms->contains('businesses_manage') || $userPerms->contains('businesses_edit');
+        $canDeleteBusiness = $user->hasRole('Administrator') || $userPerms->contains('businesses_manage') || $userPerms->contains('businesses_delete');
+    @endphp
     <div x-data="{
         activeTab: 'listings',
         detailsOpen: false, addCatOpen: false, editCatOpen: false,
@@ -128,55 +135,53 @@
                         </a>
                     </div>
                 </div>
-            </div>
-
-            <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
-                <table class="w-full text-left border-collapse">
+            </div            <div class="bg-white border border-slate-100 rounded-2xl overflow-x-auto shadow-sm">
+                <table class="w-full text-left border-collapse min-w-full">
                     <thead>
                         <tr
-                            class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
-                            <th class="py-2.5 px-3.5">{{ __('messages.business') }}</th>
-                            <th class="py-2.5 px-3.5">{{ __('messages.owner') }}</th>
-                            <th class="py-2.5 px-3.5">{{ __('messages.phone') }}</th>
-                            <th class="py-2.5 px-3.5">{{ __('messages.category') }}</th>
-                            <th class="py-2.5 px-3.5">{{ __('messages.status') }}</th>
-                            <th class="py-2.5 px-3.5">{{ __('messages.subscription_dates') }}</th>
-                            <th class="py-2.5 px-3.5">{{ __('messages.membership_status') }}</th>
-                            <th class="py-2.5 px-3.5 text-right">{{ __('messages.actions') }}</th>
+                            class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100 whitespace-nowrap">
+                            <th class="py-2.5 px-2.5">{{ __('messages.business') }}</th>
+                            <th class="py-2.5 px-2.5">{{ __('messages.owner') }}</th>
+                            <th class="py-2.5 px-2.5">{{ __('messages.phone') }}</th>
+                            <th class="py-2.5 px-2.5">{{ __('messages.category') }}</th>
+                            <th class="py-2.5 px-2.5 text-center">{{ __('messages.status') }}</th>
+                            <th class="py-2.5 px-2.5 text-center">{{ __('messages.subscription_dates') }}</th>
+                            <th class="py-2.5 px-2.5 text-center">{{ __('messages.membership_status') }}</th>
+                            <th class="py-2.5 px-2.5 text-right shrink-0">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                    <tbody class="divide-y divide-slate-100 text-[11px] font-semibold text-slate-700">
                         @forelse($businesses as $b)
                             <tr class="hover:bg-slate-50/60 transition-colors">
-                                <td class="py-2.5 px-3.5">
-                                    <div class="flex items-center space-x-2.5 gap-2">
-                                        <img class="w-8 h-8 rounded-lg object-cover border border-slate-100 bg-slate-50 shrink-0"
+                                <td class="py-2 px-2.5">
+                                    <div class="flex items-center space-x-2 gap-1.5">
+                                        <img class="w-7 h-7 rounded-lg object-cover border border-slate-100 bg-slate-50 shrink-0"
                                             src="{{ str_starts_with($b->logo_path, 'http') ? $b->logo_path : asset('storage/' . $b->logo_path) }}"
                                             alt="">
-                                        <div>
-                                            <p class="text-slate-900 font-bold leading-tight">{{ $b->business_name }}</p>
-                                            <p class="text-[10px] text-slate-400 font-medium truncate max-w-[160px]">
+                                        <div class="min-w-0">
+                                            <p class="text-slate-900 font-bold leading-tight truncate max-w-[130px] sm:max-w-[160px]">{{ $b->business_name }}</p>
+                                            <p class="text-[10px] text-slate-400 font-medium truncate max-w-[130px] sm:max-w-[160px]">
                                                 {{ $b->address }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-2.5 px-3.5 text-slate-700 whitespace-nowrap">{{ $b->owner_name }}</td>
-                                <td class="py-2.5 px-3.5 text-slate-600 whitespace-nowrap">{{ $b->phone }}</td>
-                                <td class="py-2.5 px-3.5 whitespace-nowrap"><span
-                                        class="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full text-[10px] font-bold inline-block">{{ $b->category?->name ?? 'N/A' }}</span>
+                                <td class="py-2 px-2.5 text-slate-700 whitespace-nowrap">{{ $b->owner_name }}</td>
+                                <td class="py-2 px-2.5 text-slate-600 whitespace-nowrap text-[11px]">{{ $b->phone }}</td>
+                                <td class="py-2 px-2.5 whitespace-nowrap"><span
+                                        class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[9px] font-bold inline-block">{{ $b->category?->name ?? 'N/A' }}</span>
                                 </td>
-                                <td class="py-2.5 px-3.5 whitespace-nowrap">
+                                <td class="py-2 px-2.5 text-center whitespace-nowrap">
                                     @if($b->status == 'approved') <span
-                                        class="inline-flex items-center px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[10px] whitespace-nowrap">{{ __('messages.approved') }}</span>
+                                        class="inline-flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[9px] whitespace-nowrap">{{ __('messages.approved') }}</span>
                                     @elseif($b->status == 'rejected') <span
-                                        class="inline-flex items-center px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-full font-bold text-[10px] whitespace-nowrap">{{ __('messages.rejected') }}</span>
+                                        class="inline-flex items-center px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-full font-bold text-[9px] whitespace-nowrap">{{ __('messages.rejected') }}</span>
                                     @else <span
-                                        class="inline-flex items-center px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-full font-bold text-[10px] whitespace-nowrap">{{ __('messages.pending') }}</span>
+                                        class="inline-flex items-center px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-full font-bold text-[9px] whitespace-nowrap">{{ __('messages.pending') }}</span>
                                     @endif
                                 </td>
-                                <td class="py-2.5 px-3.5 whitespace-nowrap">
+                                <td class="py-2 px-2.5 text-center whitespace-nowrap">
                                     @if($b->approved_at)
-                                        <div class="text-[10px] leading-snug">
+                                        <div class="text-[9px] leading-tight">
                                             <div class="font-bold text-slate-700">P: {{ $b->approved_at->format('d M Y') }}</div>
                                             <div class="font-semibold text-slate-400">E:
                                                 {{ $b->approved_at->addYear()->format('d M Y') }}</div>
@@ -185,17 +190,17 @@
                                         <span class="text-slate-400">—</span>
                                     @endif
                                 </td>
-                                <td class="py-2.5 px-3.5 whitespace-nowrap">
+                                <td class="py-2 px-2.5 text-center whitespace-nowrap">
                                     @if($b->membership_status == 'active') <span
-                                        class="inline-flex items-center px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[10px] whitespace-nowrap">{{ __('messages.active') }}</span>
+                                        class="inline-flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[9px] whitespace-nowrap">{{ __('messages.active') }}</span>
                                     @else <span
-                                        class="inline-flex items-center px-2.5 py-0.5 bg-slate-50 text-slate-700 border border-slate-100 rounded-full font-bold text-[10px] whitespace-nowrap">{{ __('messages.inactive') }}</span>
+                                        class="inline-flex items-center px-2 py-0.5 bg-slate-50 text-slate-700 border border-slate-100 rounded-full font-bold text-[9px] whitespace-nowrap">{{ __('messages.inactive') }}</span>
                                     @endif
                                 </td>
-                                <td class="py-2 px-3">
-                                    <div class="flex justify-end items-center space-x-1.5">
+                                <td class="py-2 px-2.5 whitespace-nowrap text-right shrink-0">
+                                    <div class="flex justify-end items-center space-x-1 gap-1">
                                         <a href="{{ route('admin.businesses.show', $b->id) }}"
-                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                                            class="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                                             title="{{ __('messages.view_details') }}">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                                 stroke-width="2">
@@ -205,19 +210,21 @@
                                                     d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
                                             </svg>
                                         </a>
-                                        <a href="{{ route('admin.businesses.edit', $b->id) }}"
-                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
-                                            title="{{ __('messages.edit') }}">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </a>
-                                        @if($b->status !== 'approved')
+                                        @if($canEditBusiness)
+                                            <a href="{{ route('admin.businesses.edit', $b->id) }}"
+                                                class="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
+                                                title="{{ __('messages.edit') }}">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </a>
+                                        @endif
+                                        @if($b->status !== 'approved' && $canEditBusiness)
                                             <form method="POST" action="{{ route('admin.businesses.approve', $b->id) }}">@csrf
                                                 <button
-                                                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                                                    class="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
                                                     title="{{ __('messages.approve') }}">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                                         stroke-width="2">
@@ -226,10 +233,10 @@
                                                 </button>
                                             </form>
                                         @endif
-                                        @if($b->status === 'pending')
+                                        @if($b->status === 'pending' && $canEditBusiness)
                                             <form method="POST" action="{{ route('admin.businesses.reject', $b->id) }}">@csrf
                                                 <button
-                                                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                                                    class="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
                                                     title="{{ __('messages.reject') }}">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                                         stroke-width="2">
@@ -239,10 +246,10 @@
                                                 </button>
                                             </form>
                                         @endif
-                                        @if($b->status === 'approved' && $b->membership_status === 'active')
+                                        @if($b->status === 'approved' && $b->membership_status === 'active' && $canEditBusiness)
                                             <form method="POST" action="{{ route('admin.businesses.deactivate', $b->id) }}">@csrf
                                                 <button
-                                                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
+                                                    class="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
                                                     title="Mark Inactive">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                                         stroke-width="2">
@@ -252,10 +259,10 @@
                                                 </button>
                                             </form>
                                         @endif
-                                        @if($b->status === 'approved' && $b->membership_status === 'inactive')
+                                        @if($b->status === 'approved' && $b->membership_status === 'inactive' && $canEditBusiness)
                                             <form method="POST" action="{{ route('admin.businesses.activate', $b->id) }}">@csrf
                                                 <button
-                                                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                                                    class="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
                                                     title="Mark Active">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                                         stroke-width="2">
@@ -264,22 +271,24 @@
                                                 </button>
                                             </form>
                                         @endif
-                                        <button
-                                            @click="$dispatch('confirm-delete',{action:'{{ route('admin.businesses.destroy', $b->id) }}',message:'{{ __('messages.delete_confirm_business', ['name' => $b->business_name]) }}'})"
-                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
-                                            title="{{ __('messages.delete') }}">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
+                                        @if($canDeleteBusiness)
+                                            <button
+                                                @click="$dispatch('confirm-delete',{action:'{{ route('admin.businesses.destroy', $b->id) }}',message:'{{ __('messages.delete_confirm_business', ['name' => $b->business_name]) }}'})"
+                                                class="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                                                title="{{ __('messages.delete') }}">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-12 text-center text-slate-400 text-xs">
+                                <td colspan="8" class="py-12 text-center text-slate-400 text-xs">
                                     {{ __('messages.no_businesses_found') }}</td>
                             </tr>
                         @endforelse

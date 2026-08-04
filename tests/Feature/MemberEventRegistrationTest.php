@@ -89,7 +89,8 @@ class MemberEventRegistrationTest extends TestCase
         $response->assertOk();
 
         $html = $response->getContent();
-        preg_match_all('/<option\b[^>]*>/', $html, $matches);
+        preg_match('/<select name="student_name"[^>]*>(.*?)<\/select>/s', $html, $selectMatch);
+        preg_match_all('/<option\b[^>]*>/', $selectMatch[1] ?? '', $matches);
 
         // first option is the placeholder, so expect 7 options total for 6 family members
         $this->assertCount(7, $matches[0]);

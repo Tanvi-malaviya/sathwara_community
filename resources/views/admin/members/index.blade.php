@@ -3,6 +3,13 @@
 @section('page_title', __('messages.member_approvals_listings'))
 
 @section('content')
+    @php
+        $user = auth()->user();
+        $userPerms = $user->permissions->pluck('name');
+        $canAddMember = $user->hasRole('Administrator') || $userPerms->contains('members_manage') || $userPerms->contains('members_add');
+        $canEditMember = $user->hasRole('Administrator') || $userPerms->contains('members_manage') || $userPerms->contains('members_edit');
+        $canDeleteMember = $user->hasRole('Administrator') || $userPerms->contains('members_manage') || $userPerms->contains('members_delete');
+    @endphp
     <div class="space-y-4">
         <!-- Single Integrated Toolbar Line -->
         <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
@@ -59,14 +66,16 @@
                         📥 <span>{{ __('messages.export_excel') }}</span>
                     </a>
 
-                    <a href="{{ route('admin.members.create') }}"
-                        class="h-9 inline-flex items-center justify-center px-4 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors gap-1.5 whitespace-nowrap">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        <span>{{ __('messages.add_member') }}</span>
-                    </a>
+                    @if($canAddMember)
+                        <a href="{{ route('admin.members.create') }}"
+                            class="h-9 inline-flex items-center justify-center px-4 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors gap-1.5 whitespace-nowrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            <span>{{ __('messages.add_member') }}</span>
+                        </a>
+                    @endif
                 </div>
 
             </div>
@@ -115,19 +124,31 @@
                             <td class="py-2.5 px-4 text-right">
                                 <div class="flex justify-end items-center space-x-2">
                                     <div class="flex items-center gap-2">
-                                        @if($m->status == 'pending')
-                                            <form method="POST" action="{{ route('admin.members.approve', $m->id) }}"
-                                                class="inline">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                                                    title="{{ __('messages.approve') }}">
+                                        @if($canEditMember)
+                                            @if($m->status == 'pending' || $m->status == 'rejected')
+                                                <form method="POST" action="{{ route('admin.members.approve', $m->id) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                                                        title="{{ __('messages.approve') }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            @if($m->status == 'pending' || $m->status == 'approved')
+                                                <button type="button"
+                                                    @click="$dispatch('open-reject-modal', { action: '{{ route('admin.members.reject', $m->id) }}', name: '{{ addslashes($m->name) }}' })"
+                                                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                                                    title="{{ __('messages.reject') }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
                                                 </button>
-                                            </form>
+                                            @endif
                                         @endif
                                         <!-- View -->
                                         <a href="{{ route('admin.members.show', $m->id) }}"
@@ -142,29 +163,33 @@
                                         </a>
 
                                         <!-- Edit -->
-                                        <a href="{{ route('admin.members.edit', $m->id) }}"
-                                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
-                                            title="{{ __('messages.edit') }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M16.862 3.487a2.25 2.25 0 113.182 3.182L8.25 18.463 3 20.25l1.787-5.25L16.862 3.487z" />
-                                            </svg>
-                                        </a>
+                                        @if($canEditMember)
+                                            <a href="{{ route('admin.members.edit', $m->id) }}"
+                                                class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
+                                                title="{{ __('messages.edit') }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M16.862 3.487a2.25 2.25 0 113.182 3.182L8.25 18.463 3 20.25l1.787-5.25L16.862 3.487z" />
+                                                </svg>
+                                            </a>
+                                        @endif
 
                                         <!-- Delete -->
-                                        <button type="button" @click="$dispatch('confirm-delete', {
-                                                action: '{{ route('admin.members.destroy', $m->id) }}',
-                                                message: '{{ __('messages.delete_confirm_member', ['name' => $m->name]) }}'
-                                            })"
-                                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
-                                            title="{{ __('messages.delete') }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0v12a1 1 0 001 1h8a1 1 0 001-1V7M10 11v6M14 11v6" />
-                                            </svg>
-                                        </button>
+                                        @if($canDeleteMember)
+                                            <button type="button" @click="$dispatch('confirm-delete', {
+                                                    action: '{{ route('admin.members.destroy', $m->id) }}',
+                                                    message: '{{ __('messages.delete_confirm_member', ['name' => $m->name]) }}'
+                                                })"
+                                                class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                                                title="{{ __('messages.delete') }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0v12a1 1 0 001 1h8a1 1 0 001-1V7M10 11v6M14 11v6" />
+                                                </svg>
+                                            </button>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
@@ -183,6 +208,30 @@
         <!-- Pagination -->
         <div>
             {{ $members->links() }}
+        </div>
+
+        <!-- Reject Member Modal -->
+        <div x-data="{ open: false, action: '', name: '' }"
+             @open-reject-modal.window="open = true; action = $event.detail.action; name = $event.detail.name">
+            <template x-teleport="body">
+                <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" x-transition x-cloak>
+                    <div @click.away="open = false" class="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xl max-w-md w-full space-y-4 relative">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <h3 class="text-sm font-black text-rose-600">Reject Member Application</h3>
+                            <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+                        </div>
+                        <form method="POST" :action="action" class="space-y-3">
+                            @csrf
+                            <p class="text-xs text-slate-600 font-semibold">Please specify the reason for rejecting <strong x-text="name" class="text-slate-900"></strong>:</p>
+                            <textarea name="rejection_reason" required rows="3" placeholder="e.g. Incomplete address or incorrect details..." class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 outline-none"></textarea>
+                            <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+                                <button type="button" @click="open = false" class="px-4 py-2 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl">Cancel</button>
+                                <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs">Reject Member</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </template>
         </div>
     </div>
 @endsection

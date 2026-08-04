@@ -227,18 +227,31 @@ class MemberController extends Controller
         return redirect()->route('admin.members.show', $member->id)->with('success', 'Member details updated successfully.');
     }
 
+    private function checkEditPermission()
+    {
+        $user = auth()->user();
+        if ($user->hasRole('Administrator')) {
+            return;
+        }
+        $userPerms = $user->permissions->pluck('name');
+        if ($userPerms->contains('members_manage') || $userPerms->contains('members_edit')) {
+            return;
+        }
+        abort(403, 'You do not have permission to approve, reject, or modify members.');
+    }
+
     /**
      * Approve Member
      */
     public function approve($id)
     {
+        $this->checkEditPermission();
+
         $member = User::role('Member')->findOrFail($id);
         $member->update([
             'status' => 'approved',
             'rejection_reason' => null,
         ]);
-
-        // Send Email Notice (Optional - can trigger mailable here)
 
         return redirect()->back()->with('success', 'Member approved successfully.');
     }
@@ -248,6 +261,8 @@ class MemberController extends Controller
      */
     public function reject(Request $request, $id)
     {
+        $this->checkEditPermission();
+
         $request->validate([
             'rejection_reason' => 'required|string',
         ]);

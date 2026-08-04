@@ -139,28 +139,57 @@ class PublicController extends Controller
     }
 
     /**
+     * Public Registration Form Page
+     */
+    public function showPublicRegistrationForm($id)
+    {
+        $event = Event::where('status', 'published')->findOrFail($id);
+        
+        if ($event->event_type !== 'yuva_melo' && !auth()->check()) {
+            return redirect()->route('login')->with('warning', 'Please login to fill up this form.');
+        }
+
+        $user = auth()->user();
+        $registrations = $user ? $user->eventRegistrations()->where('event_id', $id)->orderBy('created_at', 'desc')->get() : collect();
+        $registration = $registrations->first();
+        $familyMembers = $user ? $user->familyMembers()->orderBy('name')->get() : collect();
+        $areas = \App\Models\Area::orderBy('name')->get();
+
+        return view('member.event.register', compact('event', 'registration', 'registrations', 'familyMembers', 'areas'));
+    }
+
+    /**
      * Register for an Event
      */
     public function registerEvent(Request $request, $id)
     {
-        if (!auth()->check()) {
-            return redirect()->route('login')->with('warning', 'Please login to register for events.');
-        }
-
-        $user = auth()->user();
-        if ($user->status !== 'approved') {
-            return redirect()->back()->with('error', 'Your account must be approved to register.');
-        }
-
         $event = Event::where('status', 'published')->findOrFail($id);
+
+        if ($event->event_type !== 'yuva_melo') {
+            if (!auth()->check()) {
+                return redirect()->route('login')->with('warning', 'Please login to register for events.');
+            }
+
+            $user = auth()->user();
+            if ($user->status !== 'approved') {
+                return redirect()->back()->with('error', 'Your account must be approved to register.');
+            }
+        } else {
+            $user = auth()->user();
+        }
+
         if (!($event->has_registration_form ?? $event->registration_option)) {
             return redirect()->back()->with('error', 'Registration is not required for this event.');
+        }
+
+        if (!empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString()) {
+            return redirect()->back()->with('error', 'Registration for this event closed on ' . date('d-M-Y', strtotime($event->registration_end_date)) . '.');
         }
 
         // Capture form data depending on event type
         $formData = [];
         if ($event->event_type === 'inam_vitaran') {
-            $profile = $user->memberProfile;
+            $profile = $user ? $user->memberProfile : null;
 
             // Handle Marksheet File Upload
             $marksheetUrl = null;
@@ -172,9 +201,9 @@ class PublicController extends Controller
             }
 
             $formData = [
-                'member_id' => sprintf('#%05d', $user->id),
-                'parent_name' => $user->name,
-                'email' => $user->email,
+                'member_id' => $user ? sprintf('#%05d', $user->id) : ($request->input('member_number') ?? ''),
+                'parent_name' => $user ? $user->name : '',
+                'email' => $user ? $user->email : '',
                 'mobile' => $profile->phone ?? '',
                 'address' => $profile->address ?? '',
                 'area' => $profile->area ?? $profile->city ?? '',
@@ -223,7 +252,7 @@ class PublicController extends Controller
 
             $formData['full_name'] = trim(($formData['first_name'] ?? '') . ' ' . ($formData['surname'] ?? ''));
             if (empty($formData['full_name'])) {
-                $formData['full_name'] = auth()->user()->name;
+                $formData['full_name'] = $user ? $user->name : 'Participant';
             }
             $formData['contact_number'] = $formData['mobile_no'] ?? '';
             $formData['submission_date'] = now()->format('d-M-Y h:i A');
@@ -245,29 +274,35 @@ class PublicController extends Controller
 
         // Check if matching registration exists for this specific student/participant
         $existingRegistration = null;
-        if (!empty($formData['student_name'])) {
-            $registrations = EventRegistration::where('event_id', $event->id)
-                ->where('user_id', $user->id)
-                ->get();
-            foreach ($registrations as $r) {
-                if (isset($r->form_data['student_name']) && trim(mb_strtolower($r->form_data['student_name'])) === trim(mb_strtolower($formData['student_name']))) {
-                    $existingRegistration = $r;
-                    break;
+        if ($user) {
+            if (!empty($formData['student_name'])) {
+                $registrations = EventRegistration::where('event_id', $event->id)
+                    ->where('user_id', $user->id)
+                    ->get();
+                foreach ($registrations as $r) {
+                    if (isset($r->form_data['student_name']) && trim(mb_strtolower($r->form_data['student_name'])) === trim(mb_strtolower($formData['student_name']))) {
+                        $existingRegistration = $r;
+                        break;
+                    }
                 }
-            }
-        } elseif (!empty($formData['full_name'])) {
-            $registrations = EventRegistration::where('event_id', $event->id)
-                ->where('user_id', $user->id)
-                ->get();
-            foreach ($registrations as $r) {
-                if (isset($r->form_data['full_name']) && trim(mb_strtolower($r->form_data['full_name'])) === trim(mb_strtolower($formData['full_name']))) {
-                    $existingRegistration = $r;
-                    break;
+            } elseif (!empty($formData['full_name'])) {
+                $registrations = EventRegistration::where('event_id', $event->id)
+                    ->where('user_id', $user->id)
+                    ->get();
+                foreach ($registrations as $r) {
+                    if (isset($r->form_data['full_name']) && trim(mb_strtolower($r->form_data['full_name'])) === trim(mb_strtolower($formData['full_name']))) {
+                        $existingRegistration = $r;
+                        break;
+                    }
                 }
             }
         }
 
         if ($existingRegistration) {
+            if (!empty($existingRegistration->form_data['registration_no'])) {
+                $formData['registration_no'] = $existingRegistration->form_data['registration_no'];
+            }
+
             // Preserve old marksheet_url if a new file wasn't uploaded during update
             if ($event->event_type === 'inam_vitaran' && empty($formData['marksheet_url'])) {
                 if (!empty($existingRegistration->form_data['marksheet_url'])) {
@@ -298,14 +333,18 @@ class PublicController extends Controller
             }
         }
 
+        // Assign registration number starting from 1 for this specific event
+        $nextRegistrationNo = EventRegistration::where('event_id', $event->id)->count() + 1;
+        $formData['registration_no'] = $nextRegistrationNo;
+
         EventRegistration::create([
             'event_id' => $event->id,
-            'user_id' => $user->id,
+            'user_id' => $user ? $user->id : null,
             'status' => 'approved',
             'form_data' => $formData,
         ]);
 
-        return $redirectTarget->with('success', 'Registration submitted successfully.');
+        return $redirectTarget->with('success', 'Registration submitted successfully!');
     }
 
     /**
@@ -442,6 +481,27 @@ class PublicController extends Controller
             \Illuminate\Support\Facades\Log::error('Contact form mail failed: ' . $e->getMessage());
             return redirect()->back()->with('success', 'તમારો સંદેશ સફળતાપૂર્વક મળ્યો! ✅');
         }
+    }
+
+    /**
+     * Delete Event Registration by Member before last date
+     */
+    public function deleteRegistration($id)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('warning', 'Please login to manage registrations.');
+        }
+
+        $registration = EventRegistration::where('user_id', auth()->id())->findOrFail($id);
+        $event = $registration->event;
+
+        if (!empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString()) {
+            return redirect()->back()->with('error', 'The last date for registration (' . date('d-M-Y', strtotime($event->registration_end_date)) . ') has passed. You cannot delete this registration.');
+        }
+
+        $registration->delete();
+
+        return redirect()->route('member.events.register_form', $event->id)->with('success', 'Registration deleted successfully.');
     }
 }
 

@@ -54,34 +54,50 @@
 
         <!-- Table -->
         <div class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm">
-            <table class="w-full text-left border-collapse table-fixed">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr
-                        class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
-                        <th class="py-2 px-3" style="width: 180px;">{{ __('messages.member') }}</th>
-                        <th class="py-2 px-3" style="width: 140px;">{{ __('messages.designation') }}</th>
-                        <th class="py-2 px-3">{{ __('messages.message_preview') }}</th>
-                        <th class="py-2 px-3 text-right" style="width: 100px;">{{ __('messages.actions') }}</th>
+                    <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
+                        <th class="py-3 px-4">{{ __('messages.member') }}</th>
+                        <th class="py-3 px-4">{{ __('messages.designation') }}</th>
+                        <th class="py-3 px-4 text-center">{{ __('messages.display_order') }}</th>
+                        <th class="py-3 px-4 text-center">{{ __('messages.status') }}</th>
+                        <th class="py-3 px-4 text-right">{{ __('messages.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                     @forelse($members as $m)
-                        <tr class="hover:bg-slate-50/50">
-                            <td class="py-2 px-3 text-slate-900 font-bold">
+                        <tr class="hover:bg-slate-50/60 transition-colors">
+                            <td class="py-3 px-4 text-slate-900 font-bold">
                                 <div class="flex items-center space-x-3">
-                                    <img class="w-8 h-8 rounded-full object-cover shrink-0"
+                                    <img class="w-9 h-9 rounded-xl object-cover shrink-0 border border-slate-200 shadow-2xs bg-slate-100"
                                         src="{{ str_starts_with($m->photo_path, 'http') ? $m->photo_path : asset('storage/' . $m->photo_path) }}"
                                         alt="{{ $m->name }}">
-                                    <span class="truncate">{{ $m->name }}</span>
+                                    <span class="font-extrabold text-slate-900 text-xs">{{ $m->name }}</span>
                                 </div>
                             </td>
-                            <td class="py-2 px-3 truncate">{{ $m->designation }}</td>
-                            <td class="py-2 px-3 text-slate-500"
-                                style="max-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                {{ $m->message }}
+                            <td class="py-3 px-4 text-slate-600 font-bold text-xs">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80">
+                                    <span>👑</span> {{ $m->designation }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="inline-block px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-extrabold text-[11px] border border-slate-200">
+                                    #{{ $m->display_order }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                @if($m->status)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-extrabold text-[10px] border border-emerald-200/80 uppercase tracking-wider">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {{ __('messages.active') }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 font-extrabold text-[10px] border border-slate-200 uppercase tracking-wider">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> {{ __('messages.inactive') }}
+                                    </span>
+                                @endif
                             </td>
 
-                            <td class="py-2 px-3 text-right">
+                            <td class="py-3 px-4 text-right">
                                 <div class="flex justify-end items-center space-x-2">
                                     {{-- Edit --}}
                                     <button type="button" @click="openEdit({
@@ -93,9 +109,9 @@
                                                                         display_order: {{ $m->display_order }},
                                                                         update_url: '{{ route('admin.content.desk.update', $m->id) }}'
                                                                     })"
-                                        class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
+                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200/60 transition-colors shadow-2xs"
                                         title="{{ __('messages.edit') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -104,9 +120,9 @@
                                     {{-- Delete --}}
                                     <button type="button"
                                         @click="$dispatch('confirm-delete', { action: '{{ route('admin.content.desk.destroy', $m->id) }}', message: '{{ __('messages.delete_confirm_desk', ['name' => addslashes($m->name)]) }}' })"
-                                        class="flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200/60 transition-colors shadow-2xs"
                                         title="{{ __('messages.delete') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -117,7 +133,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="py-12 text-center text-slate-400">{{ __('messages.no_desk_entries_yet') }}
+                            <td colspan="5" class="py-12 text-center text-slate-400">{{ __('messages.no_desk_entries_yet') }}
                             </td>
                         </tr>
                     @endforelse
@@ -196,12 +212,6 @@
                                 class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
                         </div>
                     </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.greeting_message') }}</label>
-                        <textarea name="message" rows="3" required placeholder="Greetings message from desk..."
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">{{ old('message') }}</textarea>
-                    </div>
                     <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
                         <button type="button" @click="showAddModal = false"
                             class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
@@ -273,12 +283,6 @@
                             <input type="number" name="display_order" :value="editDesk.display_order" required
                                 class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
                         </div>
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.greeting_message') }}</label>
-                        <textarea name="message" rows="3" required x-text="editDesk.message"
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg"></textarea>
                     </div>
                     <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
                         <button type="button" @click="showEditModal = false"

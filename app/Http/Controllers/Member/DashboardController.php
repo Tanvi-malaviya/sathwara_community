@@ -25,7 +25,34 @@ class DashboardController extends Controller
         $familyCount = $family->count();
         $registeredEvents = $user->registeredEvents()->where('date', '>=', now()->toDateString())->get();
         
-        return view('member.dashboard', compact('user', 'profile', 'family', 'familyCount', 'registeredEvents'));
+        $formattedMemberId = '#' . sprintf('%05d', $user->id);
+        $myBusinesses = \App\Models\Business::where('user_id', $user->id)
+                        ->orWhere('member_id', (string)$user->id)
+                        ->orWhere('member_id', $formattedMemberId)
+                        ->orWhere('member_id', '#' . $user->id)
+                        ->with('category', 'area')
+                        ->latest()
+                        ->get();
+
+        return view('member.dashboard', compact('user', 'profile', 'family', 'familyCount', 'registeredEvents', 'myBusinesses'));
+    }
+
+    /**
+     * Display Registered Businesses for logged in member
+     */
+    public function myBusinesses()
+    {
+        $user = auth()->user();
+        $formattedMemberId = '#' . sprintf('%05d', $user->id);
+        $businesses = \App\Models\Business::where('user_id', $user->id)
+                        ->orWhere('member_id', (string)$user->id)
+                        ->orWhere('member_id', $formattedMemberId)
+                        ->orWhere('member_id', '#' . $user->id)
+                        ->with('category', 'area')
+                        ->latest()
+                        ->get();
+
+        return view('member.my_businesses', compact('user', 'businesses'));
     }
 
     /**

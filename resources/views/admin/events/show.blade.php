@@ -24,6 +24,19 @@
             </div>
         </div>
 
+        @php
+            $user = auth()->user();
+            $userPerms = $user->permissions->pluck('name');
+            $canEditThisEvent = $user->hasRole('Administrator') || 
+                                $userPerms->contains('events_manage') || 
+                                $userPerms->contains('event_manage_' . $event->id) || 
+                                $userPerms->contains('event_edit_' . $event->id);
+
+            $canDeleteThisEvent = $user->hasRole('Administrator') || 
+                                  $userPerms->contains('events_manage') || 
+                                  $userPerms->contains('event_manage_' . $event->id);
+        @endphp
+
         <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
             @if($event->registration_option)
                 <a href="#registrations-section" 
@@ -40,22 +53,26 @@
                 <span>{{ __('messages.gallery') }}</span>
             </a>
 
-            <a href="{{ route('admin.events.edit', $event->id) }}" 
-               class="px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200/60 font-extrabold text-xs rounded-lg transition-colors flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                </svg>
-                <span>{{ __('messages.edit') }}</span>
-            </a>
+            @if($canEditThisEvent)
+                <a href="{{ route('admin.events.edit', $event->id) }}" 
+                   class="px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200/60 font-extrabold text-xs rounded-lg transition-colors flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    <span>{{ __('messages.edit') }}</span>
+                </a>
+            @endif
 
-            <button type="button" 
-                    @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.destroy', $event->id) }}', message: '{{ __('messages.delete_confirm_event', ['name' => $event->title]) }}' })"
-                    class="px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60 font-extrabold text-xs rounded-lg transition-colors flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                </svg>
-                <span>{{ __('messages.delete') }}</span>
-            </button>
+            @if($canDeleteThisEvent)
+                <button type="button" 
+                        @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.destroy', $event->id) }}', message: '{{ __('messages.delete_confirm_event', ['name' => $event->title]) }}' })"
+                        class="px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60 font-extrabold text-xs rounded-lg transition-colors flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    <span>{{ __('messages.delete') }}</span>
+                </button>
+            @endif
         </div>
     </div>
 
@@ -180,113 +197,162 @@
                         <span>{{ __('messages.rejected') }}</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-100 text-rose-800">{{ $rejectedCount }}</span>
                     </button>
-                </div>
-            </div>
+                       <!-- Registrations Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                @forelse($registrations as $index => $reg)
+                    @php
+                        $fd = $reg->form_data ?? [];
+                        $userName = $reg->user ? $reg->user->name : ($fd['student_name'] ?? $fd['full_name'] ?? $fd['first_name'] ?? 'Guest Participant');
+                        $userEmail = $reg->user ? $reg->user->email : ($fd['email'] ?? null);
+                        $userPhone = $fd['contact_number'] ?? $fd['mobile_no'] ?? ($reg->user ? ($reg->user->memberProfile->phone ?? null) : null);
+                        $userCity = $fd['city'] ?? $fd['district'] ?? ($reg->user ? ($reg->user->memberProfile->city ?? null) : null);
+                        $regNo = $fd['registration_no'] ?? ($index + 1);
+                    @endphp
+                    <div x-show="activeTab === 'all' || activeTab === '{{ $reg->status }}'" 
+                         class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs hover:shadow-md hover:border-primary-400 transition-all space-y-2 relative group flex flex-col justify-between">
+                        
+                        <div class="space-y-2">
+                            <!-- Card Header: Reg # + Name & Status -->
+                            <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200/80 text-[10px] font-black text-slate-700 shrink-0">#{{ $regNo }}</span>
 
-            <!-- Registrations Table -->
-            <div class="border border-slate-100 rounded-xl overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
-                            <th class="py-2.5 px-4">{{ __('messages.member_name') }}</th>
-                            <th class="py-2.5 px-4">{{ __('messages.submitted_details') }}</th>
-                            <th class="py-2.5 px-4">{{ __('messages.contact_info') }}</th>
-                            <th class="py-2.5 px-4">{{ __('messages.city') }}</th>
-                            <th class="py-2.5 px-4">{{ __('messages.registered_date') }}</th>
-                            <th class="py-2.5 px-4">{{ __('messages.status') }}</th>
-                            <th class="py-2.5 px-4 text-right">{{ __('messages.actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-                        @forelse($registrations as $reg)
-                            <tr x-show="activeTab === 'all' || activeTab === '{{ $reg->status }}'" class="hover:bg-slate-50/60 transition-colors">
-                                <td class="py-3 px-4 text-slate-900 font-bold whitespace-nowrap">
-                                    {{ $reg->user->name }}
-                                </td>
-                                <td class="py-3 px-4">
-                                    <button type="button" 
-                                            @click="selectedRegistration = {{ json_encode([
-                                                'id' => $reg->id,
-                                                'user_name' => $reg->user->name,
-                                                'email' => $reg->user->email,
-                                                'phone' => $reg->form_data['contact_number'] ?? ($reg->user->memberProfile->phone ?? 'N/A'),
-                                                'city' => $reg->user->memberProfile->city ?? 'N/A',
-                                                'date' => $reg->created_at->format('d-M-Y h:i A'),
-                                                'status' => $reg->status,
-                                                'form_data' => $reg->form_data ?? [],
-                                                'approve_url' => route('admin.events.registrations.approve', $reg->id),
-                                                'reject_url' => route('admin.events.registrations.reject', $reg->id),
-                                            ]) }}; showDetailsModal = true" 
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all border border-slate-200/80 shadow-2xs">
-                                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path>
-                                        </svg>
-                                        <span>{{ __('messages.view_form_details') }}</span>
-                                    </button>
-                                </td>
-                                <td class="py-3 px-4 space-y-0.5">
-                                    <div class="text-slate-900 font-bold text-[11px]">{{ $reg->form_data['contact_number'] ?? ($reg->user->memberProfile->phone ?? 'N/A') }}</div>
-                                    <div class="text-slate-400 text-[10px] truncate max-w-[150px]">{{ $reg->user->email }}</div>
-                                </td>
-                                <td class="py-3 px-4 text-slate-600 font-medium whitespace-nowrap">
-                                    {{ $reg->user->memberProfile->city ?? 'N/A' }}
-                                </td>
-                                <td class="py-3 px-4 text-slate-500 font-medium text-[11px] whitespace-nowrap">
-                                    {{ $reg->created_at->format('d-M-Y') }}
-                                    <span class="block text-[10px] text-slate-400 font-normal">{{ $reg->created_at->format('h:i A') }}</span>
-                                </td>
-                                <td class="py-3 px-4 whitespace-nowrap">
-                                    @if($reg->status === 'approved')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
-                                            {{ __('messages.approved') }}
-                                        </span>
-                                    @elseif($reg->status === 'rejected')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200 uppercase">
-                                            {{ __('messages.rejected') }}
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 uppercase">
-                                            {{ __('messages.pending') }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="py-3 px-4 text-right whitespace-nowrap">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        @if($reg->status !== 'approved')
-                                            <form method="POST" action="{{ route('admin.events.registrations.approve', $reg->id) }}" class="inline">
-                                                @csrf
-                                                <button type="submit" title="{{ __('messages.approve') }}" 
-                                                        class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-800 transition-colors flex items-center justify-center">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        @endif
-                                        @if($reg->status !== 'rejected')
-                                            <form method="POST" action="{{ route('admin.events.registrations.reject', $reg->id) }}" class="inline">
-                                                @csrf
-                                                <button type="submit" title="{{ __('messages.reject') }}" 
-                                                        class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-800 transition-colors flex items-center justify-center">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                                                    </svg>
-                                                </button>
-                                            </form>
+                                    <div class="min-w-0">
+                                        <h4 class="text-xs font-black text-slate-900 truncate group-hover:text-primary-600 transition-colors">
+                                            {{ $userName }}
+                                        </h4>
+                                        @if($userCity)
+                                            <p class="text-[9px] text-slate-400 font-semibold truncate">{{ $userCity }}</p>
                                         @endif
                                     </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="py-10 text-center text-slate-400 font-medium">
-                                    {{ __('messages.no_registrations_yet') }}
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                </div>
+
+                                <div class="text-right shrink-0 space-y-0.5">
+                                    @if($reg->status === 'approved')
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                                            Approved
+                                        </span>
+                                    @elseif($reg->status === 'rejected')
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200 uppercase">
+                                            Rejected
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 uppercase">
+                                            Pending
+                                        </span>
+                                    @endif
+                                    <span class="text-[8px] font-medium text-slate-400 block">{{ $reg->created_at->format('d-M-Y') }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Contact Bar -->
+                            @if($userPhone || $userEmail)
+                                <div class="flex items-center justify-between text-[10px] bg-slate-50/80 rounded-lg p-1.5 border border-slate-100">
+                                    @if($userPhone)
+                                        <div class="flex items-center gap-1 font-extrabold text-slate-800">
+                                            <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                            <span>{{ $userPhone }}</span>
+                                        </div>
+                                    @endif
+                                    @if($userEmail)
+                                        <div class="text-[9px] font-semibold text-slate-400 truncate max-w-[120px]" title="{{ $userEmail }}">
+                                            {{ $userEmail }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            <!-- Embedded Form Details -->
+                            <div class="grid grid-cols-2 gap-1.5 text-[10px]">
+                                @if(!empty($fd['education']))
+                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                                        <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Education</span>
+                                        <span class="font-bold text-slate-800 truncate block">{{ $fd['education'] }}</span>
+                                    </div>
+                                @endif
+
+                                @if(!empty($fd['school_college']))
+                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                                        <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">School / College</span>
+                                        <span class="font-bold text-slate-800 truncate block" title="{{ $fd['school_college'] }}">{{ $fd['school_college'] }}</span>
+                                    </div>
+                                @endif
+
+                                @if(!empty($fd['percentage']))
+                                    <div class="bg-emerald-50/80 p-1.5 rounded-lg border border-emerald-100/90 col-span-2">
+                                        <span class="text-[8px] font-extrabold text-emerald-600 uppercase block tracking-wider">Percentage</span>
+                                        <span class="font-black text-emerald-700 block text-xs">{{ str_contains($fd['percentage'], '%') ? $fd['percentage'] : $fd['percentage'] . '%' }}</span>
+                                    </div>
+                                @elseif(!empty($fd['received_marks']) && !empty($fd['total_marks']))
+                                    <div class="bg-emerald-50/80 p-1.5 rounded-lg border border-emerald-100/90 col-span-2">
+                                        <span class="text-[8px] font-extrabold text-emerald-600 uppercase block tracking-wider">Obtained Marks</span>
+                                        <span class="font-black text-emerald-700 block text-xs">{{ $fd['received_marks'] }} / {{ $fd['total_marks'] }}</span>
+                                    </div>
+                                @endif
+
+                                @if(!empty($fd['age']))
+                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                                        <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Age / Gender</span>
+                                        <span class="font-bold text-slate-800 truncate block">{{ $fd['age'] }} Yrs {{ !empty($fd['gender']) ? '('.ucfirst($fd['gender']).')' : '' }}</span>
+                                    </div>
+                                @endif
+
+                                @if(!empty($fd['qualification']))
+                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                                        <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Qualification</span>
+                                        <span class="font-bold text-slate-800 truncate block">{{ $fd['qualification'] }}</span>
+                                    </div>
+                                @endif
+
+                                @if(!empty($fd['occupation']))
+                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                                        <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Occupation</span>
+                                        <span class="font-bold text-slate-800 truncate block">{{ $fd['occupation'] }}</span>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Marksheet Link -->
+                            @if(!empty($fd['marksheet_url']))
+                                <div class="pt-0.5">
+                                    <a href="{{ str_starts_with($fd['marksheet_url'], 'http') ? $fd['marksheet_url'] : asset('storage/' . $fd['marksheet_url']) }}" target="_blank" 
+                                       class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-[9px] font-extrabold border border-blue-200/80 transition-colors w-full justify-center">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                        <span>View Marksheet / Certificate ↗</span>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Actions (Approve/Reject) -->
+                        @if($reg->status !== 'approved' || $reg->status !== 'rejected')
+                            <div class="pt-1.5 border-t border-slate-100 flex items-center justify-end gap-1.5">
+                                @if($reg->status !== 'approved')
+                                    <form method="POST" action="{{ route('admin.events.registrations.approve', $reg->id) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" title="{{ __('messages.approve') }}" 
+                                                class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[9px] font-extrabold border border-emerald-200 transition-colors inline-flex items-center gap-0.5">
+                                            ✓ Approve
+                                        </button>
+                                    </form>
+                                @endif
+                                @if($reg->status !== 'rejected')
+                                    <form method="POST" action="{{ route('admin.events.registrations.reject', $reg->id) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" title="{{ __('messages.reject') }}" 
+                                                class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 hover:bg-rose-100 text-[9px] font-empty text-[9px] font-extrabold border border-rose-200 transition-colors inline-flex items-center gap-0.5">
+                                            ✕ Reject
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="col-span-full py-12 text-center text-slate-400 font-medium bg-white rounded-2xl border border-slate-100 shadow-2xs">
+                        {{ __('messages.no_registrations_found') }}
+                    </div>
+                @endforelse
             </div>
         </div>
     @endif

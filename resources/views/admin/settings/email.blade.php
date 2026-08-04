@@ -22,26 +22,6 @@
         </div>
     </div>
 
-    <!-- Alert Notifications -->
-    @if(session('success'))
-        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-2xl flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-2">
-                <span class="text-base">✅</span>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-sm font-black">&times;</button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold rounded-2xl flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-2">
-                <span class="text-base">❌</span>
-                <span>{{ session('error') }}</span>
-            </div>
-            <button onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700 text-sm font-black">&times;</button>
-        </div>
-    @endif
 
     @if(isset($errors) && $errors->any())
         <div class="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold rounded-2xl">

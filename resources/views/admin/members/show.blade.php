@@ -3,7 +3,12 @@
 @section('page_title', __('messages.member_profile_sheet'))
 
 @section('content')
-<div class="space-y-5 max-w-6xl mx-auto">
+@php
+    $user = auth()->user();
+    $userPerms = $user->permissions->pluck('name');
+    $canEditMember = $user->hasRole('Administrator') || $userPerms->contains('members_manage') || $userPerms->contains('members_edit');
+@endphp
+<div class="space-y-5 max-w-6xl mx-auto" x-data="{ showRejectModal: false }">
     <!-- Profile Details Card with Perfect Balance & Zero Empty Space -->
     <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
         <div class="flex flex-col md:flex-row items-start gap-5 lg:gap-6">
@@ -29,7 +34,7 @@
                         </p>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider {{ $member->status == 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($member->status == 'rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200') }}">
                             {{ __('messages.status_label') }}: 
                             @if($member->status == 'approved')
@@ -41,12 +46,29 @@
                             @endif
                         </span>
 
-                        <a href="{{ route('admin.members.edit', $member->id) }}" class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs rounded-lg transition-all shadow-xs gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            <span>{{ __('messages.edit_profile') }}</span>
-                        </a>
+                        @if($canEditMember)
+                            @if($member->status == 'pending' || $member->status == 'rejected')
+                                <form method="POST" action="{{ route('admin.members.approve', $member->id) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-lg transition-all shadow-xs gap-1">
+                                        ✓ {{ __('messages.approve') }}
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if($member->status == 'pending' || $member->status == 'approved')
+                                <button type="button" @click="showRejectModal = true" class="inline-flex items-center px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs rounded-lg transition-all shadow-xs gap-1">
+                                    ✕ {{ __('messages.reject') }}
+                                </button>
+                            @endif
+
+                            <a href="{{ route('admin.members.edit', $member->id) }}" class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs rounded-lg transition-all shadow-xs gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                <span>{{ __('messages.edit_profile') }}</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
 
@@ -160,5 +182,26 @@
             @endforelse
         </div>
     </div>
+
+    <!-- Reject Member Modal -->
+    <template x-teleport="body">
+        <div x-show="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" x-transition x-cloak>
+            <div @click.away="showRejectModal = false" class="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xl max-w-md w-full space-y-4 relative">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-sm font-black text-rose-600">Reject Member Application</h3>
+                    <button type="button" @click="showRejectModal = false" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+                </div>
+                <form method="POST" action="{{ route('admin.members.reject', $member->id) }}" class="space-y-3">
+                    @csrf
+                    <p class="text-xs text-slate-600 font-semibold">Please specify the reason for rejecting <strong class="text-slate-900">{{ $member->name }}</strong>:</p>
+                    <textarea name="rejection_reason" required rows="3" placeholder="e.g. Incomplete address or incorrect details..." class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 outline-none"></textarea>
+                    <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+                        <button type="button" @click="showRejectModal = false" class="px-4 py-2 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl">Cancel</button>
+                        <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs">Reject Member</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
 </div>
 @endsection

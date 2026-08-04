@@ -24,6 +24,12 @@ class GalleryController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+        $userPerms = $user->permissions->pluck('name');
+        if (!$user->hasRole('Administrator') && !$userPerms->contains('gallery_manage') && !$userPerms->contains('gallery_add')) {
+            abort(403, 'You do not have permission to add gallery photos.');
+        }
+
         // Pre-check for PHP file upload errors (e.g. Disk Full, Temp Dir errors)
         $filesToCheck = [];
         if ($request->hasFile('images')) {
@@ -152,6 +158,12 @@ class GalleryController extends Controller
      */
     public function destroy($id)
     {
+        $user = auth()->user();
+        $userPerms = $user->permissions->pluck('name');
+        if (!$user->hasRole('Administrator') && !$userPerms->contains('gallery_manage') && !$userPerms->contains('gallery_delete')) {
+            abort(403, 'You do not have permission to delete gallery photos.');
+        }
+
         $photo = Gallery::findOrFail($id);
 
         if (Storage::disk('public')->exists($photo->image_path) && !str_starts_with($photo->image_path, 'http')) {

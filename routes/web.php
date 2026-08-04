@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\SettingsController as AdminSettings;
 use App\Http\Controllers\Admin\EmailSettingsController as AdminEmailSettings;
 use App\Http\Controllers\Admin\AwardController as AdminAward;
 use App\Http\Controllers\Admin\AreaController as AdminArea;
+use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\SubAdminController;
 use Illuminate\Support\Facades\Route;
 
 // ================= LANGUAGE TOGGLE =================
@@ -27,6 +29,8 @@ Route::get('/about-us', [PublicController::class, 'about'])->name('about');
 Route::get('/management-desk', [PublicController::class, 'managementDesk'])->name('management_desk');
 Route::get('/events', [PublicController::class, 'events'])->name('events');
 Route::get('/events/{id}', [PublicController::class, 'eventDetails'])->name('event.details');
+Route::get('/events/{id}/register', [PublicController::class, 'showPublicRegistrationForm'])->name('events.public_register_form');
+Route::post('/events/{id}/register', [PublicController::class, 'registerEvent'])->name('events.public_register');
 Route::get('/updates', [PublicController::class, 'updates'])->name('updates');
 Route::get('/updates/{id}', [PublicController::class, 'updateDetails'])->name('update.details');
 Route::get('/gallery', [PublicController::class, 'gallery'])->name('gallery');
@@ -45,6 +49,7 @@ Route::middleware('guest')->group(function () {
 // Business signup (Public - can be submitted by guests or logged-in members)
 Route::get('/register/business', [RegistrationController::class, 'showBusinessRegister'])->name('register.business');
 Route::post('/register/business', [RegistrationController::class, 'submitBusinessRegister'])->name('register.business.submit');
+Route::get('/api/check-member-id', [RegistrationController::class, 'checkMemberId'])->name('api.check_member_id');
 
 // ================= ACCOUNT STATUS PAGE & REDIRECT =================
 // Guarded by auth, but accessible even if NOT approved (so they see the pending/rejected status)
@@ -73,6 +78,7 @@ Route::middleware(['auth', 'role:Member', 'approved'])->prefix('member')->name('
     Route::get('/account-settings/email/cancel-otp', [MemberDashboard::class, 'cancelEmailOtp'])->name('account.settings.cancel_otp');
     Route::post('/account-settings/password', [MemberDashboard::class, 'updatePassword'])->name('account.settings.update_password');
     Route::get('/membership-card', [MemberDashboard::class, 'membershipCard'])->name('card');
+    Route::get('/my-businesses', [MemberDashboard::class, 'myBusinesses'])->name('businesses.my');
 
     // Family CRUD
     Route::resource('family', MemberFamily::class);
@@ -82,6 +88,7 @@ Route::middleware(['auth', 'role:Member', 'approved'])->prefix('member')->name('
     Route::get('/events/{id}', [MemberEvent::class, 'show'])->name('events.show');
     Route::get('/events/{id}/register', [MemberEvent::class, 'showRegistrationForm'])->name('events.register_form');
     Route::post('/events/{id}/register', [PublicController::class, 'registerEvent'])->name('events.register');
+    Route::delete('/events/registrations/{id}', [PublicController::class, 'deleteRegistration'])->name('events.registrations.destroy');
 
     // Award Claims
     Route::get('/awards', [MemberAward::class, 'index'])->name('awards.index');
@@ -89,120 +96,159 @@ Route::middleware(['auth', 'role:Member', 'approved'])->prefix('member')->name('
     Route::post('/awards/apply', [MemberAward::class, 'store'])->name('awards.store');
 });
 
-// ================= ADMINISTRATOR PANEL =================
-// Guarded by auth, and Role Administrator
-Route::middleware(['auth', 'role:Administrator'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard overview
+// ================= ADMINISTRATOR AUTH & PANEL =================
+// Dedicated Admin Login & Logout
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+});
+
+// Guarded by auth, and Role Administrator or Sub Admin
+Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard overview (all logged in admins/sub-admins)
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
+    // Sub-Admins Management (Administrator role only)
+    Route::get('/sub-admins', [SubAdminController::class, 'index'])->name('sub_admins.index');
+    Route::post('/sub-admins', [SubAdminController::class, 'store'])->name('sub_admins.store');
+    Route::put('/sub-admins/{id}', [SubAdminController::class, 'update'])->name('sub_admins.update');
+    Route::put('/sub-admins/{id}/events', [SubAdminController::class, 'updateEventPermissions'])->name('sub_admins.update_events');
+    Route::delete('/sub-admins/{id}', [SubAdminController::class, 'destroy'])->name('sub_admins.destroy');
+
     // Members list, detail sheet, approvals, CSV export, print
-    Route::get('/members', [AdminMember::class, 'index'])->name('members.index');
-    Route::get('/members/export', [AdminMember::class, 'exportCsv'])->name('members.export');
-    Route::get('/members/print', [AdminMember::class, 'printList'])->name('members.print');
-    Route::get('/members/create', [AdminMember::class, 'create'])->name('members.create');
-    Route::post('/members/store', [AdminMember::class, 'store'])->name('members.store');
-    Route::get('/members/{id}', [AdminMember::class, 'show'])->name('members.show');
-    Route::get('/members/{id}/edit', [AdminMember::class, 'edit'])->name('members.edit');
-    Route::post('/members/{id}/update', [AdminMember::class, 'update'])->name('members.update');
-    Route::post('/members/{id}/approve', [AdminMember::class, 'approve'])->name('members.approve');
-    Route::post('/members/{id}/reject', [AdminMember::class, 'reject'])->name('members.reject');
-    Route::delete('/members/{id}', [AdminMember::class, 'destroy'])->name('members.destroy');
+    Route::middleware(['permission_check:members_manage'])->group(function() {
+        Route::get('/members', [AdminMember::class, 'index'])->name('members.index');
+        Route::get('/members/export', [AdminMember::class, 'exportCsv'])->name('members.export');
+        Route::get('/members/print', [AdminMember::class, 'printList'])->name('members.print');
+        Route::get('/members/create', [AdminMember::class, 'create'])->name('members.create');
+        Route::post('/members/store', [AdminMember::class, 'store'])->name('members.store');
+        Route::get('/members/{id}', [AdminMember::class, 'show'])->name('members.show');
+        Route::get('/members/{id}/edit', [AdminMember::class, 'edit'])->name('members.edit');
+        Route::post('/members/{id}/update', [AdminMember::class, 'update'])->name('members.update');
+        Route::post('/members/{id}/approve', [AdminMember::class, 'approve'])->name('members.approve');
+        Route::post('/members/{id}/reject', [AdminMember::class, 'reject'])->name('members.reject');
+        Route::delete('/members/{id}', [AdminMember::class, 'destroy'])->name('members.destroy');
+    });
 
     // Areas Management
-    Route::get('/areas', [AdminArea::class, 'index'])->name('areas.index');
-    Route::get('/areas/export', [AdminArea::class, 'exportCsv'])->name('areas.export');
-    Route::post('/areas', [AdminArea::class, 'store'])->name('areas.store');
-    Route::put('/areas/{id}', [AdminArea::class, 'update'])->name('areas.update');
-    Route::delete('/areas/{id}', [AdminArea::class, 'destroy'])->name('areas.destroy');
+    Route::middleware(['permission_check:areas_manage'])->group(function() {
+        Route::get('/areas', [AdminArea::class, 'index'])->name('areas.index');
+        Route::get('/areas/export', [AdminArea::class, 'exportCsv'])->name('areas.export');
+        Route::post('/areas', [AdminArea::class, 'store'])->name('areas.store');
+        Route::put('/areas/{id}', [AdminArea::class, 'update'])->name('areas.update');
+        Route::delete('/areas/{id}', [AdminArea::class, 'destroy'])->name('areas.destroy');
+    });
 
     // Businesses and Categories
-    Route::get('/businesses', [AdminBusiness::class, 'index'])->name('businesses.index');
-    Route::get('/businesses/export', [AdminBusiness::class, 'exportCsv'])->name('businesses.export');
-    Route::get('/businesses/{id}', [AdminBusiness::class, 'show'])->name('businesses.show');
-    Route::get('/businesses/{id}/edit', [AdminBusiness::class, 'edit'])->name('businesses.edit');
-    Route::post('/businesses/{id}/update', [AdminBusiness::class, 'update'])->name('businesses.update');
-    Route::post('/businesses/{id}/approve', [AdminBusiness::class, 'approve'])->name('businesses.approve');
-    Route::post('/businesses/{id}/reject', [AdminBusiness::class, 'reject'])->name('businesses.reject');
-    Route::post('/businesses/{id}/deactivate', [AdminBusiness::class, 'deactivate'])->name('businesses.deactivate');
-    Route::post('/businesses/{id}/activate', [AdminBusiness::class, 'activate'])->name('businesses.activate');
-    Route::delete('/businesses/{id}', [AdminBusiness::class, 'destroy'])->name('businesses.destroy');
+    Route::middleware(['permission_check:businesses_manage'])->group(function() {
+        Route::get('/businesses', [AdminBusiness::class, 'index'])->name('businesses.index');
+        Route::get('/businesses/export', [AdminBusiness::class, 'exportCsv'])->name('businesses.export');
+        Route::get('/businesses/{id}', [AdminBusiness::class, 'show'])->name('businesses.show');
+        Route::get('/businesses/{id}/edit', [AdminBusiness::class, 'edit'])->name('businesses.edit');
+        Route::post('/businesses/{id}/update', [AdminBusiness::class, 'update'])->name('businesses.update');
+        Route::post('/businesses/{id}/approve', [AdminBusiness::class, 'approve'])->name('businesses.approve');
+        Route::post('/businesses/{id}/reject', [AdminBusiness::class, 'reject'])->name('businesses.reject');
+        Route::post('/businesses/{id}/deactivate', [AdminBusiness::class, 'deactivate'])->name('businesses.deactivate');
+        Route::post('/businesses/{id}/activate', [AdminBusiness::class, 'activate'])->name('businesses.activate');
+        Route::delete('/businesses/{id}', [AdminBusiness::class, 'destroy'])->name('businesses.destroy');
 
-    Route::get('/business-categories', [AdminBusiness::class, 'categories'])->name('businesses.categories');
-    Route::post('/business-categories', [AdminBusiness::class, 'storeCategory'])->name('businesses.categories.store');
-    Route::get('/business-categories/{id}/edit', [AdminBusiness::class, 'editCategory'])->name('businesses.categories.edit');
-    Route::post('/business-categories/{id}/update', [AdminBusiness::class, 'updateCategory'])->name('businesses.categories.update');
-    Route::delete('/business-categories/{id}', [AdminBusiness::class, 'destroyCategory'])->name('businesses.categories.destroy');
+        Route::get('/business-categories', [AdminBusiness::class, 'categories'])->name('businesses.categories');
+        Route::post('/business-categories', [AdminBusiness::class, 'storeCategory'])->name('businesses.categories.store');
+        Route::get('/business-categories/{id}/edit', [AdminBusiness::class, 'editCategory'])->name('businesses.categories.edit');
+        Route::post('/business-categories/{id}/update', [AdminBusiness::class, 'updateCategory'])->name('businesses.categories.update');
+        Route::delete('/business-categories/{id}', [AdminBusiness::class, 'destroyCategory'])->name('businesses.categories.destroy');
+    });
 
     // Events and Registrations
-    Route::get('/events/export', [AdminEvent::class, 'exportCsv'])->name('events.export');
-    Route::resource('events', AdminEvent::class);
-    Route::get('/events/{id}/registrations/export', [AdminEvent::class, 'exportRegistrationsCsv'])->name('events.registrations.export');
-    Route::get('/events/{id}/registrations', [AdminEvent::class, 'registrations'])->name('events.registrations');
-    Route::post('/events/registrations/{id}/toggle-select', [AdminEvent::class, 'toggleSelectRegistration'])->name('events.registrations.toggle_select');
-    Route::get('/events/{id}/gallery', [AdminEvent::class, 'gallery'])->name('events.gallery');
-    Route::post('/events/{id}/gallery', [AdminEvent::class, 'uploadGallery'])->name('events.gallery.upload');
-    Route::delete('/events/gallery/{id}', [AdminEvent::class, 'deleteGalleryPhoto'])->name('events.gallery.destroy');
+    Route::middleware(['permission_check:events_manage'])->group(function() {
+        Route::get('/events/export', [AdminEvent::class, 'exportCsv'])->name('events.export');
+        Route::resource('events', AdminEvent::class);
+        Route::get('/events/{id}/registrations/export', [AdminEvent::class, 'exportRegistrationsCsv'])->name('events.registrations.export');
+        Route::get('/events/{id}/registrations', [AdminEvent::class, 'registrations'])->name('events.registrations');
+        Route::post('/events/registrations/{id}/toggle-select', [AdminEvent::class, 'toggleSelectRegistration'])->name('events.registrations.toggle_select');
+        Route::post('/events/registrations/{id}/approve', [AdminEvent::class, 'approveRegistration'])->name('events.registrations.approve');
+        Route::post('/events/registrations/{id}/reject', [AdminEvent::class, 'rejectRegistration'])->name('events.registrations.reject');
+        Route::get('/events/{id}/gallery', [AdminEvent::class, 'gallery'])->name('events.gallery');
+        Route::post('/events/{id}/gallery', [AdminEvent::class, 'uploadGallery'])->name('events.gallery.upload');
+        Route::delete('/events/gallery/{id}', [AdminEvent::class, 'deleteGalleryPhoto'])->name('events.gallery.destroy');
 
-    // Student Awards Applications
-    Route::get('/awards', [AdminAward::class, 'index'])->name('awards.index');
-    Route::get('/awards/export', [AdminAward::class, 'exportCsv'])->name('awards.export');
-    Route::get('/awards/{id}', [AdminAward::class, 'show'])->name('awards.show');
-    Route::post('/awards/{id}/approve', [AdminAward::class, 'approve'])->name('awards.approve');
-    Route::post('/awards/{id}/reject', [AdminAward::class, 'reject'])->name('awards.reject');
-    Route::delete('/awards/{id}', [AdminAward::class, 'destroy'])->name('awards.destroy');
+        // Student Awards Applications
+        Route::get('/awards', [AdminAward::class, 'index'])->name('awards.index');
+        Route::get('/awards/export', [AdminAward::class, 'exportCsv'])->name('awards.export');
+        Route::get('/awards/{id}', [AdminAward::class, 'show'])->name('awards.show');
+        Route::post('/awards/{id}/approve', [AdminAward::class, 'approve'])->name('awards.approve');
+        Route::post('/awards/{id}/reject', [AdminAward::class, 'reject'])->name('awards.reject');
+        Route::delete('/awards/{id}', [AdminAward::class, 'destroy'])->name('awards.destroy');
+    });
 
     // General Gallery
-    Route::get('/gallery', [AdminGallery::class, 'index'])->name('gallery.index');
-    Route::get('/gallery/export', [AdminGallery::class, 'exportCsv'])->name('gallery.export');
-    Route::post('/gallery', [AdminGallery::class, 'store'])->name('gallery.store');
-    Route::delete('/gallery/{id}', [AdminGallery::class, 'destroy'])->name('gallery.destroy');
+    Route::middleware(['permission_check:gallery_manage'])->group(function() {
+        Route::get('/gallery', [AdminGallery::class, 'index'])->name('gallery.index');
+        Route::get('/gallery/export', [AdminGallery::class, 'exportCsv'])->name('gallery.export');
+        Route::post('/gallery', [AdminGallery::class, 'store'])->name('gallery.store');
+        Route::delete('/gallery/{id}', [AdminGallery::class, 'destroy'])->name('gallery.destroy');
+    });
 
-    // Content Management (sliders, agendas, management desk, committee, timelines, updates)
-    Route::get('/content/sliders', [AdminContent::class, 'sliders'])->name('content.sliders');
-    Route::get('/content/sliders/export', [AdminContent::class, 'exportSlidersCsv'])->name('content.sliders.export');
-    Route::post('/content/sliders', [AdminContent::class, 'storeSlider'])->name('content.sliders.store');
-    Route::put('/content/sliders/{id}', [AdminContent::class, 'updateSlider'])->name('content.sliders.update');
-    Route::delete('/content/sliders/{id}', [AdminContent::class, 'destroySlider'])->name('content.sliders.destroy');
+    // Content Management
+    Route::middleware(['permission_check:sliders_manage'])->group(function() {
+        Route::get('/content/sliders', [AdminContent::class, 'sliders'])->name('content.sliders');
+        Route::get('/content/sliders/export', [AdminContent::class, 'exportSlidersCsv'])->name('content.sliders.export');
+        Route::post('/content/sliders', [AdminContent::class, 'storeSlider'])->name('content.sliders.store');
+        Route::put('/content/sliders/{id}', [AdminContent::class, 'updateSlider'])->name('content.sliders.update');
+        Route::delete('/content/sliders/{id}', [AdminContent::class, 'destroySlider'])->name('content.sliders.destroy');
+    });
 
-    Route::get('/content/agendas', [AdminContent::class, 'agendas'])->name('content.agendas');
-    Route::get('/content/agendas/export', [AdminContent::class, 'exportAgendasCsv'])->name('content.agendas.export');
-    Route::post('/content/agendas', [AdminContent::class, 'storeAgenda'])->name('content.agendas.store');
-    Route::put('/content/agendas/{id}', [AdminContent::class, 'updateAgenda'])->name('content.agendas.update');
-    Route::delete('/content/agendas/{id}', [AdminContent::class, 'destroyAgenda'])->name('content.agendas.destroy');
+    Route::middleware(['permission_check:agendas_manage'])->group(function() {
+        Route::get('/content/agendas', [AdminContent::class, 'agendas'])->name('content.agendas');
+        Route::get('/content/agendas/export', [AdminContent::class, 'exportAgendasCsv'])->name('content.agendas.export');
+        Route::post('/content/agendas', [AdminContent::class, 'storeAgenda'])->name('content.agendas.store');
+        Route::put('/content/agendas/{id}', [AdminContent::class, 'updateAgenda'])->name('content.agendas.update');
+        Route::delete('/content/agendas/{id}', [AdminContent::class, 'destroyAgenda'])->name('content.agendas.destroy');
+    });
 
-    Route::get('/content/management-desk', [AdminContent::class, 'managementDesk'])->name('content.desk');
-    Route::get('/content/management-desk/export', [AdminContent::class, 'exportDeskCsv'])->name('content.desk.export');
-    Route::post('/content/management-desk', [AdminContent::class, 'storeDesk'])->name('content.desk.store');
-    Route::put('/content/management-desk/{id}', [AdminContent::class, 'updateDesk'])->name('content.desk.update');
-    Route::delete('/content/management-desk/{id}', [AdminContent::class, 'destroyDesk'])->name('content.desk.destroy');
+    Route::middleware(['permission_check:desk_manage'])->group(function() {
+        Route::get('/content/management-desk', [AdminContent::class, 'managementDesk'])->name('content.desk');
+        Route::get('/content/management-desk/export', [AdminContent::class, 'exportDeskCsv'])->name('content.desk.export');
+        Route::post('/content/management-desk', [AdminContent::class, 'storeDesk'])->name('content.desk.store');
+        Route::put('/content/management-desk/{id}', [AdminContent::class, 'updateDesk'])->name('content.desk.update');
+        Route::delete('/content/management-desk/{id}', [AdminContent::class, 'destroyDesk'])->name('content.desk.destroy');
+    });
 
-    Route::get('/content/committee', [AdminContent::class, 'committee'])->name('content.committee');
-    Route::get('/content/committee/export', [AdminContent::class, 'exportCommitteeCsv'])->name('content.committee.export');
-    Route::post('/content/committee', [AdminContent::class, 'storeCommittee'])->name('content.committee.store');
-    Route::put('/content/committee/{id}', [AdminContent::class, 'updateCommittee'])->name('content.committee.update');
-    Route::delete('/content/committee/{id}', [AdminContent::class, 'destroyCommittee'])->name('content.committee.destroy');
+    Route::middleware(['permission_check:committee_manage'])->group(function() {
+        Route::get('/content/committee', [AdminContent::class, 'committee'])->name('content.committee');
+        Route::get('/content/committee/export', [AdminContent::class, 'exportCommitteeCsv'])->name('content.committee.export');
+        Route::post('/content/committee', [AdminContent::class, 'storeCommittee'])->name('content.committee.store');
+        Route::put('/content/committee/{id}', [AdminContent::class, 'updateCommittee'])->name('content.committee.update');
+        Route::delete('/content/committee/{id}', [AdminContent::class, 'destroyCommittee'])->name('content.committee.destroy');
+    });
 
-    Route::get('/content/timelines', [AdminContent::class, 'timelines'])->name('content.timelines');
-    Route::get('/content/timelines/export', [AdminContent::class, 'exportTimelinesCsv'])->name('content.timelines.export');
-    Route::post('/content/timelines', [AdminContent::class, 'storeTimeline'])->name('content.timelines.store');
-    Route::put('/content/timelines/{id}', [AdminContent::class, 'updateTimeline'])->name('content.timelines.update');
-    Route::delete('/content/timelines/{id}', [AdminContent::class, 'destroyTimeline'])->name('content.timelines.destroy');
+    Route::middleware(['permission_check:timelines_manage'])->group(function() {
+        Route::get('/content/timelines', [AdminContent::class, 'timelines'])->name('content.timelines');
+        Route::get('/content/timelines/export', [AdminContent::class, 'exportTimelinesCsv'])->name('content.timelines.export');
+        Route::post('/content/timelines', [AdminContent::class, 'storeTimeline'])->name('content.timelines.store');
+        Route::put('/content/timelines/{id}', [AdminContent::class, 'updateTimeline'])->name('content.timelines.update');
+        Route::delete('/content/timelines/{id}', [AdminContent::class, 'destroyTimeline'])->name('content.timelines.destroy');
+    });
 
-    Route::get('/content/updates', [AdminContent::class, 'updates'])->name('content.updates');
-    Route::get('/content/updates/export', [AdminContent::class, 'exportUpdatesCsv'])->name('content.updates.export');
-    Route::post('/content/updates', [AdminContent::class, 'storeUpdate'])->name('content.updates.store');
-    Route::put('/content/updates/{id}', [AdminContent::class, 'updateUpdate'])->name('content.updates.update');
-    Route::delete('/content/updates/{id}', [AdminContent::class, 'destroyUpdate'])->name('content.updates.destroy');
+    Route::middleware(['permission_check:announcements_manage'])->group(function() {
+        Route::get('/content/updates', [AdminContent::class, 'updates'])->name('content.updates');
+        Route::get('/content/updates/export', [AdminContent::class, 'exportUpdatesCsv'])->name('content.updates.export');
+        Route::post('/content/updates', [AdminContent::class, 'storeUpdate'])->name('content.updates.store');
+        Route::put('/content/updates/{id}', [AdminContent::class, 'updateUpdate'])->name('content.updates.update');
+        Route::delete('/content/updates/{id}', [AdminContent::class, 'destroyUpdate'])->name('content.updates.destroy');
+    });
 
-    // Site Settings (contact information, maps, colors, SEO, logo)
-    Route::get('/settings', [AdminSettings::class, 'index'])->name('settings.index');
-    Route::post('/settings', [AdminSettings::class, 'update'])->name('settings.update');
+    // Site & Email Settings
+    Route::middleware(['permission_check:settings_manage'])->group(function() {
+        Route::get('/settings', [AdminSettings::class, 'index'])->name('settings.index');
+        Route::post('/settings', [AdminSettings::class, 'update'])->name('settings.update');
 
-    // Email / SMTP Settings (manage .env email configuration)
-    Route::get('/email-settings', [AdminEmailSettings::class, 'index'])->name('email_settings.index');
-    Route::post('/email-settings', [AdminEmailSettings::class, 'update'])->name('email_settings.update');
-    Route::post('/email-settings/test', [AdminEmailSettings::class, 'sendTestMail'])->name('email_settings.test');
+        Route::get('/email-settings', [AdminEmailSettings::class, 'index'])->name('email_settings.index');
+        Route::post('/email-settings', [AdminEmailSettings::class, 'update'])->name('email_settings.update');
+        Route::post('/email-settings/test', [AdminEmailSettings::class, 'sendTestMail'])->name('email_settings.test');
+    });
 });
 
 // Fallback to Breeze default auth routes
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

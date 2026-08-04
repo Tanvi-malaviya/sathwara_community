@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="max-w-6xl bg-white border border-slate-100 rounded-xl p-5 shadow-sm space-y-4">
+
     <!-- Validation Errors -->
     @if ($errors->any())
         <div class="p-3 bg-rose-50 border border-rose-100 text-rose-800 rounded-xl">
@@ -16,6 +17,10 @@
         </div>
     @endif
 
+    @php 
+        $existingCount = is_array($business->gallery_images) ? count($business->gallery_images) : 0; 
+    @endphp
+
     <form method="POST" action="{{ route('admin.businesses.update', $business->id) }}" class="space-y-4" enctype="multipart/form-data">
         @csrf
 
@@ -26,8 +31,8 @@
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Member ID <span class="text-rose-500">*</span></label>
-                    <input type="text" name="member_id" value="{{ old('member_id', $business->member_id) }}" required placeholder="e.g. LIFETIME-1234" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Member ID <span class="text-slate-400 font-normal">(Optional)</span></label>
+                    <input type="text" name="member_id" value="{{ old('member_id', $business->member_id) }}" placeholder="e.g. #00005 (Optional)" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
@@ -166,7 +171,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- LOGO UPLOAD -->
                 <div class="space-y-2 border border-slate-100 rounded-xl p-3 bg-slate-50/50">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase block">Logo Image / V.Card <span class="text-rose-500">*</span></label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase block">Logo Image / V.Card</label>
                     <div class="flex items-center space-x-3">
                         <img src="{{ str_starts_with($business->logo_path, 'http') ? $business->logo_path : asset('storage/' . $business->logo_path) }}" 
                              class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-white shadow-sm shrink-0" alt="Logo">
@@ -180,7 +185,7 @@
 
                 <!-- PAYMENT SCREENSHOT UPLOAD -->
                 <div class="space-y-2 border border-slate-100 rounded-xl p-3 bg-slate-50/50">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase block">Payment Screenshot <span class="text-rose-500">*</span></label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase block">Payment Screenshot <span class="text-slate-400 font-normal">(Optional)</span></label>
                     <div class="flex items-center space-x-3">
                         @if($business->payment_screenshot_path)
                             <img src="{{ asset('storage/' . $business->payment_screenshot_path) }}" 
@@ -197,31 +202,154 @@
                 </div>
 
                 <!-- GALLERY UPLOAD & MANAGEMENT -->
-                <div class="space-y-2 border border-slate-100 rounded-xl p-3 bg-slate-50/50">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase block">Add Showcase Photos</label>
-                    <input type="file" name="gallery[]" accept="image/*" multiple 
-                           class="w-full text-xs font-semibold file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
-                    <p class="text-[9px] text-slate-400 font-semibold">Max 10MB per image</p>
-                </div>
-            </div>
+                <div class="space-y-4 border border-slate-200/80 rounded-2xl p-4 bg-slate-50/60 shadow-2xs md:col-span-3" x-data="multiShowcaseUploader({{ $existingCount }})">
+                    <div class="flex items-center justify-between gap-3 pb-1 flex-wrap">
+                        <div>
+                            <label class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider block">Add Showcase Photos</label>
+                            <p class="text-[10px] text-slate-400 font-medium">Select photos to append (Max 6 total per business). Previously saved photos remain.</p>
+                        </div>
 
-            <!-- EXISTING GALLERY PHOTOS WITH DELETE OPTION -->
-            @if($business->gallery_images && count($business->gallery_images) > 0)
-                <div class="mt-3 border border-slate-100 rounded-xl p-3">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Existing Showcase Photos (Select to delete)</p>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                        @foreach($business->gallery_images as $index => $img)
-                            <label class="block relative aspect-square rounded-lg overflow-hidden border border-slate-200 cursor-pointer group bg-slate-50">
-                                <img src="{{ asset('storage/' . $img) }}" class="w-full h-full object-cover group-hover:opacity-75 transition-opacity">
-                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                    <span class="text-white text-[9px] font-bold">Remove</span>
-                                </div>
-                                <input type="checkbox" name="remove_gallery_images[]" value="{{ $img }}" class="absolute top-1 right-1 w-3.5 h-3.5 rounded text-rose-600 focus:ring-rose-500 border-slate-300">
-                            </label>
-                        @endforeach
+                        <div class="flex items-center gap-2">
+                            <!-- SELECT FILES BUTTON -->
+                            <button type="button" @click="$refs.hiddenFileInput.click()" 
+                                :disabled="maxFiles <= 0"
+                                :class="maxFiles <= 0 ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'"
+                                class="px-4 py-2 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>SELECT FILES</span>
+                            </button>
+
+                            <!-- CLEAR BUTTON -->
+                            <button type="button" @click="clearAll()" x-show="files.length > 0" x-cloak
+                                class="px-3.5 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 font-extrabold text-xs rounded-xl border border-rose-200/80 transition-all flex items-center gap-1.5 cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span>CLEAR</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden file input linked to DataTransfer for actual form submission -->
+                    <input type="file" x-ref="hiddenFileInput" name="gallery[]" accept="image/*" multiple @change="selectFiles($event)" class="hidden">
+
+                    <!-- Drag & Drop Container Zone -->
+                    <div 
+                        @dragover.prevent="isDragging = true"
+                        @dragleave.prevent="isDragging = false"
+                        @drop.prevent="dropFiles($event)"
+                        :class="isDragging ? 'border-blue-500 bg-blue-50/60 scale-[0.99]' : 'border-slate-300 bg-white hover:bg-slate-50/80'"
+                        class="border-2 border-dashed rounded-2xl p-5 text-center transition-all cursor-pointer relative"
+                        @click="$refs.hiddenFileInput.click()">
+                        
+                        <div x-show="files.length === 0" class="space-y-1.5 py-3">
+                            <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto border border-blue-100">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <p class="text-xs font-extrabold text-slate-700">Drop Your Files Here or <span class="text-blue-600 underline">Browse</span></p>
+                            <p class="text-[10px] text-slate-400 font-medium">
+                                Allowed Slots Available: <strong class="text-blue-600 font-bold" x-text="maxFiles"></strong> photo(s) can be added (6 Total Allowed)
+                            </p>
+                        </div>
+
+                        <!-- Selected Photos Thumbnails Grid -->
+                        <div x-show="files.length > 0" class="space-y-2" @click.stop x-cloak>
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 px-1 border-b border-slate-100 pb-2">
+                                <span>New Showcase Photos To Add:</span>
+                                <span class="text-blue-600 font-black bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/80" 
+                                      x-text="files.length + '/' + maxFiles + ' New Selected (' + (existingCount + files.length) + '/6 Total)'"></span>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-3 pt-1">
+                                <template x-for="(f, idx) in files" :key="f.id">
+                                    <div class="relative group w-24 h-24 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-2xs shrink-0">
+                                        <img :src="f.url" class="w-full h-full object-cover">
+                                        
+                                        <!-- Remove Button -->
+                                        <button type="button" @click.stop="removeFile(idx)" 
+                                            class="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-md hover:bg-rose-700 transition-colors text-[10px] font-black" title="Remove photo">
+                                            ✕
+                                        </button>
+                                        
+                                        <!-- File Name Bar -->
+                                        <div class="absolute bottom-0 inset-x-0 bg-slate-900/80 text-white p-0.5 text-[8px] truncate font-semibold backdrop-blur-xs text-center">
+                                            <span x-text="f.name"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EXISTING GALLERY PHOTOS WITH DELETE OPTION -->
+                    @if($business->gallery_images && count($business->gallery_images) > 0)
+                        <div class="mt-4 pt-4 border-t border-slate-200/80">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Existing Showcase Photos (Select to Delete)</p>
+                                <span x-show="removedImages.length > 0" class="text-[10px] font-extrabold text-rose-600 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-md">
+                                    <span x-text="removedImages.length"></span> photo(s) marked for removal (Frees up <span x-text="removedImages.length"></span> slot<span x-show="removedImages.length > 1">s</span>)
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                                @foreach($business->gallery_images as $index => $img)
+                                    <label class="block relative aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer group bg-slate-50 shadow-2xs"
+                                           :class="isRemoved('{{ $img }}') ? 'border-rose-500 ring-2 ring-rose-500/30' : 'border-slate-200 hover:border-slate-300'">
+                                        <img src="{{ asset('storage/' . $img) }}" 
+                                             class="w-full h-full object-cover transition-all"
+                                             :class="isRemoved('{{ $img }}') ? 'opacity-30 grayscale' : 'group-hover:opacity-85'">
+                                        
+                                        <div x-show="isRemoved('{{ $img }}')" class="absolute inset-0 bg-rose-950/40 flex flex-col items-center justify-center text-white">
+                                            <span class="text-[9px] font-black uppercase tracking-wider bg-rose-600 px-2 py-0.5 rounded-md shadow-sm">Will Delete</span>
+                                        </div>
+
+                                        <input type="checkbox" name="remove_gallery_images[]" value="{{ $img }}" 
+                                               @change="toggleExisting('{{ $img }}', $event)" 
+                                               class="absolute top-2 right-2 w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300 shadow-sm z-10 cursor-pointer">
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                    
+                    <!-- Custom Pop-up Modal for Photo Limit Warning -->
+                    <div x-show="showLimitModal" 
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+                        @keydown.escape.window="showLimitModal = false"
+                        x-cloak>
+                        
+                        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border border-slate-100 space-y-4 relative overflow-hidden" @click.away="showLimitModal = false">
+                            <div class="w-14 h-14 rounded-full bg-amber-50 text-amber-500 border border-amber-200/80 flex items-center justify-center mx-auto shadow-inner">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <h3 class="text-base font-black text-slate-900">Photo Limit Reached</h3>
+                                <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                                    Maximum <strong class="text-amber-600 font-bold">6 total showcase photos</strong> allowed per business directory entry.
+                                    <br><span class="text-[11px] text-slate-500 block mt-1">You currently have <strong x-text="existingCount"></strong> active saved photo(s). Select checkboxes under Existing Showcase Photos to remove old ones and free up slots.</span>
+                                </p>
+                            </div>
+
+                            <button type="button" @click="showLimitModal = false" 
+                                class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer">
+                                Got it, thanks!
+                            </button>
+                        </div>
                     </div>
                 </div>
-            @endif
+            </div>
         </div>
 
         <!-- FORM ACTIONS -->
@@ -237,4 +365,114 @@
         </div>
     </form>
 </div>
+
+<script>
+function multiShowcaseUploader(initialExistingCount = 0) {
+    return {
+        files: [],
+        removedImages: [],
+        isDragging: false,
+        initialExistingCount: initialExistingCount,
+        showLimitModal: false,
+        
+        get existingCount() {
+            return Math.max(0, this.initialExistingCount - this.removedImages.length);
+        },
+
+        get maxFiles() {
+            return Math.max(0, 6 - this.existingCount);
+        },
+
+        isRemoved(imgPath) {
+            return this.removedImages.includes(imgPath);
+        },
+
+        toggleExisting(imgPath, e) {
+            if (e.target.checked) {
+                if (!this.removedImages.includes(imgPath)) {
+                    this.removedImages.push(imgPath);
+                }
+            } else {
+                this.removedImages = this.removedImages.filter(img => img !== imgPath);
+                if (this.files.length > this.maxFiles) {
+                    this.files.splice(this.maxFiles);
+                    this.syncInput();
+                }
+            }
+        },
+
+        selectFiles(e) {
+            if (this.maxFiles <= 0) {
+                this.showLimitModal = true;
+                return;
+            }
+            if (e.target.files && e.target.files.length > 0) {
+                this.addFiles(Array.from(e.target.files));
+            }
+        },
+        
+        dropFiles(e) {
+            this.isDragging = false;
+            if (this.maxFiles <= 0) {
+                this.showLimitModal = true;
+                return;
+            }
+            if (e.dataTransfer && e.dataTransfer.files) {
+                this.addFiles(Array.from(e.dataTransfer.files));
+            }
+        },
+        
+        addFiles(newFiles) {
+            let overflow = false;
+            newFiles.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const exists = this.files.some(f => f.name === file.name && f.file.size === file.size);
+                    if (!exists) {
+                        if (this.files.length < this.maxFiles) {
+                            this.files.push({
+                                id: Math.random().toString(36).substring(2, 9),
+                                file: file,
+                                name: file.name,
+                                size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+                                url: URL.createObjectURL(file)
+                            });
+                        } else {
+                            overflow = true;
+                        }
+                    }
+                }
+            });
+
+            if (overflow || (this.maxFiles <= 0 && newFiles.length > 0)) {
+                this.showLimitModal = true;
+            }
+
+            this.syncInput();
+        },
+        
+        removeFile(index) {
+            if (this.files[index]) {
+                URL.revokeObjectURL(this.files[index].url);
+                this.files.splice(index, 1);
+                this.syncInput();
+            }
+        },
+        
+        clearAll() {
+            this.files.forEach(f => URL.revokeObjectURL(f.url));
+            this.files = [];
+            this.syncInput();
+        },
+        
+        syncInput() {
+            const input = this.$refs.hiddenFileInput;
+            if (input) {
+                const dt = new DataTransfer();
+                this.files.forEach(f => dt.items.add(f.file));
+                input.files = dt.files;
+            }
+        }
+    };
+}
+</script>
 @endsection

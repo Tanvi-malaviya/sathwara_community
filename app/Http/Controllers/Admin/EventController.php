@@ -17,12 +17,24 @@ class EventController extends Controller
     public function index(Request $request)
     {
         $query = Event::withCount('registrations');
+
+        $user = auth()->user();
+        if ($user->hasRole('Sub Admin') && !$user->permissions->pluck('name')->contains('events_manage')) {
+            $allowedEventIds = $user->permissions->pluck('name')
+                ->filter(fn($p) => str_starts_with($p, 'event_'))
+                ->map(function($p) {
+                    return (int) str_replace(['event_manage_', 'event_view_', 'event_edit_', 'event_create_'], '', $p);
+                })->filter()->unique()->toArray();
+
+            $query->whereIn('id', $allowedEventIds);
+        }
+
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('venue', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('venue', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
         $events = $query->orderBy('date', 'desc')->paginate(15)->withQueryString();
@@ -64,6 +76,8 @@ class EventController extends Controller
             'venue' => 'required|string|max:255',
             'date' => 'required|date',
             'time' => 'required',
+            'published_date' => 'nullable|date',
+            'registration_end_date' => 'nullable|date',
             'banner' => 'nullable|image|max:3072',
             'has_registration_form' => 'required|boolean',
             'pass_fee' => 'nullable|numeric|min:0',
@@ -83,6 +97,8 @@ class EventController extends Controller
             'venue' => $request->venue,
             'date' => $request->date,
             'time' => $request->time,
+            'published_date' => $request->published_date,
+            'registration_end_date' => $request->registration_end_date,
             'banner_path' => $bannerPath ?? '',
             'registration_option' => $request->has_registration_form,
             'has_registration_form' => $request->has_registration_form,
@@ -94,12 +110,26 @@ class EventController extends Controller
         return redirect()->route('admin.events.index')->with('success', 'Event created successfully.');
     }
 
+    private function checkEditPermission($eventId)
+    {
+        $user = auth()->user();
+        if ($user->hasRole('Administrator')) {
+            return;
+        }
+        $userPerms = $user->permissions->pluck('name');
+        if ($userPerms->contains('events_manage') || $userPerms->contains('event_manage_' . $eventId) || $userPerms->contains('event_edit_' . $eventId)) {
+            return;
+        }
+        abort(403, 'You do not have permission to edit or modify this event.');
+    }
+
     /**
      * Edit Form
      */
     public function edit($id)
     {
         $event = Event::findOrFail($id);
+        $this->checkEditPermission($event->id);
         return view('admin.events.edit', compact('event'));
     }
 
@@ -109,6 +139,7 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
         $event = Event::findOrFail($id);
+        $this->checkEditPermission($event->id);
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -117,6 +148,8 @@ class EventController extends Controller
             'venue' => 'required|string|max:255',
             'date' => 'required|date',
             'time' => 'required',
+            'published_date' => 'nullable|date',
+            'registration_end_date' => 'nullable|date',
             'banner' => 'nullable|image|max:3072',
             'has_registration_form' => 'required|boolean',
             'pass_fee' => 'nullable|numeric|min:0',
@@ -139,6 +172,8 @@ class EventController extends Controller
             'venue' => $request->venue,
             'date' => $request->date,
             'time' => $request->time,
+            'published_date' => $request->published_date,
+            'registration_end_date' => $request->registration_end_date,
             'banner_path' => $bannerPath ?? '',
             'registration_option' => $request->has_registration_form,
             'has_registration_form' => $request->has_registration_form,
@@ -156,6 +191,7 @@ class EventController extends Controller
     public function destroy($id)
     {
         $event = Event::findOrFail($id);
+        $this->checkEditPermission($event->id);
         $event->delete();
 
         return redirect()->route('admin.events.index')->with('success', 'Event deleted successfully.');
@@ -181,6 +217,7 @@ class EventController extends Controller
     public function toggleSelectRegistration($id)
     {
         $registration = EventRegistration::findOrFail($id);
+        $this->checkEditPermission($registration->event_id);
         $registration->update([
             'is_selected' => !$registration->is_selected
         ]);
@@ -232,7 +269,7 @@ class EventController extends Controller
     public function deleteGalleryPhoto($id)
     {
         $photo = Gallery::findOrFail($id);
-        
+
         if (Storage::disk('public')->exists($photo->image_path) && !str_starts_with($photo->image_path, 'http')) {
             Storage::disk('public')->delete($photo->image_path);
         }
@@ -247,27 +284,27 @@ class EventController extends Controller
     public function exportCsv(Request $request)
     {
         $headers = [
-            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=events_export_" . date('Y-m-d') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
 
         $query = Event::withCount('registrations');
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('venue', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('venue', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
         $events = $query->orderBy('date', 'desc')->get();
 
-        $callback = function() use ($events) {
+        $callback = function () use ($events) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($file, [
                 __('messages.csv_id'),
                 __('messages.csv_event_title'),
@@ -306,56 +343,103 @@ class EventController extends Controller
     public function exportRegistrationsCsv($id)
     {
         $event = Event::findOrFail($id);
-        $registrations = EventRegistration::where('event_id', $event->id)->with('user')->orderBy('created_at', 'desc')->get();
+        $registrations = EventRegistration::where('event_id', $event->id)->with('user')->orderBy('created_at', 'asc')->get();
 
         $headers = [
-            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=registrations_event_" . $event->id . "_" . date('Y-m-d') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
 
-        $callback = function() use ($registrations, $event) {
+        $callback = function () use ($registrations, $event) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             if ($event->event_type === 'inam_vitaran') {
-                fputcsv($file, ['Reg ID', 'Member ID', 'Member Name', 'Student Name', 'Education', 'School/College', 'Total Marks', 'Obtained Marks', 'Percentage', 'Submission Date']);
-                foreach ($registrations as $r) {
+                fputcsv($file, ['Reg ID', 'Member ID', 'Member Name', 'Student Name', 'Education', 'School/College', 'Total Marks', 'Obtained Marks', 'Percentage', 'Marksheet File URL', 'Submission Date', 'Remarks']);
+                foreach ($registrations as $index => $r) {
                     $fd = $r->form_data ?? [];
                     fputcsv($file, [
-                        $r->id,
-                        $fd['member_id'] ?? ($r->user ? '#'.sprintf('%05d', $r->user->id) : ''),
+                        $fd['registration_no'] ?? ($index + 1),
+                        $fd['member_id'] ?? ($r->user ? '#' . sprintf('%05d', $r->user->id) : ''),
                         $fd['parent_name'] ?? ($r->user ? $r->user->name : ''),
                         $fd['student_name'] ?? ($r->user ? $r->user->name : ''),
                         $fd['education'] ?? '',
                         $fd['school_college'] ?? '',
                         $fd['total_marks'] ?? '',
                         $fd['received_marks'] ?? '',
-                        ($fd['percentage'] ?? '') ? $fd['percentage'].'%' : '',
+                        !empty($fd['percentage']) ? (str_contains($fd['percentage'], '%') ? $fd['percentage'] : $fd['percentage'] . '%') : '',
+                        $fd['marksheet_url'] ?? '',
                         $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
+                        $fd['remarks'] ?? '',
                     ]);
                 }
             } elseif ($event->event_type === 'yuva_melo') {
                 fputcsv($file, [
-                    'Id', 'Date', 'Status', 'Application Id', 'Name', 'Surname', 'Gender',
-                    'Father Name', 'Grandpa Name', 'Address', 'Mobile Number 1', 'Whatsapp Number',
-                    'Birth Date', 'Age', 'Height', 'Weight', 'Qualification', 'Occupation',
-                    'Occupation Address', 'Monthly Income', 'Elder Brothers', 'Married Elder Brothers',
-                    'Younger Brothers', 'Married Younger Brothers', 'Elder Sisters', 'Married Elder Sisters',
-                    'Younger Sisters', 'Married Younger Sisters', 'Father Occupation', 'Father Occupation Address',
-                    'Father Mobile', 'Father Age', 'Father Income', 'Native Place', 'Mother Name', 'Mother Occupation',
-                    'Maternal Uncle Name', 'Maternal Grandfather Name', 'Maternal Grandfather Address', 'Maternal Grandfather Occupation',
-                    'Business', 'House', 'Own House', 'Vehicle', 'Divorce', 'Special Need',
-                    'Physical Disability', 'Disability Duration', 'Other Info', 'Special Info',
-                    'Member Number', 'Payment Number', 'Photo URL', 'Aadhaar Photo URL', 'Selfie URL',
-                    'WhatsApp Image URL', 'Payment Image URL'
+                    'Id',
+                    'Date',
+                    'Status',
+                    'Application Id',
+                    'Name',
+                    'Surname',
+                    'Gender',
+                    'Father Name',
+                    'Grandpa Name',
+                    'Address',
+                    'Mobile Number 1',
+                    'Whatsapp Number',
+                    'Birth Date',
+                    'Age',
+                    'Height',
+                    'Weight',
+                    'Qualification',
+                    'Occupation',
+                    'Occupation Address',
+                    'Monthly Income',
+                    'Elder Brothers',
+                    'Married Elder Brothers',
+                    'Younger Brothers',
+                    'Married Younger Brothers',
+                    'Elder Sisters',
+                    'Married Elder Sisters',
+                    'Younger Sisters',
+                    'Married Younger Sisters',
+                    'Father Occupation',
+                    'Father Occupation Address',
+                    'Father Mobile',
+                    'Father Age',
+                    'Father Income',
+                    'Native Place',
+                    'Mother Name',
+                    'Mother Occupation',
+                    'Maternal Uncle Name',
+                    'Maternal Grandfather Name',
+                    'Maternal Grandfather Address',
+                    'Maternal Grandfather Occupation',
+                    'Business',
+                    'House',
+                    'Own House',
+                    'Vehicle',
+                    'Divorce',
+                    'Special Need',
+                    'Physical Disability',
+                    'Disability Duration',
+                    'Other Info',
+                    'Special Info',
+                    'Member Number',
+                    'Payment Number',
+                    'Photo URL',
+                    'Aadhaar Photo URL',
+                    'Selfie URL',
+                    'WhatsApp Image URL',
+                    'Payment Image URL'
                 ]);
-                foreach ($registrations as $r) {
+                foreach ($registrations as $index => $r) {
                     $fd = $r->form_data ?? [];
                     fputcsv($file, [
-                        $r->id,
+                        $fd['registration_no'] ?? ($index + 1),
                         $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
                         ucfirst($r->status ?? 'approved'),
                         $fd['member_number'] ?? ($r->user ? '#' . sprintf('%05d', $r->user->id) : ''),
@@ -416,10 +500,10 @@ class EventController extends Controller
                 }
             } else {
                 fputcsv($file, ['Reg ID', 'Member Name', 'Participant Name', 'Contact Number', 'Remarks', 'Submission Date']);
-                foreach ($registrations as $r) {
+                foreach ($registrations as $index => $r) {
                     $fd = $r->form_data ?? [];
                     fputcsv($file, [
-                        $r->id,
+                        $fd['registration_no'] ?? ($index + 1),
                         $r->user ? $r->user->name : '',
                         $fd['full_name'] ?? ($r->user ? $r->user->name : ''),
                         $fd['contact_number'] ?? '',
@@ -433,5 +517,25 @@ class EventController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Approve Event Registration
+     */
+    public function approveRegistration($id)
+    {
+        $registration = EventRegistration::findOrFail($id);
+        $registration->update(['status' => 'approved']);
+        return redirect()->back()->with('success', 'Registration approved successfully.');
+    }
+
+    /**
+     * Reject Event Registration
+     */
+    public function rejectRegistration($id)
+    {
+        $registration = EventRegistration::findOrFail($id);
+        $registration->update(['status' => 'rejected']);
+        return redirect()->back()->with('success', 'Registration rejected.');
     }
 }

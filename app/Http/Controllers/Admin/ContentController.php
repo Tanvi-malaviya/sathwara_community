@@ -172,7 +172,7 @@ class ContentController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'designation' => 'required|string|max:255',
-            'message' => 'required|string',
+            'message' => 'nullable|string',
             'photo' => 'required|image|max:2048',
             'display_order' => 'required|integer',
             'status' => 'required|boolean',
@@ -183,13 +183,13 @@ class ContentController extends Controller
         ManagementDesk::create([
             'name' => $request->name,
             'designation' => $request->designation,
-            'message' => $request->message,
+            'message' => $request->message ?? '',
             'photo_path' => $path,
             'display_order' => $request->display_order,
             'status' => $request->status,
         ]);
 
-        return redirect()->back()->with('success', 'Desk member message created.');
+        return redirect()->back()->with('success', 'Desk member created.');
     }
 
     public function updateDesk(Request $request, $id)
@@ -198,7 +198,7 @@ class ContentController extends Controller
         $request->validate([
             'name'          => 'required|string|max:255',
             'designation'   => 'required|string|max:255',
-            'message'       => 'required|string',
+            'message'       => 'nullable|string',
             'photo'         => 'nullable|image|max:2048',
             'display_order' => 'required|integer',
             'status'        => 'required|boolean',
@@ -215,7 +215,7 @@ class ContentController extends Controller
         $member->update([
             'name'          => $request->name,
             'designation'   => $request->designation,
-            'message'       => $request->message,
+            'message'       => $request->message ?? '',
             'photo_path'    => $path,
             'display_order' => $request->display_order,
             'status'        => $request->status,

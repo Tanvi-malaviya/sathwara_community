@@ -108,37 +108,40 @@
                     </div>
 
                     <!-- Action and Status -->
-                    <div class="pt-3 border-t border-slate-50 flex items-center justify-between gap-2">
+                    <div class="pt-3 mt-auto border-t border-slate-100 flex items-center justify-between gap-2.5">
                         <!-- Registration Status Badge -->
-                        <div>
+                        <div class="shrink-0">
                             @if(($event->event_type ?? 'normal') === 'normal' || !($event->has_registration_form || $event->registration_option))
-                                <span class="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-lg">{{ __('messages.open_entry') }}</span>
+                                <span class="inline-flex items-center px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded-lg whitespace-nowrap">{{ __('messages.open_entry') }}</span>
                             @else
                                 @if(!empty($registrations[$event->id]))
-                                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-lg uppercase">{{ __('messages.registered') }}</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 rounded-lg uppercase whitespace-nowrap">
+                                        <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                        {{ __('messages.registered') }}
+                                    </span>
                                 @else
-                                    <span class="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-lg uppercase">{{ __('messages.not_registered') }}</span>
+                                    <span class="inline-flex items-center px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded-lg uppercase whitespace-nowrap">{{ __('messages.not_registered') }}</span>
                                 @endif
                             @endif
                         </div>
 
                         <!-- Action Button: context-aware based on event_type -->
-                        <div>
+                        <div class="shrink-0">
                             @if(($event->event_type ?? 'normal') === 'yuva_melo')
                                 <a href="{{ route('member.events.register_form', $event->id) }}"
-                                   class="inline-flex items-center px-3.5 py-1.5 text-white text-xs font-bold rounded-xl transition-all gap-1 shadow-sm"
+                                   class="inline-flex items-center px-3 py-1.5 text-white text-xs font-bold rounded-xl transition-all gap-1 shadow-sm whitespace-nowrap hover:opacity-95"
                                    style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">
-                                    ⚡ {{ __('messages.yuva_melo') }} Form →
+                                    ⚡ {{ __('messages.yuva_melo') }}  →
                                 </a>
                             @elseif(($event->event_type ?? 'normal') === 'inam_vitaran')
                                 <a href="{{ route('member.events.register_form', $event->id) }}"
-                                   class="inline-flex items-center px-3.5 py-1.5 text-white text-xs font-bold rounded-xl transition-all gap-1 shadow-sm"
+                                   class="inline-flex items-center px-3 py-1.5 text-white text-xs font-bold rounded-xl transition-all gap-1 shadow-sm whitespace-nowrap hover:opacity-95"
                                    style="background: linear-gradient(135deg, #d97706, #b45309);">
-                                    🏆 {{ __('messages.inam_vitaran') }} Form →
+                                    🏆 {{ __('messages.inam_vitaran') }}  →
                                 </a>
                             @else
                                 <a href="{{ route('event.details', $event->id) }}"
-                                   class="inline-flex items-center px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all gap-1">
+                                   class="inline-flex items-center px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all gap-1 whitespace-nowrap">
                                     {{ __('messages.view_details') }} →
                                 </a>
                             @endif

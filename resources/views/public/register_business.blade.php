@@ -28,9 +28,39 @@
                 @csrf
                 
                 <!-- Row 1: Member ID & Business Name -->
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.member_id_label') }} <span class="text-rose-500">*</span></label>
-                    <input type="text" name="member_id" required value="{{ old('member_id') }}" placeholder="{{ __('messages.member_id_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
+                <div class="space-y-0.5" 
+                     x-data="{ 
+                         memberId: '{{ old('member_id') }}', 
+                         memberStatus: '', 
+                         isFound: null, 
+                         loading: false,
+                         checkMember() {
+                             if(!this.memberId || this.memberId.trim() === '') {
+                                 this.memberStatus = '';
+                                 this.isFound = null;
+                                 return;
+                             }
+                             this.loading = true;
+                             fetch('{{ route('api.check_member_id') }}?member_id=' + encodeURIComponent(this.memberId))
+                                 .then(res => res.json())
+                                 .then(data => {
+                                     this.loading = false;
+                                     this.isFound = data.found;
+                                     this.memberStatus = data.message;
+                                 })
+                                 .catch(() => { this.loading = false; });
+                         }
+                     }"
+                     x-init="if(memberId) checkMember()">
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.member_id_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
+                    <div class="relative">
+                        <input type="text" name="member_id" x-model="memberId" @input.debounce.400ms="checkMember()" placeholder="{{ __('messages.member_id_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border rounded-lg focus:bg-white focus:ring-0 transition-colors" :class="isFound === true ? 'border-emerald-400' : (isFound === false ? 'border-rose-400' : 'border-slate-200')">
+                        <span x-show="loading" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold">Checking...</span>
+                    </div>
+                    <div x-show="memberStatus" class="mt-0.5 text-[10px] font-extrabold" :class="isFound ? 'text-emerald-700' : 'text-rose-600'" x-text="memberStatus"></div>
+                    @error('member_id')
+                        <p class="text-[10px] text-rose-600 font-bold mt-0.5">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="space-y-0.5 md:col-span-2">
@@ -64,15 +94,56 @@
                     </select>
                 </div>
 
-                <!-- Row 3: Contacts -->
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.phone_whatsapp_label') }} <span class="text-rose-500">*</span></label>
-                    <input type="text" name="phone" required value="{{ old('phone') }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="{{ __('messages.ten_digits') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
-                </div>
+                <!-- Row 3: Contacts with Phone & WhatsApp Toggle Switch -->
+                <div class="md:col-span-3 bg-slate-50/80 border border-slate-200/80 rounded-xl p-3.5 space-y-3" 
+                     x-data="{ 
+                         sameWhatsapp: {{ old('whatsapp') && old('whatsapp') !== old('phone') ? 'false' : 'true' }}, 
+                         phoneNum: '{{ old('phone') }}', 
+                         whatsappNum: '{{ old('whatsapp') }}' 
+                     }">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200/60 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-slate-800 uppercase tracking-wide">Contact Details</span>
+                            <span class="text-[10px] font-bold text-slate-400">({{ __('messages.phone_whatsapp_label') }})</span>
+                        </div>
 
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.email_address_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="{{ __('messages.email_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
+                        <!-- Toggle Switch UI -->
+                        <div class="flex items-center gap-2 select-none cursor-pointer" @click="sameWhatsapp = !sameWhatsapp; if(sameWhatsapp) whatsappNum = phoneNum">
+                            <span class="text-[11px] font-extrabold text-slate-700">WhatsApp number same as Phone?</span>
+                            <button type="button" 
+                                    :class="sameWhatsapp ? 'bg-emerald-500' : 'bg-slate-300'" 
+                                    class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none">
+                                <span :class="sameWhatsapp ? 'translate-x-4' : 'translate-x-0'" 
+                                      class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"></span>
+                            </button>
+                            <span x-text="sameWhatsapp ? 'Yes' : 'No'" :class="sameWhatsapp ? 'text-emerald-700 font-extrabold' : 'text-slate-500 font-bold'" class="text-[10px] w-6"></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <!-- Phone Field -->
+                        <div class="space-y-0.5">
+                            <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">Phone / Mobile <span class="text-rose-500">*</span></label>
+                            <input type="text" name="phone" x-model="phoneNum" @input="if(sameWhatsapp) whatsappNum = phoneNum" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="{{ __('messages.ten_digits') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-white border border-slate-200 rounded-lg focus:border-primary-500 focus:ring-0">
+                        </div>
+
+                        <!-- WhatsApp Field -->
+                        <div class="space-y-0.5">
+                            <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">
+                                WhatsApp Number 
+                                <template x-if="sameWhatsapp">
+                                    <span class="text-emerald-600 font-bold text-[9px] lowercase">(same as phone)</span>
+                                </template>
+                            </label>
+                            <input type="text" name="whatsapp" x-model="whatsappNum" :readonly="sameWhatsapp" :class="sameWhatsapp ? 'bg-slate-100 text-slate-500 cursor-not-allowed border-slate-200' : 'bg-white border-emerald-400 focus:border-emerald-500'" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10-digit WhatsApp number" class="w-full text-xs font-semibold px-3 py-1.5 rounded-lg focus:ring-0">
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="space-y-0.5">
+                            <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">{{ __('messages.email_address_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
+                            <input type="email" name="email" value="{{ old('email') }}" placeholder="{{ __('messages.email_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-white border border-slate-200 rounded-lg focus:border-primary-500 focus:ring-0">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Row 4: Links -->
@@ -108,14 +179,100 @@
                 </div>
 
                 <!-- Row 6: Showcase Photos & Description -->
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.showcase_photos_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
-                    <input type="file" name="gallery[]" multiple class="text-[11px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                <div class="space-y-2 md:col-span-3 border border-slate-100 rounded-xl p-3 bg-slate-50/50" x-data="multiShowcaseUploader()">
+                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                        <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
+                            {{ __('messages.showcase_photos_label') }} <span class="text-slate-400 font-normal">(Select multiple times to append)</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" @click="$refs.hiddenFileInput.click()" 
+                                class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] rounded-lg shadow-2xs transition-all flex items-center gap-1 cursor-pointer">
+                                <span>SELECT FILES</span>
+                            </button>
+                            <button type="button" @click="clearAll()" x-show="files.length > 0" x-cloak
+                                class="px-2.5 py-1 bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-[10px] rounded-lg transition-all cursor-pointer">
+                                <span>CLEAR</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <input type="file" x-ref="hiddenFileInput" name="gallery[]" accept="image/*" multiple @change="selectFiles($event)" class="hidden">
+
+                    <div 
+                        @dragover.prevent="isDragging = true"
+                        @dragleave.prevent="isDragging = false"
+                        @drop.prevent="dropFiles($event)"
+                        :class="isDragging ? 'border-blue-500 bg-blue-50/60' : 'border-slate-300 bg-white'"
+                        class="border border-dashed rounded-xl p-3 text-center transition-all cursor-pointer"
+                        @click="$refs.hiddenFileInput.click()">
+                        
+                        <div x-show="files.length === 0" class="py-2 space-y-1">
+                            <p class="text-[11px] font-extrabold text-slate-600">Drop Your Files Here or <span class="text-blue-600 underline">Browse</span></p>
+                            <p class="text-[9px] text-slate-400">Select multiple times to add photos without removing previous selections</p>
+                        </div>
+
+                        <div x-show="files.length > 0" class="space-y-2" @click.stop x-cloak>
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 px-1 border-b border-slate-100 pb-1.5">
+                                <span>Selected Showcase Photos:</span>
+                                <span class="text-blue-600 font-extrabold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/80" x-text="files.length + '/6 Selected'"></span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 pt-1">
+                                <template x-for="(f, idx) in files" :key="f.id">
+                                    <div class="relative group w-24 h-24 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-2xs shrink-0">
+                                        <img :src="f.url" class="w-full h-full object-cover">
+                                        
+                                        <!-- Remove Button -->
+                                        <button type="button" @click.stop="removeFile(idx)" 
+                                            class="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-md hover:bg-rose-700 transition-colors text-[10px] font-black" title="Remove photo">
+                                            ✕
+                                        </button>
+                                        
+                                        <!-- File Name Bar -->
+                                        <div class="absolute bottom-0 inset-x-0 bg-slate-900/80 text-white p-0.5 text-[8px] truncate font-semibold backdrop-blur-xs text-center">
+                                            <span x-text="f.name"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Custom Pop-up Modal for Photo Limit Warning -->
+                    <div x-show="showLimitModal" 
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+                        @keydown.escape.window="showLimitModal = false"
+                        x-cloak>
+                        
+                        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border border-slate-100 space-y-4 relative overflow-hidden" @click.away="showLimitModal = false">
+                            <div class="w-14 h-14 rounded-full bg-amber-50 text-amber-500 border border-amber-200/80 flex items-center justify-center mx-auto shadow-inner">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <h3 class="text-base font-black text-slate-900">Photo Limit Reached</h3>
+                                <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                                    You can select a maximum of <strong class="text-amber-600 font-bold">6 showcase photos</strong>. Only the first 6 photos were kept.
+                                </p>
+                            </div>
+
+                            <button type="button" @click="showLimitModal = false" 
+                                class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer">
+                                Got it, thanks!
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="space-y-0.5 md:col-span-2">
+                <div class="space-y-0.5 md:col-span-3">
                     <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.business_desc_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
-                    <textarea name="description" rows="1" placeholder="{{ __('messages.business_desc_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">{{ old('description') }}</textarea>
+                    <textarea name="description" rows="2" placeholder="{{ __('messages.business_desc_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">{{ old('description') }}</textarea>
                 </div>
 
                 <!-- Row 7: Address -->
@@ -134,4 +291,79 @@
         </div>
     </div>
 </section>
+
+<script>
+function multiShowcaseUploader() {
+    return {
+        files: [],
+        isDragging: false,
+        maxFiles: 6,
+        showLimitModal: false,
+        
+        selectFiles(e) {
+            if (e.target.files && e.target.files.length > 0) {
+                this.addFiles(Array.from(e.target.files));
+            }
+        },
+        
+        dropFiles(e) {
+            this.isDragging = false;
+            if (e.dataTransfer && e.dataTransfer.files) {
+                this.addFiles(Array.from(e.dataTransfer.files));
+            }
+        },
+        
+        addFiles(newFiles) {
+            let overflow = false;
+            newFiles.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const exists = this.files.some(f => f.name === file.name && f.file.size === file.size);
+                    if (!exists) {
+                        if (this.files.length < this.maxFiles) {
+                            this.files.push({
+                                id: Math.random().toString(36).substring(2, 9),
+                                file: file,
+                                name: file.name,
+                                size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+                                url: URL.createObjectURL(file)
+                            });
+                        } else {
+                            overflow = true;
+                        }
+                    }
+                }
+            });
+
+            if (overflow) {
+                this.showLimitModal = true;
+            }
+
+            this.syncInput();
+        },
+        
+        removeFile(index) {
+            if (this.files[index]) {
+                URL.revokeObjectURL(this.files[index].url);
+                this.files.splice(index, 1);
+                this.syncInput();
+            }
+        },
+        
+        clearAll() {
+            this.files.forEach(f => URL.revokeObjectURL(f.url));
+            this.files = [];
+            this.syncInput();
+        },
+        
+        syncInput() {
+            const input = this.$refs.hiddenFileInput;
+            if (input) {
+                const dt = new DataTransfer();
+                this.files.forEach(f => dt.items.add(f.file));
+                input.files = dt.files;
+            }
+        }
+    };
+}
+</script>
 @endsection

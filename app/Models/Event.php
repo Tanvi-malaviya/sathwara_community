@@ -17,6 +17,8 @@ class Event extends Model
         'venue',
         'date',
         'time',
+        'published_date',
+        'registration_end_date',
         'banner_path',
         'registration_option',
         'has_registration_form',
@@ -26,6 +28,8 @@ class Event extends Model
     ];
 
     protected $casts = [
+        'published_date' => 'date',
+        'registration_end_date' => 'date',
         'registration_option' => 'boolean',
         'has_registration_form' => 'boolean',
         'pass_fee' => 'decimal:2',

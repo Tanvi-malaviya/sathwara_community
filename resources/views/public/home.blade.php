@@ -34,38 +34,53 @@
                 </div>
             @endforeach
 
-            <!-- Unified Hero Slider Control Bar (Bottom Right - Prev, Counter, Indicators, Next) -->
-            <div class="absolute bottom-4 sm:bottom-6 right-4 sm:right-8 z-30 flex items-center gap-2 bg-slate-950/80 backdrop-blur-xl p-1.5 rounded-full border border-white/20 text-white shadow-2xl">
-                <!-- Prev Arrow Button -->
-                <button @click="prev(); resetTimer();" 
-                        class="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/25 text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
-                        aria-label="Previous slide">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
-                    </svg>
-                </button>
+            <!-- Unified Hero Slider Control Bar & Dynamic Action Button (Bottom Right) -->
+            <div class="absolute bottom-4 sm:bottom-6 right-4 sm:right-8 z-30 flex flex-wrap items-center gap-3">
+                
+                <!-- Dynamic Action Button (Shows ONLY if button_text is set) -->
+                <template x-if="slides[activeSlide] && slides[activeSlide].button_text && slides[activeSlide].button_text.trim() !== ''">
+                    <a :href="slides[activeSlide].button_link || '#'" 
+                       class="px-5 py-2.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-500 text-white font-extrabold text-xs sm:text-sm rounded-full shadow-2xl border border-white/20 backdrop-blur-md transition-all duration-300 flex items-center gap-2 shrink-0 active:scale-95 hover:shadow-primary-500/30">
+                        <span x-text="slides[activeSlide].button_text"></span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                        </svg>
+                    </a>
+                </template>
 
-                <!-- Slide Counter -->
-                <span class="px-2 text-xs sm:text-sm font-black tracking-widest text-slate-200 select-none" x-text="(activeSlide + 1) + ' / ' + slides.length"></span>
+                <!-- Slider Control Bar (Prev, Counter, Indicators, Next) -->
+                <div class="flex items-center gap-2 bg-slate-950/80 backdrop-blur-xl p-1.5 rounded-full border border-white/20 text-white shadow-2xl">
+                    <!-- Prev Arrow Button -->
+                    <button @click="prev(); resetTimer();" 
+                            class="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/25 text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
+                            aria-label="Previous slide">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                        </svg>
+                    </button>
 
-                <!-- Pagination Dots -->
-                <div class="flex items-center space-x-1.5 px-1">
-                    @foreach($sliders as $dotIdx => $dotSlide)
-                        <button @click="activeSlide = {{ $dotIdx }}; resetTimer();"
-                                class="h-2 rounded-full transition-all duration-300 cursor-pointer"
-                                :class="activeSlide === {{ $dotIdx }} ? 'w-6 bg-primary-500' : 'w-2 bg-white/40 hover:bg-white/70'"
-                                :aria-label="'Go to slide ' + ({{ $dotIdx }} + 1)"></button>
-                    @endforeach
+                    <!-- Slide Counter -->
+                    <span class="px-2 text-xs sm:text-sm font-black tracking-widest text-slate-200 select-none" x-text="(activeSlide + 1) + ' / ' + slides.length"></span>
+
+                    <!-- Pagination Dots -->
+                    <div class="flex items-center space-x-1.5 px-1">
+                        @foreach($sliders as $dotIdx => $dotSlide)
+                            <button @click="activeSlide = {{ $dotIdx }}; resetTimer();"
+                                    class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+                                    :class="activeSlide === {{ $dotIdx }} ? 'w-6 bg-primary-500' : 'w-2 bg-white/40 hover:bg-white/70'"
+                                    :aria-label="'Go to slide ' + ({{ $dotIdx }} + 1)"></button>
+                        @endforeach
+                    </div>
+
+                    <!-- Next Arrow Button -->
+                    <button @click="next(); resetTimer();" 
+                            class="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/25 text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
+                            aria-label="Next slide">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                        </svg>
+                    </button>
                 </div>
-
-                <!-- Next Arrow Button -->
-                <button @click="next(); resetTimer();" 
-                        class="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/25 text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
-                        aria-label="Next slide">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-                    </svg>
-                </button>
             </div>
 
         </div>

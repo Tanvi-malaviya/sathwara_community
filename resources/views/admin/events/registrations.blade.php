@@ -26,6 +26,12 @@
 
     <!-- Filter Tabs (All / Selected) -->
     @php
+        $user = auth()->user();
+        $userPerms = $user->permissions->pluck('name');
+        $canEditThisEvent = $user->hasRole('Administrator') || 
+                            $userPerms->contains('events_manage') || 
+                            $userPerms->contains('event_manage_' . $event->id) || 
+                            $userPerms->contains('event_edit_' . $event->id);
         $totalCount = count($registrations);
         $selectedCount = $registrations->where('is_selected', true)->count();
     @endphp
@@ -63,83 +69,173 @@
 
             <a href="{{ route('admin.events.registrations.export', $event->id) }}" 
                class="h-9 px-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap">
-                📊 <span>{{ __('messages.export_csv') }}</span>
+                📊 <span>{{ __('messages.export_excel') }}</span>
             </a>
         </div>
     </div>
 
-    <!-- Registrations table -->
-    <div class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
-                    <th class="py-2.5 px-4 text-center w-16">Select</th>
-                    <th class="py-2.5 px-4">{{ __('messages.member_name') }}</th>
-                    <th class="py-2.5 px-4">{{ __('messages.submitted_details') }}</th>
-                    <th class="py-2.5 px-4">{{ __('messages.contact_info') }}</th>
-                    <th class="py-2.5 px-4">{{ __('messages.city') }}</th>
-                    <th class="py-2.5 px-4">{{ __('messages.registered_date') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-                @forelse($registrations as $reg)
-                    <tr x-show="(activeTab === 'all' || (activeTab === 'selected' && {{ $reg->is_selected ? 'true' : 'false' }})) && 
-                                (!search || 
-                                 '{{ addslashes(strtolower($reg->user->name)) }}'.includes(search.toLowerCase()) || 
-                                 '{{ addslashes(strtolower($reg->user->email)) }}'.includes(search.toLowerCase()) || 
-                                 '{{ addslashes(strtolower($reg->form_data['contact_number'] ?? ($reg->user->memberProfile->phone ?? ''))) }}'.includes(search.toLowerCase()) || 
-                                 '{{ addslashes(strtolower($reg->user->memberProfile->city ?? '')) }}'.includes(search.toLowerCase()))" 
-                        class="hover:bg-slate-50/60 transition-colors">
-                        <td class="py-3 px-4 text-center whitespace-nowrap">
+    <!-- Registrations Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        @forelse($registrations as $index => $reg)
+            @php
+                $fd = $reg->form_data ?? [];
+                $userName = $reg->user ? $reg->user->name : ($fd['student_name'] ?? $fd['full_name'] ?? $fd['first_name'] ?? 'Guest Participant');
+                $userEmail = $reg->user ? $reg->user->email : ($fd['email'] ?? null);
+                $userPhone = $fd['contact_number'] ?? $fd['mobile_no'] ?? ($reg->user ? ($reg->user->memberProfile->phone ?? null) : null);
+                $userCity = $fd['city'] ?? $fd['district'] ?? ($reg->user ? ($reg->user->memberProfile->city ?? null) : null);
+                $regNo = $fd['registration_no'] ?? ($index + 1);
+
+                $modalData = [
+                    'user_name' => $userName,
+                    'email' => $userEmail ?? '-',
+                    'phone' => $userPhone ?? '-',
+                    'city' => $userCity ?? '-',
+                    'is_selected' => (bool)$reg->is_selected,
+                    'date' => $reg->created_at->format('d-M-Y h:i A'),
+                    'form_data' => $fd,
+                ];
+            @endphp
+            <div x-show="(activeTab === 'all' || (activeTab === 'selected' && {{ $reg->is_selected ? 'true' : 'false' }})) && 
+                        (!search || 
+                         '{{ addslashes(strtolower($userName)) }}'.includes(search.toLowerCase()) || 
+                         '{{ addslashes(strtolower($userEmail ?? '')) }}'.includes(search.toLowerCase()) || 
+                         '{{ addslashes(strtolower($userPhone ?? '')) }}'.includes(search.toLowerCase()) || 
+                         '{{ addslashes(strtolower($userCity ?? '')) }}'.includes(search.toLowerCase()))" 
+                 class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs hover:shadow-md hover:border-primary-400 transition-all space-y-2 relative group flex flex-col justify-between">
+                
+                <div class="space-y-2">
+                    <!-- Card Header: Checkbox + Reg # + Name & Date -->
+                    <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
+                        <div class="flex items-center gap-2 min-w-0">
                             <form method="POST" action="{{ route('admin.events.registrations.toggle_select', $reg->id) }}">
                                 @csrf
-                                <input type="checkbox" name="is_selected" value="1" {{ $reg->is_selected ? 'checked' : '' }} onchange="this.form.submit()" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500 w-4.5 h-4.5 cursor-pointer">
+                                <input type="checkbox" name="is_selected" value="1" {{ $reg->is_selected ? 'checked' : '' }} 
+                                       @if($canEditThisEvent) onchange="this.form.submit()" @else disabled @endif 
+                                       title="{{ $canEditThisEvent ? 'Select candidate' : 'View only permission' }}" 
+                                       class="rounded border-slate-300 text-primary-600 focus:ring-primary-500 w-3.5 h-3.5 {{ $canEditThisEvent ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }}">
                             </form>
-                        </td>
-                        <td class="py-3 px-4 text-slate-900 font-bold whitespace-nowrap">
-                            {{ $reg->user->name }}
-                        </td>
-                        <td class="py-3 px-4">
-                            <button type="button" 
-                                    @click="selectedRegistration = {{ json_encode([
-                                        'id' => $reg->id,
-                                        'user_name' => $reg->user->name,
-                                        'email' => $reg->user->email,
-                                        'phone' => $reg->form_data['contact_number'] ?? ($reg->user->memberProfile->phone ?? 'N/A'),
-                                        'city' => $reg->user->memberProfile->city ?? 'N/A',
-                                        'date' => $reg->created_at->format('d-M-Y h:i A'),
-                                        'is_selected' => $reg->is_selected,
-                                        'form_data' => $reg->form_data ?? [],
-                                    ]) }}; showDetailsModal = true" 
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all border border-slate-200/80 shadow-2xs">
-                                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.573 16.49 16.638 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path>
-                                </svg>
-                                <span>{{ __('messages.view_form_details') }}</span>
-                            </button>
-                        </td>
-                        <td class="py-3 px-4 space-y-0.5">
-                            <div class="text-slate-900 font-bold text-[11px]">{{ $reg->form_data['contact_number'] ?? ($reg->user->memberProfile->phone ?? 'N/A') }}</div>
-                            <div class="text-slate-400 text-[10px] truncate max-w-[150px]">{{ $reg->user->email }}</div>
-                        </td>
-                        <td class="py-3 px-4 text-slate-600 font-medium whitespace-nowrap">
-                            {{ $reg->user->memberProfile->city ?? 'N/A' }}
-                        </td>
-                        <td class="py-3 px-4 text-slate-500 font-medium text-[11px] whitespace-nowrap">
-                            {{ $reg->created_at->format('d-M-Y') }}
-                            <span class="block text-[10px] text-slate-400 font-normal">{{ $reg->created_at->format('h:i A') }}</span>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="py-12 text-center text-slate-400 font-medium">
-                            {{ __('messages.no_registrations_found') }}
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                            
+                            <span class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200/80 text-[10px] font-black text-slate-700 shrink-0">#{{ $regNo }}</span>
+
+                            <div class="min-w-0">
+                                <h4 class="text-xs font-black text-slate-900 truncate group-hover:text-primary-600 transition-colors">
+                                    {{ $userName }}
+                                </h4>
+                                @if($userCity)
+                                    <p class="text-[9px] text-slate-400 font-semibold truncate">{{ $userCity }}</p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="text-right shrink-0">
+                            <span class="text-[9px] font-bold text-slate-400 block">{{ $reg->created_at->format('d-M-Y') }}</span>
+                            <span class="text-[8px] font-medium text-slate-300 block">{{ $reg->created_at->format('h:i A') }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Contact Bar -->
+                    @if($userPhone || $userEmail)
+                        <div class="flex items-center justify-between text-[10px] bg-slate-50/80 rounded-lg p-1.5 border border-slate-100">
+                            @if($userPhone)
+                                <div class="flex items-center gap-1 font-extrabold text-slate-800">
+                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                    <span>{{ $userPhone }}</span>
+                                </div>
+                            @endif
+                            @if($userEmail)
+                                <div class="text-[9px] font-semibold text-slate-400 truncate max-w-[120px]" title="{{ $userEmail }}">
+                                    {{ $userEmail }}
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
+                    <!-- Direct Form Data Details Embedded Inside Card -->
+                    <div class="grid grid-cols-2 gap-1.5 text-[10px]">
+                        @if(!empty($fd['education_type']))
+                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100 col-span-2">
+                                <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Education Type</span>
+                                <span class="font-bold text-slate-800 truncate block">{{ $fd['education_type'] }}</span>
+                            </div>
+                        @endif
+
+                        @if(!empty($fd['education']))
+                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100 {{ empty($fd['school_college']) ? 'col-span-2' : '' }}">
+                                <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Course / Standard</span>
+                                <span class="font-bold text-slate-800 truncate block" title="{{ $fd['education'] }}">{{ $fd['education'] }}</span>
+                            </div>
+                        @endif
+
+                        @if(!empty($fd['school_college']))
+                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100 {{ empty($fd['education']) ? 'col-span-2' : '' }}">
+                                <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">School / College</span>
+                                <span class="font-bold text-slate-800 truncate block" title="{{ $fd['school_college'] }}">{{ $fd['school_college'] }}</span>
+                            </div>
+                        @endif
+
+                        @if(!empty($fd['percentage']))
+                            <div class="bg-emerald-50/80 p-1.5 rounded-lg border border-emerald-100/90 col-span-2">
+                                <span class="text-[8px] font-extrabold text-emerald-600 uppercase block tracking-wider">Percentage</span>
+                                <span class="font-black text-emerald-700 block text-xs">{{ str_contains($fd['percentage'], '%') ? $fd['percentage'] : $fd['percentage'] . '%' }}</span>
+                            </div>
+                        @elseif(!empty($fd['received_marks']) && !empty($fd['total_marks']))
+                            <div class="bg-emerald-50/80 p-1.5 rounded-lg border border-emerald-100/90 col-span-2">
+                                <span class="text-[8px] font-extrabold text-emerald-600 uppercase block tracking-wider">Obtained Marks</span>
+                                <span class="font-black text-emerald-700 block text-xs">{{ $fd['received_marks'] }} / {{ $fd['total_marks'] }}</span>
+                            </div>
+                        @endif
+
+                        @if(!empty($fd['age']))
+                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                                <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Age / Gender</span>
+                                <span class="font-bold text-slate-800 truncate block">{{ $fd['age'] }} Yrs {{ !empty($fd['gender']) ? '('.ucfirst($fd['gender']).')' : '' }}</span>
+                            </div>
+                        @endif
+
+                        @if(!empty($fd['qualification']))
+                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                                <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Qualification</span>
+                                <span class="font-bold text-slate-800 truncate block">{{ $fd['qualification'] }}</span>
+                            </div>
+                        @endif
+
+                        @if(!empty($fd['occupation']))
+                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                                <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Occupation</span>
+                                <span class="font-bold text-slate-800 truncate block">{{ $fd['occupation'] }}</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Direct File Attachment Link (Marksheet / Document) -->
+                    @if(!empty($fd['marksheet_url']))
+                        <div class="pt-0.5">
+                            <a href="{{ str_starts_with($fd['marksheet_url'], 'http') ? $fd['marksheet_url'] : asset('storage/' . $fd['marksheet_url']) }}" target="_blank" 
+                               class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-[9px] font-extrabold border border-blue-200/80 transition-colors w-full justify-center">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                <span>View Uploaded Marksheet / Certificate ↗</span>
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- View Complete Details Button (For Yuva Melo & other events with extra fields) -->
+                @if(($event->event_type ?? 'normal') !== 'inam_vitaran')
+                    <div class="pt-2 mt-2 border-t border-slate-100">
+                        <button type="button" 
+                                @click='selectedRegistration = @json($modalData); showDetailsModal = true'
+                                class="w-full py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[11px] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span>View Complete Details</span>
+                        </button>
+                    </div>
+                @endif
+            </div>
+        @empty
+            <div class="col-span-full py-12 text-center text-slate-400 font-medium bg-white rounded-2xl border border-slate-100 shadow-2xs">
+                {{ __('messages.no_registrations_found') }}
+            </div>
+        @endforelse
     </div>
 
     <!-- Registration Details Pop-up Modal -->

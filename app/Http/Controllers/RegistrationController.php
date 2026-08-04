@@ -113,7 +113,7 @@ class RegistrationController extends Controller
     public function submitBusinessRegister(Request $request)
     {
         $request->validate([
-            'member_id' => 'required|string|max:255',
+            'member_id' => 'nullable|string|max:255',
             'business_name' => 'required|string|max:255',
             'owner_name' => 'required|string|max:255',
             'category_id' => 'nullable|exists:business_categories,id',
@@ -129,63 +129,69 @@ class RegistrationController extends Controller
             'youtube' => 'nullable|string|max:255',
             'linkedin' => 'nullable|string|max:255',
             'logo' => 'required|image|max:2048', // Attach a Business Details / V.Card
+            'gallery' => 'nullable|array|max:6',
             'gallery.*' => 'nullable|image|max:10240',
         ]);
 
-        // Validate Member ID against Database
-        $rawMemberId = trim($request->member_id);
-        $numericId = (int) preg_replace('/[^0-9]/', '', $rawMemberId);
+        $userId = null;
+        $rawMemberId = null;
 
-        $memberUser = null;
-        if ($numericId > 0) {
-            $memberUser = User::find($numericId);
-        }
-        
-        if (!$memberUser) {
-            $profile = MemberProfile::where('id', $numericId)
-                        ->orWhere('phone', $rawMemberId)
-                        ->first();
-            if ($profile) {
-                $memberUser = $profile->user;
+        if ($request->filled('member_id')) {
+            $rawMemberId = trim($request->member_id);
+            $numericId = (int) preg_replace('/[^0-9]/', '', $rawMemberId);
+
+            $memberUser = null;
+            if ($numericId > 0) {
+                $memberUser = User::find($numericId);
             }
+            
+            if (!$memberUser) {
+                $profile = MemberProfile::where('id', $numericId)
+                            ->orWhere('phone', $rawMemberId)
+                            ->first();
+                if ($profile) {
+                    $memberUser = $profile->user;
+                }
+            }
+
+            if (!$memberUser) {
+                return back()->withInput()->withErrors([
+                    'member_id' => __('messages.member_id_not_found') ?? 'The entered Member ID does not exist in our database. Please check your Member ID.',
+                ]);
+            }
+
+            $userId = $memberUser->id;
         }
 
-        if (!$memberUser) {
-            return back()->withInput()->withErrors([
-                'member_id' => __('messages.invalid_member_id')
-            ]);
-        }
-
-        if ($memberUser->status !== 'approved') {
-            return back()->withInput()->withErrors([
-                'member_id' => __('messages.pending_member_id')
-            ]);
+        if (!$userId && auth()->check()) {
+            $userId = auth()->id();
         }
 
         // Upload Logo
         $logoPath = $request->file('logo')->store('businesses/logos', 'public');
 
-        // Upload Gallery Images
+        // Upload Gallery Images (Max 6 Photos)
         $galleryPaths = [];
         if ($request->hasFile('gallery')) {
-            foreach ($request->file('gallery') as $file) {
+            $files = array_slice($request->file('gallery'), 0, 6);
+            foreach ($files as $file) {
                 $path = $file->store('businesses/gallery', 'public');
                 $galleryPaths[] = $path;
             }
         }
 
-        // Create Business (linked to verified member user_id)
+        // Create Business (anyone can register)
         Business::create([
-            'user_id' => $memberUser->id,
+            'user_id' => $userId,
             'category_id' => $request->category_id,
             'area_id' => $request->area_id,
             'member_id' => $rawMemberId,
             'business_name' => $request->business_name,
             'owner_name' => $request->owner_name,
-            'description' => $request->description,
+            'description' => $request->description ?? '',
             'address' => $request->address,
             'phone' => $request->phone,
-            'whatsapp' => $request->phone,
+            'whatsapp' => $request->whatsapp ?? $request->phone,
             'email' => $request->email,
             'website' => $request->website,
             'facebook' => $request->facebook,
@@ -197,6 +203,47 @@ class RegistrationController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('business.directory')->with('success', 'Your business registration has been submitted and is pending admin approval.');
+        return redirect()->route('business.directory')->with('success', 'Your business directory registration has been submitted successfully and is pending admin approval.');
+    }
+
+    /**
+     * Live AJAX check if Member ID exists
+     */
+    public function checkMemberId(Request $request)
+    {
+        $memberId = trim($request->query('member_id', ''));
+        if (empty($memberId)) {
+            return response()->json(['found' => false, 'message' => '']);
+        }
+
+        $numericId = (int) preg_replace('/[^0-9]/', '', $memberId);
+        $memberUser = null;
+        if ($numericId > 0) {
+            $memberUser = User::find($numericId);
+        }
+
+        if (!$memberUser) {
+            $profile = MemberProfile::where('id', $numericId)
+                        ->orWhere('phone', $memberId)
+                        ->first();
+            if ($profile) {
+                $memberUser = $profile->user;
+            }
+        }
+
+        if ($memberUser) {
+            $name = $memberUser->memberProfile ? ($memberUser->memberProfile->first_name . ' ' . $memberUser->memberProfile->last_name) : $memberUser->name;
+            return response()->json([
+                'found' => true,
+                'name' => $name,
+                'member_id' => '#' . sprintf('%05d', $memberUser->id),
+                'message' => "Member Found: {$name} (#" . sprintf('%05d', $memberUser->id) . ")"
+            ]);
+        }
+
+        return response()->json([
+            'found' => false,
+            'message' => 'Member ID does not exist in database.'
+        ]);
     }
 }

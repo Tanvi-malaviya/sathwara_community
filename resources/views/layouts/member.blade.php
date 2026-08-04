@@ -79,6 +79,8 @@
         .font-sans {
             font-family: 'Manrope', sans-serif !important;
         }
+
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 
@@ -159,6 +161,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span>{{ __('messages.register_event') }}</span>
+            </a>
+            <a href="{{ route('member.businesses.my') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.businesses.*') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>{{ __('messages.my_businesses') ?? 'My Businesses' }}</span>
             </a>
             {{-- <a href="{{ route('member.awards.index') }}"
                 class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.awards.*') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">

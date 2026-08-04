@@ -90,6 +90,31 @@
                 </div>
             </div>
 
+            <!-- Published Date & Form Fill Up Last Date -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+                <div class="space-y-0.5">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                        <span>Form Published Date</span>
+                        <span class="text-[9px] text-slate-400 font-normal">(Form Start Date)</span>
+                    </label>
+                    <input type="date" name="published_date" value="{{ old('published_date', $event->published_date ? $event->published_date->format('Y-m-d') : ($event->created_at ? $event->created_at->format('Y-m-d') : '')) }}"
+                           @click="$event.target.showPicker?.()"
+                           @focus="$event.target.showPicker?.()"
+                           class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
+                </div>
+
+                <div class="space-y-0.5">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                        <span>Form Fill Up Last Date</span>
+                        <span class="text-[9px] text-rose-500 font-bold">(Last Date / Deadline)</span>
+                    </label>
+                    <input type="date" name="registration_end_date" value="{{ old('registration_end_date', $event->registration_end_date ? $event->registration_end_date->format('Y-m-d') : '') }}"
+                           @click="$event.target.showPicker?.()"
+                           @focus="$event.target.showPicker?.()"
+                           class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
+                </div>
+            </div>
+
             <div class="space-y-0.5">
                 <label class="text-[10px] font-bold text-slate-500 uppercase">{{ __('messages.venue_hall_address') }}</label>
                 <input type="text" name="venue" value="{{ old('venue', $event->venue) }}" required

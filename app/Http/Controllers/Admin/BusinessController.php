@@ -142,7 +142,7 @@ class BusinessController extends Controller
         $business = Business::findOrFail($id);
 
         $request->validate([
-            'member_id' => 'required|string|max:255',
+            'member_id' => 'nullable|string|max:255',
             'business_name' => 'required|string|max:255',
             'owner_name' => 'required|string|max:255',
             'category_id' => 'nullable|exists:business_categories,id',
@@ -162,16 +162,49 @@ class BusinessController extends Controller
             'approved_at' => 'nullable|date',
             'logo' => 'nullable|image|max:2048',
             'payment_screenshot' => 'nullable|image|max:2048',
+            'gallery' => 'nullable|array|max:6',
             'gallery.*' => 'nullable|image|max:10240',
         ]);
 
         $data = [
-            'member_id' => $request->member_id,
             'area_id' => $request->area_id,
             'business_name' => $request->business_name,
             'owner_name' => $request->owner_name,
             'category_id' => $request->category_id,
             'description' => $request->description,
+        ];
+
+        if ($request->filled('member_id')) {
+            $rawMemberId = trim($request->member_id);
+            $numericId = (int) preg_replace('/[^0-9]/', '', $rawMemberId);
+
+            $memberUser = null;
+            if ($numericId > 0) {
+                $memberUser = \App\Models\User::find($numericId);
+            }
+            if (!$memberUser) {
+                $profile = \App\Models\MemberProfile::where('id', $numericId)
+                            ->orWhere('phone', $rawMemberId)
+                            ->first();
+                if ($profile) {
+                    $memberUser = $profile->user;
+                }
+            }
+
+            if (!$memberUser) {
+                return back()->withInput()->withErrors([
+                    'member_id' => 'Entered Member ID (' . $request->member_id . ') does not exist in the database.',
+                ]);
+            }
+
+            $data['user_id'] = $memberUser->id;
+            $data['member_id'] = $rawMemberId;
+        } else {
+            $data['user_id'] = null;
+            $data['member_id'] = null;
+        }
+
+        $data = array_merge($data, [
             'address' => $request->address,
             'phone' => $request->phone,
             'whatsapp' => $request->phone,
@@ -183,7 +216,7 @@ class BusinessController extends Controller
             'linkedin' => $request->linkedin,
             'status' => $request->status,
             'membership_status' => $request->membership_status,
-        ];
+        ]);
 
         if ($request->filled('approved_at')) {
             $data['approved_at'] = $request->approved_at;
@@ -207,15 +240,6 @@ class BusinessController extends Controller
             $data['payment_screenshot_path'] = $request->file('payment_screenshot')->store('businesses/payments', 'public');
         }
 
-        if ($request->hasFile('gallery')) {
-            $galleryPaths = $business->gallery_images ?? [];
-            foreach ($request->file('gallery') as $file) {
-                $path = $file->store('businesses/gallery', 'public');
-                $galleryPaths[] = $path;
-            }
-            $data['gallery_images'] = $galleryPaths;
-        }
-
         if ($request->has('remove_gallery_images')) {
             $galleryPaths = $business->gallery_images ?? [];
             foreach ($request->remove_gallery_images as $imgToRemove) {
@@ -229,9 +253,22 @@ class BusinessController extends Controller
             $data['gallery_images'] = array_values($galleryPaths);
         }
 
+        if ($request->hasFile('gallery')) {
+            $galleryPaths = $data['gallery_images'] ?? ($business->gallery_images ?? []);
+            $remainingSlots = max(0, 6 - count($galleryPaths));
+            if ($remainingSlots > 0) {
+                $files = array_slice($request->file('gallery'), 0, $remainingSlots);
+                foreach ($files as $file) {
+                    $path = $file->store('businesses/gallery', 'public');
+                    $galleryPaths[] = $path;
+                }
+            }
+            $data['gallery_images'] = array_values($galleryPaths);
+        }
+
         $business->update($data);
 
-        return redirect()->route('admin.businesses.index')->with('success', 'Business directory entry updated successfully.');
+        return redirect()->back()->with('success', 'Business directory entry updated successfully.');
     }
 
     /**

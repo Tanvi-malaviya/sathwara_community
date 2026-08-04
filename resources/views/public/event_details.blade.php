@@ -75,6 +75,13 @@
                                              },
                                          @endforeach
                                      ],
+                                     init() {
+                                         this.$nextTick(() => {
+                                             if (this.$refs.lightboxModal) {
+                                                 document.body.appendChild(this.$refs.lightboxModal);
+                                             }
+                                         });
+                                     },
                                      nextImage() {
                                          if (this.galleryImages.length > 0) {
                                              this.lightboxIndex = (this.lightboxIndex + 1) % this.galleryImages.length;
@@ -102,26 +109,25 @@
                                     </div>
                                 @endforeach
 
-                                <!-- Lightbox Modal with Navigation Arrows -->
-                                <template x-teleport="body">
-                                    <div x-show="lightbox" 
-                                         x-transition:enter="transition ease-out duration-300"
-                                         x-transition:enter-start="opacity-0 scale-95"
-                                         x-transition:enter-end="opacity-100 scale-100"
-                                         x-transition:leave="transition ease-in duration-200"
-                                         x-transition:leave-start="opacity-100 scale-100"
-                                         x-transition:leave-end="opacity-0 scale-95"
-                                         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999999; background-color: rgba(2, 6, 23, 0.96); backdrop-filter: blur(20px); overflow: hidden;"
-                                         class="flex flex-col items-center justify-between p-4 sm:p-6 select-none relative" 
-                                         @click="lightbox = false" 
-                                         x-cloak>
-                                        
-                                        <!-- PREVIOUS ARROW BUTTON (<) -->
-                                        <button x-show="galleryImages.length > 1" 
-                                                @click.stop="prevImage()" 
-                                                style="position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 10000000;"
-                                                class="left-4 sm:left-8 group p-2.5 sm:p-3 rounded-full bg-slate-900/80 hover:bg-primary-500 text-white border border-white/20 hover:border-primary-400 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-                                                title="Previous Image (Left Arrow)">
+                                 <!-- Lightbox Modal with Navigation Arrows -->
+                                 <div x-ref="lightboxModal" x-show="lightbox" 
+                                      x-transition:enter="transition ease-out duration-300"
+                                      x-transition:enter-start="opacity-0 scale-95"
+                                      x-transition:enter-end="opacity-100 scale-100"
+                                      x-transition:leave="transition ease-in duration-200"
+                                      x-transition:leave-start="opacity-100 scale-100"
+                                      x-transition:leave-end="opacity-0 scale-95"
+                                      style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999999 !important; background-color: rgba(2, 6, 23, 0.96); backdrop-filter: blur(20px); overflow: hidden;"
+                                      class="flex flex-col items-center justify-between p-4 sm:p-6 select-none relative" 
+                                      @click="lightbox = false" 
+                                      x-cloak>
+                                     
+                                     <!-- PREVIOUS ARROW BUTTON (<) -->
+                                     <button x-show="galleryImages.length > 1" 
+                                             @click.stop="prevImage()" 
+                                             style="position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 10000000;"
+                                             class="left-4 sm:left-8 group p-2.5 sm:p-3 rounded-full bg-slate-900/80 hover:bg-primary-500 text-white border border-white/20 hover:border-primary-400 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+                                             title="Previous Image (Left Arrow)">
                                             <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
                                             </svg>
@@ -173,7 +179,6 @@
                                             </span>
                                         </div>
                                     </div>
-                                </template>
                             </div>
                         </div>
                     @endif
@@ -206,7 +211,20 @@
                                 </div>
                             @else
                                 <!-- Active Event Registration check -->
-                                @if(auth()->guest())
+                                @if(($event->event_type ?? 'normal') === 'yuva_melo')
+                                    <!-- Yuva Melo Registration (NO LOGIN REQUIRED) -->
+                                    <div class="space-y-3">
+                                        <div class="p-3.5 bg-purple-50 border border-purple-100 rounded-xl text-purple-900 text-xs font-semibold space-y-1">
+                                            <div class="flex items-center gap-1.5 font-bold text-purple-700">
+                                                <span>⚡ Open Public Registration</span>
+                                            </div>
+                                            <p class="text-[11px] text-purple-800">Anyone can fill this form without login. If you are a member, enter your Member ID inside the form.</p>
+                                        </div>
+                                        <a href="{{ route('events.public_register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5 cursor-pointer">
+                                            ⚡ Fill Yuva Melo Form &rarr;
+                                        </a>
+                                    </div>
+                                @elseif(auth()->guest())
                                     <div class="space-y-4">
                                         <p class="text-xs text-slate-500 text-center">{{ __('messages.please_login_to_register') }}</p>
                                         <a href="{{ route('login') }}"
@@ -227,20 +245,14 @@
                                     @else
                                         <!-- Approved Member Registration check -->
                                         @if($registration)
-                                            @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
+                                            @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                                 <div class="space-y-2">
                                                     <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center">
                                                         <span>{{ __('messages.registered_check') }}</span>
                                                     </div>
-                                                    @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                                                        <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
-                                                            {{ __('messages.fill_inam_form') }}
-                                                        </a>
-                                                    @else
-                                                        <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
-                                                            {{ __('messages.fill_yuva_form') }}
-                                                        </a>
-                                                    @endif
+                                                    <a href="{{ route('events.public_register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
+                                                        {{ __('messages.fill_inam_form') }}
+                                                    </a>
                                                 </div>
                                             @else
                                                 <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1">
@@ -250,15 +262,11 @@
                                             @endif
                                         @else
                                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                                                <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
+                                                <a href="{{ route('events.public_register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
                                                     🏆 Fill Inam Form &rarr;
                                                 </a>
-                                            @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                                <a href="{{ route('member.events.register_form', $event->id) }}" class="w-full flex items-center justify-center px-4 py-3.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center gap-1.5">
-                                                    ⚡ Fill Yuva Form &rarr;
-                                                </a>
                                             @else
-                                                <form method="POST" action="{{ route('member.events.register', $event->id) }}">
+                                                <form method="POST" action="{{ route('events.public_register', $event->id) }}">
                                                     @csrf
                                                     <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-xl shadow-sm transition-colors text-center cursor-pointer">
                                                         {{ __('messages.register_seat_now') }}

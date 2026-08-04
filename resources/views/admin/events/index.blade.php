@@ -31,10 +31,19 @@
                     📊 <span>{{ __('messages.export_excel') }}</span>
                 </a>
 
-                <a href="{{ route('admin.events.create') }}" 
-                   class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1 shrink-0 whitespace-nowrap">
-                    <span>{{ __('messages.plan_new_event') }}</span>
-                </a>
+                @php
+                    $user = auth()->user();
+                    $canCreateAnyEvent = $user->hasRole('Administrator') || 
+                                         $user->hasPermissionTo('events_manage') || 
+                                         $user->permissions->pluck('name')->contains(fn($p) => str_starts_with($p, 'event_create_') || str_starts_with($p, 'event_manage_'));
+                @endphp
+
+                @if($canCreateAnyEvent)
+                    <a href="{{ route('admin.events.create') }}" 
+                       class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1 shrink-0 whitespace-nowrap">
+                        <span>{{ __('messages.plan_new_event') }}</span>
+                    </a>
+                @endif
             </div>
         </div>
     </div>
@@ -55,6 +64,17 @@
             </thead>
             <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                 @forelse($events as $e)
+                    @php
+                        $userPerms = $user->permissions->pluck('name');
+                        $canEditThisEvent = $user->hasRole('Administrator') || 
+                                            $userPerms->contains('events_manage') || 
+                                            $userPerms->contains('event_manage_' . $e->id) || 
+                                            $userPerms->contains('event_edit_' . $e->id);
+
+                        $canDeleteThisEvent = $user->hasRole('Administrator') || 
+                                              $userPerms->contains('events_manage') || 
+                                              $userPerms->contains('event_manage_' . $e->id);
+                    @endphp
                     <tr class="hover:bg-slate-50/60 transition-colors">
                         <td class="py-2 px-2.5">
                             <div class="flex items-center gap-2">
@@ -119,21 +139,25 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </a>
-                                <a href="{{ route('admin.events.edit', $e->id) }}" 
-                                   class="w-6.5 h-6.5 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors flex items-center justify-center" 
-                                   title="{{ __('messages.edit') }}">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </a>
-                                <button type="button" 
-                                        @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.destroy', $e->id) }}', message: '{{ __('messages.delete_confirm_event', ['name' => $e->title]) }}' })" 
-                                        class="w-6.5 h-6.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors flex items-center justify-center" 
-                                        title="{{ __('messages.delete') }}">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                                @if($canEditThisEvent)
+                                    <a href="{{ route('admin.events.edit', $e->id) }}" 
+                                       class="w-6.5 h-6.5 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors flex items-center justify-center" 
+                                       title="{{ __('messages.edit') }}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </a>
+                                @endif
+                                @if($canDeleteThisEvent)
+                                    <button type="button" 
+                                            @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.destroy', $e->id) }}', message: '{{ __('messages.delete_confirm_event', ['name' => $e->title]) }}' })" 
+                                            class="w-6.5 h-6.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors flex items-center justify-center" 
+                                            title="{{ __('messages.delete') }}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                @endif
                             </div>
                         </td>
                     </tr>

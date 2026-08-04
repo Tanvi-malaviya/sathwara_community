@@ -3,6 +3,12 @@
 @section('page_title', __('messages.general_photo_gallery'))
 
 @section('content')
+    @php
+        $user = auth()->user();
+        $userPerms = $user->permissions->pluck('name');
+        $canAddGallery = $user->hasRole('Administrator') || $userPerms->contains('gallery_manage') || $userPerms->contains('gallery_add');
+        $canDeleteGallery = $user->hasRole('Administrator') || $userPerms->contains('gallery_manage') || $userPerms->contains('gallery_delete');
+    @endphp
     <div x-data="{ showAddModal: @json($errors->any()) }">
         <!-- Header Actions & Search bar -->
         <!-- Header Actions -->
@@ -12,14 +18,16 @@
                 📊 <span>{{ __('messages.export_excel') }}</span>
             </a>
 
-            <button @click="showAddModal = true"
-                class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 font-bold text-xs text-white rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-95 shrink-0 whitespace-nowrap">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                {{ __('messages.add_photo') }}
-            </button>
+            @if($canAddGallery)
+                <button @click="showAddModal = true"
+                    class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 font-bold text-xs text-white rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-95 shrink-0 whitespace-nowrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ __('messages.add_photo') }}
+                </button>
+            @endif
         </div>
 
         <!-- Photos Grid List -->
@@ -32,13 +40,15 @@
                             src="{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}"
                             alt="Gallery Image">
                     </div>
-                    <div class="p-3">
-                        <button type="button"
-                            @click="$dispatch('confirm-delete', { action: '{{ route('admin.gallery.destroy', $photo->id) }}', message: '{{ __('messages.delete_confirm_gallery_photo') }}' })"
-                            class="w-full py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] rounded-lg transition-colors">
-                            {{ __('messages.delete_image') }}
-                        </button>
-                    </div>
+                    @if($canDeleteGallery)
+                        <div class="p-3">
+                            <button type="button"
+                                @click="$dispatch('confirm-delete', { action: '{{ route('admin.gallery.destroy', $photo->id) }}', message: '{{ __('messages.delete_confirm_gallery_photo') }}' })"
+                                class="w-full py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] rounded-lg transition-colors">
+                                {{ __('messages.delete_image') }}
+                            </button>
+                        </div>
+                    @endif
                 </div>
             @empty
                 <div
