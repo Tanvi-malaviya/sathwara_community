@@ -69,35 +69,7 @@
             </div>
         </div>
         
-        <!-- Section: General Content -->
-        <div class="space-y-4 pt-5 border-t border-slate-100">
-            <h3 class="text-sm font-extrabold text-slate-800 border-b border-slate-100 pb-2.5 flex items-center gap-2">
-                <span>ℹ️</span>
-                <span>{{ __('messages.about_us_configurations') }}</span>
-            </h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-600 block">{{ __('messages.community_mission') }}</label>
-                    <textarea name="about_mission" rows="2.5" class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">{{ old('about_mission', $settings['about_mission'] ?? '') }}</textarea>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-600 block">{{ __('messages.community_vision') }}</label>
-                    <textarea name="about_vision" rows="2.5" class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">{{ old('about_vision', $settings['about_vision'] ?? '') }}</textarea>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-600 block">{{ __('messages.community_history_text') }}</label>
-                    <textarea name="about_history" rows="3" class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">{{ old('about_history', $settings['about_history'] ?? '') }}</textarea>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-600 block">{{ __('messages.objectives_html_bulletins') }}</label>
-                    <textarea name="about_objectives" rows="3" placeholder="e.g. <li>Provide scholarship support</li>" class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors font-mono">{{ old('about_objectives', $settings['about_objectives'] ?? '') }}</textarea>
-                </div>
-            </div>
-        </div>
+      
 
         <!-- Section: Contact Details -->
         <div class="space-y-4 pt-5 border-t border-slate-100">

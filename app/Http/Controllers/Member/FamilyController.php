@@ -18,14 +18,40 @@ class FamilyController extends Controller
 
     public function create()
     {
-        $family = auth()->user()->familyMembers;
-        return view('member.family.create', compact('family'));
+        $user = auth()->user();
+        $family = $user->familyMembers;
+        $profile = $user->memberProfile;
+        return view('member.family.create', compact('family', 'profile'));
     }
 
     public function store(Request $request)
     {
-        $userProfile = auth()->user()->memberProfile;
+        $user = auth()->user();
+        $userProfile = $user->memberProfile;
+        $userGender = strtolower($userProfile->gender ?? 'Male');
         $parentDob = $userProfile && $userProfile->dob ? $userProfile->dob : null;
+
+        if (in_array($request->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ'])) {
+            $existingSpouse = $user->familyMembers()->whereIn('relationship', ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ'])->exists();
+            if ($existingSpouse) {
+                return redirect()->back()->withErrors(['relationship' => 'You can only add 1 spouse (Wife/Husband).'])->withInput();
+            }
+            if ($userGender === 'female' && in_array($request->relationship, ['Wife', 'પત્ની'])) {
+                return redirect()->back()->withErrors(['relationship' => 'Female member can only add Husband as relationship.'])->withInput();
+            }
+            if ($userGender !== 'female' && in_array($request->relationship, ['Husband', 'પતિ'])) {
+                return redirect()->back()->withErrors(['relationship' => 'Male member can only add Wife as relationship.'])->withInput();
+            }
+        }
+
+        if (in_array($request->relationship, ['Wife', 'Husband', 'Daughter-in-law', 'Son-in-law', 'Spouse', 'પત્ની', 'પતિ', 'વહુ', 'જમાઈ'])) {
+            $request->merge(['marital_status' => 'Married']);
+        }
+        if (in_array($request->relationship, ['Husband', 'Son-in-law', 'Son', 'पति', 'પતિ', 'જમાઈ', 'દીકરો'])) {
+            $request->merge(['gender' => 'Male']);
+        } elseif (in_array($request->relationship, ['Wife', 'Daughter-in-law', 'Daughter', 'પત્ની', 'વહુ', 'દીકરી'])) {
+            $request->merge(['gender' => 'Female']);
+        }
 
         $dobRules = ['nullable', 'date', 'before:today'];
         if ($parentDob) {
@@ -55,16 +81,42 @@ class FamilyController extends Controller
 
     public function edit($id)
     {
-        $member = auth()->user()->familyMembers()->findOrFail($id);
-        $family = auth()->user()->familyMembers()->where('id', '!=', $id)->get();
-        return view('member.family.edit', compact('member', 'family'));
+        $user = auth()->user();
+        $member = $user->familyMembers()->findOrFail($id);
+        $family = $user->familyMembers()->where('id', '!=', $id)->get();
+        $profile = $user->memberProfile;
+        return view('member.family.edit', compact('member', 'family', 'profile'));
     }
 
     public function update(Request $request, $id)
     {
-        $member = auth()->user()->familyMembers()->findOrFail($id);
-        $userProfile = auth()->user()->memberProfile;
+        $user = auth()->user();
+        $member = $user->familyMembers()->findOrFail($id);
+        $userProfile = $user->memberProfile;
+        $userGender = strtolower($userProfile->gender ?? 'Male');
         $parentDob = $userProfile && $userProfile->dob ? $userProfile->dob : null;
+
+        if (in_array($request->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ'])) {
+            $existingSpouse = $user->familyMembers()->where('id', '!=', $id)->whereIn('relationship', ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ'])->exists();
+            if ($existingSpouse) {
+                return redirect()->back()->withErrors(['relationship' => 'You can only add 1 spouse (Wife/Husband).'])->withInput()->with('edit_id', $id);
+            }
+            if ($userGender === 'female' && in_array($request->relationship, ['Wife', 'પત્ની'])) {
+                return redirect()->back()->withErrors(['relationship' => 'Female member can only add Husband as relationship.'])->withInput()->with('edit_id', $id);
+            }
+            if ($userGender !== 'female' && in_array($request->relationship, ['Husband', 'પતિ'])) {
+                return redirect()->back()->withErrors(['relationship' => 'Male member can only add Wife as relationship.'])->withInput()->with('edit_id', $id);
+            }
+        }
+
+        if (in_array($request->relationship, ['Wife', 'Husband', 'Daughter-in-law', 'Son-in-law', 'Spouse', 'પત્ની', 'પતિ', 'વહુ', 'જમાઈ'])) {
+            $request->merge(['marital_status' => 'Married']);
+        }
+        if (in_array($request->relationship, ['Husband', 'Son-in-law', 'Son', 'पति', 'પતિ', 'જમાઈ', 'દીકરો'])) {
+            $request->merge(['gender' => 'Male']);
+        } elseif (in_array($request->relationship, ['Wife', 'Daughter-in-law', 'Daughter', 'પત્ની', 'વહુ', 'દીકરી'])) {
+            $request->merge(['gender' => 'Female']);
+        }
 
         $dobRules = ['nullable', 'date', 'before:today'];
         if ($parentDob) {

@@ -237,11 +237,21 @@
                                 <div class="space-y-0.5">
                                     <label
                                         class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.relationship') }}</label>
+                                    @php
+                                        $userGender = $profile->gender ?? 'Male';
+                                        $isFemaleMember = strtolower($userGender) === 'female';
+                                        $hasExistingSpouse = $family->contains(fn($m) => in_array($m->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ']));
+                                    @endphp
                                     <select name="relationship" required x-model="addRelationship"
                                         class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
                                         <option value="" disabled>{{ __('messages.select_relationship') }}</option>
-                                        <option value="Wife">{{ __('messages.rel_wife') }}</option>
-                                        <option value="Husband">{{ __('messages.rel_husband') }}</option>
+                                        @if(!$hasExistingSpouse)
+                                            @if($isFemaleMember)
+                                                <option value="Husband">{{ __('messages.rel_husband') }}</option>
+                                            @else
+                                                <option value="Wife">{{ __('messages.rel_wife') }}</option>
+                                            @endif
+                                        @endif
                                         <option value="Son">{{ __('messages.rel_son') }}</option>
                                         <option value="Daughter">{{ __('messages.rel_daughter') }}</option>
                                         <option value="Daughter-in-law">{{ __('messages.rel_daughter_in_law') }}</option>
@@ -424,8 +434,11 @@
                                         class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.relationship') }}</label>
                                     <select name="relationship" required x-model="editMember.relationship"
                                         class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
-                                        <option value="Wife">{{ __('messages.rel_wife') }}</option>
-                                        <option value="Husband">{{ __('messages.rel_husband') }}</option>
+                                        @if($isFemaleMember)
+                                            <option value="Husband" x-show="!{{ $hasExistingSpouse ? 'true' : 'false' }} || ['Husband', 'Spouse', 'પતિ'].includes(editMember.relationship)">{{ __('messages.rel_husband') }}</option>
+                                        @else
+                                            <option value="Wife" x-show="!{{ $hasExistingSpouse ? 'true' : 'false' }} || ['Wife', 'Spouse', 'પત્ની'].includes(editMember.relationship)">{{ __('messages.rel_wife') }}</option>
+                                        @endif
                                         <option value="Son">{{ __('messages.rel_son') }}</option>
                                         <option value="Daughter">{{ __('messages.rel_daughter') }}</option>
                                         <option value="Daughter-in-law">{{ __('messages.rel_daughter_in_law') }}</option>

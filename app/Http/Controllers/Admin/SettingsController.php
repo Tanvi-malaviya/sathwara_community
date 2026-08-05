@@ -81,4 +81,60 @@ class SettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings updated successfully.');
     }
+
+    /**
+     * Show About Us Page Settings
+     */
+    public function about()
+    {
+        $settings = [
+            'about_mission_title_en' => Setting::get('about_mission_title_en', 'Empowering People'),
+            'about_mission_title_gu' => Setting::get('about_mission_title_gu', 'લોકોને સશક્ત બનાવવું'),
+            'about_mission_en' => Setting::get('about_mission_en', Setting::get('about_mission')),
+            'about_mission_gu' => Setting::get('about_mission_gu'),
+
+            'about_vision_title_en' => Setting::get('about_vision_title_en', 'Future Prosperity'),
+            'about_vision_title_gu' => Setting::get('about_vision_title_gu', 'ભવિષ્યની સમૃદ્ધિ'),
+            'about_vision_en' => Setting::get('about_vision_en', Setting::get('about_vision')),
+            'about_vision_gu' => Setting::get('about_vision_gu'),
+
+            'about_objectives_title_en' => Setting::get('about_objectives_title_en', 'Strategic Goals'),
+            'about_objectives_title_gu' => Setting::get('about_objectives_title_gu', 'વ્યૂહાત્મક લક્ષ્યો'),
+            'about_objectives_en' => Setting::get('about_objectives_en', Setting::get('about_objectives')),
+            'about_objectives_gu' => Setting::get('about_objectives_gu'),
+
+            'about_history_title_en' => Setting::get('about_history_title_en', 'Heritage & Journey'),
+            'about_history_title_gu' => Setting::get('about_history_title_gu', 'વારસો અને યાત્રા'),
+            'about_history_en' => Setting::get('about_history_en', Setting::get('about_history')),
+            'about_history_gu' => Setting::get('about_history_gu'),
+        ];
+
+        return view('admin.settings.about', compact('settings'));
+    }
+
+    /**
+     * Update About Us Page Settings
+     */
+    public function updateAbout(Request $request)
+    {
+        $keys = [
+            'about_mission_title_en', 'about_mission_title_gu',
+            'about_mission_en', 'about_mission_gu',
+
+            'about_vision_title_en', 'about_vision_title_gu',
+            'about_vision_en', 'about_vision_gu',
+
+            'about_objectives_title_en', 'about_objectives_title_gu',
+            'about_objectives_en', 'about_objectives_gu',
+
+            'about_history_title_en', 'about_history_title_gu',
+            'about_history_en', 'about_history_gu',
+        ];
+
+        foreach ($keys as $key) {
+            Setting::set($key, $request->input($key));
+        }
+
+        return redirect()->back()->with('success', 'About Us configurations saved successfully.');
+    }
 }

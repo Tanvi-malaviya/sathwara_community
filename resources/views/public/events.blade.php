@@ -85,10 +85,15 @@
                             </p>
                         </div>
 
-                        <div class="flex justify-between items-center pt-3 border-t border-slate-100 min-w-0 gap-3">
+                        <div class="flex justify-between items-center pt-3 border-t border-slate-100 min-w-0 gap-2 flex-wrap">
                             <div class="min-w-0 flex-1">
                                 <span class="text-[10px] font-bold text-slate-400 truncate block" title="{{ $event->venue }}">📍 {{ $event->venue }}</span>
                             </div>
+                            @if(!empty($event->registration_end_date))
+                                <span class="text-[9px] font-extrabold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 whitespace-nowrap">
+                                    ⏳ Last Date: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </a>

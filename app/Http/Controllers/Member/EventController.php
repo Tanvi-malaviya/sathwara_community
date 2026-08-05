@@ -14,7 +14,7 @@ class EventController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Event::where('status', 'published');
+        $query = Event::published();
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -35,7 +35,7 @@ class EventController extends Controller
      */
     public function show($id)
     {
-        $event = Event::where('status', 'published')->findOrFail($id);
+        $event = Event::published()->findOrFail($id);
         $user = auth()->user();
         $registration = $user->eventRegistrations()->where('event_id', $id)->first();
         $gallery = $event->galleries()->get();
@@ -48,7 +48,11 @@ class EventController extends Controller
      */
     public function showRegistrationForm($id)
     {
-        $event = Event::where('status', 'published')->findOrFail($id);
+        $event = Event::published()->findOrFail($id);
+        
+        if (!($event->has_registration_form ?? $event->registration_option)) {
+            return redirect()->route('member.events.show', $event->id)->with('warning', 'Registration form is not enabled for this event.');
+        }
         $user = auth()->user();
         $registrations = $user->eventRegistrations()->where('event_id', $id)->orderBy('created_at', 'desc')->get();
         $registration = $registrations->first();

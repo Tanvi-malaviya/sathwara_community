@@ -1,9 +1,9 @@
-@extends(auth()->check() ? 'layouts.member' : 'layouts.public')
+@extends(request()->routeIs('member.*') && auth()->check() ? 'layouts.member' : 'layouts.public')
 
 @section('page_title', $event->title . ' Registration')
 
 @section('content')
-    @if(!auth()->check())
+    @if(!request()->routeIs('member.*') || !auth()->check())
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
     @endif
         @php
@@ -41,22 +41,17 @@
                     selectedStudent: @json(old('student_name', '')),
                     educationType: @json(old('education_type', '')),
                     education: @json(old('education', '')),
+                    otherCourse: '',
+                    schoolStandard: '',
+                    schoolStream: '',
                     coursesMap: {
-                        'Primary': [
+                        'School': [
                             '1st Standard', '2nd Standard', '3rd Standard', '4th Standard',
-                            '5th Standard', '6th Standard', '7th Standard', '8th Standard'
+                            '5th Standard', '6th Standard', '7th Standard', '8th Standard',
+                            '9th Standard', '10th Standard', '11th Standard', '12th Standard',
+                            'Other'
                         ],
-                        'Secondary': [
-                            '9th Standard', '10th Standard (SSC / GSEB)', '10th Standard (CBSE)', '10th Standard (ICSE)'
-                        ],
-                        'Higher Secondary': [
-                            '11th Science (GSEB)', '11th Commerce (GSEB)', '11th Arts (GSEB)',
-                            '12th Science - PCM (GSEB)', '12th Science - PCB (GSEB)', '12th Science - PCMB (GSEB)',
-                            '12th Commerce (GSEB)', '12th Arts (GSEB)',
-                            '11th Science (CBSE)', '11th Commerce (CBSE)', '11th Arts (CBSE)',
-                            '12th Science (CBSE)', '12th Commerce (CBSE)', '12th Arts (CBSE)'
-                        ],
-                        'College (UG / PG / Professional)': [
+                        'College': [
                             'BA – Bachelor of Arts',
                             'MA – Master of Arts',
                             'BCom – Bachelor of Commerce',
@@ -143,7 +138,7 @@
                             'CFA – Chartered Financial Analyst',
                             'Other'
                         ],
-                        'Diploma / Polytechnic': [
+                        'Diploma': [
                             'Diploma in Computer Engineering',
                             'Diploma in Information Technology',
                             'Diploma in Civil Engineering',
@@ -189,7 +184,7 @@
                             'Diploma in Physiotherapy',
                             'Other'
                         ],
-                        'ITI Trades': [
+                        'ITI': [
                             'COPA (Computer Operator & Programming Assistant)',
                             'ICTSM (Information Communication Technology System Maintenance)',
                             'Electrician',
@@ -244,14 +239,62 @@
                             'Hair & Skin Care',
                             'Other'
                         ],
-                        'Other': [
-                            'PhD (Doctor of Philosophy)', 'D.Sc. (Doctor of Science)',
-                            'D.Litt (Doctor of Letters)', 'Post Doctoral Research',
-                            'Professional Certificate Course', 'Other'
-                        ]
+                        'Other': ['Other']
+                    },
+                    onStandardChange() {
+                        this.schoolStream = '';
+                        this.otherCourse = '';
+                        this.updateEducationFromSchool();
+                    },
+                    onStreamChange() {
+                        this.otherCourse = '';
+                        this.updateEducationFromSchool();
+                    },
+                    updateEducationFromSchool() {
+                        if (this.educationType !== 'School') return;
+                        if (this.schoolStandard === '11th Standard' || this.schoolStandard === '12th Standard') {
+                            if (this.schoolStream === 'Other') {
+                                this.education = 'Other';
+                            } else if (this.schoolStream) {
+                                this.education = this.schoolStandard + ' (' + this.schoolStream + ')';
+                            } else {
+                                this.education = '';
+                            }
+                        } else if (this.schoolStandard === 'Other') {
+                            this.education = 'Other';
+                        } else {
+                            this.education = this.schoolStandard;
+                        }
+                    },
+                    parseSchoolEducation(rawEdu) {
+                        if (!rawEdu) return;
+                        let stdMatches = rawEdu.match(/(1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|11th|12th)\s*(Standard|Std)?/i);
+                        if (stdMatches) {
+                            let num = stdMatches[1].toLowerCase();
+                            this.schoolStandard = num + ' Standard';
+                            if (num === '11th' || num === '12th') {
+                                if (/science/i.test(rawEdu)) this.schoolStream = 'Science';
+                                else if (/commerce/i.test(rawEdu)) this.schoolStream = 'Commerce';
+                                else if (/arts/i.test(rawEdu)) this.schoolStream = 'Arts';
+                                else {
+                                    this.schoolStream = 'Other';
+                                    this.otherCourse = rawEdu;
+                                }
+                            }
+                        } else {
+                            this.schoolStandard = 'Other';
+                            this.otherCourse = rawEdu;
+                        }
+                        this.updateEducationFromSchool();
                     },
                     get coursesList() {
-                        return this.educationType && this.coursesMap[this.educationType] ? this.coursesMap[this.educationType] : [];
+                        if (!this.educationType) return [];
+                        let et = this.educationType;
+                        if (et === 'Primary' || et === 'Secondary' || et === 'Higher Secondary') et = 'School';
+                        if (et === 'College (UG / PG / Professional)') et = 'College';
+                        if (et === 'Diploma / Polytechnic') et = 'Diploma';
+                        if (et === 'ITI Trades') et = 'ITI';
+                        return this.coursesMap[et] || this.coursesMap['Other'] || [];
                     },
                     courseDropdownOpen: false,
                     courseSearch: '',
@@ -289,12 +332,60 @@
                     init() {
                         this.syncSiblingFields();
                         this.calcPercentage();
+                        let rawEt = this.educationType;
+                        if (rawEt === 'Primary' || rawEt === 'Secondary' || rawEt === 'Higher Secondary') this.educationType = 'School';
+                        if (rawEt === 'College (UG / PG / Professional)') this.educationType = 'College';
+                        if (rawEt === 'Diploma / Polytechnic') this.educationType = 'Diploma';
+                        if (rawEt === 'ITI Trades') this.educationType = 'ITI';
+
+                        if (this.educationType === 'School' && this.education) {
+                            this.parseSchoolEducation(this.education);
+                        } else if (this.education && this.educationType) {
+                            let availableCourses = this.coursesList;
+                            if (this.educationType === 'Other') {
+                                this.otherCourse = this.education;
+                                this.education = 'Other';
+                            } else if (!availableCourses.includes(this.education) || this.education === 'Other') {
+                                this.otherCourse = this.education === 'Other' ? '' : this.education;
+                                this.education = 'Other';
+                            }
+                        }
                     },
                     editRegistration(reg) {
                         let fd = reg.form_data || {};
                         this.selectedStudent = fd.student_name || '';
-                        this.educationType = fd.education_type || '';
-                        this.education = fd.education || '';
+                        let rawEt = fd.education_type || '';
+                        let mappedEt = rawEt;
+                        if (rawEt === 'Primary' || rawEt === 'Secondary' || rawEt === 'Higher Secondary') mappedEt = 'School';
+                        if (rawEt === 'College (UG / PG / Professional)') mappedEt = 'College';
+                        if (rawEt === 'Diploma / Polytechnic') mappedEt = 'Diploma';
+                        if (rawEt === 'ITI Trades') mappedEt = 'ITI';
+                        this.educationType = mappedEt;
+
+                        let rawEdu = fd.education || '';
+                        this.schoolStandard = '';
+                        this.schoolStream = '';
+                        this.otherCourse = '';
+
+                        if (this.educationType === 'School') {
+                            this.parseSchoolEducation(rawEdu);
+                        } else if (this.educationType === 'Other') {
+                            this.education = 'Other';
+                            this.otherCourse = rawEdu;
+                        } else {
+                            let availableCourses = this.coursesList;
+                            if (availableCourses.includes(rawEdu) && rawEdu !== 'Other') {
+                                this.education = rawEdu;
+                                this.otherCourse = '';
+                            } else if (rawEdu) {
+                                this.education = 'Other';
+                                this.otherCourse = rawEdu;
+                            } else {
+                                this.education = '';
+                                this.otherCourse = '';
+                            }
+                        }
+
                         this.schoolCollege = fd.school_college || '';
                         this.totalMarks = fd.total_marks || '';
                         this.receivedMarks = fd.received_marks || '';
@@ -313,6 +404,9 @@
                         this.selectedStudent = '';
                         this.educationType = '';
                         this.education = '';
+                        this.otherCourse = '';
+                        this.schoolStandard = '';
+                        this.schoolStream = '';
                         this.schoolCollege = '';
                         this.totalMarks = '';
                         this.receivedMarks = '';
@@ -363,26 +457,21 @@
 
         <div class="space-y-3 w-full" x-data="eventRegistrationData()">
 
-            <!-- Top Navigation -->
-            @if(auth()->check())
-                <div class="flex items-center justify-between">
-                    <a href="{{ route('member.events.index') }}"
-                        class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs transition-all hover:shadow-xs">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                        <span>Back to Events</span>
-                    </a>
-                </div>
-            @endif
-
             @php
-                $isRegistrationClosed = !empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString();
+                $isRegistrationFormDisabled = !($event->has_registration_form ?? $event->registration_option);
+                $isRegistrationClosed = $isRegistrationFormDisabled || (!empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString());
             @endphp
 
             <!-- DEFAULT / CLOSED NOTICE BANNER -->
-            @if($isRegistrationClosed)
+            @if($isRegistrationFormDisabled)
+                <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2.5 font-bold shadow-2xs">
+                    <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>Notice: Registration form is disabled for this event.</span>
+                </div>
+            @elseif($isRegistrationClosed)
                 <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2.5 font-bold shadow-2xs">
                     <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -405,7 +494,9 @@
                             @endif
                         </div>
                         <div class="text-[11px] font-medium text-amber-800 leading-relaxed">
-                            @if(!empty($event->description))
+                            @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
+                                Please select details and fill in all mandatory fields carefully before submitting your registration.
+                            @elseif(!empty($event->description))
                                 {!! $event->description !!}
                             @else
                                 Please select student/candidate details and fill in all mandatory fields carefully before submitting.
@@ -437,28 +528,22 @@
                     <div class="max-w-md space-y-1.5 z-10">
                         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100/90 border border-rose-200/90 text-rose-800 font-extrabold text-[10px] uppercase tracking-wider">
                             <span class="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></span>
-                            <span>Registration Closed</span>
+                            <span>{{ $isRegistrationFormDisabled ? 'Form Disabled' : 'Registration Closed' }}</span>
                         </div>
 
-                        <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">Form Fill-up Is Closed</h3>
+                        <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">{{ $isRegistrationFormDisabled ? 'Registration Form Is Disabled' : 'Form Fill-up Is Closed' }}</h3>
 
                         <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                            The deadline for submitting registrations for <strong class="text-slate-800 font-bold">{{ $event->title }}</strong> passed on 
-                            <span class="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/80 inline-block">{{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>. Form fill-up is disabled for this event.
+                            @if($isRegistrationFormDisabled)
+                                Online registration form is not enabled for <strong class="text-slate-800 font-bold">{{ $event->title }}</strong>.
+                            @else
+                                The deadline for submitting registrations for <strong class="text-slate-800 font-bold">{{ $event->title }}</strong> passed on 
+                                <span class="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/80 inline-block">{{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>. Form fill-up is disabled for this event.
+                            @endif
                         </p>
                     </div>
 
-                    @if(auth()->check())
-                        <div class="pt-1 z-10">
-                            <a href="{{ route('member.events.index') }}" 
-                                class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-2xs hover:shadow transition-all inline-flex items-center gap-2">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
-                                </svg>
-                                <span>Back to Events List</span>
-                            </a>
-                        </div>
-                    @endif
+
                 </div>
             @else
                 <!-- MAIN FORM CARD CONTAINER -->
@@ -527,35 +612,75 @@
                                                 Education Type <span class="text-rose-500">*</span>
                                             </label>
                                             <select name="education_type" x-model="educationType" required
-                                                @change="education = ''"
+                                                @change="education = ''; otherCourse = ''; schoolStandard = ''; schoolStream = ''"
                                                 class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
                                                 <option value="">-- Select Education Type --</option>
-                                                <option value="Primary">Primary (1st to 8th Standard)</option>
-                                                <option value="Secondary">Secondary (9th - 10th Standard)</option>
-                                                <option value="Higher Secondary">Higher Secondary (11th - 12th)</option>
-                                                <option value="College (UG / PG / Professional)">College (UG / PG / Professional Degree)</option>
-                                                <option value="Diploma / Polytechnic">Diploma / Polytechnic</option>
-                                                <option value="ITI Trades">ITI Trades</option>
-                                                <option value="Other">Other (PhD / D.Sc. / Research)</option>
+                                                <option value="School">School (1st to 12th Standard)</option>
+                                                <option value="College">College (UG / PG / Professional)</option>
+                                                <option value="Diploma">Diploma / Polytechnic</option>
+                                                <option value="ITI">ITI Trades</option>
+                                                <option value="Other">Other</option>
                                             </select>
                                         </div>
 
-                                        <!-- STEP 2: Custom Searchable Course Dropdown -->
+                                        <!-- Hidden input for form submission -->
+                                        <input type="hidden" name="education" :value="(educationType === 'Other' || education === 'Other' || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))) ? otherCourse : education">
+
+                                        <!-- STEP 2A: School Standard Selection (when Education Type is 'School') -->
+                                        <div class="space-y-3" x-show="educationType === 'School'">
+                                            <!-- Standard Dropdown -->
+                                            <div class="space-y-1">
+                                                <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                    Standard / Class <span class="text-rose-500">*</span>
+                                                </label>
+                                                <select x-model="schoolStandard" @change="onStandardChange()" :required="educationType === 'School'"
+                                                    class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                                    <option value="">-- Select Standard --</option>
+                                                    <option value="1st Standard">1st Standard</option>
+                                                    <option value="2nd Standard">2nd Standard</option>
+                                                    <option value="3rd Standard">3rd Standard</option>
+                                                    <option value="4th Standard">4th Standard</option>
+                                                    <option value="5th Standard">5th Standard</option>
+                                                    <option value="6th Standard">6th Standard</option>
+                                                    <option value="7th Standard">7th Standard</option>
+                                                    <option value="8th Standard">8th Standard</option>
+                                                    <option value="9th Standard">9th Standard</option>
+                                                    <option value="10th Standard">10th Standard</option>
+                                                    <option value="11th Standard">11th Standard</option>
+                                                    <option value="12th Standard">12th Standard</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Stream Dropdown (for 11th & 12th) -->
+                                            <div class="space-y-1" x-show="schoolStandard === '11th Standard' || schoolStandard === '12th Standard'"
+                                                x-transition:enter="transition ease-out duration-200"
+                                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                                x-transition:enter-end="opacity-100 translate-y-0">
+                                                <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                    Stream / Branch <span class="text-rose-500">*</span>
+                                                </label>
+                                                <select x-model="schoolStream" @change="onStreamChange()" :required="educationType === 'School' && (schoolStandard === '11th Standard' || schoolStandard === '12th Standard')"
+                                                    class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                                    <option value="">-- Select Stream --</option>
+                                                    <option value="Science">Science</option>
+                                                    <option value="Commerce">Commerce</option>
+                                                    <option value="Arts">Arts</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- STEP 2B: Searchable Course Dropdown (when Education Type is College, Diploma, or ITI) -->
                                         <div class="space-y-1"
-                                            x-show="educationType !== ''"
+                                            x-show="educationType === 'College' || educationType === 'Diploma' || educationType === 'ITI'"
                                             x-transition:enter="transition ease-out duration-200"
                                             x-transition:enter-start="opacity-0 -translate-y-1"
                                             x-transition:enter-end="opacity-100 translate-y-0"
-                                            x-transition:leave="transition ease-in duration-150"
-                                            x-transition:leave-start="opacity-100 translate-y-0"
-                                            x-transition:leave-end="opacity-0 -translate-y-1"
                                             style="display:none">
                                             <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                Standard / Course / Degree <span class="text-rose-500">*</span>
+                                                Course / Degree <span class="text-rose-500">*</span>
                                             </label>
-
-                                            <!-- Hidden input for form submission -->
-                                            <input type="hidden" name="education" :value="education">
 
                                             <!-- Custom Dropdown Trigger -->
                                             <div class="relative" @click.away="courseDropdownOpen = false">
@@ -564,7 +689,7 @@
                                                     class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-left flex items-center justify-between gap-2 focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none"
                                                     :class="courseDropdownOpen ? 'border-primary-500 ring-2 ring-primary-100 bg-white' : ''">
                                                     <span :class="education ? 'text-slate-800' : 'text-slate-400'"
-                                                        x-text="education || '-- Select Course / Standard --'"></span>
+                                                        x-text="education || '-- Select Course --'"></span>
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200" :class="courseDropdownOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                                     </svg>
@@ -617,6 +742,22 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+
+                                        <!-- Custom Course / Stream Input (when 'Other' is selected anywhere) -->
+                                        <div class="space-y-1"
+                                            x-show="educationType === 'Other' || (educationType !== 'School' && educationType !== '' && education === 'Other') || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))"
+                                            x-transition:enter="transition ease-out duration-200"
+                                            x-transition:enter-start="opacity-0 -translate-y-1"
+                                            x-transition:enter-end="opacity-100 translate-y-0"
+                                            style="display:none">
+                                            <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                Enter Course / Standard Name <span class="text-rose-500">*</span>
+                                            </label>
+                                            <input type="text" x-model="otherCourse"
+                                                :required="educationType === 'Other' || (educationType !== 'School' && education === 'Other') || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))"
+                                                placeholder="Type your course / qualification name"
+                                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
                                         </div>
 
                                         <div class="space-y-1">
@@ -1681,7 +1822,7 @@
                 </div>
             </template>
         </div>
-        @if(!auth()->check())
+        @if(!request()->routeIs('member.*') || !auth()->check())
             </div>
         @endif
 @endsection

@@ -104,7 +104,19 @@ class RegistrationController extends Controller
     {
         $categories = BusinessCategory::orderBy('name')->get();
         $areas = Area::orderBy('name')->get();
-        return view('public.register_business', compact('categories', 'areas'));
+
+        $existingBusiness = null;
+        if (auth()->check()) {
+            $user = auth()->user();
+            $formattedMemberId = '#' . sprintf('%05d', $user->id);
+            $existingBusiness = Business::where('user_id', $user->id)
+                                ->orWhere('member_id', (string)$user->id)
+                                ->orWhere('member_id', $formattedMemberId)
+                                ->orWhere('member_id', '#' . $user->id)
+                                ->first();
+        }
+
+        return view('public.register_business', compact('categories', 'areas', 'existingBusiness'));
     }
 
     /**
@@ -128,9 +140,13 @@ class RegistrationController extends Controller
             'instagram' => 'nullable|string|max:255',
             'youtube' => 'nullable|string|max:255',
             'linkedin' => 'nullable|string|max:255',
-            'logo' => 'required|image|max:2048', // Attach a Business Details / V.Card
+            'logo' => 'required|file|mimes:jpeg,jpg,png,webp,gif,bmp,pdf|max:10240', // Attach Business Logo / Visiting Card
             'gallery' => 'nullable|array|max:6',
-            'gallery.*' => 'nullable|image|max:10240',
+            'gallery.*' => 'nullable|file|mimes:jpeg,jpg,png,webp,gif,bmp|max:10240',
+        ], [
+            'logo.required' => 'Please upload your Business Logo or Visiting Card.',
+            'logo.mimes' => 'Business Logo must be an image file (JPG, PNG, WEBP) or a PDF document.',
+            'logo.max' => 'Business Logo file size must not exceed 10MB.',
         ]);
 
         $userId = null;
@@ -165,6 +181,31 @@ class RegistrationController extends Controller
 
         if (!$userId && auth()->check()) {
             $userId = auth()->id();
+        }
+
+        // Single Business per Member Constraint Check
+        if ($userId) {
+            $formattedMemberId = '#' . sprintf('%05d', $userId);
+            $existingBusiness = Business::where('user_id', $userId)
+                                ->orWhere('member_id', (string)$userId)
+                                ->orWhere('member_id', $formattedMemberId)
+                                ->orWhere('member_id', '#' . $userId)
+                                ->first();
+
+            if ($existingBusiness) {
+                return back()->withInput()->withErrors([
+                    'member_id' => "Each member is allowed to register only 1 business. You have already registered '{$existingBusiness->business_name}'. (દરેક સભ્ય માત્ર ૧ જ વ્યવસાય રજીસ્ટર કરી શકે છે.)",
+                ]);
+            }
+        }
+
+        if ($rawMemberId) {
+            $existingBusiness = Business::where('member_id', $rawMemberId)->first();
+            if ($existingBusiness) {
+                return back()->withInput()->withErrors([
+                    'member_id' => "A business ('{$existingBusiness->business_name}') has already been registered with Member ID '{$rawMemberId}'. Only 1 business registration per member is allowed.",
+                ]);
+            }
         }
 
         // Upload Logo
@@ -207,7 +248,7 @@ class RegistrationController extends Controller
     }
 
     /**
-     * Live AJAX check if Member ID exists
+     * Live AJAX check if Member ID exists & single business limit check
      */
     public function checkMemberId(Request $request)
     {
@@ -233,11 +274,28 @@ class RegistrationController extends Controller
 
         if ($memberUser) {
             $name = $memberUser->memberProfile ? ($memberUser->memberProfile->first_name . ' ' . $memberUser->memberProfile->last_name) : $memberUser->name;
+            $formattedMemberId = '#' . sprintf('%05d', $memberUser->id);
+
+            // Check if member already registered a business
+            $existingBusiness = Business::where('user_id', $memberUser->id)
+                                ->orWhere('member_id', $memberId)
+                                ->orWhere('member_id', (string)$memberUser->id)
+                                ->orWhere('member_id', $formattedMemberId)
+                                ->first();
+
+            if ($existingBusiness) {
+                return response()->json([
+                    'found' => false,
+                    'has_business' => true,
+                    'message' => "❌ Member {$name} has already registered a business ('{$existingBusiness->business_name}'). Each member is allowed to register only 1 business."
+                ]);
+            }
+
             return response()->json([
                 'found' => true,
                 'name' => $name,
-                'member_id' => '#' . sprintf('%05d', $memberUser->id),
-                'message' => "Member Found: {$name} (#" . sprintf('%05d', $memberUser->id) . ")"
+                'member_id' => $formattedMemberId,
+                'message' => "Member Found: {$name} ({$formattedMemberId})"
             ]);
         }
 

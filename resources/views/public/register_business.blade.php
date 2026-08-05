@@ -12,6 +12,23 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white border border-slate-200/60 rounded-2xl p-5 md:p-6 shadow-xs">
             
+            @if(isset($existingBusiness) && $existingBusiness)
+                <div class="mb-5 p-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 font-black text-xs text-amber-900">
+                            <span>⚠️</span>
+                            <span>Business Registration Limit Exceeded (વ્યવસાય નોંધણી મર્યાદા)</span>
+                        </div>
+                        <p class="text-xs text-amber-800 font-medium">
+                            You have already registered a business: <strong>{{ $existingBusiness->business_name }}</strong> (Status: <span class="uppercase font-extrabold">{{ $existingBusiness->status }}</span>). Each member is allowed to register <strong>only 1 business</strong>.
+                        </p>
+                    </div>
+                    <a href="{{ route('member.businesses.my') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl transition-all shrink-0">
+                        <span>My Businesses</span> &rarr;
+                    </a>
+                </div>
+            @endif
+
             <!-- Validation errors -->
             @if ($errors->any())
                 <div class="mb-4 p-3 bg-rose-50 border border-rose-100 text-rose-800 rounded-xl">
@@ -50,9 +67,8 @@
                                  })
                                  .catch(() => { this.loading = false; });
                          }
-                     }"
                      x-init="if(memberId) checkMember()">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.member_id_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.member_id_label') }}</label>
                     <div class="relative">
                         <input type="text" name="member_id" x-model="memberId" @input.debounce.400ms="checkMember()" placeholder="{{ __('messages.member_id_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border rounded-lg focus:bg-white focus:ring-0 transition-colors" :class="isFound === true ? 'border-emerald-400' : (isFound === false ? 'border-rose-400' : 'border-slate-200')">
                         <span x-show="loading" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold">Checking...</span>
@@ -75,7 +91,7 @@
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.business_category_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.business_category_label') }}</label>
                     <select name="category_id" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
                         <option value="">{{ __('messages.select_category') }}</option>
                         @foreach($categories as $cat)
@@ -140,7 +156,7 @@
 
                         <!-- Email Field -->
                         <div class="space-y-0.5">
-                            <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">{{ __('messages.email_address_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
+                            <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">{{ __('messages.email_address_label') }}</label>
                             <input type="email" name="email" value="{{ old('email') }}" placeholder="{{ __('messages.email_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-white border border-slate-200 rounded-lg focus:border-primary-500 focus:ring-0">
                         </div>
                     </div>
@@ -148,34 +164,34 @@
 
                 <!-- Row 4: Links -->
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.website_url_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.website_url_label') }}</label>
                     <input type="url" name="website" value="{{ old('website') }}" placeholder="https://example.com" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.facebook_link_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.facebook_link_label') }}</label>
                     <input type="text" name="facebook" value="{{ old('facebook') }}" placeholder="https://facebook.com/username" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.instagram_link_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.instagram_link_label') }}</label>
                     <input type="text" name="instagram" value="{{ old('instagram') }}" placeholder="https://instagram.com/username" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
                 </div>
 
                 <!-- Row 5: Links Continued & File -->
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.youtube_link_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.youtube_link_label') }}</label>
                     <input type="text" name="youtube" value="{{ old('youtube') }}" placeholder="https://youtube.com/@username" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.linkedin_link_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.linkedin_link_label') }}</label>
                     <input type="text" name="linkedin" value="{{ old('linkedin') }}" placeholder="https://linkedin.com/in/username" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.attach_vcard_label') }} <span class="text-rose-500">*</span></label>
-                    <input type="file" name="logo" required class="text-[11px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.business_logo_label') }} <span class="text-rose-500">*</span></label>
+                    <input type="file" name="logo" required accept="image/*,.pdf" class="text-[11px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
                 </div>
 
                 <!-- Row 6: Showcase Photos & Description -->
@@ -185,8 +201,8 @@
                             {{ __('messages.showcase_photos_label') }} <span class="text-slate-400 font-normal">(Select multiple times to append)</span>
                         </label>
                         <div class="flex items-center gap-2">
-                            <button type="button" @click="$refs.hiddenFileInput.click()" 
-                                class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] rounded-lg shadow-2xs transition-all flex items-center gap-1 cursor-pointer">
+                            <button type="button" x-show="files.length < 6" @click="$refs.hiddenFileInput.click()" 
+                                class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] rounded-lg shadow-2xs transition-all flex items-center gap-1 cursor-pointer" x-cloak>
                                 <span>SELECT FILES</span>
                             </button>
                             <button type="button" @click="clearAll()" x-show="files.length > 0" x-cloak

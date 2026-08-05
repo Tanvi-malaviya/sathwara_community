@@ -117,10 +117,16 @@
                             @endif
                         </td>
                         <td class="py-2 px-2.5 whitespace-nowrap">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
-                                {{ $e->status == 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($e->status == 'cancelled' ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-slate-100 text-slate-600 border border-slate-200') }}">
-                                {{ __('messages.' . strtolower($e->status)) != 'messages.' . strtolower($e->status) ? __('messages.' . strtolower($e->status)) : ucfirst($e->status) }}
-                            </span>
+                            @if($e->status == 'published' && $e->published_date && $e->published_date->toDateString() > now()->toDateString())
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200/80" title="Will automatically publish on {{ date('d-M-Y', strtotime($e->published_date)) }}">
+                                    Scheduled ({{ date('d-M-Y', strtotime($e->published_date)) }})
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
+                                    {{ $e->status == 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($e->status == 'cancelled' ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-slate-100 text-slate-600 border border-slate-200') }}">
+                                    {{ __('messages.' . strtolower($e->status)) != 'messages.' . strtolower($e->status) ? __('messages.' . strtolower($e->status)) : ucfirst($e->status) }}
+                                </span>
+                            @endif
                         </td>
                         <td class="py-2 px-2.5 text-right whitespace-nowrap">
                             <div class="flex justify-end items-center space-x-1">

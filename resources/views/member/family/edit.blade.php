@@ -46,10 +46,21 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1">
                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Relationship</label>
-                @php $rel = old('relationship', $member->relationship); @endphp
+                @php
+                    $rel = old('relationship', $member->relationship);
+                    $userGender = $profile->gender ?? 'Male';
+                    $isFemaleMember = strtolower($userGender) === 'female';
+                    $hasExistingSpouse = isset($family) && $family->contains(fn($m) => in_array($m->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ']));
+                    $isCurrentSpouse = in_array($rel, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ']);
+                @endphp
                 <select name="relationship" required x-model="rel" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-                    <option value="Wife" {{ in_array($rel, ['Wife', 'Spouse', 'પત્ની']) ? 'selected' : '' }}>{{ __('messages.rel_wife') }}</option>
-                    <option value="Husband" {{ in_array($rel, ['Husband', 'પતિ']) ? 'selected' : '' }}>{{ __('messages.rel_husband') }}</option>
+                    @if(!$hasExistingSpouse || $isCurrentSpouse)
+                        @if($isFemaleMember)
+                            <option value="Husband" {{ in_array($rel, ['Husband', 'પતિ']) ? 'selected' : '' }}>{{ __('messages.rel_husband') }}</option>
+                        @else
+                            <option value="Wife" {{ in_array($rel, ['Wife', 'Spouse', 'પત્ની']) ? 'selected' : '' }}>{{ __('messages.rel_wife') }}</option>
+                        @endif
+                    @endif
                     <option value="Son" {{ in_array($rel, ['Son', 'દીકરો']) ? 'selected' : '' }}>{{ __('messages.rel_son') }}</option>
                     <option value="Daughter" {{ in_array($rel, ['Daughter', 'દીકરી']) ? 'selected' : '' }}>{{ __('messages.rel_daughter') }}</option>
                     <option value="Daughter-in-law" {{ in_array($rel, ['Daughter-in-law', 'વહુ']) ? 'selected' : '' }}>{{ __('messages.rel_daughter_in_law') }}</option>

@@ -328,11 +328,22 @@
             </div>
             @endif
 
+            <!-- Management Desk (Standalone Main Tab) -->
+            @if($hasDesk)
+            <a href="{{ route('admin.content.desk') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.content.desk') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 01-2-2v-4a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2" />
+                </svg>
+                <span>{{ __('messages.management_desk') }}</span>
+            </a>
+            @endif
+
             <!-- About Us Page Dropdown -->
-            @if($hasDesk || $hasCommittee || $hasTimelines)
-            <div x-data="{ open: {{ (Route::is('admin.content.desk') || Route::is('admin.content.committee') || Route::is('admin.content.timelines')) ? 'true' : 'false' }} }">
+            @if($hasSettings || $hasTimelines)
+            <div x-data="{ open: {{ (Route::is('admin.settings.about*') || Route::is('admin.content.timelines')) ? 'true' : 'false' }} }">
                 <button @click="open = !open" 
-                    class="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.content.desk') || Route::is('admin.content.committee') || Route::is('admin.content.timelines')) ? 'text-white bg-zinc-900/80' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    class="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.settings.about*') || Route::is('admin.content.timelines')) ? 'text-white bg-zinc-900/80' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
                     <div class="flex items-center space-x-3">
                         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -344,18 +355,11 @@
                     </svg>
                 </button>
                 <div x-show="open" class="pl-7 pr-2 py-1 space-y-1" x-cloak>
-                    @if($hasDesk)
-                    <a href="{{ route('admin.content.desk') }}"
-                        class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.content.desk') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.content.desk') ? 'bg-white' : 'bg-slate-600' }}"></span>
-                        <span>{{ __('messages.management_desk') }}</span>
-                    </a>
-                    @endif
-                    @if($hasCommittee)
-                    <a href="{{ route('admin.content.committee') }}"
-                        class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.content.committee') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.content.committee') ? 'bg-white' : 'bg-slate-600' }}"></span>
-                        <span>{{ __('messages.committee_members') }}</span>
+                    @if($hasSettings)
+                    <a href="{{ route('admin.settings.about') }}"
+                        class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.settings.about*') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                        <span class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.settings.about*') ? 'bg-white' : 'bg-slate-600' }}"></span>
+                        <span>{{ __('messages.about_us_configurations') }}</span>
                     </a>
                     @endif
                     @if($hasTimelines)
