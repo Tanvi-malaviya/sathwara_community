@@ -62,24 +62,24 @@
         }
     }" class="space-y-4">
 
-        <div class="flex flex-col md:flex-row md:items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm gap-3">
+        <div class="flex flex-col xl:flex-row xl:items-center justify-between bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm gap-3">
             <p class="text-xs text-slate-500">{{ __('messages.family_manage_desc') }}
             </p>
-            <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <div class="flex flex-wrap items-center gap-2 shrink-0 w-full xl:w-auto">
                 <!-- Search bar -->
-                <div class="relative">
+                <div class="relative flex-1 sm:flex-initial">
                     <input type="text" x-model="search" placeholder="{{ __('messages.search_family') }}" 
-                           class="text-xs font-semibold pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 w-40 sm:w-48 transition-colors">
+                           class="text-xs font-semibold pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 w-full sm:w-48 transition-colors">
                     <button type="button" x-show="search" @click="search = ''" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-sm" title="Clear search">
                         &times;
                     </button>
                 </div>
                 <button @click="showTreeModal = true"
-                    class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                    class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer flex-1 sm:flex-initial">
                     <span>🌳</span> {{ __('messages.view_family_tree') }}
                 </button>
                 <button @click="showAddModal = true"
-                    class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors cursor-pointer">
+                    class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors cursor-pointer flex-1 sm:flex-initial text-center">
                     + {{ __('messages.add_family_member') }}
                 </button>
             </div>

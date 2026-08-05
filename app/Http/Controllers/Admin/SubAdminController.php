@@ -27,7 +27,8 @@ class SubAdminController extends Controller
             'sliders_manage'      => __('messages.mod_hero_sliders'),
             'agendas_manage'      => __('messages.mod_core_agendas'),
             'desk_manage'         => __('messages.mod_management_desk'),
-            'committee_manage'    => __('messages.mod_committee_members'),
+            'about_manage'        => __('messages.mod_about_content'),
+            // 'committee_manage'    => __('messages.mod_committee_members'),
             'timelines_manage'    => __('messages.mod_milestone_timeline'),
             'announcements_manage'=> __('messages.mod_announcements_news'),
             'settings_manage'     => __('messages.mod_global_settings'),
@@ -98,7 +99,8 @@ class SubAdminController extends Controller
             return !str_starts_with($p, 'event_manage_')
                 && !str_starts_with($p, 'event_view_')
                 && !str_starts_with($p, 'event_edit_')
-                && !str_starts_with($p, 'event_create_');
+                && !str_starts_with($p, 'event_create_')
+                && !str_starts_with($p, 'event_delete_');
         })->toArray();
 
         $mergedPerms = array_unique(array_merge($existingPerms, $eventPerms));

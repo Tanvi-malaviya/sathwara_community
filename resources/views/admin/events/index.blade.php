@@ -49,17 +49,17 @@
     </div>
 
     <!-- Events List Table -->
-    <div class="bg-white border border-slate-100 rounded-xl overflow-x-auto shadow-sm">
-        <table class="w-full text-left border-collapse min-w-[720px] lg:min-w-0">
+    <div class="bg-white border border-slate-100 rounded-xl overflow-x-auto no-scrollbar shadow-sm">
+        <table class="w-full text-left border-collapse min-w-full">
             <thead>
                 <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
-                    <th class="py-2.5 px-2.5">{{ __('messages.event_name') }}</th>
-                    <th class="py-2.5 px-2.5">{{ __('messages.event_type') }}</th>
-                    <th class="py-2.5 px-2.5">{{ __('messages.venue') }}</th>
-                    <th class="py-2.5 px-2.5">{{ __('messages.date') }}</th>
-                    <th class="py-2.5 px-2.5">{{ __('messages.participants') }}</th>
-                    <th class="py-2.5 px-2.5">{{ __('messages.status') }}</th>
-                    <th class="py-2.5 px-2.5 text-right">{{ __('messages.actions') }}</th>
+                    <th class="py-2.5 px-2">{{ __('messages.event_name') }}</th>
+                    <th class="py-2.5 px-2">{{ __('messages.event_type') }}</th>
+                    <th class="py-2.5 px-2">{{ __('messages.venue') }}</th>
+                    <th class="py-2.5 px-2">{{ __('messages.date') }}</th>
+                    <th class="py-2.5 px-2">{{ __('messages.participants') }}</th>
+                    <th class="py-2.5 px-2">{{ __('messages.status') }}</th>
+                    <th class="py-2.5 px-2 text-right">{{ __('messages.actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
@@ -68,25 +68,26 @@
                         $userPerms = $user->permissions->pluck('name');
                         $canEditThisEvent = $user->hasRole('Administrator') || 
                                             $userPerms->contains('events_manage') || 
+                                            $userPerms->contains('events_edit') || 
                                             $userPerms->contains('event_manage_' . $e->id) || 
                                             $userPerms->contains('event_edit_' . $e->id);
 
                         $canDeleteThisEvent = $user->hasRole('Administrator') || 
                                               $userPerms->contains('events_manage') || 
-                                              $userPerms->contains('event_manage_' . $e->id);
+                                              $userPerms->contains('events_delete');
                     @endphp
                     <tr class="hover:bg-slate-50/60 transition-colors">
-                        <td class="py-2 px-2.5">
+                        <td class="py-2 px-2">
                             <div class="flex items-center gap-2">
-                                <img class="w-8 h-8 rounded-lg object-cover bg-slate-100 border border-slate-200/60 shrink-0" 
+                                <img class="w-7 h-7 rounded-lg object-cover bg-slate-100 border border-slate-200/60 shrink-0" 
                                      src="{{ str_starts_with($e->banner_path, 'http') ? $e->banner_path : asset('storage/' . $e->banner_path) }}" 
                                      alt="Banner">
                                  <div class="min-w-0">
-                                      <span class="text-slate-900 font-bold text-xs truncate max-w-[180px] lg:max-w-[220px] block" title="{{ $e->title }}">{{ $e->title }}</span>
+                                      <span class="text-slate-900 font-bold text-xs truncate max-w-[140px] xl:max-w-[200px] block" title="{{ $e->title }}">{{ $e->title }}</span>
                                  </div>
                             </div>
                         </td>
-                        <td class="py-2 px-2.5 whitespace-nowrap">
+                        <td class="py-2 px-2 whitespace-nowrap">
                             @if($e->event_type === 'yuva_melo')
                                 <span class="px-2 py-0.5 text-[10px] font-extrabold bg-purple-50 text-purple-700 rounded-md border border-purple-200/80 inline-flex items-center gap-1">
                                     <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span> {{ __('messages.yuva_melo') }}
@@ -101,13 +102,13 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="py-2 px-2.5 text-slate-600 font-medium max-w-[150px] lg:max-w-[190px] truncate text-[11px]" title="{{ $e->venue }}">
+                        <td class="py-2 px-2 text-slate-600 font-medium max-w-[110px] xl:max-w-[160px] truncate text-[11px]" title="{{ $e->venue }}">
                             {{ $e->venue }}
                         </td>
-                        <td class="py-2 px-2.5 text-[11px] text-slate-700 whitespace-nowrap font-medium">
+                        <td class="py-2 px-2 text-[11px] text-slate-700 whitespace-nowrap font-medium">
                             {{ date('d-M-Y', strtotime($e->date)) }}
                         </td>
-                        <td class="py-2 px-2.5 whitespace-nowrap text-[11px]">
+                        <td class="py-2 px-2 whitespace-nowrap text-[11px]">
                             @if(($e->event_type ?? 'normal') !== 'normal' && ($e->has_registration_form || $e->registration_option))
                                 <a href="{{ route('admin.events.registrations', $e->id) }}" class="text-primary-600 font-bold hover:underline">
                                     {{ $e->registrations_count }} {{ __('messages.registered') }}
@@ -116,7 +117,7 @@
                                 <span class="text-slate-400 font-medium">{{ __('messages.open_entry') }}</span>
                             @endif
                         </td>
-                        <td class="py-2 px-2.5 whitespace-nowrap">
+                        <td class="py-2 px-2 whitespace-nowrap">
                             @if($e->status == 'published' && $e->published_date && $e->published_date->toDateString() > now()->toDateString())
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200/80" title="Will automatically publish on {{ date('d-M-Y', strtotime($e->published_date)) }}">
                                     Scheduled ({{ date('d-M-Y', strtotime($e->published_date)) }})

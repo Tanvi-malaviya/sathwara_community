@@ -119,10 +119,23 @@ class EventController extends Controller
             return;
         }
         $userPerms = $user->permissions->pluck('name');
-        if ($userPerms->contains('events_manage') || $userPerms->contains('event_manage_' . $eventId) || $userPerms->contains('event_edit_' . $eventId)) {
+        if ($userPerms->contains('events_manage') || $userPerms->contains('events_edit') || $userPerms->contains('event_manage_' . $eventId) || $userPerms->contains('event_edit_' . $eventId)) {
             return;
         }
         abort(403, 'You do not have permission to edit or modify this event.');
+    }
+
+    private function checkDeletePermission($eventId)
+    {
+        $user = auth()->user();
+        if ($user->hasRole('Administrator')) {
+            return;
+        }
+        $userPerms = $user->permissions->pluck('name');
+        if ($userPerms->contains('events_manage') || $userPerms->contains('events_delete') || $userPerms->contains('event_manage_' . $eventId) || $userPerms->contains('event_delete_' . $eventId)) {
+            return;
+        }
+        abort(403, 'You do not have permission to delete this event.');
     }
 
     /**
@@ -195,7 +208,7 @@ class EventController extends Controller
     public function destroy($id)
     {
         $event = Event::findOrFail($id);
-        $this->checkEditPermission($event->id);
+        $this->checkDeletePermission($event->id);
         $event->delete();
 
         return redirect()->route('admin.events.index')->with('success', 'Event deleted successfully.');

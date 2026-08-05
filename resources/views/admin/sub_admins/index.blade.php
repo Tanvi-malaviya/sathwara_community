@@ -17,8 +17,57 @@
         this.showEditModal = true;
     },
     openEvents(admin) {
-        this.eventsAdmin = admin;
+        this.eventsAdmin = JSON.parse(JSON.stringify(admin));
+        if (!this.eventsAdmin.permissions) this.eventsAdmin.permissions = [];
+        
+        const allEventIds = @json($allEvents->pluck('id'));
+        const hasFull = this.eventsAdmin.permissions.includes('events_manage');
+        const hasView = this.eventsAdmin.permissions.includes('events_view');
+        const hasEdit = this.eventsAdmin.permissions.includes('events_edit');
+
+        allEventIds.forEach(id => {
+            if (hasFull || hasView) {
+                if (!this.eventsAdmin.permissions.includes('event_view_' + id)) {
+                    this.eventsAdmin.permissions.push('event_view_' + id);
+                }
+            }
+            if (hasFull || hasEdit) {
+                if (!this.eventsAdmin.permissions.includes('event_edit_' + id)) {
+                    this.eventsAdmin.permissions.push('event_edit_' + id);
+                }
+            }
+        });
+
         this.showEventsModal = true;
+    },
+    toggleSelectAllEvents(e) {
+        const allEventIds = @json($allEvents->pluck('id'));
+        if (!this.eventsAdmin.permissions) this.eventsAdmin.permissions = [];
+        if (e.target.checked) {
+            allEventIds.forEach(id => {
+                if (!this.eventsAdmin.permissions.includes('event_view_' + id)) {
+                    this.eventsAdmin.permissions.push('event_view_' + id);
+                }
+                if (!this.eventsAdmin.permissions.includes('event_edit_' + id)) {
+                    this.eventsAdmin.permissions.push('event_edit_' + id);
+                }
+            });
+        } else {
+            allEventIds.forEach(id => {
+                this.eventsAdmin.permissions = this.eventsAdmin.permissions.filter(p => 
+                    p !== ('event_view_' + id) && p !== ('event_edit_' + id)
+                );
+            });
+        }
+    },
+    isAllEventsSelected() {
+        if (!this.eventsAdmin || !this.eventsAdmin.permissions) return false;
+        const allEventIds = @json($allEvents->pluck('id'));
+        if (allEventIds.length === 0) return false;
+        return allEventIds.every(id => 
+            this.eventsAdmin.permissions.includes('event_view_' + id) && 
+            this.eventsAdmin.permissions.includes('event_edit_' + id)
+        );
     },
     toggleFullAccess(permKey, modPrefix, e) {
         if (!this.editAdmin.permissions) this.editAdmin.permissions = [];
@@ -104,16 +153,23 @@
                         </td>
                         <td class="py-3 px-4 text-right">
                             <div class="flex justify-end items-center space-x-1.5">
-                                <button type="button" @click="openEvents({
-                                    id: {{ $admin->id }},
-                                    name: {{ json_encode($admin->name) }},
-                                    email: {{ json_encode($admin->email) }},
-                                    permissions: {{ json_encode($admin->permissions->pluck('name')->toArray()) }},
-                                    update_url: '{{ route('admin.sub_admins.update_events', $admin->id) }}'
-                                })" class="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/80 transition-colors shadow-2xs font-black text-[10px]" title="Events & Access Settings">
-                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    <span>{{ __('messages.events') }}</span>
-                                </button>
+                                @php
+                                    $adminPerms = $admin->permissions->pluck('name')->toArray();
+                                    $hasEventsAccess = collect($adminPerms)->contains(fn($p) => str_starts_with($p, 'events_') || str_starts_with($p, 'event_'));
+                                @endphp
+                                @if($hasEventsAccess)
+
+                                    <button type="button" @click="openEvents({
+                                        id: {{ $admin->id }},
+                                        name: {{ json_encode($admin->name) }},
+                                        email: {{ json_encode($admin->email) }},
+                                        permissions: {{ json_encode($adminPerms) }},
+                                        update_url: '{{ route('admin.sub_admins.update_events', $admin->id) }}'
+                                    })" class="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/80 transition-colors shadow-2xs font-black text-[10px]" title="Events & Access Settings">
+                                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span>{{ __('messages.events') }}</span>
+                                    </button>
+                                @endif
                                 <button type="button" @click="openEdit({
                                     id: {{ $admin->id }},
                                     name: {{ json_encode($admin->name) }},
@@ -381,20 +437,29 @@
                     <!-- Scrollable Modal Body -->
                     <div class="p-5 space-y-4 overflow-y-auto text-xs" style="max-height: 58vh;">
                         <!-- Info Alert -->
-                        <div class="p-3 bg-indigo-50/90 border border-indigo-100/90 rounded-xl text-indigo-950 flex items-start gap-2.5 shadow-2xs">
+                        <!-- <div class="p-3 bg-indigo-50/90 border border-indigo-100/90 rounded-xl text-indigo-950 flex items-start gap-2.5 shadow-2xs">
                             <span class="text-indigo-600 text-sm shrink-0">ℹ️</span>
                             <div>
                                 <h4 class="font-extrabold text-[11px] text-indigo-950">{{ __('messages.event_level_permissions_control') }}</h4>
                                 <p class="text-[10px] text-indigo-700 font-medium mt-0.5">{{ __('messages.event_level_permissions_desc') }}</p>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- ALL EVENTS LIST -->
                         <div class="space-y-2.5">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
-                                    {{ __('messages.all_community_events') }} ({{ count($allEvents) }} Total):
-                                </label>
+                                <div class="flex items-center gap-3">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
+                                        {{ __('messages.all_community_events') }} ({{ count($allEvents) }} Total):
+                                    </label>
+                                    <label class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-100/90 cursor-pointer hover:bg-indigo-100/90 transition-colors text-[10px] font-black text-indigo-700 select-none" title="Select / Unselect All Events Access">
+                                        <input type="checkbox" 
+                                               :checked="isAllEventsSelected()" 
+                                               @change="toggleSelectAllEvents($event)"
+                                               class="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-0 cursor-pointer">
+                                        <span>✨ {{ __('messages.select_all') }}</span>
+                                    </label>
+                                </div>
 
                                 <!-- Live Search Input -->
                                 <div class="relative w-full sm:w-64">
@@ -408,70 +473,44 @@
                             <div class="space-y-2.5">
                                 @forelse($allEvents as $evt)
                                     <div x-show="!eventsSearch || '{{ strtolower(addslashes($evt->title)) }}'.includes(eventsSearch.toLowerCase()) || '{{ strtolower(addslashes($evt->event_type ?? '')) }}'.includes(eventsSearch.toLowerCase())"
-                                         class="bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl p-3.5 transition-all space-y-2.5">
-                                        <!-- Top Row: Title, Badges & Registrations Link -->
-                                        <div class="flex items-center justify-between gap-2">
-                                            <div class="flex items-center gap-2 flex-wrap min-w-0">
-                                                <h4 class="text-xs font-black text-slate-900 truncate">{{ $evt->title }}</h4>
-                                                @if($evt->event_type)
-                                                    <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-100 text-amber-800 border border-amber-200/80 shrink-0">
-                                                        {{ str_replace('_', ' ', $evt->event_type) }}
-                                                    </span>
-                                                @endif
-                                                @if($evt->status === 'closed')
-                                                    <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-slate-200 text-slate-600 shrink-0">Closed</span>
-                                                @else
-                                                    <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200/80 shrink-0">Active</span>
-                                                @endif
-                                            </div>
-
-                                            <a href="{{ route('admin.events.registrations', $evt->id) }}" target="_blank" 
-                                               class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-[10px] font-extrabold shrink-0 transition-colors inline-flex items-center gap-1 shadow-2xs" title="View Registrations">
-                                                <span>{{ __('messages.registrations') }} ↗</span>
-                                            </a>
-                                        </div>
-
-                                        <!-- Metadata Row: Date, Venue, Count -->
-                                        <div class="flex items-center gap-3 text-[10px] text-slate-500 font-semibold bg-white p-2 rounded-lg border border-slate-200/70 flex-wrap">
-                                            @if($evt->date)
-                                                <span class="whitespace-nowrap flex items-center gap-1">📅 {{ \Carbon\Carbon::parse($evt->date)->format('d-M-Y') }}</span>
+                                         class="flex items-center justify-between gap-3 bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl p-3 transition-all">
+                                        
+                                        <!-- Left Side: Event Title & Badges -->
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <h4 class="text-xs font-black text-slate-900 truncate" title="{{ $evt->title }}">{{ $evt->title }}</h4>
+                                            @if($evt->event_type)
+                                                <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-amber-100 text-amber-800 border border-amber-200/80 shrink-0">
+                                                    {{ str_replace('_', ' ', $evt->event_type) }}
+                                                </span>
                                             @endif
-                                            @if($evt->venue)
-                                                <span class="truncate max-w-[200px] flex items-center gap-1" title="{{ $evt->venue }}">📍 {{ $evt->venue }}</span>
+                                            @if($evt->status === 'closed')
+                                                <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-slate-200 text-slate-600 shrink-0">Closed</span>
+                                            @else
+                                                <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200/80 shrink-0">Active</span>
                                             @endif
-                                            <span class="text-slate-800 font-black ml-auto flex items-center gap-1">👥 {{ $evt->registrations_count }} {{ __('messages.registrations') }}</span>
                                         </div>
 
-                                        <!-- Bottom Row: Granular Permissions Controls -->
-                                        <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
-                                            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">{{ __('messages.access_rights') }}</span>
-                                            <div class="flex items-center gap-2 flex-wrap">
-                                                <!-- View Permission -->
-                                                <label class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white border border-slate-200 hover:bg-blue-50 cursor-pointer transition-colors text-[10px] font-bold select-none" title="Allow View Registrations & Details">
-                                                    <input type="checkbox" name="event_permissions[]" value="event_view_{{ $evt->id }}" 
-                                                           :checked="eventsAdmin.permissions && (eventsAdmin.permissions.includes('events_manage') || eventsAdmin.permissions.includes('event_manage_{{ $evt->id }}') || eventsAdmin.permissions.includes('event_view_{{ $evt->id }}'))"
-                                                           class="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer">
-                                                    <span class="text-blue-700 font-black">👁️ {{ __('messages.view') }}</span>
-                                                </label>
+                                        <!-- Right Side: View & Edit Controls -->
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <!-- View Permission -->
+                                            <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-blue-50 cursor-pointer transition-colors text-[10px] font-bold select-none" title="Allow View Registrations & Details">
+                                                <input type="checkbox" name="event_permissions[]" value="event_view_{{ $evt->id }}" 
+                                                       x-model="eventsAdmin.permissions"
+                                                       class="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer">
+                                                <span class="text-blue-700 font-black">👁️ {{ __('messages.view') }}</span>
+                                            </label>
 
-                                                <!-- Edit Permission -->
-                                                <label class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white border border-slate-200 hover:bg-amber-50 cursor-pointer transition-colors text-[10px] font-bold select-none" title="Allow Edit / Approve / Reject">
-                                                    <input type="checkbox" name="event_permissions[]" value="event_edit_{{ $evt->id }}" 
-                                                           :checked="eventsAdmin.permissions && (eventsAdmin.permissions.includes('events_manage') || eventsAdmin.permissions.includes('event_manage_{{ $evt->id }}') || eventsAdmin.permissions.includes('event_edit_{{ $evt->id }}'))"
-                                                           class="w-3.5 h-3.5 rounded border-slate-300 text-amber-600 focus:ring-0 cursor-pointer">
-                                                    <span class="text-amber-700 font-black">✏️ {{ __('messages.edit') }}</span>
-                                                </label>
-
-                                                <!-- Add Permission -->
-                                                <label class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white border border-slate-200 hover:bg-emerald-50 cursor-pointer transition-colors text-[10px] font-bold select-none" title="Allow Add New Registration">
-                                                    <input type="checkbox" name="event_permissions[]" value="event_create_{{ $evt->id }}" 
-                                                           :checked="eventsAdmin.permissions && (eventsAdmin.permissions.includes('events_manage') || eventsAdmin.permissions.includes('event_manage_{{ $evt->id }}') || eventsAdmin.permissions.includes('event_create_{{ $evt->id }}'))"
-                                                           class="w-3.5 h-3.5 rounded border-slate-300 text-emerald-600 focus:ring-0 cursor-pointer">
-                                                    <span class="text-emerald-700 font-black">➕ {{ __('messages.add') }}</span>
-                                                </label>
-                                            </div>
+                                            <!-- Edit Permission -->
+                                            <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-amber-50 cursor-pointer transition-colors text-[10px] font-bold select-none" title="Allow Edit / Approve / Reject">
+                                                <input type="checkbox" name="event_permissions[]" value="event_edit_{{ $evt->id }}" 
+                                                       x-model="eventsAdmin.permissions"
+                                                       class="w-3.5 h-3.5 rounded border-slate-300 text-amber-600 focus:ring-0 cursor-pointer">
+                                                <span class="text-amber-700 font-black">✏️ {{ __('messages.edit') }}</span>
+                                            </label>
                                         </div>
+
                                     </div>
+
                                 @empty
                                     <div class="p-6 text-center text-slate-400 text-xs font-medium bg-slate-50 rounded-xl border border-slate-200/60">
                                         No events created yet.

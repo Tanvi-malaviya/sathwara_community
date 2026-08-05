@@ -37,7 +37,18 @@ class SettingsController extends Controller
             'footer_text' => Setting::get('footer_text', '© ' . date('Y') . ' Sathwara Community. All rights reserved.'),
         ];
 
-        return view('admin.settings.index', compact('settings'));
+        $emailSettings = [
+            'mail_mailer'       => Setting::get('mail_mailer', env('MAIL_MAILER', 'smtp')),
+            'mail_host'         => Setting::get('mail_host', env('MAIL_HOST', 'smtp.gmail.com')),
+            'mail_port'         => Setting::get('mail_port', env('MAIL_PORT', '587')),
+            'mail_username'     => Setting::get('mail_username', env('MAIL_USERNAME', '')),
+            'mail_password'     => Setting::get('mail_password', env('MAIL_PASSWORD', '')),
+            'mail_encryption'   => Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls')),
+            'mail_from_address' => Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@sathwaracommunity.com')),
+            'mail_from_name'    => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Sathwara Community Portal')),
+        ];
+
+        return view('admin.settings.index', compact('settings', 'emailSettings'));
     }
 
     /**
@@ -109,7 +120,9 @@ class SettingsController extends Controller
             'about_history_gu' => Setting::get('about_history_gu'),
         ];
 
-        return view('admin.settings.about', compact('settings'));
+        $timelines = \App\Models\Timeline::orderBy('display_order')->get();
+
+        return view('admin.settings.about', compact('settings', 'timelines'));
     }
 
     /**
@@ -132,9 +145,11 @@ class SettingsController extends Controller
         ];
 
         foreach ($keys as $key) {
-            Setting::set($key, $request->input($key));
+            if ($request->has($key)) {
+                Setting::set($key, $request->input($key));
+            }
         }
 
-        return redirect()->back()->with('success', 'About Us configurations saved successfully.');
+        return redirect()->back()->with('success', 'About Us configuration saved successfully.');
     }
 }

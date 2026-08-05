@@ -31,8 +31,12 @@ class CheckAdminPermission
                 return $next($request);
             }
 
+            if ($permission === 'settings_manage' && ($userPerms->contains('about_manage') || $userPerms->contains('timelines_manage') || $userPerms->contains('committee_manage') || $userPerms->contains('desk_manage'))) {
+                return $next($request);
+            }
+
             $modPrefix = str_replace('_manage', '', $permission);
-            if ($userPerms->contains(fn($p) => str_starts_with($p, $modPrefix . '_') || str_starts_with($p, 'event_'))) {
+            if ($userPerms->contains(fn($p) => str_starts_with($p, $modPrefix . '_') || str_starts_with($p, 'event_') || str_starts_with($p, 'about_'))) {
                 return $next($request);
             }
         }

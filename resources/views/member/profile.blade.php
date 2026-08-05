@@ -28,38 +28,38 @@
         <input type="hidden" name="last_name" value="{{ old('last_name', $profile->last_name ?? '') }}">
 
         <!-- MEMBER IDENTITY & PHOTO HEADER CARD -->
-        <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+        <div class="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 shadow-sm">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <!-- User Info -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div class="relative group shrink-0">
-                        <img class="w-16 h-16 rounded-2xl object-cover bg-slate-50 border-2 border-primary-200 shadow-xs" 
+                        <img class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover bg-slate-50 border-2 border-primary-200 shadow-xs" 
                              src="{{ $profile && $profile->photo_path ? (str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path)) : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100' }}" 
                              alt="Profile Photo">
                     </div>
-                    <div class="space-y-1">
+                    <div class="space-y-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="px-2 py-0.5 rounded-md bg-primary-50 text-primary-700 border border-primary-100 text-[10px] font-black uppercase tracking-wider">MEMBER ACCOUNT</span>
                             <span class="text-xs font-black text-slate-500">#{{ sprintf('%05d', $user->id) }}</span>
                         </div>
-                        <h2 class="text-base font-black text-slate-900 leading-tight">
+                        <h2 class="text-sm sm:text-base font-black text-slate-900 leading-tight truncate">
                             {{ $profile->first_name ?? '' }} {{ $profile->middle_name ?? '' }} {{ $profile->last_name ?? '' }}
                         </h2>
-                        <p class="text-xs text-slate-500 font-semibold flex items-center gap-1">
+                        <p class="text-xs text-slate-500 font-semibold flex items-center gap-1 truncate">
                             <span>✉️</span>
-                            <span>{{ $user->email }}</span>
+                            <span class="truncate">{{ $user->email }}</span>
                         </p>
                     </div>
                 </div>
 
                 <!-- Photo Upload Field -->
-                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 flex items-center gap-3 shrink-0 w-full sm:w-auto">
-                    <div class="space-y-0.5">
+                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 shrink-0 w-full sm:w-auto overflow-hidden">
+                    <div class="space-y-0.5 shrink-0">
                         <label class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider block">{{ __('messages.profile_photo') }}</label>
                         <span class="text-[9px] text-slate-400 font-medium block">JPG, PNG or WEBP (Max 2MB)</span>
                     </div>
                     <input type="file" name="photo" accept="image/*"
-                           class="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-extrabold file:bg-primary-500 file:text-white hover:file:bg-primary-600 cursor-pointer transition-all">
+                           class="w-full max-w-full text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-extrabold file:bg-primary-500 file:text-white hover:file:bg-primary-600 cursor-pointer transition-all">
                 </div>
             </div>
         </div>
@@ -191,13 +191,13 @@
             </div>
 
             <!-- PROFILE ACTIONS -->
-            <div class="pt-4 border-t border-slate-100 flex justify-end items-center gap-3">
+            <div class="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
                 <a href="{{ route('member.dashboard') }}" 
-                   class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-extrabold text-xs rounded-xl transition-all">
+                   class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-extrabold text-xs rounded-xl transition-all text-center">
                     {{ __('messages.cancel') }}
                 </a>
                 <button type="submit" 
-                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all uppercase tracking-wider cursor-pointer hover:-translate-y-0.5">
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all uppercase tracking-wider cursor-pointer hover:-translate-y-0.5">
                     <span>💾</span>
                     <span>{{ __('messages.save_profile_changes') }}</span>
                 </button>

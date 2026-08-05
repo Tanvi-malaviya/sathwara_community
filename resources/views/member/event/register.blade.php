@@ -462,44 +462,53 @@
                 $isRegistrationClosed = $isRegistrationFormDisabled || (!empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString());
             @endphp
 
+            <!-- Back to Events Navigation Link -->
+            <div>
+                <a href="{{ auth()->check() && request()->routeIs('member.*') ? route('member.events.index') : route('home') }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition-all shadow-2xs group">
+                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    <span>Back to Events</span>
+                </a>
+            </div>
+
             <!-- DEFAULT / CLOSED NOTICE BANNER -->
             @if($isRegistrationFormDisabled)
-                <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2.5 font-bold shadow-2xs">
+                <div
+                    class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2.5 font-bold shadow-2xs">
                     <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <span>Notice: Registration form is disabled for this event.</span>
                 </div>
-            @elseif($isRegistrationClosed)
-                <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2.5 font-bold shadow-2xs">
-                    <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span>Notice: The last date to fill up this form ({{ date('d-M-Y', strtotime($event->registration_end_date)) }}) has passed. Registration is now closed.</span>
-                </div>
-            @else
-                <div class="p-3.5 sm:p-4 bg-amber-50/90 border border-amber-200/90 rounded-2xl text-xs text-amber-900 flex items-start gap-3 shadow-2xs">
+            @elseif(!$isRegistrationClosed)
+                <div
+                    class="p-3.5 sm:p-4 bg-amber-50/90 border border-amber-200/90 rounded-2xl text-xs text-amber-900 flex items-start gap-3 shadow-2xs">
                     <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div class="space-y-1 flex-1 min-w-0">
                         <div class="flex items-center justify-between gap-2 flex-wrap">
                             <span class="font-extrabold text-amber-900 text-xs">Notice / Instructions:</span>
                             @if(!empty($event->registration_end_date))
-                                <span class="text-[10px] font-extrabold text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded-lg border border-amber-200/80">
+                                <span
+                                    class="text-[10px] font-extrabold text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded-lg border border-amber-200/80">
                                     Last Date: ⏳ {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
                                 </span>
                             @endif
                         </div>
                         <div class="text-[11px] font-medium text-amber-800 leading-relaxed">
                             @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
-                                Please select details and fill in all mandatory fields carefully before submitting your registration.
+                                Please select details and fill in all mandatory fields carefully before submitting your
+                                registration.
                             @elseif(!empty($event->description))
                                 {!! $event->description !!}
                             @else
-                                Please select student/candidate details and fill in all mandatory fields carefully before submitting.
+                                Please select student/candidate details and fill in all mandatory fields carefully before
+                                submitting.
                             @endif
                         </div>
                     </div>
@@ -507,38 +516,57 @@
             @endif
 
             @if($isRegistrationClosed)
-                <!-- REGISTRATION CLOSED CARD -->
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 text-center shadow-2xs space-y-4 flex flex-col items-center justify-center relative overflow-hidden">
-                    <!-- Ambient background glow -->
-                    <div class="absolute -top-20 -right-20 w-48 h-48 bg-rose-50 rounded-full blur-2xl opacity-70 pointer-events-none"></div>
-                    <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-amber-50 rounded-full blur-2xl opacity-70 pointer-events-none"></div>
+                <!-- REGISTRATION CLOSED CARD WITH DYNAMIC ANIMATIONS -->
+                <div
+                    class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 text-center shadow-2xs space-y-4 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <!-- Ambient background floating glow animation -->
+                    <div
+                        class="absolute -top-20 -right-20 w-56 h-56 bg-rose-100/50 rounded-full blur-3xl animate-float pointer-events-none">
+                    </div>
+                    <div
+                        class="absolute -bottom-20 -left-20 w-56 h-56 bg-amber-100/50 rounded-full blur-3xl animate-float-reverse pointer-events-none">
+                    </div>
 
-                    <!-- Vector Graphic Badge -->
+                    <!-- Vector Graphic Animated Lock Badge -->
                     <div class="relative flex items-center justify-center z-10 py-1">
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600 shadow-2xs relative group">
-                            <div class="absolute -inset-1 rounded-3xl bg-rose-500/10 animate-ping opacity-75"></div>
-                            
-                            <svg class="w-8 h-8 sm:w-10 sm:h-10 text-rose-500 relative z-10 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        <div
+                            class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600 shadow-2xs relative group animate-float">
+                            <!-- Outer pulsing rings -->
+                            <div class="absolute -inset-1.5 rounded-3xl bg-rose-500/15 animate-ping opacity-75"></div>
+                            <div class="absolute -inset-3 rounded-3xl bg-rose-400/10 animate-pulse-glow"></div>
+
+                            <svg class="w-8 h-8 sm:w-10 sm:h-10 text-rose-500 relative z-10 transform group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300"
+                                fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                         </div>
                     </div>
 
-                    <!-- Details -->
+                    <!-- Details with Animations -->
                     <div class="max-w-md space-y-1.5 z-10">
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100/90 border border-rose-200/90 text-rose-800 font-extrabold text-[10px] uppercase tracking-wider">
-                            <span class="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></span>
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100/90 border border-rose-200/90 text-rose-800 font-extrabold text-[10px] uppercase tracking-wider shadow-2xs hover:scale-105 transition-transform">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-600 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                            </span>
                             <span>{{ $isRegistrationFormDisabled ? 'Form Disabled' : 'Registration Closed' }}</span>
                         </div>
 
-                        <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">{{ $isRegistrationFormDisabled ? 'Registration Form Is Disabled' : 'Form Fill-up Is Closed' }}</h3>
+                        <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                            {{ $isRegistrationFormDisabled ? 'Registration Form Is Disabled' : 'Form Fill-up Is Closed' }}</h3>
 
                         <p class="text-xs text-slate-500 font-medium leading-relaxed">
                             @if($isRegistrationFormDisabled)
-                                Online registration form is not enabled for <strong class="text-slate-800 font-bold">{{ $event->title }}</strong>.
+                                Online registration form is not enabled for <strong
+                                    class="text-slate-800 font-bold">{{ $event->title }}</strong>.
                             @else
-                                The deadline for submitting registrations for <strong class="text-slate-800 font-bold">{{ $event->title }}</strong> passed on 
-                                <span class="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/80 inline-block">{{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>. Form fill-up is disabled for this event.
+                                The deadline for submitting registrations for <strong
+                                    class="text-slate-800 font-bold">{{ $event->title }}</strong> passed on
+                                <span
+                                    class="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/80 inline-block hover:scale-105 transition-transform animate-pulse">{{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>.
+                                Form fill-up is disabled for this event.
                             @endif
                         </p>
                     </div>
@@ -549,951 +577,970 @@
                 <!-- MAIN FORM CARD CONTAINER -->
                 <div id="registrationFormCard"
                     class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden w-full transition-all">
-                <div class="p-4 sm:p-6 space-y-4">
+                    <div class="p-4 sm:p-6 space-y-4">
 
-                    <!-- Edit Mode Banner -->
-                    <div x-show="isEditing"
-                        class="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-3 text-xs"
-                        x-cloak>
-                        <div class="flex items-center gap-2">
-                            <span class="text-amber-600 font-extrabold">✏️ Editing Registration for:</span>
-                            <span class="font-black text-amber-900" x-text="selectedStudent"></span>
+                        <!-- Edit Mode Banner -->
+                        <div x-show="isEditing"
+                            class="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-3 text-xs"
+                            x-cloak>
+                            <div class="flex items-center gap-2">
+                                <span class="text-amber-600 font-extrabold">✏️ Editing Registration for:</span>
+                                <span class="font-black text-amber-900" x-text="selectedStudent"></span>
+                            </div>
+                            <button type="button" @click="cancelEdit()"
+                                class="px-3 py-1 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg border border-slate-200 shadow-2xs">
+                                ✕ Cancel Edit
+                            </button>
                         </div>
-                        <button type="button" @click="cancelEdit()"
-                            class="px-3 py-1 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg border border-slate-200 shadow-2xs">
-                            ✕ Cancel Edit
-                        </button>
-                    </div>
 
-                    <!-- Registration Form -->
-                    <form method="POST" action="{{ route('events.public_register', $event->id) }}"
-                        enctype="multipart/form-data" class="space-y-4">
-                        @csrf
+                        <!-- Registration Form -->
+                        <form method="POST" action="{{ route('events.public_register', $event->id) }}"
+                            enctype="multipart/form-data" class="space-y-4">
+                            @csrf
 
-                        @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                            <!-- Inam Vitaran Academic & Marksheet Form Fields -->
-                            <div class="space-y-4 text-xs">
-                                @php
-                                    $familyMembers = $familyMembers ?? (auth()->check() ? auth()->user()->familyMembers : collect());
-                                @endphp
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
-                                        <span>Student / Candidate Full Name <span class="text-rose-500">*</span></span>
-                                        <span class="text-[10px] font-normal text-slate-400">(Select student from family
-                                            members)</span>
-                                    </label>
-                                    @if($familyMembers->count() > 0)
-                                        <select name="student_name" x-model="selectedStudent" required
-                                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 transition-all outline-none">
-                                            <option value="">-- Select Student / Child --</option>
-                                            @foreach($familyMembers as $fm)
-                                                <option value="{{ $fm->name }}">{{ $fm->name }} ({{ $fm->relationship }})</option>
-                                            @endforeach
-                                        </select>
-                                    @else
-                                        <div
-                                            class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-2">
-                                            <p class="font-bold">No family members found on your profile.</p>
-                                            <p class="text-[11px]">Please add your children / student under Family Members first to
-                                                register for Inam Vitaran.</p>
-                                            <a href="{{ route('member.family.index') }}"
-                                                class="inline-block px-3.5 py-1.5 bg-amber-600 text-white font-bold rounded-lg text-[11px]">
-                                                + Add Family Member
-                                            </a>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <template x-if="selectedStudent !== ''">
-                                    <div class="space-y-4 pt-1">
-                                        <!-- STEP 1: Education Type Dropdown -->
-                                        <div class="space-y-1">
-                                            <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                Education Type <span class="text-rose-500">*</span>
-                                            </label>
-                                            <select name="education_type" x-model="educationType" required
-                                                @change="education = ''; otherCourse = ''; schoolStandard = ''; schoolStream = ''"
-                                                class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
-                                                <option value="">-- Select Education Type --</option>
-                                                <option value="School">School (1st to 12th Standard)</option>
-                                                <option value="College">College (UG / PG / Professional)</option>
-                                                <option value="Diploma">Diploma / Polytechnic</option>
-                                                <option value="ITI">ITI Trades</option>
-                                                <option value="Other">Other</option>
+                            @if(($event->event_type ?? 'normal') === 'inam_vitaran')
+                                <!-- Inam Vitaran Academic & Marksheet Form Fields -->
+                                <div class="space-y-4 text-xs">
+                                    @php
+                                        $familyMembers = $familyMembers ?? (auth()->check() ? auth()->user()->familyMembers : collect());
+                                    @endphp
+                                    <div class="space-y-1">
+                                        <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                                            <span>Student / Candidate Full Name <span class="text-rose-500">*</span></span>
+                                            <span class="text-[10px] font-normal text-slate-400">(Select student from family
+                                                members)</span>
+                                        </label>
+                                        @if($familyMembers->count() > 0)
+                                            <select name="student_name" x-model="selectedStudent" required
+                                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 transition-all outline-none">
+                                                <option value="">-- Select Student / Child --</option>
+                                                @foreach($familyMembers as $fm)
+                                                    <option value="{{ $fm->name }}">{{ $fm->name }} ({{ $fm->relationship }})</option>
+                                                @endforeach
                                             </select>
-                                        </div>
+                                        @else
+                                            <div
+                                                class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-2">
+                                                <p class="font-bold">No family members found on your profile.</p>
+                                                <p class="text-[11px]">Please add your children / student under Family Members first to
+                                                    register for Inam Vitaran.</p>
+                                                <a href="{{ route('member.family.index') }}"
+                                                    class="inline-block px-3.5 py-1.5 bg-amber-600 text-white font-bold rounded-lg text-[11px]">
+                                                    + Add Family Member
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
 
-                                        <!-- Hidden input for form submission -->
-                                        <input type="hidden" name="education" :value="(educationType === 'Other' || education === 'Other' || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))) ? otherCourse : education">
-
-                                        <!-- STEP 2A: School Standard Selection (when Education Type is 'School') -->
-                                        <div class="space-y-3" x-show="educationType === 'School'">
-                                            <!-- Standard Dropdown -->
+                                    <template x-if="selectedStudent !== ''">
+                                        <div class="space-y-4 pt-1">
+                                            <!-- STEP 1: Education Type Dropdown -->
                                             <div class="space-y-1">
                                                 <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                    Standard / Class <span class="text-rose-500">*</span>
+                                                    Education Type <span class="text-rose-500">*</span>
                                                 </label>
-                                                <select x-model="schoolStandard" @change="onStandardChange()" :required="educationType === 'School'"
+                                                <select name="education_type" x-model="educationType" required
+                                                    @change="education = ''; otherCourse = ''; schoolStandard = ''; schoolStream = ''"
                                                     class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
-                                                    <option value="">-- Select Standard --</option>
-                                                    <option value="1st Standard">1st Standard</option>
-                                                    <option value="2nd Standard">2nd Standard</option>
-                                                    <option value="3rd Standard">3rd Standard</option>
-                                                    <option value="4th Standard">4th Standard</option>
-                                                    <option value="5th Standard">5th Standard</option>
-                                                    <option value="6th Standard">6th Standard</option>
-                                                    <option value="7th Standard">7th Standard</option>
-                                                    <option value="8th Standard">8th Standard</option>
-                                                    <option value="9th Standard">9th Standard</option>
-                                                    <option value="10th Standard">10th Standard</option>
-                                                    <option value="11th Standard">11th Standard</option>
-                                                    <option value="12th Standard">12th Standard</option>
+                                                    <option value="">-- Select Education Type --</option>
+                                                    <option value="School">School (1st to 12th Standard)</option>
+                                                    <option value="College">College (UG / PG / Professional)</option>
+                                                    <option value="Diploma">Diploma / Polytechnic</option>
+                                                    <option value="ITI">ITI Trades</option>
                                                     <option value="Other">Other</option>
                                                 </select>
                                             </div>
 
-                                            <!-- Stream Dropdown (for 11th & 12th) -->
-                                            <div class="space-y-1" x-show="schoolStandard === '11th Standard' || schoolStandard === '12th Standard'"
+                                            <!-- Hidden input for form submission -->
+                                            <input type="hidden" name="education"
+                                                :value="(educationType === 'Other' || education === 'Other' || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))) ? otherCourse : education">
+
+                                            <!-- STEP 2A: School Standard Selection (when Education Type is 'School') -->
+                                            <div class="space-y-3" x-show="educationType === 'School'">
+                                                <!-- Standard Dropdown -->
+                                                <div class="space-y-1">
+                                                    <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                        Standard / Class <span class="text-rose-500">*</span>
+                                                    </label>
+                                                    <select x-model="schoolStandard" @change="onStandardChange()"
+                                                        :required="educationType === 'School'"
+                                                        class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                                        <option value="">-- Select Standard --</option>
+                                                        <option value="1st Standard">1st Standard</option>
+                                                        <option value="2nd Standard">2nd Standard</option>
+                                                        <option value="3rd Standard">3rd Standard</option>
+                                                        <option value="4th Standard">4th Standard</option>
+                                                        <option value="5th Standard">5th Standard</option>
+                                                        <option value="6th Standard">6th Standard</option>
+                                                        <option value="7th Standard">7th Standard</option>
+                                                        <option value="8th Standard">8th Standard</option>
+                                                        <option value="9th Standard">9th Standard</option>
+                                                        <option value="10th Standard">10th Standard</option>
+                                                        <option value="11th Standard">11th Standard</option>
+                                                        <option value="12th Standard">12th Standard</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Stream Dropdown (for 11th & 12th) -->
+                                                <div class="space-y-1"
+                                                    x-show="schoolStandard === '11th Standard' || schoolStandard === '12th Standard'"
+                                                    x-transition:enter="transition ease-out duration-200"
+                                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                                    x-transition:enter-end="opacity-100 translate-y-0">
+                                                    <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                        Stream / Branch <span class="text-rose-500">*</span>
+                                                    </label>
+                                                    <select x-model="schoolStream" @change="onStreamChange()"
+                                                        :required="educationType === 'School' && (schoolStandard === '11th Standard' || schoolStandard === '12th Standard')"
+                                                        class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                                        <option value="">-- Select Stream --</option>
+                                                        <option value="Science">Science</option>
+                                                        <option value="Commerce">Commerce</option>
+                                                        <option value="Arts">Arts</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- STEP 2B: Searchable Course Dropdown (when Education Type is College, Diploma, or ITI) -->
+                                            <div class="space-y-1"
+                                                x-show="educationType === 'College' || educationType === 'Diploma' || educationType === 'ITI'"
                                                 x-transition:enter="transition ease-out duration-200"
                                                 x-transition:enter-start="opacity-0 -translate-y-1"
-                                                x-transition:enter-end="opacity-100 translate-y-0">
+                                                x-transition:enter-end="opacity-100 translate-y-0" style="display:none">
                                                 <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                    Stream / Branch <span class="text-rose-500">*</span>
+                                                    Course / Degree <span class="text-rose-500">*</span>
                                                 </label>
-                                                <select x-model="schoolStream" @change="onStreamChange()" :required="educationType === 'School' && (schoolStandard === '11th Standard' || schoolStandard === '12th Standard')"
-                                                    class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
-                                                    <option value="">-- Select Stream --</option>
-                                                    <option value="Science">Science</option>
-                                                    <option value="Commerce">Commerce</option>
-                                                    <option value="Arts">Arts</option>
-                                                    <option value="Other">Other</option>
-                                                </select>
-                                            </div>
-                                        </div>
 
-                                        <!-- STEP 2B: Searchable Course Dropdown (when Education Type is College, Diploma, or ITI) -->
-                                        <div class="space-y-1"
-                                            x-show="educationType === 'College' || educationType === 'Diploma' || educationType === 'ITI'"
-                                            x-transition:enter="transition ease-out duration-200"
-                                            x-transition:enter-start="opacity-0 -translate-y-1"
-                                            x-transition:enter-end="opacity-100 translate-y-0"
-                                            style="display:none">
-                                            <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                Course / Degree <span class="text-rose-500">*</span>
-                                            </label>
+                                                <!-- Custom Dropdown Trigger -->
+                                                <div class="relative" @click.away="courseDropdownOpen = false">
+                                                    <button type="button"
+                                                        @click="courseDropdownOpen = !courseDropdownOpen; if(courseDropdownOpen) $nextTick(() => $refs.courseSearchInput.focus())"
+                                                        class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-left flex items-center justify-between gap-2 focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none"
+                                                        :class="courseDropdownOpen ? 'border-primary-500 ring-2 ring-primary-100 bg-white' : ''">
+                                                        <span class="text-slate-900 font-bold"
+                                                            x-text="education || '- Select Course -'"></span>
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200"
+                                                            :class="courseDropdownOpen ? 'rotate-180' : ''" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
 
-                                            <!-- Custom Dropdown Trigger -->
-                                            <div class="relative" @click.away="courseDropdownOpen = false">
-                                                <button type="button"
-                                                    @click="courseDropdownOpen = !courseDropdownOpen; if(courseDropdownOpen) $nextTick(() => $refs.courseSearchInput.focus())"
-                                                    class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-left flex items-center justify-between gap-2 focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none"
-                                                    :class="courseDropdownOpen ? 'border-primary-500 ring-2 ring-primary-100 bg-white' : ''">
-                                                    <span :class="education ? 'text-slate-800' : 'text-slate-400'"
-                                                        x-text="education || '-- Select Course --'"></span>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200" :class="courseDropdownOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                                    </svg>
-                                                </button>
+                                                    <!-- Dropdown Panel -->
+                                                    <div x-show="courseDropdownOpen"
+                                                        x-transition:enter="transition ease-out duration-150"
+                                                        x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                                                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                                        x-transition:leave="transition ease-in duration-100"
+                                                        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                                        x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                                                        style="display:none"
+                                                        class="absolute z-[999] left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
 
-                                                <!-- Dropdown Panel -->
-                                                <div x-show="courseDropdownOpen"
-                                                    x-transition:enter="transition ease-out duration-150"
-                                                    x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
-                                                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                                                    x-transition:leave="transition ease-in duration-100"
-                                                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                                                    x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
-                                                    style="display:none"
-                                                    class="absolute z-[999] left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
+                                                        <!-- Search Box -->
+                                                        <div class="p-2 border-b border-slate-100 bg-slate-50">
+                                                            <div
+                                                                class="flex items-center gap-2 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                    class="w-3 h-3 text-slate-400 shrink-0" fill="none"
+                                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
+                                                                </svg>
+                                                                <input type="text" x-ref="courseSearchInput" x-model="courseSearch"
+                                                                    placeholder="Search course..."
+                                                                    class="flex-1 text-xs font-medium text-slate-700 bg-transparent outline-none placeholder-slate-400">
+                                                                <button type="button" x-show="courseSearch"
+                                                                    @click="courseSearch = ''"
+                                                                    class="text-slate-300 hover:text-slate-500">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
+                                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                                            stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
 
-                                                    <!-- Search Box -->
-                                                    <div class="p-2 border-b border-slate-100 bg-slate-50">
-                                                        <div class="flex items-center gap-2 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
-                                                            </svg>
-                                                            <input type="text" x-ref="courseSearchInput"
-                                                                x-model="courseSearch"
-                                                                placeholder="Search course..."
-                                                                class="flex-1 text-xs font-medium text-slate-700 bg-transparent outline-none placeholder-slate-400">
-                                                            <button type="button" x-show="courseSearch" @click="courseSearch = ''" class="text-slate-300 hover:text-slate-500">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                            </button>
+                                                        <!-- Course List -->
+                                                        <div class="overflow-y-auto" style="max-height: 200px;">
+                                                            <template x-if="filteredCoursesList.length === 0">
+                                                                <div class="px-4 py-3 text-xs text-slate-400 text-center">No course
+                                                                    found</div>
+                                                            </template>
+                                                            <template x-for="course in filteredCoursesList" :key="course">
+                                                                <div @click="education = course; courseDropdownOpen = false; courseSearch = ''"
+                                                                    class="px-3.5 py-2 text-xs font-medium cursor-pointer transition-colors"
+                                                                    :class="education === course ? 'bg-primary-50 text-primary-600 font-bold' : 'text-slate-700 hover:bg-slate-50'"
+                                                                    x-text="course">
+                                                                </div>
+                                                            </template>
+                                                        </div>
+
+                                                        <!-- Footer count -->
+                                                        <div
+                                                            class="px-3 py-1.5 border-t border-slate-100 bg-slate-50 text-[10px] text-slate-400 font-medium">
+                                                            <span x-text="filteredCoursesList.length + ' course(s)'"></span>
                                                         </div>
                                                     </div>
+                                                </div>
+                                            </div>
 
-                                                    <!-- Course List -->
-                                                    <div class="overflow-y-auto" style="max-height: 200px;">
-                                                        <template x-if="filteredCoursesList.length === 0">
-                                                            <div class="px-4 py-3 text-xs text-slate-400 text-center">No course found</div>
-                                                        </template>
-                                                        <template x-for="course in filteredCoursesList" :key="course">
-                                                            <div @click="education = course; courseDropdownOpen = false; courseSearch = ''"
-                                                                class="px-3.5 py-2 text-xs font-medium cursor-pointer transition-colors"
-                                                                :class="education === course ? 'bg-primary-50 text-primary-600 font-bold' : 'text-slate-700 hover:bg-slate-50'"
-                                                                x-text="course">
-                                                            </div>
-                                                        </template>
+                                            <!-- Custom Course / Stream Input (when 'Other' is selected anywhere) -->
+                                            <div class="space-y-1"
+                                                x-show="educationType === 'Other' || (educationType !== 'School' && educationType !== '' && education === 'Other') || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))"
+                                                x-transition:enter="transition ease-out duration-200"
+                                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                                x-transition:enter-end="opacity-100 translate-y-0" style="display:none">
+                                                <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                    Enter Course / Standard Name <span class="text-rose-500">*</span>
+                                                </label>
+                                                <input type="text" x-model="otherCourse"
+                                                    :required="educationType === 'Other' || (educationType !== 'School' && education === 'Other') || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))"
+                                                    placeholder="Type your course / qualification name"
+                                                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                            </div>
+
+                                            <div class="space-y-1">
+                                                <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                    School / College / Institute Name <span class="text-rose-500">*</span>
+                                                </label>
+                                                <input type="text" name="school_college" x-model="schoolCollege" required
+                                                    placeholder="Enter school or university name"
+                                                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                            </div>
+
+                                            <!-- Single Unified Box Container for Total Marks, Obtained Marks, & Percentage -->
+                                            <div class="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 space-y-2">
+                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                    <div class="space-y-1">
+                                                        <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                            Total Marks <span class="text-rose-500">*</span>
+                                                        </label>
+                                                        <input type="number" step="any" name="total_marks" x-model="totalMarks"
+                                                            @input="calcPercentage()" @change="calcPercentage()" required
+                                                            placeholder="e.g. 600"
+                                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
                                                     </div>
 
-                                                    <!-- Footer count -->
-                                                    <div class="px-3 py-1.5 border-t border-slate-100 bg-slate-50 text-[10px] text-slate-400 font-medium">
-                                                        <span x-text="filteredCoursesList.length + ' course(s)'"></span>
+                                                    <div class="space-y-1">
+                                                        <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                            Obtained Marks <span class="text-rose-500">*</span>
+                                                        </label>
+                                                        <input type="number" step="any" name="received_marks"
+                                                            x-model="receivedMarks" @input="calcPercentage()"
+                                                            @change="calcPercentage()" required placeholder="e.g. 520"
+                                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                                    </div>
+
+                                                    <div class="space-y-1">
+                                                        <label
+                                                            class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                                                            <span>Percentage (%) <span class="text-rose-500">*</span></span>
+                                                            <span
+                                                                class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80">Auto
+                                                                Calculated</span>
+                                                        </label>
+                                                        <input type="text" name="percentage" x-model="percentage" readonly
+                                                            tabindex="-1" required placeholder="Auto-calculated (e.g. 86.67%)"
+                                                            class="w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-lg text-xs font-black text-slate-800 cursor-not-allowed outline-none select-none focus:ring-0">
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <!-- Custom Course / Stream Input (when 'Other' is selected anywhere) -->
-                                        <div class="space-y-1"
-                                            x-show="educationType === 'Other' || (educationType !== 'School' && educationType !== '' && education === 'Other') || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))"
-                                            x-transition:enter="transition ease-out duration-200"
-                                            x-transition:enter-start="opacity-0 -translate-y-1"
-                                            x-transition:enter-end="opacity-100 translate-y-0"
-                                            style="display:none">
-                                            <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                Enter Course / Standard Name <span class="text-rose-500">*</span>
-                                            </label>
-                                            <input type="text" x-model="otherCourse"
-                                                :required="educationType === 'Other' || (educationType !== 'School' && education === 'Other') || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))"
-                                                placeholder="Type your course / qualification name"
-                                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
-                                        </div>
+                                            <!-- Marksheet File Upload Field -->
+                                            <div class="space-y-1">
+                                                <label
+                                                    class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                                                    <span>Upload Marksheet File (Image / PDF) <span class="text-rose-500"
+                                                            x-show="!isEditing || !marksheetUrl">*</span></span>
+                                                    <span class="text-[10px] text-slate-400 font-medium">Supported: JPG, PNG, PDF
+                                                        (Max
+                                                        5MB)</span>
+                                                </label>
 
-                                        <div class="space-y-1">
-                                            <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                School / College / Institute Name <span class="text-rose-500">*</span>
-                                            </label>
-                                            <input type="text" name="school_college" x-model="schoolCollege" required
-                                                placeholder="Enter school or university name"
-                                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
-                                        </div>
-
-                                        <!-- Single Unified Box Container for Total Marks, Obtained Marks, & Percentage -->
-                                        <div class="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 space-y-2">
-                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                                <div class="space-y-1">
-                                                    <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                        Total Marks <span class="text-rose-500">*</span>
-                                                    </label>
-                                                    <input type="number" step="any" name="total_marks" x-model="totalMarks"
-                                                        @input="calcPercentage()" @change="calcPercentage()" required
-                                                        placeholder="e.g. 600"
-                                                        class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
-                                                </div>
-
-                                                <div class="space-y-1">
-                                                    <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                        Obtained Marks <span class="text-rose-500">*</span>
-                                                    </label>
-                                                    <input type="number" step="any" name="received_marks"
-                                                        x-model="receivedMarks" @input="calcPercentage()"
-                                                        @change="calcPercentage()" required placeholder="e.g. 520"
-                                                        class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
-                                                </div>
-
-                                                <div class="space-y-1">
-                                                    <label
-                                                        class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
-                                                        <span>Percentage (%) <span class="text-rose-500">*</span></span>
-                                                        <span
-                                                            class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80">Auto
-                                                            Calculated</span>
-                                                    </label>
-                                                    <input type="text" name="percentage" x-model="percentage" readonly
-                                                        tabindex="-1" required placeholder="Auto-calculated (e.g. 86.67%)"
-                                                        class="w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-lg text-xs font-black text-slate-800 cursor-not-allowed outline-none select-none focus:ring-0">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Marksheet File Upload Field -->
-                                        <div class="space-y-1">
-                                            <label
-                                                class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
-                                                <span>Upload Marksheet File (Image / PDF) <span class="text-rose-500"
-                                                        x-show="!isEditing || !marksheetUrl">*</span></span>
-                                                <span class="text-[10px] text-slate-400 font-medium">Supported: JPG, PNG, PDF
-                                                    (Max
-                                                    5MB)</span>
-                                            </label>
-
-                                            <template x-if="isEditing && marksheetUrl">
-                                                <div
-                                                    class="text-[11px] font-semibold text-slate-700 bg-amber-50 p-2 rounded-lg border border-amber-200 flex items-center justify-between">
-                                                    <span>Current File: <a :href="marksheetUrl" target="_blank"
-                                                            class="font-extrabold text-primary-600 hover:underline">View
-                                                            Uploaded Marksheet ↗</a></span>
-                                                    <span class="text-[10px] text-slate-400 font-normal">(Upload new file below
-                                                        to replace)</span>
-                                                </div>
-                                            </template>
-
-                                            <div class="flex items-center gap-2">
-                                                <input type="file" name="marksheet_file" accept="image/*,.pdf"
-                                                    :required="!isEditing && !marksheetUrl"
-                                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 file:mr-3 file:py-1.5 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-primary-500 file:text-white hover:file:bg-primary-600 cursor-pointer">
-                                            </div>
-                                        </div>
-
-                                        <div class="space-y-1">
-                                            <label class="text-[11px] font-bold text-slate-700">Special Achievement / Remarks
-                                                (Optional)</label>
-                                            <textarea name="remarks" x-model="remarks" rows="2"
-                                                placeholder="Mention rank, board awards, sports honors or extra accomplishments"
-                                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none"></textarea>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-
-                        @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                            <!-- Yuva Melo Step Tabs Navigation -->
-                            <div class="flex border-b border-slate-200/80 mb-2.5 gap-2 overflow-x-auto pb-1">
-                                <button type="button" @click="yuvaTab = 1"
-                                    :class="yuvaTab === 1 ? 'border-primary-500 text-primary-600 font-extrabold bg-primary-50/50' : 'border-transparent text-slate-500 hover:text-slate-700'"
-                                    class="px-4 py-2 border-b-2 text-xs transition-all whitespace-nowrap rounded-t-lg cursor-pointer">
-                                    {{ __('messages.yuva_tab_1') }}
-                                </button>
-                                <button type="button" @click="yuvaTab = 2"
-                                    :class="yuvaTab === 2 ? 'border-primary-500 text-primary-600 font-extrabold bg-primary-50/50' : 'border-transparent text-slate-500 hover:text-slate-700'"
-                                    class="px-4 py-2 border-b-2 text-xs transition-all whitespace-nowrap rounded-t-lg cursor-pointer">
-                                    {{ __('messages.yuva_tab_2') }}
-                                </button>
-                                <button type="button" @click="yuvaTab = 3"
-                                    :class="yuvaTab === 3 ? 'border-primary-500 text-primary-600 font-extrabold bg-primary-50/50' : 'border-transparent text-slate-500 hover:text-slate-700'"
-                                    class="px-4 py-2 border-b-2 text-xs transition-all whitespace-nowrap rounded-t-lg cursor-pointer">
-                                    {{ __('messages.yuva_tab_3') }}
-                                </button>
-                            </div>
-
-                            <!-- STEP 1: Candidate's Info -->
-                            <div x-show="yuvaTab === 1" class="space-y-2.5 text-xs">
-                                <div
-                                    class="bg-slate-50/80 px-3 py-2 rounded-xl border border-slate-100 font-bold text-primary-800 text-[11px]">
-                                    {{ __('messages.yuva_sec_1') }}
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.surname') }} <span
-                                                class="text-rose-500">*</span></label>
-                                        <input type="text" name="surname" value="{{ old('surname') }}" required
-                                            placeholder="Enter surname"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.first_name') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="first_name" value="{{ old('first_name') }}" required
-                                            placeholder="Enter first name"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.gender') }} <span
-                                                class="text-rose-500">*</span></label>
-                                        <select name="gender" required
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                            <option value="" disabled {{ old('gender') ? '' : 'selected' }}>Select Gender
-                                            </option>
-                                            <option value="Male" {{ old('gender') === 'Male' ? 'selected' : '' }}>Male</option>
-                                            <option value="Female" {{ old('gender') === 'Female' ? 'selected' : '' }}>Female
-                                            </option>
-                                            <option value="Other" {{ old('gender') === 'Other' ? 'selected' : '' }}>Other</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.birth_date') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="date" name="birth_date" value="{{ old('birth_date') }}" required
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.age') }} <span
-                                                class="text-rose-500">*</span></label>
-                                        <input type="number" name="age" value="{{ old('age') }}" required placeholder="e.g. 25"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.height') }}</label>
-                                        <input type="text" name="height" value="{{ old('height') }}"
-                                            placeholder="e.g. 5'6\"" class=" w-full px-3 py-2 bg-slate-50 border
-                                            border-slate-200 rounded-lg text-xs font-semibold focus:bg-white
-                                            focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.weight') }}</label>
-                                        <input type="text" name="weight" value="{{ old('weight') }}" placeholder="e.g. 60 kg"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">{{ __('messages.address') }} <span
-                                            class="text-rose-500">*</span></label>
-                                    <textarea name="address" rows="2" required placeholder="Enter full address"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">{{ old('address') }}</textarea>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.state') }} <span
-                                                class="text-rose-500">*</span></label>
-                                        <input type="text" name="state" value="{{ old('state', 'Gujarat') }}" required
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.district') }} <span
-                                                class="text-rose-500">*</span></label>
-                                        <input type="text" name="district" value="{{ old('district') }}" required
-                                            placeholder="Enter district"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">Area <span
-                                                class="text-rose-500">*</span></label>
-                                        <select name="area_id" required
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                            <option value="">-- Select Area --</option>
-                                            @if(isset($areas))
-                                                @foreach($areas as $areaItem)
-                                                    <option value="{{ $areaItem->id }}" {{ old('area_id') == $areaItem->id ? 'selected' : '' }}>
-                                                        {{ $areaItem->name }}{{ $areaItem->pincode ? ' (' . $areaItem->pincode . ')' : '' }}
-                                                    </option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.association') }}</label>
-                                        <input type="text" name="association" value="{{ old('association') }}"
-                                            placeholder="Enter mandal/association"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.mobile') }} <span
-                                                class="text-rose-500">*</span></label>
-                                        <input type="text" name="mobile_no"
-                                            value="{{ old('mobile_no', auth()->user()->memberProfile->phone ?? '') }}" required
-                                            maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
-                                            placeholder="10-digit number"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.whatsapp_no') }}</label>
-                                        <input type="text" name="whatsapp" value="{{ old('whatsapp') }}" maxlength="10"
-                                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
-                                            placeholder="10-digit whatsapp number"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.qualification') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="qualification" value="{{ old('qualification') }}" required
-                                            placeholder="e.g. Graduate / B.E."
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.occupation') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="occupation" value="{{ old('occupation') }}" required
-                                            placeholder="e.g. Job / Business"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.monthly_income') }}</label>
-                                        <input type="text" name="monthly_income" value="{{ old('monthly_income') }}"
-                                            placeholder="e.g. Rs. 25,000"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="space-y-1">
-                                    <label
-                                        class="text-[11px] font-bold text-slate-700">{{ __('messages.occupation_address') }}</label>
-                                    <input type="text" name="occupation_address" value="{{ old('occupation_address') }}"
-                                        placeholder="Enter job/business address"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.divorce_status') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <select name="divorce" required
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                            <option value="No" {{ old('divorce', 'No') === 'No' ? 'selected' : '' }}>No (ના)
-                                            </option>
-                                            <option value="Yes" {{ old('divorce') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
-                                        </select>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.special_need') }}</label>
-                                        <input type="text" name="special_need" value="{{ old('special_need') }}"
-                                            placeholder="e.g. None / Physical Disability details"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.physical_disability') }}</label>
-                                        <input type="text" name="physical_disability" value="{{ old('physical_disability') }}"
-                                            placeholder="e.g. None / Details"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.disability_duration') }}</label>
-                                        <input type="text" name="disability_duration" value="{{ old('disability_duration') }}"
-                                            placeholder="e.g. Since birth / N/A"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.special_info') }}</label>
-                                        <input type="text" name="special_info" value="{{ old('special_info') }}"
-                                            placeholder="Any special achievement or information"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.other_info') }}</label>
-                                        <input type="text" name="other_info" value="{{ old('other_info') }}"
-                                            placeholder="Additional notes or remarks"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <!-- Document Upload Grid -->
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                                    <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
-                                        <label
-                                            class="text-[10px] font-bold text-slate-600 block">{{ __('messages.member_photo') }}</label>
-                                        <input type="file" name="member_photo" accept="image/*"
-                                            class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
-                                    </div>
-                                    <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
-                                        <label
-                                            class="text-[10px] font-bold text-slate-600 block">{{ __('messages.aadhaar_photo') }}</label>
-                                        <input type="file" name="aadhaar_photo" accept="image/*"
-                                            class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
-                                    </div>
-                                    <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
-                                        <label
-                                            class="text-[10px] font-bold text-slate-600 block">{{ __('messages.selfie') }}</label>
-                                        <input type="file" name="selfie" accept="image/*"
-                                            class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
-                                    </div>
-                                    <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
-                                        <label
-                                            class="text-[10px] font-bold text-slate-600 block">{{ __('messages.whatsapp_image') }}</label>
-                                        <input type="file" name="whatsapp_image" accept="image/*"
-                                            class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
-                                    </div>
-                                </div>
-
-                                <!-- Tab 1 Next Button -->
-                                <div class="flex justify-end pt-2">
-                                    <button type="button" @click="yuvaTab = 2"
-                                        class="px-5 py-2 bg-primary-500 text-white hover:bg-primary-600 font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">
-                                        {!! __('messages.next_step') !!}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- STEP 2: Father & Family Info -->
-                            <div x-show="yuvaTab === 2" class="space-y-2.5 text-xs" x-cloak>
-                                <div
-                                    class="bg-slate-50/80 px-3 py-2 rounded-xl border border-slate-100 font-bold text-primary-800 text-[11px]">
-                                    {{ __('messages.yuva_sec_2') }}
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.father_name') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="father_name" value="{{ old('father_name') }}" required
-                                            placeholder="Enter father's full name"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.grandfather_name') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="grandfather_name" value="{{ old('grandfather_name') }}"
-                                            required placeholder="Enter grandfather's full name"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    {{--
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">Father's Gyanti (Gnati)</label>
-                                        <input type="text" name="father_gyanti" value="{{ old('father_gyanti') }}"
-                                            placeholder="e.g. Sathwara / Patel"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    --}}
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.father_age') }}</label>
-                                        <input type="number" name="father_age" value="{{ old('father_age') }}"
-                                            placeholder="e.g. 52"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.father_occupation') }}</label>
-                                        <input type="text" name="father_occupation" value="{{ old('father_occupation') }}"
-                                            placeholder="e.g. Farming / Business"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.father_income') }}</label>
-                                        <input type="text" name="father_income" value="{{ old('father_income') }}"
-                                            placeholder="Annual or Monthly Income"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.father_occupation_address') }}</label>
-                                        <input type="text" name="father_occupation_address"
-                                            value="{{ old('father_occupation_address') }}"
-                                            placeholder="Enter father's job/business address"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.father_mobile') }}</label>
-                                        <input type="text" name="father_mobile" value="{{ old('father_mobile') }}"
-                                            maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
-                                            placeholder="10-digit mobile number"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.mother_name') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="mother_name" value="{{ old('mother_name') }}" required
-                                            placeholder="Enter mother's name"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    {{--
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">Mother's Gyanti (Gnati)</label>
-                                        <input type="text" name="mother_gyanti" value="{{ old('mother_gyanti') }}"
-                                            placeholder="e.g. Sathwara / Patel"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    --}}
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.mother_occupation') }}</label>
-                                        <input type="text" name="mother_occupation"
-                                            value="{{ old('mother_occupation', 'Housewife') }}" placeholder="e.g. Housewife"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.native_place') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="native_place" value="{{ old('native_place') }}" required
-                                            placeholder="Enter native village/city"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <!-- Brother and Sister Details (Siblings Section with Modal + Cards) -->
-                                <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80 space-y-2.5">
-                                    <div class="flex items-center justify-between flex-wrap gap-2">
-                                        <div>
-                                            <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
-                                                {{ __('messages.siblings_details') }}
-                                            </h4>
-                                            <p class="text-[10px] text-slate-400 mt-0.5">Add brother(s) and sister(s) details
-                                                using
-                                                the button</p>
-                                        </div>
-                                        <button type="button" @click="showSiblingModal = true"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                    d="M12 4v16m8-8H4"></path>
-                                            </svg>
-                                            <span>Add Sibling</span>
-                                        </button>
-                                    </div>
-
-                                    <!-- Sibling Cards List (Compact Small Cards) -->
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-1"
-                                        x-show="siblings.length > 0">
-                                        <template x-for="(s, index) in siblings" :key="index">
-                                            <div
-                                                class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-between min-w-0">
-                                                <div class="min-w-0 space-y-0.5">
-                                                    <div class="flex items-center gap-1.5 truncate">
-                                                        <span
-                                                            class="text-[9px] font-black px-1.5 py-0.5 rounded-md text-white tracking-tight shrink-0"
-                                                            :class="{
-                                                                          'bg-blue-600': s.relation.includes('Brother'),
-                                                                          'bg-pink-600': s.relation.includes('Sister')
-                                                                      }" x-text="s.relation"></span>
-                                                        <span class="text-[11px] font-extrabold text-slate-800 truncate"
-                                                            x-text="s.details || '1 Member'"></span>
-                                                    </div>
+                                                <template x-if="isEditing && marksheetUrl">
                                                     <div
-                                                        class="flex items-center gap-1 text-[10px] text-slate-500 font-medium truncate">
-                                                        <span x-text="s.married === 'Yes' ? 'Married' : 'Unmarried'"></span>
-                                                        <template x-if="s.occupation">
-                                                            <span class="truncate" x-text="'• ' + s.occupation"></span>
-                                                        </template>
+                                                        class="text-[11px] font-semibold text-slate-700 bg-amber-50 p-2 rounded-lg border border-amber-200 flex items-center justify-between">
+                                                        <span>Current File: <a :href="marksheetUrl" target="_blank"
+                                                                class="font-extrabold text-primary-600 hover:underline">View
+                                                                Uploaded Marksheet ↗</a></span>
+                                                        <span class="text-[10px] text-slate-400 font-normal">(Upload new file below
+                                                            to replace)</span>
                                                     </div>
+                                                </template>
+
+                                                <div class="flex items-center gap-2">
+                                                    <input type="file" name="marksheet_file" accept="image/*,.pdf"
+                                                        :required="!isEditing && !marksheetUrl"
+                                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 file:mr-3 file:py-1.5 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-primary-500 file:text-white hover:file:bg-primary-600 cursor-pointer">
                                                 </div>
-                                                <button type="button" @click="removeSibling(index)"
-                                                    class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors shrink-0 ml-1"
-                                                    title="Remove Sibling">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                        </path>
-                                                    </svg>
-                                                </button>
                                             </div>
-                                        </template>
-                                    </div>
 
-                                    <!-- Empty State -->
-                                    <div x-show="siblings.length === 0"
-                                        class="p-3 border border-dashed border-slate-200 rounded-xl text-center text-xs text-slate-400 font-semibold bg-white/60">
-                                        No siblings added yet. Click <strong class="text-primary-600">"+ Add Sibling"</strong>
-                                        to
-                                        add details.
-                                    </div>
-
-                                    <!-- Hidden Sync Fields -->
-                                    <input type="hidden" name="siblings_json" :value="JSON.stringify(siblings)">
-                                    <input type="hidden" name="elder_brother" :value="legacyElderB">
-                                    <input type="hidden" name="elder_brother_married" :value="legacyElderBM">
-                                    <input type="hidden" name="younger_brother" :value="legacyYoungerB">
-                                    <input type="hidden" name="younger_brother_married" :value="legacyYoungerBM">
-                                    <input type="hidden" name="elder_sister" :value="legacyElderS">
-                                    <input type="hidden" name="elder_sister_married" :value="legacyElderSM">
-                                    <input type="hidden" name="younger_sister" :value="legacyYoungerS">
-                                    <input type="hidden" name="younger_sister_married" :value="legacyYoungerSM">
+                                            <div class="space-y-1">
+                                                <label class="text-[11px] font-bold text-slate-700">Special Achievement / Remarks
+                                                    (Optional)</label>
+                                                <textarea name="remarks" x-model="remarks" rows="2"
+                                                    placeholder="Mention rank, board awards, sports honors or extra accomplishments"
+                                                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none"></textarea>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </div>
 
-                                <!-- Family Business, Property, Vehicle Info -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.business_details') }}</label>
-                                        <input type="text" name="business" value="{{ old('business') }}"
-                                            placeholder="Family business info"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.house_type') }}</label>
-                                        <input type="text" name="house" value="{{ old('house') }}"
-                                            placeholder="e.g. Flat / Tenement"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.own_house') }}</label>
-                                        <select name="own_house"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                            <option value="Yes" {{ old('own_house') === 'Yes' ? 'selected' : '' }}>Yes</option>
-                                            <option value="No" {{ old('own_house', 'No') === 'No' ? 'selected' : '' }}>No</option>
-                                        </select>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.vehicle_details') }}</label>
-                                        <input type="text" name="vehicle" value="{{ old('vehicle') }}"
-                                            placeholder="e.g. Two Wheeler / Car model"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <!-- Tab 2 Next/Prev Buttons -->
-                                <div class="flex justify-between pt-2">
+                            @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
+                                <!-- Yuva Melo Step Tabs Navigation -->
+                                <div class="flex border-b border-slate-200/80 mb-2.5 gap-2 overflow-x-auto pb-1">
                                     <button type="button" @click="yuvaTab = 1"
-                                        class="px-4 py-2 border border-slate-200 hover:bg-slate-50 font-bold text-xs rounded-xl transition-colors cursor-pointer">
-                                        {!! __('messages.prev_step') !!}
+                                        :class="yuvaTab === 1 ? 'border-primary-500 text-primary-600 font-extrabold bg-primary-50/50' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                                        class="px-4 py-2 border-b-2 text-xs transition-all whitespace-nowrap rounded-t-lg cursor-pointer">
+                                        {{ __('messages.yuva_tab_1') }}
+                                    </button>
+                                    <button type="button" @click="yuvaTab = 2"
+                                        :class="yuvaTab === 2 ? 'border-primary-500 text-primary-600 font-extrabold bg-primary-50/50' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                                        class="px-4 py-2 border-b-2 text-xs transition-all whitespace-nowrap rounded-t-lg cursor-pointer">
+                                        {{ __('messages.yuva_tab_2') }}
                                     </button>
                                     <button type="button" @click="yuvaTab = 3"
-                                        class="px-5 py-2 bg-primary-500 text-white hover:bg-primary-600 font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">
-                                        {!! __('messages.next_step') !!}
+                                        :class="yuvaTab === 3 ? 'border-primary-500 text-primary-600 font-extrabold bg-primary-50/50' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                                        class="px-4 py-2 border-b-2 text-xs transition-all whitespace-nowrap rounded-t-lg cursor-pointer">
+                                        {{ __('messages.yuva_tab_3') }}
                                     </button>
                                 </div>
-                            </div>
 
-                            <!-- STEP 3: Maternal Info -->
-                            <div x-show="yuvaTab === 3" class="space-y-2.5 text-xs" x-cloak>
-                                <div
-                                    class="bg-slate-50/80 px-3 py-2 rounded-xl border border-slate-100 font-bold text-primary-800 text-[11px]">
-                                    {{ __('messages.yuva_sec_3') }}
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_uncle_name') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="maternal_uncle_name" value="{{ old('maternal_uncle_name') }}"
-                                            required placeholder="Enter maternal uncle's name"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                <!-- STEP 1: Candidate's Info -->
+                                <div x-show="yuvaTab === 1" class="space-y-2.5 text-xs">
+                                    <div
+                                        class="bg-slate-50/80 px-3 py-2 rounded-xl border border-slate-100 font-bold text-primary-800 text-[11px]">
+                                        {{ __('messages.yuva_sec_1') }}
                                     </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_grandfather_name') }}
-                                            <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="maternal_grandfather_name"
-                                            value="{{ old('maternal_grandfather_name') }}" required
-                                            placeholder="Enter maternal grandfather's name"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.surname') }} <span
+                                                    class="text-rose-500">*</span></label>
+                                            <input type="text" name="surname" value="{{ old('surname') }}" required
+                                                placeholder="Enter surname"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.first_name') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="first_name" value="{{ old('first_name') }}" required
+                                                placeholder="Enter first name"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.gender') }} <span
+                                                    class="text-rose-500">*</span></label>
+                                            <select name="gender" required
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                                <option value="" disabled {{ old('gender') ? '' : 'selected' }}>Select Gender
+                                                </option>
+                                                <option value="Male" {{ old('gender') === 'Male' ? 'selected' : '' }}>Male</option>
+                                                <option value="Female" {{ old('gender') === 'Female' ? 'selected' : '' }}>Female
+                                                </option>
+                                                <option value="Other" {{ old('gender') === 'Other' ? 'selected' : '' }}>Other</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_grandfather_address') }}</label>
-                                        <input type="text" name="maternal_grandfather_address"
-                                            value="{{ old('maternal_grandfather_address') }}"
-                                            placeholder="Enter maternal grandfather address"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.birth_date') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="date" name="birth_date" value="{{ old('birth_date') }}" required
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.age') }} <span
+                                                    class="text-rose-500">*</span></label>
+                                            <input type="number" name="age" value="{{ old('age') }}" required placeholder="e.g. 25"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.height') }}</label>
+                                            <input type="text" name="height" value="{{ old('height') }}"
+                                                placeholder="e.g. 5'6\"" class=" w-full px-3 py-2 bg-slate-50 border
+                                                border-slate-200 rounded-lg text-xs font-semibold focus:bg-white
+                                                focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.weight') }}</label>
+                                            <input type="text" name="weight" value="{{ old('weight') }}" placeholder="e.g. 60 kg"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
                                     </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_grandfather_occupation') }}</label>
-                                        <input type="text" name="maternal_grandfather_occupation"
-                                            value="{{ old('maternal_grandfather_occupation') }}"
-                                            placeholder="e.g. Farming / Retired"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
-                                    </div>
-                                </div>
 
-                                <!-- Member & Payment Verification Section -->
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-3">
-                                    <h4 class="font-extrabold text-[11px] text-slate-600 uppercase tracking-wider">Member ID &
-                                        Payment Details</h4>
+                                    <div class="space-y-1">
+                                        <label class="text-[11px] font-bold text-slate-700">{{ __('messages.address') }} <span
+                                                class="text-rose-500">*</span></label>
+                                        <textarea name="address" rows="2" required placeholder="Enter full address"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">{{ old('address') }}</textarea>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.state') }} <span
+                                                    class="text-rose-500">*</span></label>
+                                            <input type="text" name="state" value="{{ old('state', 'Gujarat') }}" required
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.district') }} <span
+                                                    class="text-rose-500">*</span></label>
+                                            <input type="text" name="district" value="{{ old('district') }}" required
+                                                placeholder="Enter district"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">Area <span
+                                                    class="text-rose-500">*</span></label>
+                                            <select name="area_id" required
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                                <option value="">-- Select Area --</option>
+                                                @if(isset($areas))
+                                                    @foreach($areas as $areaItem)
+                                                        <option value="{{ $areaItem->id }}" {{ old('area_id') == $areaItem->id ? 'selected' : '' }}>
+                                                            {{ $areaItem->name }}{{ $areaItem->pincode ? ' (' . $areaItem->pincode . ')' : '' }}
+                                                        </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.association') }}</label>
+                                            <input type="text" name="association" value="{{ old('association') }}"
+                                                placeholder="Enter mandal/association"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.mobile') }} <span
+                                                    class="text-rose-500">*</span></label>
+                                            <input type="text" name="mobile_no"
+                                                value="{{ old('mobile_no', auth()->user()->memberProfile->phone ?? '') }}" required
+                                                maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+                                                placeholder="10-digit number"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.whatsapp_no') }}</label>
+                                            <input type="text" name="whatsapp" value="{{ old('whatsapp') }}" maxlength="10"
+                                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+                                                placeholder="10-digit whatsapp number"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.qualification') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="qualification" value="{{ old('qualification') }}" required
+                                                placeholder="e.g. Graduate / B.E."
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.occupation') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="occupation" value="{{ old('occupation') }}" required
+                                                placeholder="e.g. Job / Business"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.monthly_income') }}</label>
+                                            <input type="text" name="monthly_income" value="{{ old('monthly_income') }}"
+                                                placeholder="e.g. Rs. 25,000"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label
+                                            class="text-[11px] font-bold text-slate-700">{{ __('messages.occupation_address') }}</label>
+                                        <input type="text" name="occupation_address" value="{{ old('occupation_address') }}"
+                                            placeholder="Enter job/business address"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.divorce_status') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <select name="divorce" required
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                                <option value="No" {{ old('divorce', 'No') === 'No' ? 'selected' : '' }}>No (ના)
+                                                </option>
+                                                <option value="Yes" {{ old('divorce') === 'Yes' ? 'selected' : '' }}>Yes (હા)</option>
+                                            </select>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.special_need') }}</label>
+                                            <input type="text" name="special_need" value="{{ old('special_need') }}"
+                                                placeholder="e.g. None / Physical Disability details"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                         <div class="space-y-1">
                                             <label
-                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.member_number') }}</label>
-                                            <input type="text" name="member_number"
-                                                value="{{ old('member_number', auth()->check() ? '#' . sprintf('%05d', auth()->user()->id) : '') }}"
-                                                placeholder="e.g. #00005"
-                                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.physical_disability') }}</label>
+                                            <input type="text" name="physical_disability" value="{{ old('physical_disability') }}"
+                                                placeholder="e.g. None / Details"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                                         </div>
                                         <div class="space-y-1">
                                             <label
-                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.payment_number') }}</label>
-                                            <input type="text" name="payment_number" value="{{ old('payment_number') }}"
-                                                placeholder="e.g. UTR / UPI Ref / Transaction No."
-                                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.disability_duration') }}</label>
+                                            <input type="text" name="disability_duration" value="{{ old('disability_duration') }}"
+                                                placeholder="e.g. Since birth / N/A"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                                         </div>
                                     </div>
-                                    <div class="space-y-1">
-                                        <label
-                                            class="text-[11px] font-bold text-slate-700 block">{{ __('messages.payment_image') }}</label>
-                                        <input type="file" name="payment_image" accept="image/*"
-                                            class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.special_info') }}</label>
+                                            <input type="text" name="special_info" value="{{ old('special_info') }}"
+                                                placeholder="Any special achievement or information"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.other_info') }}</label>
+                                            <input type="text" name="other_info" value="{{ old('other_info') }}"
+                                                placeholder="Additional notes or remarks"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <!-- Document Upload Grid -->
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                        <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
+                                            <label
+                                                class="text-[10px] font-bold text-slate-600 block">{{ __('messages.member_photo') }}</label>
+                                            <input type="file" name="member_photo" accept="image/*"
+                                                class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                                        </div>
+                                        <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
+                                            <label
+                                                class="text-[10px] font-bold text-slate-600 block">{{ __('messages.aadhaar_photo') }}</label>
+                                            <input type="file" name="aadhaar_photo" accept="image/*"
+                                                class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                                        </div>
+                                        <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
+                                            <label
+                                                class="text-[10px] font-bold text-slate-600 block">{{ __('messages.selfie') }}</label>
+                                            <input type="file" name="selfie" accept="image/*"
+                                                class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                                        </div>
+                                        <div class="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/60 space-y-1">
+                                            <label
+                                                class="text-[10px] font-bold text-slate-600 block">{{ __('messages.whatsapp_image') }}</label>
+                                            <input type="file" name="whatsapp_image" accept="image/*"
+                                                class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                                        </div>
+                                    </div>
+
+                                    <!-- Tab 1 Next Button -->
+                                    <div class="flex justify-end pt-2">
+                                        <button type="button" @click="yuvaTab = 2"
+                                            class="px-5 py-2 bg-primary-500 text-white hover:bg-primary-600 font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">
+                                            {!! __('messages.next_step') !!}
+                                        </button>
                                     </div>
                                 </div>
 
-                                <!-- Tab 3 Prev Button -->
-                                <div class="flex justify-start pt-2">
-                                    <button type="button" @click="yuvaTab = 2"
-                                        class="px-4 py-2 border border-slate-200 hover:bg-slate-50 font-bold text-xs rounded-xl transition-colors cursor-pointer">
-                                        {!! __('messages.prev_step') !!}
-                                    </button>
-                                </div>
-                            </div>
+                                <!-- STEP 2: Father & Family Info -->
+                                <div x-show="yuvaTab === 2" class="space-y-2.5 text-xs" x-cloak>
+                                    <div
+                                        class="bg-slate-50/80 px-3 py-2 rounded-xl border border-slate-100 font-bold text-primary-800 text-[11px]">
+                                        {{ __('messages.yuva_sec_2') }}
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.father_name') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="father_name" value="{{ old('father_name') }}" required
+                                                placeholder="Enter father's full name"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.grandfather_name') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="grandfather_name" value="{{ old('grandfather_name') }}"
+                                                required placeholder="Enter grandfather's full name"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        {{--
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">Father's Gyanti (Gnati)</label>
+                                            <input type="text" name="father_gyanti" value="{{ old('father_gyanti') }}"
+                                                placeholder="e.g. Sathwara / Patel"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        --}}
+                                    </div>
 
-                        @else
-                            <!-- Normal Event Form Fields -->
-                            <div class="space-y-3.5 text-xs">
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                        Participant Full Name <span class="text-rose-500">*</span>
-                                    </label>
-                                    <input type="text" name="full_name"
-                                        value="{{ old('full_name', auth()->check() ? auth()->user()->name : '') }}" required
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.father_age') }}</label>
+                                            <input type="number" name="father_age" value="{{ old('father_age') }}"
+                                                placeholder="e.g. 52"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.father_occupation') }}</label>
+                                            <input type="text" name="father_occupation" value="{{ old('father_occupation') }}"
+                                                placeholder="e.g. Farming / Business"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.father_income') }}</label>
+                                            <input type="text" name="father_income" value="{{ old('father_income') }}"
+                                                placeholder="Annual or Monthly Income"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.father_occupation_address') }}</label>
+                                            <input type="text" name="father_occupation_address"
+                                                value="{{ old('father_occupation_address') }}"
+                                                placeholder="Enter father's job/business address"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.father_mobile') }}</label>
+                                            <input type="text" name="father_mobile" value="{{ old('father_mobile') }}"
+                                                maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+                                                placeholder="10-digit mobile number"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.mother_name') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="mother_name" value="{{ old('mother_name') }}" required
+                                                placeholder="Enter mother's name"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        {{--
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">Mother's Gyanti (Gnati)</label>
+                                            <input type="text" name="mother_gyanti" value="{{ old('mother_gyanti') }}"
+                                                placeholder="e.g. Sathwara / Patel"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        --}}
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.mother_occupation') }}</label>
+                                            <input type="text" name="mother_occupation"
+                                                value="{{ old('mother_occupation', 'Housewife') }}" placeholder="e.g. Housewife"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.native_place') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="native_place" value="{{ old('native_place') }}" required
+                                                placeholder="Enter native village/city"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <!-- Brother and Sister Details (Siblings Section with Modal + Cards) -->
+                                    <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80 space-y-2.5">
+                                        <div class="flex items-center justify-between flex-wrap gap-2">
+                                            <div>
+                                                <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
+                                                    {{ __('messages.siblings_details') }}
+                                                </h4>
+                                                <p class="text-[10px] text-slate-400 mt-0.5">Add brother(s) and sister(s) details
+                                                    using
+                                                    the button</p>
+                                            </div>
+                                            <button type="button" @click="showSiblingModal = true"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                        d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                                <span>Add Sibling</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Sibling Cards List (Compact Small Cards) -->
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-1"
+                                            x-show="siblings.length > 0">
+                                            <template x-for="(s, index) in siblings" :key="index">
+                                                <div
+                                                    class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-between min-w-0">
+                                                    <div class="min-w-0 space-y-0.5">
+                                                        <div class="flex items-center gap-1.5 truncate">
+                                                            <span
+                                                                class="text-[9px] font-black px-1.5 py-0.5 rounded-md text-white tracking-tight shrink-0"
+                                                                :class="{
+                                                                                      'bg-blue-600': s.relation.includes('Brother'),
+                                                                                      'bg-pink-600': s.relation.includes('Sister')
+                                                                                  }" x-text="s.relation"></span>
+                                                            <span class="text-[11px] font-extrabold text-slate-800 truncate"
+                                                                x-text="s.details || '1 Member'"></span>
+                                                        </div>
+                                                        <div
+                                                            class="flex items-center gap-1 text-[10px] text-slate-500 font-medium truncate">
+                                                            <span x-text="s.married === 'Yes' ? 'Married' : 'Unmarried'"></span>
+                                                            <template x-if="s.occupation">
+                                                                <span class="truncate" x-text="'• ' + s.occupation"></span>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" @click="removeSibling(index)"
+                                                        class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors shrink-0 ml-1"
+                                                        title="Remove Sibling">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- Empty State -->
+                                        <div x-show="siblings.length === 0"
+                                            class="p-3 border border-dashed border-slate-200 rounded-xl text-center text-xs text-slate-400 font-semibold bg-white/60">
+                                            No siblings added yet. Click <strong class="text-primary-600">"+ Add Sibling"</strong>
+                                            to
+                                            add details.
+                                        </div>
+
+                                        <!-- Hidden Sync Fields -->
+                                        <input type="hidden" name="siblings_json" :value="JSON.stringify(siblings)">
+                                        <input type="hidden" name="elder_brother" :value="legacyElderB">
+                                        <input type="hidden" name="elder_brother_married" :value="legacyElderBM">
+                                        <input type="hidden" name="younger_brother" :value="legacyYoungerB">
+                                        <input type="hidden" name="younger_brother_married" :value="legacyYoungerBM">
+                                        <input type="hidden" name="elder_sister" :value="legacyElderS">
+                                        <input type="hidden" name="elder_sister_married" :value="legacyElderSM">
+                                        <input type="hidden" name="younger_sister" :value="legacyYoungerS">
+                                        <input type="hidden" name="younger_sister_married" :value="legacyYoungerSM">
+                                    </div>
+
+                                    <!-- Family Business, Property, Vehicle Info -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.business_details') }}</label>
+                                            <input type="text" name="business" value="{{ old('business') }}"
+                                                placeholder="Family business info"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.house_type') }}</label>
+                                            <input type="text" name="house" value="{{ old('house') }}"
+                                                placeholder="e.g. Flat / Tenement"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.own_house') }}</label>
+                                            <select name="own_house"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                                <option value="Yes" {{ old('own_house') === 'Yes' ? 'selected' : '' }}>Yes</option>
+                                                <option value="No" {{ old('own_house', 'No') === 'No' ? 'selected' : '' }}>No</option>
+                                            </select>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.vehicle_details') }}</label>
+                                            <input type="text" name="vehicle" value="{{ old('vehicle') }}"
+                                                placeholder="e.g. Two Wheeler / Car model"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <!-- Tab 2 Next/Prev Buttons -->
+                                    <div class="flex justify-between pt-2">
+                                        <button type="button" @click="yuvaTab = 1"
+                                            class="px-4 py-2 border border-slate-200 hover:bg-slate-50 font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                                            {!! __('messages.prev_step') !!}
+                                        </button>
+                                        <button type="button" @click="yuvaTab = 3"
+                                            class="px-5 py-2 bg-primary-500 text-white hover:bg-primary-600 font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">
+                                            {!! __('messages.next_step') !!}
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                        Contact Number <span class="text-rose-500">*</span>
-                                    </label>
-                                    <input type="text" name="contact_number"
-                                        value="{{ old('contact_number', auth()->check() ? (auth()->user()->memberProfile->phone ?? '') : '') }}"
-                                        required maxlength="10"
-                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
-                                        placeholder="Enter 10-digit mobile number"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                <!-- STEP 3: Maternal Info -->
+                                <div x-show="yuvaTab === 3" class="space-y-2.5 text-xs" x-cloak>
+                                    <div
+                                        class="bg-slate-50/80 px-3 py-2 rounded-xl border border-slate-100 font-bold text-primary-800 text-[11px]">
+                                        {{ __('messages.yuva_sec_3') }}
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_uncle_name') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="maternal_uncle_name" value="{{ old('maternal_uncle_name') }}"
+                                                required placeholder="Enter maternal uncle's name"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_grandfather_name') }}
+                                                <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="maternal_grandfather_name"
+                                                value="{{ old('maternal_grandfather_name') }}" required
+                                                placeholder="Enter maternal grandfather's name"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_grandfather_address') }}</label>
+                                            <input type="text" name="maternal_grandfather_address"
+                                                value="{{ old('maternal_grandfather_address') }}"
+                                                placeholder="Enter maternal grandfather address"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700">{{ __('messages.maternal_grandfather_occupation') }}</label>
+                                            <input type="text" name="maternal_grandfather_occupation"
+                                                value="{{ old('maternal_grandfather_occupation') }}"
+                                                placeholder="e.g. Farming / Retired"
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
+                                        </div>
+                                    </div>
+
+                                    <!-- Member & Payment Verification Section -->
+                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-3">
+                                        <h4 class="font-extrabold text-[11px] text-slate-600 uppercase tracking-wider">Member ID &
+                                            Payment Details</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                            <div class="space-y-1">
+                                                <label
+                                                    class="text-[11px] font-bold text-slate-700">{{ __('messages.member_number') }}</label>
+                                                <input type="text" name="member_number"
+                                                    value="{{ old('member_number', auth()->check() ? '#' . sprintf('%05d', auth()->user()->id) : '') }}"
+                                                    placeholder="e.g. #00005"
+                                                    @if(auth()->check()) readonly @endif
+                                                    class="w-full px-3 py-2 {{ auth()->check() ? 'bg-slate-100 text-slate-800 font-extrabold cursor-not-allowed select-none border-slate-200' : 'bg-white border-slate-200 focus:border-primary-500' }} rounded-lg text-xs outline-none">
+                                            </div>
+                                            <div class="space-y-1">
+                                                <label
+                                                    class="text-[11px] font-bold text-slate-700">{{ __('messages.payment_number') }}</label>
+                                                <input type="text" name="payment_number" value="{{ old('payment_number') }}"
+                                                    placeholder="e.g. UTR / UPI Ref / Transaction No."
+                                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
+                                            </div>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label
+                                                class="text-[11px] font-bold text-slate-700 block">{{ __('messages.payment_image') }}</label>
+                                            <input type="file" name="payment_image" accept="image/*"
+                                                class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                                        </div>
+                                    </div>
+
+                                    <!-- Tab 3 Prev Button -->
+                                    <div class="flex justify-start pt-2">
+                                        <button type="button" @click="yuvaTab = 2"
+                                            class="px-4 py-2 border border-slate-200 hover:bg-slate-50 font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                                            {!! __('messages.prev_step') !!}
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-slate-700">Special Notes / Remarks
-                                        (Optional)</label>
-                                    <textarea name="remarks" rows="2"
-                                        placeholder="Any special seating or assistance requirements"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">{{ old('remarks') }}</textarea>
-                                </div>
-                            </div>
-                        @endif
+                            @else
+                                <!-- Normal Event Form Fields -->
+                                <div class="space-y-3.5 text-xs">
+                                    <div class="space-y-1">
+                                        <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                            Participant Full Name <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input type="text" name="full_name"
+                                            value="{{ old('full_name', auth()->check() ? auth()->user()->name : '') }}" required
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                    </div>
 
-                        <!-- ACTION BUTTONS -->
-                        <div x-show="(('{{ $event->event_type ?? 'normal' }}' !== 'inam_vitaran') || selectedStudent !== '') && ('{{ $event->event_type ?? 'normal' }}' !== 'yuva_melo' || yuvaTab === 3)"
-                            class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
-                            @if(auth()->check())
-                                <a href="{{ route('member.events.index') }}"
-                                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
-                                    Cancel
-                                </a>
+                                    <div class="space-y-1">
+                                        <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                            Contact Number <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input type="text" name="contact_number"
+                                            value="{{ old('contact_number', auth()->check() ? (auth()->user()->memberProfile->phone ?? '') : '') }}"
+                                            required maxlength="10"
+                                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+                                            placeholder="Enter 10-digit mobile number"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="text-[11px] font-bold text-slate-700">Special Notes / Remarks
+                                            (Optional)</label>
+                                        <textarea name="remarks" rows="2"
+                                            placeholder="Any special seating or assistance requirements"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">{{ old('remarks') }}</textarea>
+                                    </div>
+                                </div>
                             @endif
-                            <button type="submit"
-                                class="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-md hover:shadow-lg transition-all transform active:scale-95 flex items-center gap-2 uppercase tracking-wider cursor-pointer">
-                                <span>Submit Registration</span>
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </form>
+
+                            <!-- ACTION BUTTONS -->
+                            <div x-show="(('{{ $event->event_type ?? 'normal' }}' !== 'inam_vitaran') || selectedStudent !== '') && ('{{ $event->event_type ?? 'normal' }}' !== 'yuva_melo' || yuvaTab === 3)"
+                                class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+                                @if(auth()->check())
+                                    <a href="{{ route('member.events.index') }}"
+                                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
+                                        Cancel
+                                    </a>
+                                @endif
+                                <button type="submit"
+                                    class="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-md hover:shadow-lg transition-all transform active:scale-95 flex items-center gap-2 uppercase tracking-wider cursor-pointer">
+                                    <span>Submit Registration</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
             @endif
 
             @if(isset($registrations) && $registrations->count() > 0)
@@ -1514,7 +1561,7 @@
                         @foreach($registrations as $index => $reg)
                             @if(!empty($reg->form_data))
                                     @php 
-                                        $fd = $reg->form_data; 
+                                                                    $fd = $reg->form_data;
                                         $cardIndex = $registrations->count() - $index;
                                         $regNo = $fd['registration_no'] ?? $cardIndex;
                                     @endphp
@@ -1531,8 +1578,7 @@
                                         <!-- Card Header: #Index & Candidate Name -->
                                         <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
                                             <div class="flex items-center gap-1.5 min-w-0">
-                                                <span
-                                                    class="text-xs font-black text-slate-400">#{{ $cardIndex }}</span>
+                                                <span class="text-xs font-black text-slate-400">#{{ $cardIndex }}</span>
                                                 <h4
                                                     class="text-xs font-black text-slate-900 truncate group-hover:text-primary-600 transition-colors">
                                                     {{ $fd['full_name'] ?? $fd['student_name'] ?? 'Registration' }}
