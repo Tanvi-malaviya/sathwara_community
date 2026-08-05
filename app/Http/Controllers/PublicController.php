@@ -39,7 +39,7 @@ class PublicController extends Controller
         $sliders = Slider::where('status', true)->orderBy('display_order')->get();
         $agendas = Agenda::orderBy('display_order')->get();
         $managementDesk = ManagementDesk::where('status', true)->orderBy('display_order')->get();
-        $upcomingEvents = Event::where('status', 'published')
+        $upcomingEvents = Event::published()
             ->where('date', '>=', now()->toDateString())
             ->orderBy('date')
             ->take(3)
@@ -61,7 +61,7 @@ class PublicController extends Controller
         $stats = [
             'total_members' => User::role('Member')->where('status', 'approved')->count(),
             'total_businesses' => Business::active()->count(),
-            'total_events' => Event::where('status', 'published')->count(),
+            'total_events' => Event::published()->count(),
             'gallery_images' => Gallery::whereNull('event_id')->count(),
         ];
 
@@ -82,15 +82,49 @@ class PublicController extends Controller
      */
     public function about()
     {
+        $locale = app()->getLocale();
+        $isGu = ($locale === 'gu');
+
+        // Mission Title & Text
+        $missionTitle = Setting::get($isGu ? 'about_mission_title_gu' : 'about_mission_title_en') 
+            ?: Setting::get($isGu ? 'about_mission_title_en' : 'about_mission_title_gu') 
+            ?: __('messages.empowering_people');
+
+        $mission = Setting::get($isGu ? 'about_mission_gu' : 'about_mission_en') 
+            ?: Setting::get($isGu ? 'about_mission_en' : 'about_mission_gu') 
+            ?: Setting::get('about_mission', 'To bring unity, support, and professional growth to all community members.');
+
+        // Vision Title & Text
+        $visionTitle = Setting::get($isGu ? 'about_vision_title_gu' : 'about_vision_title_en') 
+            ?: Setting::get($isGu ? 'about_vision_title_en' : 'about_vision_title_gu') 
+            ?: __('messages.future_prosperity');
+
+        $vision = Setting::get($isGu ? 'about_vision_gu' : 'about_vision_en') 
+            ?: Setting::get($isGu ? 'about_vision_en' : 'about_vision_gu') 
+            ?: Setting::get('about_vision', 'An empowered, educated, and well-connected community built on shared trust and values.');
+
+        // Objectives Title & Text
+        $objectivesTitle = Setting::get($isGu ? 'about_objectives_title_gu' : 'about_objectives_title_en') 
+            ?: Setting::get($isGu ? 'about_objectives_title_en' : 'about_objectives_title_gu') 
+            ?: __('messages.strategic_goals');
+
+        $objectives = Setting::get($isGu ? 'about_objectives_gu' : 'about_objectives_en') 
+            ?: Setting::get($isGu ? 'about_objectives_en' : 'about_objectives_gu') 
+            ?: Setting::get('about_objectives', '1. Build strong integration among members.<br>2. Facilitate academic recognition and career growth.<br>3. Establish business directories to support local commerce.');
+
+        // History Title & Text
+        $historyTitle = Setting::get($isGu ? 'about_history_title_gu' : 'about_history_title_en') 
+            ?: Setting::get($isGu ? 'about_history_title_en' : 'about_history_title_gu') 
+            ?: __('messages.heritage_journey');
+
+        $history = Setting::get($isGu ? 'about_history_gu' : 'about_history_en') 
+            ?: Setting::get($isGu ? 'about_history_en' : 'about_history_gu') 
+            ?: Setting::get('about_history', 'Formed in 1995, our community has grown from a handful of dedicated families to a vibrant network supporting thousands of members.');
+
         $committee = CommitteeMember::where('status', true)->orderBy('display_order')->get();
         $timeline = Timeline::orderBy('display_order')->get();
-        
-        $mission = Setting::get('about_mission', 'To bring unity, support, and professional growth to all community members.');
-        $vision = Setting::get('about_vision', 'An empowered, educated, and well-connected community built on shared trust and values.');
-        $history = Setting::get('about_history', 'Formed in 1995, our community has grown from a handful of dedicated families to a vibrant network supporting thousands of members.');
-        $objectives = Setting::get('about_objectives', '1. Build strong integration among members.<br>2. Facilitate academic recognition and career growth.<br>3. Establish business directories to support local commerce.');
 
-        return view('public.about', compact('committee', 'timeline', 'mission', 'vision', 'history', 'objectives'));
+        return view('public.about', compact('committee', 'timeline', 'missionTitle', 'mission', 'visionTitle', 'vision', 'objectivesTitle', 'objectives', 'historyTitle', 'history'));
     }
 
     /**
@@ -107,7 +141,7 @@ class PublicController extends Controller
      */
     public function events(Request $request)
     {
-        $query = Event::where('status', 'published');
+        $query = Event::published();
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -125,7 +159,7 @@ class PublicController extends Controller
      */
     public function eventDetails($id)
     {
-        $event = Event::where('status', 'published')->findOrFail($id);
+        $event = Event::published()->findOrFail($id);
         $gallery = Gallery::where('event_id', $event->id)->get();
         
         $registration = null;
@@ -143,7 +177,11 @@ class PublicController extends Controller
      */
     public function showPublicRegistrationForm($id)
     {
-        $event = Event::where('status', 'published')->findOrFail($id);
+        $event = Event::published()->findOrFail($id);
+
+        if (!($event->has_registration_form ?? $event->registration_option)) {
+            return redirect()->route('event.details', $event->id)->with('warning', 'Registration form is not enabled for this event.');
+        }
         
         if ($event->event_type !== 'yuva_melo' && !auth()->check()) {
             return redirect()->route('login')->with('warning', 'Please login to fill up this form.');
@@ -163,7 +201,7 @@ class PublicController extends Controller
      */
     public function registerEvent(Request $request, $id)
     {
-        $event = Event::where('status', 'published')->findOrFail($id);
+        $event = Event::published()->findOrFail($id);
 
         if ($event->event_type !== 'yuva_melo') {
             if (!auth()->check()) {
@@ -208,6 +246,7 @@ class PublicController extends Controller
                 'address' => $profile->address ?? '',
                 'area' => $profile->area ?? $profile->city ?? '',
                 'student_name' => $request->input('student_name'),
+                'education_type' => $request->input('education_type'),
                 'education' => $request->input('education', $request->input('standard')),
                 'total_marks' => $request->input('total_marks'),
                 'received_marks' => $request->input('received_marks'),

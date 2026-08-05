@@ -280,7 +280,7 @@ class DatabaseSeeder extends Seeder
 
         $event2 = Event::create([
             'title' => 'Shikshan Sanman & Inam Vitaran 2026',
-            'description' => 'A ceremony to honour students of our community who scored above 80% in Class 10 and 12 boards. Qualified students must submit their certificates.',
+            'description' => '',
             'venue' => 'Sathwara Community Hall, Ashram Road, Ahmedabad',
             'date' => '2026-09-05',
             'time' => '17:00:00',

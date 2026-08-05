@@ -81,19 +81,39 @@
         }
 
         [x-cloak] { display: none !important; }
+
+        /* Hide scrollbars utilities */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
     </style>
 </head>
 
-<body x-data class="text-slate-800 antialiased min-h-screen flex flex-col md:flex-row relative">
+<body x-data="{ sidebarOpen: false }" class="text-slate-800 antialiased min-h-screen flex flex-col lg:flex-row relative">
     <!-- Soft Decorative Background Gradients -->
     <div class="fixed inset-0 bg-slate-50 z-0 overflow-hidden pointer-events-none">
         <div class="absolute -top-40 right-20 w-96 h-96 rounded-full blur-3xl opacity-20" style="background-color: var(--primary-hex);"></div>
         <div class="absolute bottom-[-100px] left-10 w-80 h-80 bg-indigo-500 rounded-full blur-3xl opacity-20"></div>
     </div>
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0" class="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-sm lg:hidden"
+        x-cloak>
+    </div>
+
     <!-- Sidebar -->
     <aside
-        class="w-full md:w-64 bg-white border-r border-slate-100 flex flex-col shrink-0 md:h-screen md:sticky md:top-0 overflow-hidden relative z-10"
-        x-data="{ sidebarOpen: false }">
+        class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 flex flex-col shrink-0 transition-transform duration-300 transform lg:translate-x-0 lg:static lg:h-screen lg:sticky lg:top-0 overflow-hidden"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" x-cloak>
         <!-- Sidebar Header -->
         <div class="h-16 flex items-center justify-between px-5 border-b border-slate-50">
             <a href="{{ route('home') }}" class="flex items-center space-x-2.5">
@@ -108,11 +128,10 @@
                 @endif
                 <span class="font-extrabold text-sm text-slate-900">{{ __('messages.member_portal') }}</span>
             </a>
-            <!-- Mobile Toggle -->
-            <button @click="sidebarOpen = !sidebarOpen"
-                class="md:hidden text-slate-400 hover:text-slate-600 focus:outline-none">
+            <!-- Mobile Close Button -->
+            <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-slate-600 focus:outline-none">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
@@ -132,8 +151,7 @@
         </div>
  
         <!-- Sidebar Navigation -->
-        <div class="flex-grow p-3 space-y-2 overflow-y-auto"
-            :class="{'block': sidebarOpen, 'hidden md:block': !sidebarOpen}">
+        <div class="flex-grow p-3 space-y-2 overflow-y-auto">
             <a href="{{ route('member.dashboard') }}"
                 class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.dashboard') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -169,13 +187,6 @@
                 </svg>
                 <span>{{ __('messages.my_businesses') ?? 'My Businesses' }}</span>
             </a>
-            {{-- <a href="{{ route('member.awards.index') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.awards.*') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-                </svg>
-                <span>{{ __('messages.award_form') }}</span>
-            </a> --}}
             <a href="{{ route('member.card') }}"
                 class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('member.card') ? 'bg-primary-50 text-primary-500' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} transition-colors">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -217,8 +228,15 @@
     <!-- Main Member Content Area -->
     <div class="flex-grow flex flex-col min-w-0 relative z-10">
         <!-- Top Navigation -->
-        <header class="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-8 shrink-0">
-            <h2 class="font-extrabold text-xl text-slate-950">@yield('page_title', __('messages.dashboard'))</h2>
+        <header class="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+                <button @click="sidebarOpen = true" class="lg:hidden text-slate-500 hover:text-slate-700 focus:outline-none p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <h2 class="font-extrabold text-base sm:text-lg lg:text-xl text-slate-950 truncate">@yield('page_title', __('messages.dashboard'))</h2>
+            </div>
 
             <div class="flex items-center space-x-4">
                 <!-- Language Toggle -->

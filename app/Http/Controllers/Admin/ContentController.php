@@ -20,7 +20,7 @@ class ContentController extends Controller
         $query = Slider::query();
         if ($request->filled('search')) {
             $query->where('title', 'like', "%{$request->search}%")
-                  ->orWhere('subtitle', 'like', "%{$request->search}%");
+                ->orWhere('subtitle', 'like', "%{$request->search}%");
         }
         $sliders = $query->orderBy('display_order')->paginate(12)->withQueryString();
         return view('admin.content.sliders', compact('sliders'));
@@ -57,12 +57,12 @@ class ContentController extends Controller
     {
         $slider = Slider::findOrFail($id);
         $request->validate([
-            'title'         => 'nullable|string|max:255',
-            'subtitle'      => 'nullable|string|max:255',
-            'image'         => 'nullable|image|max:3072',
-            'button_text'   => 'nullable|string|max:100',
-            'button_link'   => 'nullable|string|max:255',
-            'status'        => 'required|boolean',
+            'title' => 'nullable|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'image' => 'nullable|image|max:3072',
+            'button_text' => 'nullable|string|max:100',
+            'button_link' => 'nullable|string|max:255',
+            'status' => 'required|boolean',
             'display_order' => 'required|integer',
         ]);
 
@@ -75,12 +75,12 @@ class ContentController extends Controller
         }
 
         $slider->update([
-            'title'         => $request->title,
-            'subtitle'      => $request->subtitle,
-            'image_path'    => $path,
-            'button_text'   => $request->button_text,
-            'button_link'   => $request->button_link,
-            'status'        => $request->status,
+            'title' => $request->title,
+            'subtitle' => $request->subtitle,
+            'image_path' => $path,
+            'button_text' => $request->button_text,
+            'button_link' => $request->button_link,
+            'status' => $request->status,
             'display_order' => $request->display_order,
         ]);
 
@@ -103,7 +103,7 @@ class ContentController extends Controller
         $query = Agenda::query();
         if ($request->filled('search')) {
             $query->where('title', 'like', "%{$request->search}%")
-                  ->orWhere('description', 'like', "%{$request->search}%");
+                ->orWhere('description', 'like', "%{$request->search}%");
         }
         $agendas = $query->orderBy('display_order')->paginate(12)->withQueryString();
         return view('admin.content.agendas', compact('agendas'));
@@ -112,12 +112,12 @@ class ContentController extends Controller
     public function storeAgenda(Request $request)
     {
         $request->validate([
-            'title'          => 'required|string|max:255',
-            'title_gu'       => 'nullable|string|max:255',
-            'description'    => 'required|string',
+            'title' => 'required|string|max:255',
+            'title_gu' => 'nullable|string|max:255',
+            'description' => 'required|string',
             'description_gu' => 'nullable|string',
-            'icon'           => 'required|string|max:100',
-            'display_order'  => 'required|integer',
+            'icon' => 'required|string|max:100',
+            'display_order' => 'required|integer',
         ]);
 
         Agenda::create($request->all());
@@ -128,21 +128,21 @@ class ContentController extends Controller
     {
         $agenda = Agenda::findOrFail($id);
         $request->validate([
-            'title'          => 'required|string|max:255',
-            'title_gu'       => 'nullable|string|max:255',
-            'description'    => 'required|string',
+            'title' => 'nullable|string|max:255',
+            'title_gu' => 'nullable|string|max:255',
+            'description' => 'required|string',
             'description_gu' => 'nullable|string',
-            'icon'           => 'required|string|max:100',
-            'display_order'  => 'required|integer',
+            'icon' => 'nullable|string|max:100',
+            'display_order' => 'nullable|integer',
         ]);
 
         $agenda->update([
-            'title'          => $request->title,
-            'title_gu'       => $request->title_gu,
-            'description'    => $request->description,
+            'title' => $request->input('title', $agenda->title),
+            'title_gu' => $request->input('title_gu', $agenda->title_gu),
+            'description' => $request->description,
             'description_gu' => $request->description_gu,
-            'icon'           => $request->icon,
-            'display_order'  => $request->display_order,
+            'icon' => $request->input('icon', $agenda->icon),
+            'display_order' => $request->input('display_order', $agenda->display_order),
         ]);
 
         return redirect()->route('admin.content.agendas')->with('success', 'Agenda updated.');
@@ -160,8 +160,9 @@ class ContentController extends Controller
         $query = ManagementDesk::query();
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('designation', 'like', "%{$request->search}%")
-                  ->orWhere('message', 'like', "%{$request->search}%");
+                ->orWhere('name_gu', 'like', "%{$request->search}%")
+                ->orWhere('designation', 'like', "%{$request->search}%")
+                ->orWhere('designation_gu', 'like', "%{$request->search}%");
         }
         $members = $query->orderBy('display_order')->paginate(12)->withQueryString();
         return view('admin.content.management_desk', compact('members'));
@@ -171,8 +172,9 @@ class ContentController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'name_gu' => 'nullable|string|max:255',
             'designation' => 'required|string|max:255',
-            'message' => 'nullable|string',
+            'designation_gu' => 'nullable|string|max:255',
             'photo' => 'required|image|max:2048',
             'display_order' => 'required|integer',
             'status' => 'required|boolean',
@@ -182,8 +184,9 @@ class ContentController extends Controller
 
         ManagementDesk::create([
             'name' => $request->name,
+            'name_gu' => $request->name_gu,
             'designation' => $request->designation,
-            'message' => $request->message ?? '',
+            'designation_gu' => $request->designation_gu,
             'photo_path' => $path,
             'display_order' => $request->display_order,
             'status' => $request->status,
@@ -196,12 +199,13 @@ class ContentController extends Controller
     {
         $member = ManagementDesk::findOrFail($id);
         $request->validate([
-            'name'          => 'required|string|max:255',
-            'designation'   => 'required|string|max:255',
-            'message'       => 'nullable|string',
-            'photo'         => 'nullable|image|max:2048',
+            'name' => 'required|string|max:255',
+            'name_gu' => 'nullable|string|max:255',
+            'designation' => 'required|string|max:255',
+            'designation_gu' => 'nullable|string|max:255',
+            'photo' => 'nullable|image|max:2048',
             'display_order' => 'required|integer',
-            'status'        => 'required|boolean',
+            'status' => 'required|boolean',
         ]);
 
         $path = $member->photo_path;
@@ -213,12 +217,13 @@ class ContentController extends Controller
         }
 
         $member->update([
-            'name'          => $request->name,
-            'designation'   => $request->designation,
-            'message'       => $request->message ?? '',
-            'photo_path'    => $path,
+            'name' => $request->name,
+            'name_gu' => $request->name_gu,
+            'designation' => $request->designation,
+            'designation_gu' => $request->designation_gu,
+            'photo_path' => $path,
             'display_order' => $request->display_order,
-            'status'        => $request->status,
+            'status' => $request->status,
         ]);
 
         return redirect()->route('admin.content.desk')->with('success', 'Desk entry updated.');
@@ -240,7 +245,7 @@ class ContentController extends Controller
         $query = CommitteeMember::query();
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('designation', 'like', "%{$request->search}%");
+                ->orWhere('designation', 'like', "%{$request->search}%");
         }
         $members = $query->orderBy('display_order')->paginate(12)->withQueryString();
         return view('admin.content.committee', compact('members'));
@@ -320,8 +325,8 @@ class ContentController extends Controller
         $query = Timeline::query();
         if ($request->filled('search')) {
             $query->where('year', 'like', "%{$request->search}%")
-                  ->orWhere('title', 'like', "%{$request->search}%")
-                  ->orWhere('description', 'like', "%{$request->search}%");
+                ->orWhere('title', 'like', "%{$request->search}%")
+                ->orWhere('description', 'like', "%{$request->search}%");
         }
         $timelines = $query->orderBy('display_order')->paginate(12)->withQueryString();
         return view('admin.content.timelines', compact('timelines'));
@@ -330,13 +335,22 @@ class ContentController extends Controller
     public function storeTimeline(Request $request)
     {
         $request->validate([
-            'year' => 'required|string|max:10',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'display_order' => 'required|integer',
+            'year'           => 'required|string|max:10',
+            'title'          => 'required|string|max:255',
+            'title_gu'       => 'nullable|string|max:255',
+            'description'    => 'required|string',
+            'description_gu' => 'nullable|string',
+            'display_order'  => 'required|integer',
         ]);
 
-        Timeline::create($request->all());
+        Timeline::create([
+            'year'           => $request->year,
+            'title'          => $request->title,
+            'title_gu'       => $request->title_gu,
+            'description'    => $request->description,
+            'description_gu' => $request->description_gu,
+            'display_order'  => $request->display_order,
+        ]);
         return redirect()->back()->with('success', 'Timeline milestone added.');
     }
 
@@ -344,14 +358,23 @@ class ContentController extends Controller
     {
         $timeline = Timeline::findOrFail($id);
         $request->validate([
-            'year' => 'required|string|max:10',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'display_order' => 'required|integer',
+            'year'           => 'required|string|max:10',
+            'title'          => 'required|string|max:255',
+            'title_gu'       => 'nullable|string|max:255',
+            'description'    => 'required|string',
+            'description_gu' => 'nullable|string',
+            'display_order'  => 'required|integer',
         ]);
 
-        $timeline->update($request->all());
-        return redirect()->route('admin.content.timelines')->with('success', 'Timeline milestone updated.');
+        $timeline->update([
+            'year'           => $request->year,
+            'title'          => $request->title,
+            'title_gu'       => $request->title_gu,
+            'description'    => $request->description,
+            'description_gu' => $request->description_gu,
+            'display_order'  => $request->display_order,
+        ]);
+        return redirect()->back()->with('success', 'Timeline milestone updated.');
     }
 
     public function destroyTimeline($id)
@@ -366,7 +389,7 @@ class ContentController extends Controller
         $query = Update::query();
         if ($request->filled('search')) {
             $query->where('title', 'like', "%{$request->search}%")
-                  ->orWhere('description', 'like', "%{$request->search}%");
+                ->orWhere('description', 'like', "%{$request->search}%");
         }
         $updates = $query->orderBy('publish_date', 'desc')->paginate(15)->withQueryString();
         return view('admin.content.updates', compact('updates'));
@@ -443,22 +466,22 @@ class ContentController extends Controller
     public function exportSlidersCsv(Request $request)
     {
         $headers = [
-            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=sliders_export_" . date('Y-m-d') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
         $query = Slider::query();
         if ($request->filled('search')) {
             $query->where('title', 'like', "%{$request->search}%")
-                  ->orWhere('subtitle', 'like', "%{$request->search}%");
+                ->orWhere('subtitle', 'like', "%{$request->search}%");
         }
         $sliders = $query->orderBy('display_order')->get();
 
-        $callback = function() use ($sliders) {
+        $callback = function () use ($sliders) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($file, [
                 __('messages.csv_id'),
                 __('messages.csv_title'),
@@ -489,22 +512,22 @@ class ContentController extends Controller
     public function exportAgendasCsv(Request $request)
     {
         $headers = [
-            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=agendas_export_" . date('Y-m-d') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
         $query = Agenda::query();
         if ($request->filled('search')) {
             $query->where('title', 'like', "%{$request->search}%")
-                  ->orWhere('description', 'like', "%{$request->search}%");
+                ->orWhere('description', 'like', "%{$request->search}%");
         }
         $agendas = $query->orderBy('display_order')->get();
 
-        $callback = function() use ($agendas) {
+        $callback = function () use ($agendas) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($file, [
                 __('messages.csv_id'),
                 __('messages.csv_title'),
@@ -533,17 +556,17 @@ class ContentController extends Controller
     public function exportDeskCsv(Request $request)
     {
         $headers = [
-            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=management_desk_export_" . date('Y-m-d') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
         $desks = ManagementDesk::orderBy('display_order')->get();
 
-        $callback = function() use ($desks) {
+        $callback = function () use ($desks) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($file, [
                 __('messages.csv_id'),
                 __('messages.csv_name'),
@@ -572,17 +595,17 @@ class ContentController extends Controller
     public function exportCommitteeCsv(Request $request)
     {
         $headers = [
-            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=committee_export_" . date('Y-m-d') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
         $committee = CommitteeMember::orderBy('display_order')->get();
 
-        $callback = function() use ($committee) {
+        $callback = function () use ($committee) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($file, [
                 __('messages.csv_id'),
                 __('messages.csv_name'),
@@ -615,17 +638,17 @@ class ContentController extends Controller
     public function exportTimelinesCsv(Request $request)
     {
         $headers = [
-            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=timelines_export_" . date('Y-m-d') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
         $timelines = Timeline::orderBy('year', 'desc')->get();
 
-        $callback = function() use ($timelines) {
+        $callback = function () use ($timelines) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($file, [
                 __('messages.csv_id'),
                 __('messages.csv_year'),
@@ -652,17 +675,17 @@ class ContentController extends Controller
     public function exportUpdatesCsv(Request $request)
     {
         $headers = [
-            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=updates_export_" . date('Y-m-d') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
         $updates = Update::orderBy('publish_date', 'desc')->get();
 
-        $callback = function() use ($updates) {
+        $callback = function () use ($updates) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($file, [
                 __('messages.csv_id'),
                 __('messages.csv_title'),

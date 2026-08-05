@@ -2,13 +2,17 @@
 @section('page_title', __('messages.edit_profile'))
 
 @section('content')
-<div class="max-w-4xl space-y-3">
+<div class="max-w-5xl mx-auto space-y-3">
 
     <!-- Validation Errors -->
     @if ($errors->any())
-        <div class="p-2.5 bg-rose-50 border border-rose-100 text-rose-800 rounded-lg text-xs">
-            <p class="font-bold mb-1">{{ __('messages.please_correct_errors') }}</p>
-            <ul class="list-disc pl-4 text-[11px] font-medium space-y-0.5">
+        <div class="p-4 bg-rose-50 border border-rose-100 text-rose-800 rounded-2xl text-xs font-semibold shadow-xs">
+            <p class="font-extrabold mb-1.5 flex items-center gap-1.5 text-rose-900">
+                <span>⚠️</span>
+                <span>{{ __('messages.please_correct_errors') }}</span>
+            </p>
+            <ul class="list-disc pl-5 text-[11px] font-medium 
+            -y-1 text-rose-700">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -24,71 +28,84 @@
         <input type="hidden" name="last_name" value="{{ old('last_name', $profile->last_name ?? '') }}">
 
         <!-- MEMBER IDENTITY & PHOTO HEADER CARD -->
-        <div class="bg-gradient-to-r from-primary-50/80 via-white to-primary-50/30 border border-primary-100 rounded-xl p-3 shadow-2xs">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <!-- User Info -->
-                <div class="flex items-center gap-3">
-                    <img class="w-11 h-11 rounded-lg object-cover bg-white border border-primary-200 shadow-2xs shrink-0" 
-                         src="{{ $profile && $profile->photo_path ? (str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path)) : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100' }}" 
-                         alt="Profile Photo">
-                    <div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="px-1.5 py-0.2 rounded bg-primary-100 text-primary-700 text-[8px] font-black uppercase">MEMBER ACCOUNT</span>
-                            <span class="text-[11px] font-extrabold text-slate-500">#{{ sprintf('%05d', $user->id) }}</span>
+                <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div class="relative group shrink-0">
+                        <img class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover bg-slate-50 border-2 border-primary-200 shadow-xs" 
+                             src="{{ $profile && $profile->photo_path ? (str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path)) : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100' }}" 
+                             alt="Profile Photo">
+                    </div>
+                    <div class="space-y-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="px-2 py-0.5 rounded-md bg-primary-50 text-primary-700 border border-primary-100 text-[10px] font-black uppercase tracking-wider">MEMBER ACCOUNT</span>
+                            <span class="text-xs font-black text-slate-500">#{{ sprintf('%05d', $user->id) }}</span>
                         </div>
-                        <h2 class="text-xs font-black text-slate-900 leading-tight">
+                        <h2 class="text-sm sm:text-base font-black text-slate-900 leading-tight truncate">
                             {{ $profile->first_name ?? '' }} {{ $profile->middle_name ?? '' }} {{ $profile->last_name ?? '' }}
                         </h2>
-                        <p class="text-[10px] text-slate-500 font-semibold">{{ $user->email }}</p>
+                        <p class="text-xs text-slate-500 font-semibold flex items-center gap-1 truncate">
+                            <span>✉️</span>
+                            <span class="truncate">{{ $user->email }}</span>
+                        </p>
                     </div>
                 </div>
 
                 <!-- Photo Upload Field -->
-                <div class="flex items-center gap-2 shrink-0">
-                    <label class="text-[10px] font-extrabold text-slate-500 uppercase shrink-0">{{ __('messages.profile_photo') }}:</label>
+                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 shrink-0 w-full sm:w-auto overflow-hidden">
+                    <div class="space-y-0.5 shrink-0">
+                        <label class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider block">{{ __('messages.profile_photo') }}</label>
+                        <span class="text-[9px] text-slate-400 font-medium block">JPG, PNG or WEBP (Max 2MB)</span>
+                    </div>
                     <input type="file" name="photo" accept="image/*"
-                           class="text-[10px] text-slate-500 file:mr-1.5 file:py-0.5 file:px-2 file:rounded-md file:border-0 file:text-[9px] file:font-bold file:bg-primary-500 file:text-white hover:file:bg-primary-600 cursor-pointer">
+                           class="w-full max-w-full text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-extrabold file:bg-primary-500 file:text-white hover:file:bg-primary-600 cursor-pointer transition-all">
                 </div>
             </div>
         </div>
 
         <!-- FORM DATA CARD -->
-        <div class="bg-white border border-slate-100 rounded-xl p-3.5 shadow-2xs space-y-3">
+        <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-6">
             
-            <!-- PERSONAL & CONTACT DETAILS GRID -->
-            <div>
-                <h3 class="text-[11px] font-black text-slate-800 uppercase tracking-wider mb-2 pb-0.5 border-b border-slate-100 flex items-center gap-1">
-                    <span>👤</span> {{ __('messages.personal_details_sec') }} & {{ __('messages.contact_details_sec') }}
+            <!-- SECTION 1: PERSONAL & CONTACT DETAILS -->
+            <div class="space-y-3">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xs">👤</span>
+                    <span>{{ __('messages.personal_details_sec') }} & {{ __('messages.contact_details_sec') }}</span>
                 </h3>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div class="space-y-0.5">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.gender') }} *</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Gender -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.gender') }} <span class="text-rose-500">*</span></label>
                         <select name="gender" required 
-                                class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                                class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                             <option value="Male" {{ old('gender', $profile->gender ?? '') == 'Male' ? 'selected' : '' }}>{{ __('messages.gender_male') }}</option>
                             <option value="Female" {{ old('gender', $profile->gender ?? '') == 'Female' ? 'selected' : '' }}>{{ __('messages.gender_female') }}</option>
                             <option value="Other" {{ old('gender', $profile->gender ?? '') == 'Other' ? 'selected' : '' }}>{{ __('messages.gender_other') }}</option>
                         </select>
                     </div>
 
-                    <div class="space-y-0.5">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.dob') }} *</label>
+                    <!-- Date of Birth -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.dob') }} <span class="text-rose-500">*</span></label>
                         <input type="date" name="dob" value="{{ old('dob', $profile->dob ?? '') }}" required
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
-                    <div class="space-y-0.5">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Phone / WhatsApp *</label>
+                    <!-- Phone / WhatsApp -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">Phone / WhatsApp <span class="text-rose-500">*</span></label>
                         <input type="text" name="phone" value="{{ old('phone', $profile->phone ?? '') }}" required maxlength="10" 
-                               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="Phone"
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10-digit number"
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
-                    <div class="space-y-0.5">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.blood_group') }}</label>
+                    <!-- Blood Group -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.blood_group') }}</label>
                         <select name="blood_group"
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                             <option value="">-- {{ __('messages.select_blood_group') }} --</option>
                             <option value="A+" {{ old('blood_group', $profile->blood_group ?? '') == 'A+' ? 'selected' : '' }}>A+</option>
                             <option value="A-" {{ old('blood_group', $profile->blood_group ?? '') == 'A-' ? 'selected' : '' }}>A-</option>
@@ -101,75 +118,88 @@
                         </select>
                     </div>
 
-                    <div class="space-y-0.5">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.education') }}</label>
+                    <!-- Education -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.education') }}</label>
                         <input type="text" name="education" value="{{ old('education', $profile->education ?? '') }}" placeholder="e.g. B.E. Computer"
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
-                    <div class="space-y-0.5">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.occupation') }}</label>
-                        <input type="text" name="occupation" value="{{ old('occupation', $profile->occupation ?? '') }}" placeholder="e.g. Engineer"
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                    <!-- Occupation -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.occupation') }}</label>
+                        <input type="text" name="occupation" value="{{ old('occupation', $profile->occupation ?? '') }}" placeholder="e.g. Software Engineer"
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
-                    <div class="space-y-0.5 col-span-2 sm:col-span-2">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.father_member_id_optional') }}</label>
-                        <input type="text" name="father_member_id" value="{{ old('father_member_id', $profile->father_member_id ?? '') }}" placeholder="e.g. #00005"
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                    <!-- Father's Member ID -->
+                    <div class="space-y-1 sm:col-span-2">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.father_member_id_optional') }}</label>
+                        <input type="text" name="father_member_id" value="{{ old('father_member_id', $profile->father_member_id ?? '') }}" placeholder="e.g. #00005 or 5"
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                         @if(!empty($profile->father_member_id))
                             @php
                                 $fatherUser = $profile->father_user;
                             @endphp
                             @if($fatherUser)
-                                <p class="text-[9px] text-emerald-600 font-bold mt-0.5">✓ {{ $fatherUser->name }} (#{{ sprintf('%05d', $fatherUser->id) }})</p>
+                                <p class="text-[10px] text-emerald-600 font-bold mt-0.5 flex items-center gap-1">
+                                    <span>✓</span>
+                                    <span>{{ $fatherUser->name }} (#{{ sprintf('%05d', $fatherUser->id) }})</span>
+                                </p>
                             @endif
                         @endif
                     </div>
                 </div>
             </div>
 
-            <!-- ADDRESS DETAILS GRID -->
-            <div>
-                <h3 class="text-[11px] font-black text-slate-800 uppercase tracking-wider mb-2 pb-0.5 border-b border-slate-100 flex items-center gap-1">
-                    <span>📍</span> {{ __('messages.address_location_sec') }}
+            <!-- SECTION 2: ADDRESS & LOCATION DETAILS -->
+            <div class="space-y-3 pt-2">
+                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">📍</span>
+                    <span>{{ __('messages.address_location_sec') }}</span>
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-                    <div class="space-y-0.5 sm:col-span-4">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.street_address') }} *</label>
-                        <input type="text" name="address" value="{{ old('address', $profile->address ?? '') }}" required placeholder="House No, Society, Area..."
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Street Address -->
+                    <div class="space-y-1 sm:col-span-2 md:col-span-4">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.street_address') }} <span class="text-rose-500">*</span></label>
+                        <input type="text" name="address" value="{{ old('address', $profile->address ?? '') }}" required placeholder="House No, Society, Street, Area..."
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
-                    <div class="space-y-0.5">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.city') }} *</label>
+                    <!-- City -->
+                    <div class="space-y-1 sm:col-span-1 md:col-span-1">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.city') }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="city" value="{{ old('city', $profile->city ?? '') }}" required placeholder="City"
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
-                    <div class="space-y-0.5 sm:col-span-2">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.state') }} *</label>
+                    <!-- State -->
+                    <div class="space-y-1 sm:col-span-1 md:col-span-2">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.state') }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="state" value="{{ old('state', $profile->state ?? '') }}" required placeholder="State"
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
-                    <div class="space-y-0.5">
-                        <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.pincode') }} *</label>
+                    <!-- Pincode -->
+                    <div class="space-y-1 sm:col-span-1 md:col-span-1">
+                        <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider block">{{ __('messages.pincode') }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="pincode" value="{{ old('pincode', $profile->pincode ?? '') }}" required placeholder="Pincode"
-                               class="w-full text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
                 </div>
             </div>
 
             <!-- PROFILE ACTIONS -->
-            <div class="pt-2 border-t border-slate-100 flex justify-end items-center gap-2">
+            <div class="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
                 <a href="{{ route('member.dashboard') }}" 
-                   class="px-3 py-1 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg transition-colors">
+                   class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-extrabold text-xs rounded-xl transition-all text-center">
                     {{ __('messages.cancel') }}
                 </a>
                 <button type="submit" 
-                        class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-2xs transition-colors uppercase tracking-wider">
-                    {{ __('messages.save_profile_changes') }}
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all uppercase tracking-wider cursor-pointer hover:-translate-y-0.5">
+                    <span>💾</span>
+                    <span>{{ __('messages.save_profile_changes') }}</span>
                 </button>
             </div>
         </div>

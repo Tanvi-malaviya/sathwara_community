@@ -41,6 +41,9 @@
                     <span class="flex items-center gap-1.5">📅 {{ date('F d, Y', strtotime($event->date)) }}</span>
                     <span class="flex items-center gap-1.5">⏰ {{ date('h:i A', strtotime($event->time)) }}</span>
                     <span class="flex items-center gap-1.5">📍 {{ $event->venue }}</span>
+                    @if(!empty($event->registration_end_date))
+                        <span class="flex items-center gap-1.5 text-rose-300 font-extrabold bg-rose-950/70 px-3 py-1 rounded-lg border border-rose-700/60 shadow-sm">⏳ Last Date: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -58,6 +61,25 @@
                             {!! $event->description !!}
                         </div>
                     </div>
+
+                    <!-- Venue & Google Map Location -->
+                    @if(!empty($event->map_embed_url))
+                        <div class="space-y-4 pt-4 border-t border-slate-100">
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                                    <span>📍 Event Location & Venue Map</span>
+                                </h2>
+                                @if(!empty($event->google_map_link) && str_starts_with($event->google_map_link, 'http'))
+                                    <!-- <a href="{{ $event->google_map_link }}" target="_blank" class="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1">
+                                        <span>Open in Google Maps</span> &rarr;
+                                    </a> -->
+                                @endif
+                            </div>
+                            <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-52 sm:h-60 w-full bg-slate-50">
+                                <iframe src="{{ $event->map_embed_url }}" class="w-full h-full border-0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Event Gallery -->
                     @if($gallery->count() > 0)

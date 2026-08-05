@@ -74,6 +74,7 @@ class EventController extends Controller
             'event_type' => 'required|in:normal,inam_vitaran,yuva_melo',
             'description' => 'required|string',
             'venue' => 'required|string|max:255',
+            'google_map_link' => 'nullable|string',
             'date' => 'required|date',
             'time' => 'required',
             'published_date' => 'nullable|date',
@@ -95,6 +96,7 @@ class EventController extends Controller
             'event_type' => $request->event_type,
             'description' => $request->description,
             'venue' => $request->venue,
+            'google_map_link' => $request->google_map_link,
             'date' => $request->date,
             'time' => $request->time,
             'published_date' => $request->published_date,
@@ -117,10 +119,23 @@ class EventController extends Controller
             return;
         }
         $userPerms = $user->permissions->pluck('name');
-        if ($userPerms->contains('events_manage') || $userPerms->contains('event_manage_' . $eventId) || $userPerms->contains('event_edit_' . $eventId)) {
+        if ($userPerms->contains('events_manage') || $userPerms->contains('events_edit') || $userPerms->contains('event_manage_' . $eventId) || $userPerms->contains('event_edit_' . $eventId)) {
             return;
         }
         abort(403, 'You do not have permission to edit or modify this event.');
+    }
+
+    private function checkDeletePermission($eventId)
+    {
+        $user = auth()->user();
+        if ($user->hasRole('Administrator')) {
+            return;
+        }
+        $userPerms = $user->permissions->pluck('name');
+        if ($userPerms->contains('events_manage') || $userPerms->contains('events_delete') || $userPerms->contains('event_manage_' . $eventId) || $userPerms->contains('event_delete_' . $eventId)) {
+            return;
+        }
+        abort(403, 'You do not have permission to delete this event.');
     }
 
     /**
@@ -146,6 +161,7 @@ class EventController extends Controller
             'event_type' => 'required|in:normal,inam_vitaran,yuva_melo',
             'description' => 'required|string',
             'venue' => 'required|string|max:255',
+            'google_map_link' => 'nullable|string',
             'date' => 'required|date',
             'time' => 'required',
             'published_date' => 'nullable|date',
@@ -170,6 +186,7 @@ class EventController extends Controller
             'event_type' => $request->event_type,
             'description' => $request->description,
             'venue' => $request->venue,
+            'google_map_link' => $request->google_map_link,
             'date' => $request->date,
             'time' => $request->time,
             'published_date' => $request->published_date,
@@ -191,7 +208,7 @@ class EventController extends Controller
     public function destroy($id)
     {
         $event = Event::findOrFail($id);
-        $this->checkEditPermission($event->id);
+        $this->checkDeletePermission($event->id);
         $event->delete();
 
         return redirect()->route('admin.events.index')->with('success', 'Event deleted successfully.');

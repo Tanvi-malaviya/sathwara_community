@@ -244,6 +244,9 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
         Route::get('/settings', [AdminSettings::class, 'index'])->name('settings.index');
         Route::post('/settings', [AdminSettings::class, 'update'])->name('settings.update');
 
+        Route::get('/settings/about', [AdminSettings::class, 'about'])->name('settings.about');
+        Route::post('/settings/about', [AdminSettings::class, 'updateAbout'])->name('settings.about.update');
+
         Route::get('/email-settings', [AdminEmailSettings::class, 'index'])->name('email_settings.index');
         Route::post('/email-settings', [AdminEmailSettings::class, 'update'])->name('email_settings.update');
         Route::post('/email-settings/test', [AdminEmailSettings::class, 'sendTestMail'])->name('email_settings.test');

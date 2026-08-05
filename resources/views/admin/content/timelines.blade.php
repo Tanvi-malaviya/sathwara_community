@@ -4,14 +4,14 @@
 
 @section('content')
     <div x-data="{
-                showAddModal: @json($errors->any()),
-                showEditModal: false,
-                editMilestone: {},
-                openEdit(milestone) {
-                    this.editMilestone = { ...milestone };
-                    this.showEditModal = true;
-                }
-            }">
+                    showAddModal: @json($errors->any()),
+                    showEditModal: false,
+                    editMilestone: {},
+                    openEdit(milestone) {
+                        this.editMilestone = { ...milestone };
+                        this.showEditModal = true;
+                    }
+                }">
         <!-- Header Actions & Search bar -->
         <div
             class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm mb-4">
@@ -78,13 +78,13 @@
                                 <div class="flex justify-end items-center space-x-1.5">
                                     {{-- Edit --}}
                                     <button type="button" @click="openEdit({
-                                                                    id: {{ $time->id }},
-                                                                    year: {{ json_encode($time->year) }},
-                                                                    title: {{ json_encode($time->title) }},
-                                                                    display_order: {{ $time->display_order }},
-                                                                    description: {{ json_encode($time->description) }},
-                                                                    update_url: '{{ route('admin.content.timelines.update', $time->id) }}'
-                                                                })"
+                                                                            id: {{ $time->id }},
+                                                                            year: {{ json_encode($time->year) }},
+                                                                            title: {{ json_encode($time->title) }},
+                                                                            display_order: {{ $time->display_order }},
+                                                                            description: {{ json_encode($time->description) }},
+                                                                            update_url: '{{ route('admin.content.timelines.update', $time->id) }}'
+                                                                        })"
                                         class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
                                         title="{{ __('messages.edit') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"

@@ -102,6 +102,20 @@
                             </div>
                         </div>
 
+                        @if(!empty($event->registration_end_date))
+                            <div class="flex items-center gap-3 text-xs font-semibold text-slate-600">
+                                <div class="p-1.5 bg-rose-50 text-rose-500 rounded-lg shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-rose-500 block font-extrabold uppercase tracking-wider leading-none">Form Fill Up Last Date</span>
+                                    <span class="text-rose-700 font-bold">{{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="flex items-center gap-3 text-xs font-semibold text-slate-600">
                             <div class="p-1.5 bg-amber-50 text-amber-500 rounded-lg shrink-0">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -131,6 +145,32 @@
                 <div class="rich-text text-xs text-slate-600 leading-relaxed">
                     {!! $event->description !!}
                 </div>
+            </div>
+
+            @if(!empty($event->map_embed_url))
+                <!-- Venue Google Map Card -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-50 pb-3 gap-2 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-sm font-bold text-slate-900">Event Location & Venue Map</h2>
+                        </div>
+                        @if(!empty($event->google_map_link) && str_starts_with($event->google_map_link, 'http'))
+                            <a href="{{ $event->google_map_link }}" target="_blank" class="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1">
+                                <span>Open in Google Maps</span> &rarr;
+                            </a>
+                        @endif
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-2xs h-52 sm:h-60 w-full bg-slate-50">
+                        <iframe src="{{ $event->map_embed_url }}" class="w-full h-full border-0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            @endif
               <!-- Event Gallery -->
             @if($gallery->count() > 0)
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">

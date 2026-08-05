@@ -60,7 +60,7 @@
             <!-- Date, Time, and Banner Image -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase">{{ __('messages.date') }}</label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Event Date</label>
                     <input type="date" name="date" value="{{ old('date') }}"
                            @click="$event.target.showPicker?.()"
                            @focus="$event.target.showPicker?.()"
@@ -120,6 +120,15 @@
             <div class="space-y-0.5">
                 <label class="text-[10px] font-bold text-slate-500 uppercase">{{ __('messages.venue_hall_address') }}</label>
                 <input type="text" name="venue" value="{{ old('venue') }}" required
+                    class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
+            </div>
+
+            <div class="space-y-0.5">
+                <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                    <span>Google Map Link / Embed URL</span>
+                    <span class="text-[9px] text-slate-400 font-normal">(Google Map Link / iframe Embed Code)</span>
+                </label>
+                <input type="text" name="google_map_link" value="{{ old('google_map_link') }}" placeholder="e.g. https://www.google.com/maps/embed?pb=... or Google Map Link"
                     class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
             </div>
 

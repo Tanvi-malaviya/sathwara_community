@@ -24,13 +24,38 @@
             <input type="text" name="name" value="{{ old('name') }}" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
         </div>
 
-        <div x-data="{ rel: '{{ old('relationship') }}' }" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div x-data="{ 
+            rel: '{{ old('relationship') }}', 
+            gender: '{{ old('gender', 'Male') }}', 
+            marital_status: '{{ old('marital_status', 'Unmarried') }}',
+            onRelChange(val) {
+                this.rel = val;
+                if (['Wife', 'Husband', 'Daughter-in-law', 'Son-in-law', 'Spouse', 'પત્ની', 'પતિ', 'વહુ', 'જમાઈ'].includes(val)) {
+                    this.marital_status = 'Married';
+                }
+                if (['Husband', 'Son-in-law', 'Son', 'પતિ', 'જમાઈ', 'દીકરો'].includes(val)) {
+                    this.gender = 'Male';
+                } else if (['Wife', 'Daughter-in-law', 'Daughter', 'પત્ની', 'વહુ', 'દીકરી'].includes(val)) {
+                    this.gender = 'Female';
+                }
+            }
+        }" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1">
                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Relationship</label>
-                <select name="relationship" required @change="rel = $event.target.value" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                @php
+                    $userGender = $profile->gender ?? 'Male';
+                    $isFemaleMember = strtolower($userGender) === 'female';
+                    $hasExistingSpouse = isset($family) && $family->contains(fn($m) => in_array($m->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ']));
+                @endphp
+                <select name="relationship" required @change="onRelChange($event.target.value)" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
                     <option value="" disabled {{ old('relationship') ? '' : 'selected' }}>Select Relationship</option>
-                    <option value="Wife" {{ old('relationship') == 'Wife' ? 'selected' : '' }}>{{ __('messages.rel_wife') }}</option>
-                    <option value="Husband" {{ old('relationship') == 'Husband' ? 'selected' : '' }}>{{ __('messages.rel_husband') }}</option>
+                    @if(!$hasExistingSpouse)
+                        @if($isFemaleMember)
+                            <option value="Husband" {{ old('relationship') == 'Husband' ? 'selected' : '' }}>{{ __('messages.rel_husband') }}</option>
+                        @else
+                            <option value="Wife" {{ old('relationship') == 'Wife' ? 'selected' : '' }}>{{ __('messages.rel_wife') }}</option>
+                        @endif
+                    @endif
                     <option value="Son" {{ old('relationship') == 'Son' ? 'selected' : '' }}>{{ __('messages.rel_son') }}</option>
                     <option value="Daughter" {{ old('relationship') == 'Daughter' ? 'selected' : '' }}>{{ __('messages.rel_daughter') }}</option>
                     <option value="Daughter-in-law" {{ old('relationship') == 'Daughter-in-law' ? 'selected' : '' }}>{{ __('messages.rel_daughter_in_law') }}</option>
@@ -39,10 +64,6 @@
                     <option value="Granddaughter (Son's Daughter)" {{ old('relationship') == "Granddaughter (Son's Daughter)" ? 'selected' : '' }}>{{ __('messages.rel_granddaughter_sons_daughter') }}</option>
                     <option value="Grandson (Daughter's Son)" {{ old('relationship') == "Grandson (Daughter's Son)" ? 'selected' : '' }}>{{ __('messages.rel_grandson_daughters_son') }}</option>
                     <option value="Granddaughter (Daughter's Daughter)" {{ old('relationship') == "Granddaughter (Daughter's Daughter)" ? 'selected' : '' }}>{{ __('messages.rel_granddaughter_daughters_daughter') }}</option>
-                    <!-- <option value="Father" {{ old('relationship') == 'Father' ? 'selected' : '' }}>{{ __('messages.rel_father') }}</option>
-                    <option value="Mother" {{ old('relationship') == 'Mother' ? 'selected' : '' }}>{{ __('messages.rel_mother') }}</option>
-                    <option value="Brother" {{ old('relationship') == 'Brother' ? 'selected' : '' }}>{{ __('messages.rel_brother') }}</option>
-                    <option value="Sister" {{ old('relationship') == 'Sister' ? 'selected' : '' }}>{{ __('messages.rel_sister') }}</option> -->
                     <option value="Other" {{ old('relationship') == 'Other' ? 'selected' : '' }}>{{ __('messages.rel_other') }}</option>
                 </select>
 
@@ -74,7 +95,7 @@
 
             <div class="space-y-1">
                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Gender</label>
-                <select name="gender" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                <select name="gender" x-model="gender" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
@@ -85,9 +106,9 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1">
                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Marital Status</label>
-                <select name="marital_status" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-                    <option value="Unmarried" {{ old('marital_status') == 'Unmarried' ? 'selected' : '' }}>Unmarried</option>
-                    <option value="Married" {{ old('marital_status') == 'Married' ? 'selected' : '' }}>Married</option>
+                <select name="marital_status" x-model="marital_status" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                    <option value="Unmarried">Unmarried</option>
+                    <option value="Married">Married</option>
                 </select>
             </div>
 

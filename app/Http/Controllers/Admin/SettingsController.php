@@ -37,7 +37,18 @@ class SettingsController extends Controller
             'footer_text' => Setting::get('footer_text', '© ' . date('Y') . ' Sathwara Community. All rights reserved.'),
         ];
 
-        return view('admin.settings.index', compact('settings'));
+        $emailSettings = [
+            'mail_mailer'       => Setting::get('mail_mailer', env('MAIL_MAILER', 'smtp')),
+            'mail_host'         => Setting::get('mail_host', env('MAIL_HOST', 'smtp.gmail.com')),
+            'mail_port'         => Setting::get('mail_port', env('MAIL_PORT', '587')),
+            'mail_username'     => Setting::get('mail_username', env('MAIL_USERNAME', '')),
+            'mail_password'     => Setting::get('mail_password', env('MAIL_PASSWORD', '')),
+            'mail_encryption'   => Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls')),
+            'mail_from_address' => Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@sathwaracommunity.com')),
+            'mail_from_name'    => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Sathwara Community Portal')),
+        ];
+
+        return view('admin.settings.index', compact('settings', 'emailSettings'));
     }
 
     /**
@@ -80,5 +91,65 @@ class SettingsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Settings updated successfully.');
+    }
+
+    /**
+     * Show About Us Page Settings
+     */
+    public function about()
+    {
+        $settings = [
+            'about_mission_title_en' => Setting::get('about_mission_title_en', 'Empowering People'),
+            'about_mission_title_gu' => Setting::get('about_mission_title_gu', 'લોકોને સશક્ત બનાવવું'),
+            'about_mission_en' => Setting::get('about_mission_en', Setting::get('about_mission')),
+            'about_mission_gu' => Setting::get('about_mission_gu'),
+
+            'about_vision_title_en' => Setting::get('about_vision_title_en', 'Future Prosperity'),
+            'about_vision_title_gu' => Setting::get('about_vision_title_gu', 'ભવિષ્યની સમૃદ્ધિ'),
+            'about_vision_en' => Setting::get('about_vision_en', Setting::get('about_vision')),
+            'about_vision_gu' => Setting::get('about_vision_gu'),
+
+            'about_objectives_title_en' => Setting::get('about_objectives_title_en', 'Strategic Goals'),
+            'about_objectives_title_gu' => Setting::get('about_objectives_title_gu', 'વ્યૂહાત્મક લક્ષ્યો'),
+            'about_objectives_en' => Setting::get('about_objectives_en', Setting::get('about_objectives')),
+            'about_objectives_gu' => Setting::get('about_objectives_gu'),
+
+            'about_history_title_en' => Setting::get('about_history_title_en', 'Heritage & Journey'),
+            'about_history_title_gu' => Setting::get('about_history_title_gu', 'વારસો અને યાત્રા'),
+            'about_history_en' => Setting::get('about_history_en', Setting::get('about_history')),
+            'about_history_gu' => Setting::get('about_history_gu'),
+        ];
+
+        $timelines = \App\Models\Timeline::orderBy('display_order')->get();
+
+        return view('admin.settings.about', compact('settings', 'timelines'));
+    }
+
+    /**
+     * Update About Us Page Settings
+     */
+    public function updateAbout(Request $request)
+    {
+        $keys = [
+            'about_mission_title_en', 'about_mission_title_gu',
+            'about_mission_en', 'about_mission_gu',
+
+            'about_vision_title_en', 'about_vision_title_gu',
+            'about_vision_en', 'about_vision_gu',
+
+            'about_objectives_title_en', 'about_objectives_title_gu',
+            'about_objectives_en', 'about_objectives_gu',
+
+            'about_history_title_en', 'about_history_title_gu',
+            'about_history_en', 'about_history_gu',
+        ];
+
+        foreach ($keys as $key) {
+            if ($request->has($key)) {
+                Setting::set($key, $request->input($key));
+            }
+        }
+
+        return redirect()->back()->with('success', 'About Us configuration saved successfully.');
     }
 }

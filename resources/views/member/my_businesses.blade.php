@@ -13,9 +13,11 @@
             <p class="text-[11px] text-slate-500 font-medium">{{ __('messages.businesses_linked_to_member_id') }} (<span class="font-bold text-primary-600">#{{ sprintf('%05d', auth()->user()->id) }}</span>)</p>
         </div>
 
+        @if($businesses->count() < 1)
         <a href="{{ route('register.business') }}" target="_blank" class="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-2xs transition-transform hover:-translate-y-0.5 inline-flex items-center gap-1 shrink-0">
             <span>+ {{ __('messages.register_new_business') }}</span>
         </a>
+        @endif
     </div>
 
     <!-- Businesses Grid (Small & Compact Layout) -->

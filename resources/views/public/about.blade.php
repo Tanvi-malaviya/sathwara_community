@@ -2,8 +2,8 @@
 
 @section('content')
 @include('partials.page_header', [
-    'title' => __('messages.about_us'),
-    'subtitle' => __('messages.about_subtitle'),
+    'title' => $title ?? __('messages.about_us'),
+    'subtitle' => $subtitle ?? __('messages.about_subtitle'),
     'breadcrumb' => __('messages.about_us')
 ])
 
@@ -33,7 +33,7 @@
                     <span class="text-[10px] font-bold text-primary-600 uppercase tracking-wider block">
                         {{ __('messages.mission') }}
                     </span>
-                    <h3 class="text-base font-bold text-slate-900">{{ __('messages.empowering_people') }}</h3>
+                    <h3 class="text-base font-bold text-slate-900">{{ $missionTitle ?? __('messages.empowering_people') }}</h3>
                     <p class="text-xs text-slate-600 leading-relaxed font-normal">
                         {!! nl2br(e($mission)) !!}
                     </p>
@@ -49,7 +49,7 @@
                     <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider block">
                         {{ __('messages.vision') }}
                     </span>
-                    <h3 class="text-base font-bold text-slate-900">{{ __('messages.future_prosperity') }}</h3>
+                    <h3 class="text-base font-bold text-slate-900">{{ $visionTitle ?? __('messages.future_prosperity') }}</h3>
                     <p class="text-xs text-slate-600 leading-relaxed font-normal">
                         {!! nl2br(e($vision)) !!}
                     </p>
@@ -65,7 +65,7 @@
                     <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">
                         {{ __('messages.objectives') }}
                     </span>
-                    <h3 class="text-base font-bold text-slate-900">{{ __('messages.strategic_goals') }}</h3>
+                    <h3 class="text-base font-bold text-slate-900">{{ $objectivesTitle ?? __('messages.strategic_goals') }}</h3>
                     <div class="rich-text text-xs text-slate-600 leading-relaxed font-normal">
                         {!! $objectives !!}
                     </div>
@@ -91,7 +91,7 @@
                         <span>{{ __('messages.history') }}</span>
                     </span>
                     <h2 class="text-xl md:text-2xl font-extrabold text-slate-900 leading-tight">
-                        {{ __('messages.heritage_journey') }}
+                        {{ $historyTitle ?? __('messages.heritage_journey') }}
                     </h2>
                     <p class="text-xs text-slate-500 font-medium">
                         {{ __('messages.heritage_subtitle') }}

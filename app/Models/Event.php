@@ -15,6 +15,7 @@ class Event extends Model
         'event_type',
         'description',
         'venue',
+        'google_map_link',
         'date',
         'time',
         'published_date',
@@ -48,5 +49,33 @@ class Event extends Model
     public function galleries()
     {
         return $this->hasMany(Gallery::class);
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published')
+                     ->where(function ($q) {
+                         $q->whereNull('published_date')
+                           ->orWhere('published_date', '<=', now()->toDateString());
+                     });
+    }
+
+    public function getMapEmbedUrlAttribute()
+    {
+        if (empty($this->google_map_link)) {
+            return null;
+        }
+
+        $link = trim($this->google_map_link);
+
+        if (preg_match('/src=["\']([^"\']+)["\']/i', $link, $matches)) {
+            return $matches[1];
+        }
+
+        if (str_contains($link, '/maps/embed') || str_contains($link, 'output=embed')) {
+            return $link;
+        }
+
+        return 'https://maps.google.com/maps?q=' . urlencode($this->venue ?? $this->title) . '&output=embed';
     }
 }

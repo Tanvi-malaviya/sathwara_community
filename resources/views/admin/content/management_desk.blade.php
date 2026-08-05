@@ -58,7 +58,8 @@
                 <thead>
                     <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
                         <th class="py-3 px-4">{{ __('messages.member') }}</th>
-                        <th class="py-3 px-4">{{ __('messages.designation') }}</th>
+                        <th class="py-3 px-4">Designation (English)</th>
+                        <th class="py-3 px-4">Designation (Gujarati)</th>
                         <th class="py-3 px-4 text-center">{{ __('messages.display_order') }}</th>
                         <th class="py-3 px-4 text-center">{{ __('messages.status') }}</th>
                         <th class="py-3 px-4 text-right">{{ __('messages.actions') }}</th>
@@ -72,13 +73,27 @@
                                     <img class="w-9 h-9 rounded-xl object-cover shrink-0 border border-slate-200 shadow-2xs bg-slate-100"
                                         src="{{ str_starts_with($m->photo_path, 'http') ? $m->photo_path : asset('storage/' . $m->photo_path) }}"
                                         alt="{{ $m->name }}">
-                                    <span class="font-extrabold text-slate-900 text-xs">{{ $m->name }}</span>
+                                    <div>
+                                        <div class="font-extrabold text-slate-900 text-xs">{{ $m->name }}</div>
+                                        @if(!empty($m->name_gu))
+                                            <div class="text-[11px] font-semibold text-slate-500 font-gujarati mt-0.5">{{ $m->name_gu }}</div>
+                                        @endif
+                                    </div>
                                 </div>
                             </td>
                             <td class="py-3 px-4 text-slate-600 font-bold text-xs">
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80">
-                                    <span>👑</span> {{ $m->designation }}
+                                    {{ $m->designation }}
                                 </span>
+                            </td>
+                            <td class="py-3 px-4 text-slate-600 font-bold text-xs">
+                                @if(!empty($m->designation_gu))
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200/80 font-gujarati">
+                                        {{ $m->designation_gu }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400 font-normal">-</span>
+                                @endif
                             </td>
                             <td class="py-3 px-4 text-center">
                                 <span class="inline-block px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-extrabold text-[11px] border border-slate-200">
@@ -103,13 +118,14 @@
                                     <button type="button" @click="openEdit({
                                                                         id: {{ $m->id }},
                                                                         name: {{ json_encode($m->name) }},
+                                                                        name_gu: {{ json_encode($m->name_gu) }},
                                                                         designation: {{ json_encode($m->designation) }},
-                                                                        message: {{ json_encode($m->message) }},
+                                                                        designation_gu: {{ json_encode($m->designation_gu) }},
                                                                         status: {{ $m->status ? 1 : 0 }},
                                                                         display_order: {{ $m->display_order }},
                                                                         update_url: '{{ route('admin.content.desk.update', $m->id) }}'
                                                                     })"
-                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200/60 transition-colors shadow-2xs"
+                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200/60 transition-colors shadow-2xs cursor-pointer"
                                         title="{{ __('messages.edit') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -120,7 +136,7 @@
                                     {{-- Delete --}}
                                     <button type="button"
                                         @click="$dispatch('confirm-delete', { action: '{{ route('admin.content.desk.destroy', $m->id) }}', message: '{{ __('messages.delete_confirm_desk', ['name' => addslashes($m->name)]) }}' })"
-                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200/60 transition-colors shadow-2xs"
+                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200/60 transition-colors shadow-2xs cursor-pointer"
                                         title="{{ __('messages.delete') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -133,7 +149,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-12 text-center text-slate-400">{{ __('messages.no_desk_entries_yet') }}
+                            <td colspan="6" class="py-12 text-center text-slate-400">{{ __('messages.no_desk_entries_yet') }}
                             </td>
                         </tr>
                     @endforelse
@@ -153,17 +169,17 @@
             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
             x-cloak>
             <div @click.away="showAddModal = false"
-                class="bg-white rounded-xl p-4 border border-slate-100 shadow-2xl max-w-md w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
+                class="bg-white rounded-xl p-5 border border-slate-100 shadow-2xl max-w-2xl w-full space-y-4 relative max-h-[90vh] overflow-y-auto">
                 <button @click="showAddModal = false"
-                    class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                    class="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 class="text-xs font-bold text-slate-900 pr-6">{{ __('messages.new_desk_message') }}</h3>
+                <h3 class="text-xs font-black text-slate-900 pr-6 uppercase tracking-wider">{{ __('messages.new_desk_message') }}</h3>
                 <form method="POST" action="{{ route('admin.content.desk.store') }}" enctype="multipart/form-data"
-                    class="space-y-3">
+                    class="space-y-3.5">
                     @csrf
                     @if($errors->any())
                         <div class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-[10px] font-semibold rounded-xl">
@@ -174,49 +190,68 @@
                             </ul>
                         </div>
                     @endif
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.full_name') }}</label>
-                        <input type="text" name="name" value="{{ old('name') }}" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+
+                    <!-- Side-by-Side Name Fields -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Name (English) <span class="text-rose-500">*</span></label>
+                            <input type="text" name="name" value="{{ old('name') }}" required
+                                placeholder="Enter full name in English"
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Name (Gujarati / ગુજરાતી)</label>
+                            <input type="text" name="name_gu" value="{{ old('name_gu') }}"
+                                placeholder="પૂરું નામ ગુજરાતીમાં લખો"
+                                class="w-full text-xs font-semibold font-gujarati px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                        </div>
                     </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.designation_role') }}</label>
-                        <input type="text" name="designation" value="{{ old('designation') }}" required
-                            placeholder="e.g. Community President"
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+
+                    <!-- Side-by-Side Designation Fields -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Designation (English) <span class="text-rose-500">*</span></label>
+                            <input type="text" name="designation" value="{{ old('designation') }}" required
+                                placeholder="e.g. Community President"
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Designation (Gujarati / ગુજરાતી)</label>
+                            <input type="text" name="designation_gu" value="{{ old('designation_gu') }}"
+                                placeholder="હોદ્દો ગુજરાતીમાં લખો (દા.ત. પ્રમુખ)"
+                                class="w-full text-xs font-semibold font-gujarati px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                        </div>
                     </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.photo_square_max2mb') }}</label>
-                        <input type="file" name="photo" required
-                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="space-y-0.5">
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                        <div class="space-y-1">
                             <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
+                                class="text-[11px] font-bold text-slate-700">{{ __('messages.photo_square_max2mb') }} <span class="text-rose-500">*</span></label>
+                            <input type="file" name="photo" required
+                                class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                        </div>
+                        <div class="space-y-1">
+                            <label
+                                class="text-[11px] font-bold text-slate-700">{{ __('messages.status') }}</label>
                             <select name="status" required
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                                <option value="1" {{ old('status', 1) == 1 ? 'selected' : '' }}>{{ __('messages.active') }}
-                                </option>
-                                <option value="0" {{ old('status', 1) == 0 ? 'selected' : '' }}>{{ __('messages.inactive') }}
-                                </option>
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                                <option value="1" {{ old('status', 1) == 1 ? 'selected' : '' }}>{{ __('messages.active') }}</option>
+                                <option value="0" {{ old('status', 1) == 0 ? 'selected' : '' }}>{{ __('messages.inactive') }}</option>
                             </select>
                         </div>
-                        <div class="space-y-0.5">
+                        <div class="space-y-1">
                             <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.display_order') }}</label>
+                                class="text-[11px] font-bold text-slate-700">{{ __('messages.display_order') }}</label>
                             <input type="number" name="display_order" value="{{ old('display_order', 0) }}" required
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                     </div>
-                    <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+
+                    <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
                         <button type="button" @click="showAddModal = false"
-                            class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                            class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">{{ __('messages.cancel') }}</button>
                         <button type="submit"
-                            class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm">{{ __('messages.add_entry_submit') }}</button>
+                            class="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">{{ __('messages.add_entry_submit') }}</button>
                     </div>
                 </form>
             </div>
@@ -227,16 +262,16 @@
             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
             x-cloak>
             <div @click.away="showEditModal = false"
-                class="bg-white rounded-xl p-4 border border-slate-100 shadow-2xl max-w-md w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
+                class="bg-white rounded-xl p-5 border border-slate-100 shadow-2xl max-w-2xl w-full space-y-4 relative max-h-[90vh] overflow-y-auto">
                 <button @click="showEditModal = false"
-                    class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                    class="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 class="text-xs font-bold text-slate-900 pr-6">{{ __('messages.edit_desk_entry') }}</h3>
-                <form method="POST" :action="editDesk.update_url" enctype="multipart/form-data" class="space-y-3">
+                <h3 class="text-xs font-black text-slate-900 pr-6 uppercase tracking-wider">{{ __('messages.edit_desk_entry') }}</h3>
+                <form method="POST" :action="editDesk.update_url" enctype="multipart/form-data" class="space-y-3.5">
                     @csrf
                     @method('PUT')
                     @if($errors->any())
@@ -248,47 +283,68 @@
                             </ul>
                         </div>
                     @endif
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.full_name') }}</label>
-                        <input type="text" name="name" :value="editDesk.name" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+
+                    <!-- Side-by-Side Name Fields in Edit Modal -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Name (English) <span class="text-rose-500">*</span></label>
+                            <input type="text" name="name" :value="editDesk.name" required
+                                placeholder="Enter full name in English"
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Name (Gujarati / ગુજરાતી)</label>
+                            <input type="text" name="name_gu" x-model="editDesk.name_gu"
+                                placeholder="પૂરું નામ ગુજરાતીમાં લખો"
+                                class="w-full text-xs font-semibold font-gujarati px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                        </div>
                     </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.designation_role') }}</label>
-                        <input type="text" name="designation" :value="editDesk.designation" required
-                            placeholder="e.g. Community President"
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+
+                    <!-- Side-by-Side Designation Fields in Edit Modal -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Designation (English) <span class="text-rose-500">*</span></label>
+                            <input type="text" name="designation" :value="editDesk.designation" required
+                                placeholder="e.g. Community President"
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Designation (Gujarati / ગુજરાતી)</label>
+                            <input type="text" name="designation_gu" x-model="editDesk.designation_gu"
+                                placeholder="હોદ્દો ગુજરાતીમાં લખો (દા.ત. પ્રમુખ)"
+                                class="w-full text-xs font-semibold font-gujarati px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                        </div>
                     </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.replace_photo_optional') }}</label>
-                        <input type="file" name="photo"
-                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="space-y-0.5">
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                        <div class="space-y-1">
                             <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
+                                class="text-[11px] font-bold text-slate-700">{{ __('messages.replace_photo_optional') }}</label>
+                            <input type="file" name="photo"
+                                class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                        </div>
+                        <div class="space-y-1">
+                            <label
+                                class="text-[11px] font-bold text-slate-700">{{ __('messages.status') }}</label>
                             <select name="status" required
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                                 <option value="1" :selected="editDesk.status == 1">{{ __('messages.active') }}</option>
                                 <option value="0" :selected="editDesk.status == 0">{{ __('messages.inactive') }}</option>
                             </select>
                         </div>
-                        <div class="space-y-0.5">
+                        <div class="space-y-1">
                             <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.display_order') }}</label>
+                                class="text-[11px] font-bold text-slate-700">{{ __('messages.display_order') }}</label>
                             <input type="number" name="display_order" :value="editDesk.display_order" required
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                     </div>
-                    <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+
+                    <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
                         <button type="button" @click="showEditModal = false"
-                            class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                            class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">{{ __('messages.cancel') }}</button>
                         <button type="submit"
-                            class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm">{{ __('messages.save_changes') }}</button>
+                            class="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">{{ __('messages.save_changes') }}</button>
                     </div>
                 </form>
             </div>

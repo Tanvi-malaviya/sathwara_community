@@ -105,15 +105,32 @@
             font-family: 'Manrope', sans-serif !important;
         }
 
-        /* Custom Scrollbar Styles */
+        /* Hide scrollbars utilities */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        /* Sidebar Scrollbar hidden for sleek dark menu */
+        aside, aside .overflow-y-auto {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+        aside::-webkit-scrollbar, aside .overflow-y-auto::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        /* Custom Scrollbar Styles for standard page overflow */
         html {
             scrollbar-width: thin;
             scrollbar-color: #cbd5e1 #f1f5f9;
-        }
-
-        aside {
-            scrollbar-width: thin;
-            scrollbar-color: #334155 #000000;
         }
 
         ::-webkit-scrollbar {
@@ -132,25 +149,6 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
-        }
-
-        /* Sidebar Scrollbar */
-        aside ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-
-        aside ::-webkit-scrollbar-track {
-            background: #000000;
-        }
-
-        aside ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 2px;
-        }
-
-        aside ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
         }
     </style>
 </head>
@@ -218,6 +216,7 @@
                 $hasDesk = $user->hasRole('Administrator') || $userPerms->contains('desk_manage') || $userPerms->contains(fn($p) => str_starts_with($p, 'desk_'));
                 $hasCommittee = $user->hasRole('Administrator') || $userPerms->contains('committee_manage') || $userPerms->contains(fn($p) => str_starts_with($p, 'committee_'));
                 $hasTimelines = $user->hasRole('Administrator') || $userPerms->contains('timelines_manage') || $userPerms->contains(fn($p) => str_starts_with($p, 'timelines_'));
+                $hasAbout = $user->hasRole('Administrator') || $userPerms->contains('about_manage') || $userPerms->contains(fn($p) => str_starts_with($p, 'about_'));
                 $hasAnnouncements = $user->hasRole('Administrator') || $userPerms->contains('announcements_manage') || $userPerms->contains(fn($p) => str_starts_with($p, 'announcements_'));
                 $hasSettings = $user->hasRole('Administrator') || $userPerms->contains('settings_manage') || $userPerms->contains(fn($p) => str_starts_with($p, 'settings_'));
             @endphp
@@ -328,45 +327,26 @@
             </div>
             @endif
 
-            <!-- About Us Page Dropdown -->
-            @if($hasDesk || $hasCommittee || $hasTimelines)
-            <div x-data="{ open: {{ (Route::is('admin.content.desk') || Route::is('admin.content.committee') || Route::is('admin.content.timelines')) ? 'true' : 'false' }} }">
-                <button @click="open = !open" 
-                    class="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.content.desk') || Route::is('admin.content.committee') || Route::is('admin.content.timelines')) ? 'text-white bg-zinc-900/80' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                    <div class="flex items-center space-x-3">
-                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>{{ __('messages.about_us_page') }}</span>
-                    </div>
-                    <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180 text-white' : 'text-slate-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div x-show="open" class="pl-7 pr-2 py-1 space-y-1" x-cloak>
-                    @if($hasDesk)
-                    <a href="{{ route('admin.content.desk') }}"
-                        class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.content.desk') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.content.desk') ? 'bg-white' : 'bg-slate-600' }}"></span>
-                        <span>{{ __('messages.management_desk') }}</span>
-                    </a>
-                    @endif
-                    @if($hasCommittee)
-                    <a href="{{ route('admin.content.committee') }}"
-                        class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.content.committee') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.content.committee') ? 'bg-white' : 'bg-slate-600' }}"></span>
-                        <span>{{ __('messages.committee_members') }}</span>
-                    </a>
-                    @endif
-                    @if($hasTimelines)
-                    <a href="{{ route('admin.content.timelines') }}"
-                        class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.content.timelines') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.content.timelines') ? 'bg-white' : 'bg-slate-600' }}"></span>
-                        <span>{{ __('messages.milestone_timeline') }}</span>
-                    </a>
-                    @endif
-                </div>
-            </div>
+            <!-- Management Desk (Standalone Main Tab) -->
+            @if($hasDesk)
+            <a href="{{ route('admin.content.desk') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.content.desk') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 01-2-2v-4a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2" />
+                </svg>
+                <span>{{ __('messages.management_desk') }}</span>
+            </a>
+            @endif
+
+            <!-- About Us Page (Standalone Tab) -->
+            @if($hasSettings || $hasTimelines || $hasAbout)
+            <a href="{{ route('admin.settings.about') }}"
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.settings.about*') || Route::is('admin.content.timelines')) ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{{ __('messages.about_us_page') }}</span>
+            </a>
             @endif
 
             @if($hasAnnouncements)
@@ -385,22 +365,13 @@
                 {{ __('messages.configuration') }}
             </div>
             <a href="{{ route('admin.settings.index') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.settings.index') || Route::is('admin.settings.update')) ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.settings.*') || Route::is('admin.email_settings.*')) ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>{{ __('messages.global_settings') }}</span>
-            </a>
-
-            <a href="{{ route('admin.email_settings.index') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.email_settings.*') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>{{ __('messages.email_smtp_settings') }}</span>
+                <span>{{ __('messages.system_settings') }}</span>
             </a>
             @endif
 

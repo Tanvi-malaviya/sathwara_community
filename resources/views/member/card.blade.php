@@ -25,9 +25,9 @@
  
 <div class="space-y-6">
     <!-- Utility Buttons -->
-    <div class="flex justify-between items-center no-print">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 no-print">
         <p class="text-xs text-slate-500">{{ __('messages.membership_card_preview_desc') }}</p>
-        <button onclick="window.print()" class="inline-flex items-center justify-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors">
+        <button onclick="window.print()" class="inline-flex items-center justify-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors shrink-0">
             🖨️ {{ __('messages.print_membership_card') }}
         </button>
     </div>

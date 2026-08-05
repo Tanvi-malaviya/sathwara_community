@@ -4,14 +4,14 @@
 
 @section('content')
     <div x-data="{
-                showAddModal: @json($errors->any()),
-                showEditModal: false,
-                editAgenda: {},
-                openEdit(agenda) {
-                    this.editAgenda = agenda;
-                    this.showEditModal = true;
-                }
-            }">
+                    showAddModal: @json($errors->any()),
+                    showEditModal: false,
+                    editAgenda: {},
+                    openEdit(agenda) {
+                        this.editAgenda = agenda;
+                        this.showEditModal = true;
+                    }
+                }">
         <!-- Header Actions & Search bar -->
         <div
             class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm mb-4">
@@ -40,15 +40,6 @@
                     class="inline-flex items-center justify-center px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-all whitespace-nowrap">
                     📊 <span>{{ __('messages.export_excel') }}</span>
                 </a>
-
-                <button @click="showAddModal = true"
-                    class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-95 whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    {{ __('messages.add_agenda') }}
-                </button>
             </div>
         </div>
 
@@ -58,17 +49,18 @@
                 <thead>
                     <tr
                         class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
-                        <th class="py-2 px-3 w-16">{{ __('messages.icon') }}</th>
-                        <th class="py-2 px-3 w-48">{{ __('messages.title') }}</th>
-                        <th class="py-2 px-3">{{ __('messages.description') }}</th>
-                        <th class="py-2 px-3 w-20 text-center">{{ __('messages.order') }}</th>
-                        <th class="py-2 px-3 w-28 text-right">{{ __('messages.actions') }}</th>
+                        <th class="py-2.5 px-3 w-16">{{ __('messages.icon') }}</th>
+                        <th class="py-2.5 px-3 w-40">{{ __('messages.title') }}</th>
+                        <th class="py-2.5 px-3">Description (English)</th>
+                        <th class="py-2.5 px-3">Description (Gujarati)</th>
+                        <th class="py-2.5 px-3 w-20 text-center">{{ __('messages.order') }}</th>
+                        <th class="py-2.5 px-3 w-24 text-right">{{ __('messages.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                     @forelse($agendas as $agenda)
                         <tr class="hover:bg-slate-50/50">
-                            <td class="py-2 px-3 text-slate-900 font-bold">
+                            <td class="py-2.5 px-3 text-slate-900 font-bold">
                                 <span class="text-xl">
                                     @if($agenda->icon == 'users') 👥
                                     @elseif($agenda->icon == 'academic-cap') 🎓
@@ -76,31 +68,38 @@
                                     @else 📌 @endif
                                 </span>
                             </td>
-                            <td class="py-2 px-3 text-slate-900 font-bold">
-                                {{ $agenda->localized_title }}
+                            <td class="py-2.5 px-3 text-slate-900 font-bold">
+                                <div>{{ $agenda->title }}</div>
+                                @if(!empty($agenda->title_gu))
+                                    <div class="text-[11px] font-semibold text-slate-500 font-gujarati mt-0.5">
+                                        {{ $agenda->title_gu }}</div>
+                                @endif
                             </td>
-                            <td class="py-2 px-3 text-slate-500"
-                                style="max-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
-                                title="{{ $agenda->localized_description }}">
-                                {{ $agenda->localized_description }}
+                            <td class="py-2.5 px-3 text-slate-700 font-semibold text-xs leading-relaxed"
+                                title="{{ $agenda->description }}">
+                                {{ $agenda->description }}
                             </td>
-                            <td class="py-2 px-3 text-center">
+                            <td class="py-2.5 px-3 text-slate-600 font-medium font-gujarati text-xs leading-relaxed"
+                                title="{{ $agenda->description_gu }}">
+                                {{ $agenda->description_gu ?: '-' }}
+                            </td>
+                            <td class="py-2.5 px-3 text-center">
                                 <span class="text-[10px] font-bold text-slate-400">{{ $agenda->display_order }}</span>
                             </td>
-                            <td class="py-2 px-3 text-right">
+                            <td class="py-2.5 px-3 text-right">
                                 <div class="flex justify-end items-center space-x-2">
                                     {{-- Edit --}}
                                     <button type="button" @click="openEdit({
-                                                                id: {{ $agenda->id }},
-                                                                title: {{ json_encode($agenda->title) }},
-                                                                title_gu: {{ json_encode($agenda->title_gu) }},
-                                                                description: {{ json_encode($agenda->description) }},
-                                                                description_gu: {{ json_encode($agenda->description_gu) }},
-                                                                icon: {{ json_encode($agenda->icon) }},
-                                                                display_order: {{ $agenda->display_order }},
-                                                                update_url: '{{ route('admin.content.agendas.update', $agenda->id) }}'
-                                                            })"
-                                        class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
+                                                                        id: {{ $agenda->id }},
+                                                                        title: {{ json_encode($agenda->title) }},
+                                                                        title_gu: {{ json_encode($agenda->title_gu) }},
+                                                                        description: {{ json_encode($agenda->description) }},
+                                                                        description_gu: {{ json_encode($agenda->description_gu) }},
+                                                                        icon: {{ json_encode($agenda->icon) }},
+                                                                        display_order: {{ $agenda->display_order }},
+                                                                        update_url: '{{ route('admin.content.agendas.update', $agenda->id) }}'
+                                                                    })"
+                                        class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors cursor-pointer"
                                         title="{{ __('messages.edit') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -111,7 +110,7 @@
                                     {{-- Delete --}}
                                     <button type="button"
                                         @click="$dispatch('confirm-delete', { action: '{{ route('admin.content.agendas.destroy', $agenda->id) }}', message: '{{ __('messages.delete_confirm_agenda') }}' })"
-                                        class="flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                                        class="flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer"
                                         title="{{ __('messages.delete') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -124,7 +123,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-12 text-center text-slate-400">{{ __('messages.no_agendas_yet') }}</td>
+                            <td colspan="6" class="py-12 text-center text-slate-400">{{ __('messages.no_agendas_yet') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -138,71 +137,6 @@
             </div>
         @endif
 
-        <!-- ============ ADD MODAL ============ -->
-        <div x-show="showAddModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
-            x-cloak>
-            <div @click.away="showAddModal = false"
-                class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative">
-                <button @click="showAddModal = false"
-                    class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <h3 class="text-xs font-bold text-slate-900 pr-6">{{ __('messages.add_agenda_modal_title') }}</h3>
-                <form method="POST" action="{{ route('admin.content.agendas.store') }}" class="space-y-3">
-                    @csrf
-                    @if($errors->any())
-                        <div class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-[10px] font-semibold rounded-xl">
-                            <ul class="list-disc pl-4 space-y-0.5">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.title') }}</label>
-                        <input type="text" name="title" value="{{ old('title') }}" required
-                            placeholder="e.g. Higher Education Support"
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.icon') }}</label>
-                        <select name="icon" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                            <option value="users" {{ old('icon') == 'users' ? 'selected' : '' }}>👥 {{ __('messages.icon_social_community') }}</option>
-                            <option value="academic-cap" {{ old('icon') == 'academic-cap' ? 'selected' : '' }}>🎓 {{ __('messages.icon_education_students') }}</option>
-                            <option value="briefcase" {{ old('icon') == 'briefcase' ? 'selected' : '' }}>💼 {{ __('messages.icon_business_directory') }}</option>
-                            <option value="pushpin" {{ old('icon') == 'pushpin' ? 'selected' : '' }}>📌 {{ __('messages.icon_announcements') }}</option>
-                        </select>
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.display_order') }}</label>
-                        <input type="number" name="display_order" value="{{ old('display_order', 0) }}" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.description') }}</label>
-                        <textarea name="description" rows="2.5" required placeholder="Explain the focus..."
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">{{ old('description') }}</textarea>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showAddModal = false"
-                            class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
-                        <button type="submit"
-                            class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm">{{ __('messages.add_agenda_submit') }}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <!-- ============ EDIT MODAL ============ -->
         <div x-show="showEditModal"
             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
@@ -210,16 +144,31 @@
             <div @click.away="showEditModal = false"
                 class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative">
                 <button @click="showEditModal = false"
-                    class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                    class="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 class="text-xs font-bold text-slate-900 pr-6">{{ __('messages.edit_agenda_modal_title') }}</h3>
-                <form method="POST" :action="editAgenda.update_url" class="space-y-3">
+                <h3 class="text-xs font-black text-slate-900 pr-6 uppercase tracking-wider">
+                    {{ __('messages.edit_agenda_modal_title') }}</h3>
+
+                <!-- Display Agenda Info Header -->
+                <div class="p-3 bg-slate-50 border border-slate-200/60 rounded-xl space-y-0.5">
+                    <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Agenda</span>
+                    <h4 class="text-xs font-black text-slate-900 truncate" x-text="editAgenda.title"></h4>
+                </div>
+
+                <form method="POST" :action="editAgenda.update_url" class="space-y-4">
                     @csrf
                     @method('PUT')
+
+                    <!-- Hidden fields to maintain agenda properties -->
+                    <input type="hidden" name="title" :value="editAgenda.title">
+                    <input type="hidden" name="title_gu" :value="editAgenda.title_gu">
+                    <input type="hidden" name="icon" :value="editAgenda.icon">
+                    <input type="hidden" name="display_order" :value="editAgenda.display_order">
+
                     @if($errors->any())
                         <div class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-[10px] font-semibold rounded-xl">
                             <ul class="list-disc pl-4 space-y-0.5">
@@ -229,44 +178,41 @@
                             </ul>
                         </div>
                     @endif
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.title') }}</label>
-                        <input type="text" name="title" :value="editAgenda.title" required
-                            placeholder="e.g. Higher Education Support"
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+
+                    <!-- Side-by-Side Description Textareas Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- English Description -->
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-extrabold text-slate-700 flex items-center justify-between">
+                                <span>Description (English) <span class="text-rose-500">*</span></span>
+                                <span
+                                    class="text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 uppercase">EN</span>
+                            </label>
+                            <textarea name="description" rows="4" required x-model="editAgenda.description"
+                                placeholder="Enter description in English..."
+                                class="w-full text-xs font-semibold px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:outline-none transition-all leading-relaxed"></textarea>
+                        </div>
+
+                        <!-- Gujarati Description -->
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-extrabold text-slate-700 flex items-center justify-between">
+                                <span>Description ( ગુજરાતી)</span>
+                                <span
+                                    class="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 uppercase">GU</span>
+                            </label>
+                            <textarea name="description_gu" rows="4" x-model="editAgenda.description_gu"
+                                placeholder="એજન્ડા વર્ણન ગુજરાતીમાં લખો..."
+                                class="w-full text-xs font-semibold font-gujarati px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:outline-none transition-all leading-relaxed"></textarea>
+                        </div>
                     </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.icon') }}</label>
-                        <select name="icon" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                            <option value="users" :selected="editAgenda.icon === 'users'">👥 {{ __('messages.icon_social_community') }}</option>
-                            <option value="academic-cap" :selected="editAgenda.icon === 'academic-cap'">🎓 {{ __('messages.icon_education_students') }}</option>
-                            <option value="briefcase" :selected="editAgenda.icon === 'briefcase'">💼 {{ __('messages.icon_business_directory') }}</option>
-                            <option value="pushpin" :selected="editAgenda.icon === 'pushpin'">📌 {{ __('messages.icon_announcements') }}</option>
-                        </select>
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.display_order') }}</label>
-                        <input type="number" name="display_order" :value="editAgenda.display_order" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.description') }}</label>
-                        <textarea name="description" rows="2.5" required x-text="editAgenda.description"
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg"></textarea>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+
+                    <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
                         <button type="button" @click="showEditModal = false"
-                            class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                            class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">{{ __('messages.cancel') }}</button>
                         <button type="submit"
-                            class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm">{{ __('messages.save_changes') }}</button>
+                            class="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">{{ __('messages.save_changes') }}</button>
                     </div>
                 </form>
             </div>
         </div>
-    </div>
 @endsection
