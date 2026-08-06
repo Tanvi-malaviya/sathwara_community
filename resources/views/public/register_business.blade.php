@@ -17,14 +17,14 @@
                     <div class="space-y-1">
                         <div class="flex items-center gap-2 font-black text-xs text-amber-900">
                             <span>⚠️</span>
-                            <span>Business Registration Limit Exceeded (વ્યવસાય નોંધણી મર્યાદા)</span>
+                            <span>{{ __('messages.business_limit_exceeded') }}</span>
                         </div>
                         <p class="text-xs text-amber-800 font-medium">
-                            You have already registered a business: <strong>{{ $existingBusiness->business_name }}</strong> (Status: <span class="uppercase font-extrabold">{{ $existingBusiness->status }}</span>). Each member is allowed to register <strong>only 1 business</strong>.
+                            {{ __('messages.business_limit_desc', ['name' => $existingBusiness->business_name, 'status' => strtoupper($existingBusiness->status)]) }}
                         </p>
                     </div>
                     <a href="{{ route('member.businesses.my') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl transition-all shrink-0">
-                        <span>My Businesses</span> &rarr;
+                        <span>{{ __('messages.my_businesses') }}</span> &rarr;
                     </a>
                 </div>
             @endif
@@ -32,7 +32,7 @@
             <!-- Validation errors -->
             @if ($errors->any())
                 <div class="mb-4 p-3 bg-rose-50 border border-rose-100 text-rose-800 rounded-xl">
-                    <p class="text-xs font-bold mb-2">Please correct the following errors:</p>
+                    <p class="text-xs font-bold mb-2">{{ __('messages.please_correct_errors') }}</p>
                     <ul class="list-disc pl-4 text-[11px] font-medium space-y-1">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -71,7 +71,7 @@
                     <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.member_id_label') }}</label>
                     <div class="relative">
                         <input type="text" name="member_id" x-model="memberId" @input.debounce.400ms="checkMember()" placeholder="{{ __('messages.member_id_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border rounded-lg focus:bg-white focus:ring-0 transition-colors" :class="isFound === true ? 'border-emerald-400' : (isFound === false ? 'border-rose-400' : 'border-slate-200')">
-                        <span x-show="loading" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold">Checking...</span>
+                        <span x-show="loading" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold">{{ __('messages.checking') }}</span>
                     </div>
                     <div x-show="memberStatus" class="mt-0.5 text-[10px] font-extrabold" :class="isFound ? 'text-emerald-700' : 'text-rose-600'" x-text="memberStatus"></div>
                     @error('member_id')
@@ -119,39 +119,39 @@
                      }">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200/60 pb-2.5">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-black text-slate-800 uppercase tracking-wide">Contact Details</span>
+                            <span class="text-xs font-black text-slate-800 uppercase tracking-wide">{{ __('messages.contact_details_sec') }}</span>
                             <span class="text-[10px] font-bold text-slate-400">({{ __('messages.phone_whatsapp_label') }})</span>
                         </div>
 
                         <!-- Toggle Switch UI -->
                         <div class="flex items-center gap-2 select-none cursor-pointer" @click="sameWhatsapp = !sameWhatsapp; if(sameWhatsapp) whatsappNum = phoneNum">
-                            <span class="text-[11px] font-extrabold text-slate-700">WhatsApp number same as Phone?</span>
+                            <span class="text-[11px] font-extrabold text-slate-700">{{ __('messages.whatsapp_same_as_phone') }}</span>
                             <button type="button" 
                                     :class="sameWhatsapp ? 'bg-emerald-500' : 'bg-slate-300'" 
                                     class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none">
                                 <span :class="sameWhatsapp ? 'translate-x-4' : 'translate-x-0'" 
                                       class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"></span>
                             </button>
-                            <span x-text="sameWhatsapp ? 'Yes' : 'No'" :class="sameWhatsapp ? 'text-emerald-700 font-extrabold' : 'text-slate-500 font-bold'" class="text-[10px] w-6"></span>
+                            <span x-text="sameWhatsapp ? '{{ __('messages.yes') }}' : '{{ __('messages.no') }}'" :class="sameWhatsapp ? 'text-emerald-700 font-extrabold' : 'text-slate-500 font-bold'" class="text-[10px] w-6"></span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         <!-- Phone Field -->
                         <div class="space-y-0.5">
-                            <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">Phone / Mobile <span class="text-rose-500">*</span></label>
+                            <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">{{ __('messages.phone_mobile') }} <span class="text-rose-500">*</span></label>
                             <input type="text" name="phone" x-model="phoneNum" @input="if(sameWhatsapp) whatsappNum = phoneNum" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="{{ __('messages.ten_digits') }}" class="w-full text-xs font-semibold px-3 py-1.5 bg-white border border-slate-200 rounded-lg focus:border-primary-500 focus:ring-0">
                         </div>
 
                         <!-- WhatsApp Field -->
                         <div class="space-y-0.5">
                             <label class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">
-                                WhatsApp Number 
+                                {{ __('messages.whatsapp_number') }} 
                                 <template x-if="sameWhatsapp">
-                                    <span class="text-emerald-600 font-bold text-[9px] lowercase">(same as phone)</span>
+                                    <span class="text-emerald-600 font-bold text-[9px] lowercase">({{ __('messages.same_as_phone') }})</span>
                                 </template>
                             </label>
-                            <input type="text" name="whatsapp" x-model="whatsappNum" :readonly="sameWhatsapp" :class="sameWhatsapp ? 'bg-slate-100 text-slate-500 cursor-not-allowed border-slate-200' : 'bg-white border-emerald-400 focus:border-emerald-500'" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10-digit WhatsApp number" class="w-full text-xs font-semibold px-3 py-1.5 rounded-lg focus:ring-0">
+                            <input type="text" name="whatsapp" x-model="whatsappNum" :readonly="sameWhatsapp" :class="sameWhatsapp ? 'bg-slate-100 text-slate-500 cursor-not-allowed border-slate-200' : 'bg-white border-emerald-400 focus:border-emerald-500'" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="{{ __('messages.ten_digit_whatsapp_placeholder') }}" class="w-full text-xs font-semibold px-3 py-1.5 rounded-lg focus:ring-0">
                         </div>
 
                         <!-- Email Field -->
@@ -198,16 +198,16 @@
                 <div class="space-y-2 md:col-span-3 border border-slate-100 rounded-xl p-3 bg-slate-50/50" x-data="multiShowcaseUploader()">
                     <div class="flex items-center justify-between gap-3 flex-wrap">
                         <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
-                            {{ __('messages.showcase_photos_label') }} <span class="text-slate-400 font-normal">(Select multiple times to append)</span>
+                            {{ __('messages.showcase_photos_label') }} <span class="text-slate-400 font-normal">({{ __('messages.select_multiple_append') }})</span>
                         </label>
                         <div class="flex items-center gap-2">
                             <button type="button" x-show="files.length < 6" @click="$refs.hiddenFileInput.click()" 
                                 class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] rounded-lg shadow-2xs transition-all flex items-center gap-1 cursor-pointer" x-cloak>
-                                <span>SELECT FILES</span>
+                                <span>{{ __('messages.select_files') }}</span>
                             </button>
                             <button type="button" @click="clearAll()" x-show="files.length > 0" x-cloak
                                 class="px-2.5 py-1 bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-[10px] rounded-lg transition-all cursor-pointer">
-                                <span>CLEAR</span>
+                                <span>{{ __('messages.clear') }}</span>
                             </button>
                         </div>
                     </div>
@@ -223,13 +223,13 @@
                         @click="$refs.hiddenFileInput.click()">
                         
                         <div x-show="files.length === 0" class="py-2 space-y-1">
-                            <p class="text-[11px] font-extrabold text-slate-600">Drop Your Files Here or <span class="text-blue-600 underline">Browse</span></p>
-                            <p class="text-[9px] text-slate-400">Select multiple times to add photos without removing previous selections</p>
+                            <p class="text-[11px] font-extrabold text-slate-600">{{ __('messages.drop_files_here_or') }} <span class="text-blue-600 underline">{{ __('messages.browse') }}</span></p>
+                            <p class="text-[9px] text-slate-400">{{ __('messages.drop_files_subtitle') }}</p>
                         </div>
 
                         <div x-show="files.length > 0" class="space-y-2" @click.stop x-cloak>
                             <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 px-1 border-b border-slate-100 pb-1.5">
-                                <span>Selected Showcase Photos:</span>
+                                <span>{{ __('messages.selected_showcase_photos') }}</span>
                                 <span class="text-blue-600 font-extrabold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/80" x-text="files.length + '/6 Selected'"></span>
                             </div>
                             <div class="flex flex-wrap items-center gap-3 pt-1">
@@ -272,15 +272,15 @@
                             </div>
 
                             <div class="space-y-1.5">
-                                <h3 class="text-base font-black text-slate-900">Photo Limit Reached</h3>
+                                <h3 class="text-base font-black text-slate-900">{{ __('messages.photo_limit_reached') }}</h3>
                                 <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                                    You can select a maximum of <strong class="text-amber-600 font-bold">6 showcase photos</strong>. Only the first 6 photos were kept.
+                                    {{ __('messages.photo_limit_desc') }}
                                 </p>
                             </div>
 
                             <button type="button" @click="showLimitModal = false" 
                                 class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer">
-                                Got it, thanks!
+                                {{ __('messages.got_it_thanks') }}
                             </button>
                         </div>
                     </div>
