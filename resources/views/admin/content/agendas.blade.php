@@ -185,8 +185,8 @@
                         <div class="space-y-1.5">
                             <label class="text-[11px] font-extrabold text-slate-700 flex items-center justify-between">
                                 <span>Description (English) <span class="text-rose-500">*</span></span>
-                                <span
-                                    class="text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 uppercase">EN</span>
+                                <!-- <span
+                                    class="text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 uppercase">EN</span> -->
                             </label>
                             <textarea name="description" rows="4" required x-model="editAgenda.description"
                                 placeholder="Enter description in English..."
@@ -197,8 +197,8 @@
                         <div class="space-y-1.5">
                             <label class="text-[11px] font-extrabold text-slate-700 flex items-center justify-between">
                                 <span>Description ( ગુજરાતી)</span>
-                                <span
-                                    class="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 uppercase">GU</span>
+                                <!-- <span
+                                    class="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 uppercase">GU</span> -->
                             </label>
                             <textarea name="description_gu" rows="4" x-model="editAgenda.description_gu"
                                 placeholder="એજન્ડા વર્ણન ગુજરાતીમાં લખો..."
