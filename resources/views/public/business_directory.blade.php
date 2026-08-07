@@ -74,12 +74,12 @@
                                     
                                     <div class="flex flex-col items-end gap-1.5 shrink-0">
                                         <span class="text-[9px] font-extrabold text-primary-700 bg-primary-50 border border-primary-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">
-                                            {{ $biz->category?->name ?? 'General' }}
+                                            {{ $biz->category?->name ?? __('messages.general') }}
                                         </span>
                                         @if($biz->membership_status === 'active')
-                                            <span class="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">Active</span>
+                                            <span class="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">{{ __('messages.active') }}</span>
                                         @else
-                                            <span class="text-[9px] font-extrabold text-rose-700 bg-rose-50 border border-rose-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">Expired</span>
+                                            <span class="text-[9px] font-extrabold text-rose-700 bg-rose-50 border border-rose-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">{{ __('messages.expired') }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -95,20 +95,20 @@
                                         <p class="text-[10px] text-slate-400 font-bold truncate mt-0.5">
                                             {{ __('messages.owner') }}: <span class="text-slate-700">{{ $biz->owner_name }}</span>
                                             @if($biz->member_id)
-                                                <span class="mx-1 text-slate-300">•</span> ID: <span class="text-slate-700">{{ $biz->member_id }}</span>
+                                                <span class="mx-1 text-slate-300">•</span> {{ __('messages.member_id') }}: <span class="text-slate-700">{{ $biz->member_id }}</span>
                                             @endif
                                         </p>
                                         @if($biz->approved_at)
                                             <p class="text-[9px] text-slate-400 font-bold mt-1">
-                                                Purchase: <span class="text-slate-600">{{ $biz->approved_at->format('d M Y') }}</span>
+                                                {{ __('messages.purchase') }}: <span class="text-slate-600">{{ $biz->approved_at->format('d M Y') }}</span>
                                                 <span class="mx-1 text-slate-300">•</span>
-                                                Expires: <span class="text-slate-600">{{ $biz->approved_at->addYear()->format('d M Y') }}</span>
+                                                {{ __('messages.expires') }}: <span class="text-slate-600">{{ $biz->approved_at->addYear()->format('d M Y') }}</span>
                                             </p>
                                         @endif
                                     </div>
 
                                     <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed min-h-[30px]">
-                                        {{ $biz->description ?? 'No description provided.' }}
+                                        {{ $biz->description ?? __('messages.no_business_description') }}
                                     </p>
 
                                     <!-- Address & Contact Info Badges (Compact) -->

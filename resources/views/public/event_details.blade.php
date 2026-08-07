@@ -1,50 +1,69 @@
 @extends('layouts.public')
 
 @section('content')
-    <!-- Event Header Banner -->
-    <section class="relative h-96 w-full bg-slate-900 overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-indigo-900 to-slate-950 opacity-90"></div>
-        @if(!empty($event->banner_path) && (str_starts_with($event->banner_path, 'http') || file_exists(public_path('storage/' . $event->banner_path))))
-            <img class="absolute inset-0 w-full h-full object-cover opacity-40 bg-center"
-                src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}"
-                alt=""
-                onerror="this.remove()">
-        @endif
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-end pb-12 text-white">
-            <div class="max-w-4xl space-y-4">
-                <!-- Breadcrumbs -->
-                <nav class="flex items-center gap-2 text-xs font-semibold text-slate-300">
-                    <a href="{{ route('home') }}" class="hover:text-white transition-colors flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                        <span>{{ __('messages.home') }}</span>
-                    </a>
-                    <span class="text-slate-500">/</span>
-                    <a href="{{ route('events') }}" class="hover:text-white transition-colors">
-                        <span>{{ __('messages.events') }}</span>
-                    </a>
-                    <span class="text-slate-500">/</span>
-                    <span class="text-primary-300 font-bold truncate max-w-[200px]">{{ $event->title }}</span>
-                </nav>
+    <!-- Event Header Banner (Top Hero Section) -->
+    <section class="relative bg-slate-950 text-white overflow-hidden py-10 md:py-14">
+        <!-- Ambient background lighting -->
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950"></div>
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-primary-600/15 rounded-full blur-3xl pointer-events-none"></div>
 
-                <span
-                    class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-primary-500/30 text-primary-200 border border-primary-400">
-                    {{ __('messages.community_gathering') }}
-                </span>
-                <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-tight">
-                    {{ $event->title }}
-                </h1>
-                <!-- Meta Details -->
-                <div class="flex flex-wrap items-center gap-6 text-xs text-slate-300 font-semibold pt-2">
-                    <span class="flex items-center gap-1.5">📅 {{ date('F d, Y', strtotime($event->date)) }}</span>
-                    <span class="flex items-center gap-1.5">⏰ {{ date('h:i A', strtotime($event->time)) }}</span>
-                    <span class="flex items-center gap-1.5">📍 {{ $event->venue }}</span>
-                    @if(!empty($event->registration_end_date))
-                        <span class="flex items-center gap-1.5 text-rose-300 font-extrabold bg-rose-950/70 px-3 py-1 rounded-lg border border-rose-700/60 shadow-sm">⏳ Last Date: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
-                    @endif
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <!-- Left Side Text & Details (8 cols) -->
+                <div class="{{ !empty($event->banner_path) ? 'lg:col-span-8' : 'lg:col-span-12' }} space-y-3.5">
+                    <!-- Breadcrumbs -->
+                    <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
+                        <a href="{{ route('home') }}" class="hover:text-white transition-colors flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                            </svg>
+                            <span>{{ __('messages.home') }}</span>
+                        </a>
+                        <span class="text-slate-600">/</span>
+                        <a href="{{ route('events') }}" class="hover:text-white transition-colors">
+                            <span>{{ __('messages.events') }}</span>
+                        </a>
+                        <span class="text-slate-600">/</span>
+                        <span class="text-primary-400 font-bold truncate max-w-[200px]">{{ $event->title }}</span>
+                    </nav>
+
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold bg-primary-500/20 text-primary-300 border border-primary-500/30 uppercase tracking-wider">
+                            {{ __('messages.community_gathering') }}
+                        </span>
+                        @if($event->date < now()->toDateString())
+                            <span class="text-[10px] font-extrabold text-slate-400 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700 uppercase tracking-wider">{{ __('messages.passed') }}</span>
+                        @else
+                            <span class="text-[10px] font-extrabold text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-700/60 uppercase tracking-wider">{{ __('messages.upcoming') }}</span>
+                        @endif
+                    </div>
+
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white">
+                        {{ $event->title }}
+                    </h1>
+
+                    <!-- Meta Details -->
+                    <div class="flex flex-wrap items-center gap-2.5 text-xs text-slate-300 font-semibold pt-1">
+                        <span class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl">📅 {{ date('F d, Y', strtotime($event->date)) }}</span>
+                        <span class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl">⏰ {{ date('h:i A', strtotime($event->time)) }}</span>
+                        <span class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl">📍 {{ $event->venue }}</span>
+                        @if(!empty($event->registration_end_date))
+                            <span class="flex items-center gap-1.5 text-rose-300 font-extrabold bg-rose-950/80 px-3 py-1.5 rounded-xl border border-rose-700/60">⏳ Last Date: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
+                        @endif
+                    </div>
                 </div>
+
+                <!-- Right Side Small Image (4 cols) -->
+                @if(!empty($event->banner_path))
+                    <div class="lg:col-span-4 flex justify-center lg:justify-end">
+                        <div class="relative max-w-[220px] sm:max-w-[260px] w-full bg-white rounded-2xl p-1.5 border border-slate-700/40 shadow-xl">
+                            <img src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
+                                 alt="{{ $event->title }}" 
+                                 class="w-full max-h-[220px] sm:max-h-[250px] object-contain rounded-xl bg-white shadow-xs">
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </section>

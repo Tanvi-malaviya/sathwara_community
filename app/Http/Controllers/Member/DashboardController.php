@@ -292,4 +292,46 @@ class DashboardController extends Controller
         session()->forget(['pending_email', 'email_otp_code', 'email_otp_expires', 'success_otp']);
         return redirect()->route('member.account.settings');
     }
+
+    /**
+     * Display Member Directory (List of approved community members)
+     */
+    public function directory(Request $request)
+    {
+        $query = User::role('Member')
+            ->where('status', 'approved')
+            ->with(['memberProfile.area']);
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('memberProfile', function ($sub) use ($search) {
+                        $sub->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('middle_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('city', 'like', "%{$search}%")
+                            ->orWhere('state', 'like', "%{$search}%")
+                            ->orWhere('address', 'like', "%{$search}%")
+                            ->orWhereHas('area', function ($a) use ($search) {
+                                $a->where('name', 'like', "%{$search}%")
+                                  ->orWhere('pincode', 'like', "%{$search}%");
+                            });
+                    });
+            });
+        }
+
+        if ($request->filled('area_id')) {
+            $areaId = $request->area_id;
+            $query->whereHas('memberProfile', function ($sub) use ($areaId) {
+                $sub->where('area_id', $areaId);
+            });
+        }
+
+        $members = $query->orderBy('name', 'asc')->paginate(16)->withQueryString();
+        $areas = \App\Models\Area::orderBy('name')->get();
+
+        return view('member.directory', compact('members', 'areas'));
+    }
 }

@@ -51,6 +51,7 @@ class RegistrationController extends Controller
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'pincode' => 'nullable|string|max:10',
+            'photo' => 'nullable|image|max:2048',
         ]);
 
         // 1. Create Login User
@@ -64,6 +65,15 @@ class RegistrationController extends Controller
         // Assign Member role
         $memberRole = Role::findByName('Member');
         $user->assignRole($memberRole);
+
+        // Fetch area info for city, state, pincode fallback
+        $area = Area::find($validated['area_id']);
+
+        // Handle Photo Upload
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('registrations/photos', 'public');
+        }
 
         // 2. Create Member Profile
         MemberProfile::create([
@@ -81,10 +91,10 @@ class RegistrationController extends Controller
             'whatsapp' => $validated['phone'],
             'address' => $validated['address'],
             'area_id' => $validated['area_id'],
-            'city' => $validated['city'] ?? null,
-            'state' => $validated['state'] ?? null,
-            'pincode' => $validated['pincode'] ?? null,
-            'photo_path' => null,
+            'city' => !empty($validated['city']) ? $validated['city'] : ($area ? $area->city : 'Ahmedabad'),
+            'state' => !empty($validated['state']) ? $validated['state'] : ($area ? $area->state : 'Gujarat'),
+            'pincode' => !empty($validated['pincode']) ? $validated['pincode'] : ($area ? $area->pincode : ''),
+            'photo_path' => $photoPath,
             'aadhaar_number' => null,
             'aadhaar_path' => null,
             'pan_number' => null,

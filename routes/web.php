@@ -79,6 +79,7 @@ Route::middleware(['auth', 'role:Member', 'approved'])->prefix('member')->name('
     Route::post('/account-settings/password', [MemberDashboard::class, 'updatePassword'])->name('account.settings.update_password');
     Route::get('/membership-card', [MemberDashboard::class, 'membershipCard'])->name('card');
     Route::get('/my-businesses', [MemberDashboard::class, 'myBusinesses'])->name('businesses.my');
+    Route::get('/directory', [MemberDashboard::class, 'directory'])->name('directory');
 
     // Family CRUD
     Route::resource('family', MemberFamily::class);
