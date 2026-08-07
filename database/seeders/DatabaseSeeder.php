@@ -39,7 +39,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Admin Administrator',
                 'password' => Hash::make('password'),
-                'status' => 'approved'
+               'status' => 'approved',
+                'member_code' => 'ADMIN001',
             ]
         );
         $admin->assignRole($adminRole);
@@ -50,7 +51,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Karan Sathwara',
                 'password' => Hash::make('password'),
-                'status' => 'approved'
+                 'status' => 'approved',
+                'member_code' => 'MEMBER001',
             ]
         );
         $member->assignRole($memberRole);
@@ -87,7 +89,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Vijay Sathwara',
                 'password' => Hash::make('password'),
-                'status' => 'pending'
+                'status' => 'pending',
+                'member_code' => 'PENDING001',
             ]
         );
         $pendingUser->assignRole($memberRole);
