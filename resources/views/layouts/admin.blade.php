@@ -71,10 +71,14 @@
         }
 
         /* Hide scrollbar for Chrome, Safari, Edge and Firefox */
-        *, .no-scrollbar {
-            -ms-overflow-style: none !important;  /* IE and Edge */
-            scrollbar-width: none !important;  /* Firefox */
+        *,
+        .no-scrollbar {
+            -ms-overflow-style: none !important;
+            /* IE and Edge */
+            scrollbar-width: none !important;
+            /* Firefox */
         }
+
         .no-scrollbar::-webkit-scrollbar,
         ::-webkit-scrollbar {
             display: none !important;
@@ -111,17 +115,21 @@
             width: 0 !important;
             height: 0 !important;
         }
+
         .no-scrollbar {
             -ms-overflow-style: none !important;
             scrollbar-width: none !important;
         }
 
         /* Sidebar Scrollbar hidden for sleek dark menu */
-        aside, aside .overflow-y-auto {
+        aside,
+        aside .overflow-y-auto {
             -ms-overflow-style: none !important;
             scrollbar-width: none !important;
         }
-        aside::-webkit-scrollbar, aside .overflow-y-auto::-webkit-scrollbar {
+
+        aside::-webkit-scrollbar,
+        aside .overflow-y-auto::-webkit-scrollbar {
             display: none !important;
             width: 0 !important;
             height: 0 !important;
@@ -205,7 +213,7 @@
             @php
                 $user = auth()->user();
                 $userPerms = $user->permissions->pluck('name');
-                
+
                 $hasMembers = $user->hasRole('Administrator') || $userPerms->contains('members_manage') || $userPerms->contains(fn($p) => str_starts_with($p, 'members_'));
                 $hasAreas = $user->hasRole('Administrator') || $userPerms->contains('areas_manage') || $userPerms->contains(fn($p) => str_starts_with($p, 'areas_'));
                 $hasBusinesses = $user->hasRole('Administrator') || $userPerms->contains('businesses_manage') || $userPerms->contains(fn($p) => str_starts_with($p, 'businesses_'));
@@ -233,59 +241,59 @@
             @endrole
 
             @if($hasMembers)
-            <a href="{{ route('admin.members.index') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.members.*') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span>{{ __('messages.members_approvals') }}</span>
-            </a>
+                <a href="{{ route('admin.members.index') }}"
+                    class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.members.*') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span>{{ __('messages.members_approvals') }}</span>
+                </a>
             @endif
 
             @if($hasAreas)
-            <a href="{{ route('admin.areas.index') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.areas.*') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>{{ __('messages.area_management') }}</span>
-            </a>
+                <a href="{{ route('admin.areas.index') }}"
+                    class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.areas.*') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>{{ __('messages.area_management') }}</span>
+                </a>
             @endif
 
             @if($hasBusinesses)
-            <a href="{{ route('admin.businesses.index') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.businesses.index') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>{{ __('messages.business_listings') }}</span>
-            </a>
+                <a href="{{ route('admin.businesses.index') }}"
+                    class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.businesses.index') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>{{ __('messages.business_listings') }}</span>
+                </a>
             @endif
 
             @if($hasEvents)
-            <a href="{{ route('admin.events.index') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.events.*') || Route::is('admin.awards.*')) ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{{ __('messages.events_manager') }}</span>
-            </a>
+                <a href="{{ route('admin.events.index') }}"
+                    class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.events.*') || Route::is('admin.awards.*')) ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{{ __('messages.events_manager') }}</span>
+                </a>
             @endif
 
             @if($hasGallery)
-            <a href="{{ route('admin.gallery.index') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.gallery.*') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{{ __('messages.general_gallery') }}</span>
-            </a>
+                <a href="{{ route('admin.gallery.index') }}"
+                    class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.gallery.*') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{{ __('messages.general_gallery') }}</span>
+                </a>
             @endif
 
             <!-- CONTENT CONTROLS (PAGE-BASED DROPDOWNS) -->
@@ -295,84 +303,93 @@
 
             <!-- Home Page Dropdown -->
             @if($hasSliders || $hasAgendas)
-            <div x-data="{ open: {{ (Route::is('admin.content.sliders') || Route::is('admin.content.agendas')) ? 'true' : 'false' }} }">
-                <button @click="open = !open" 
-                    class="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.content.sliders') || Route::is('admin.content.agendas')) ? 'text-white bg-zinc-900/80' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                    <div class="flex items-center space-x-3">
-                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1v4a1 1 0 001 1m-6 0h6" />
+                <div
+                    x-data="{ open: {{ (Route::is('admin.content.sliders') || Route::is('admin.content.agendas')) ? 'true' : 'false' }} }">
+                    <button @click="open = !open"
+                        class="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.content.sliders') || Route::is('admin.content.agendas')) ? 'text-white bg-zinc-900/80' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            <span>{{ __('messages.home_page') }}</span>
+                        </div>
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200"
+                            :class="open ? 'rotate-180 text-white' : 'text-slate-500'" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                        <span>{{ __('messages.home_page') }}</span>
+                    </button>
+                    <div x-show="open" class="pl-7 pr-2 py-1 space-y-1" x-cloak>
+                        @if($hasSliders)
+                            <a href="{{ route('admin.content.sliders') }}"
+                                class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.content.sliders') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                                <span
+                                    class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.content.sliders') ? 'bg-white' : 'bg-slate-600' }}"></span>
+                                <span>{{ __('messages.hero_sliders') }}</span>
+                            </a>
+                        @endif
+                        @if($hasAgendas)
+                            <a href="{{ route('admin.content.agendas') }}"
+                                class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.content.agendas') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                                <span
+                                    class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.content.agendas') ? 'bg-white' : 'bg-slate-600' }}"></span>
+                                <span>{{ __('messages.core_agendas') }}</span>
+                            </a>
+                        @endif
                     </div>
-                    <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180 text-white' : 'text-slate-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div x-show="open" class="pl-7 pr-2 py-1 space-y-1" x-cloak>
-                    @if($hasSliders)
-                    <a href="{{ route('admin.content.sliders') }}"
-                        class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.content.sliders') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.content.sliders') ? 'bg-white' : 'bg-slate-600' }}"></span>
-                        <span>{{ __('messages.hero_sliders') }}</span>
-                    </a>
-                    @endif
-                    @if($hasAgendas)
-                    <a href="{{ route('admin.content.agendas') }}"
-                        class="flex items-center space-x-2.5 px-3 py-2 text-[11px] font-bold rounded-lg {{ Route::is('admin.content.agendas') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ Route::is('admin.content.agendas') ? 'bg-white' : 'bg-slate-600' }}"></span>
-                        <span>{{ __('messages.core_agendas') }}</span>
-                    </a>
-                    @endif
                 </div>
-            </div>
             @endif
 
             <!-- Management Desk (Standalone Main Tab) -->
             @if($hasDesk)
-            <a href="{{ route('admin.content.desk') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.content.desk') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 01-2-2v-4a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2" />
-                </svg>
-                <span>{{ __('messages.management_desk') }}</span>
-            </a>
+                <a href="{{ route('admin.content.desk') }}"
+                    class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.content.desk') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 01-2-2v-4a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2" />
+                    </svg>
+                    <span>{{ __('messages.management_desk') }}</span>
+                </a>
             @endif
 
             <!-- About Us Page (Standalone Tab) -->
             @if($hasSettings || $hasTimelines || $hasAbout)
-            <a href="{{ route('admin.settings.about') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.settings.about*') || Route::is('admin.content.timelines')) ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{{ __('messages.about_us_page') }}</span>
-            </a>
+                <a href="{{ route('admin.settings.about') }}"
+                    class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.settings.about*') || Route::is('admin.content.timelines')) ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{{ __('messages.about_us_page') }}</span>
+                </a>
             @endif
 
             @if($hasAnnouncements)
-            <a href="{{ route('admin.content.updates') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.content.updates') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                </svg>
-                <span>{{ __('messages.announcements') }}</span>
-            </a>
+                <a href="{{ route('admin.content.updates') }}"
+                    class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ Route::is('admin.content.updates') ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                    </svg>
+                    <span>{{ __('messages.announcements') }}</span>
+                </a>
             @endif
 
             @if($hasSettings)
-            <div class="pt-4 pb-1 text-[10px] font-extrabold uppercase text-slate-500 tracking-widest px-4">
-                {{ __('messages.configuration') }}
-            </div>
-            <a href="{{ route('admin.settings.index') }}"
-                class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.settings.*') || Route::is('admin.email_settings.*')) ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>{{ __('messages.system_settings') }}</span>
-            </a>
+                <div class="pt-4 pb-1 text-[10px] font-extrabold uppercase text-slate-500 tracking-widest px-4">
+                    {{ __('messages.configuration') }}
+                </div>
+                <a href="{{ route('admin.settings.index') }}"
+                    class="flex items-center space-x-3 px-4 py-2.5 text-xs font-bold rounded-lg {{ (Route::is('admin.settings.*') || Route::is('admin.email_settings.*')) ? 'bg-primary-500 text-white' : 'text-slate-400 hover:bg-zinc-900 hover:text-white' }} transition-colors">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>{{ __('messages.system_settings') }}</span>
+                </a>
             @endif
 
             <div class="border-t border-zinc-900 my-4"></div>

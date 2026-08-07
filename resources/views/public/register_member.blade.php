@@ -34,7 +34,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('register.member.submit') }}" class="space-y-4">
+            <form method="POST" action="{{ route('register.member.submit') }}" enctype="multipart/form-data" class="space-y-4">
                 @csrf
 
                 <!-- SECTION 1: PERSONAL DETAILS -->
@@ -97,6 +97,12 @@
                             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('messages.father_member_id') }} <span class="text-[9px] text-slate-400 font-normal">{{ __('messages.if_registered') }}</span></label>
                             <input type="text" name="father_member_id" value="{{ old('father_member_id') }}" placeholder="{{ __('messages.father_id_placeholder') }}" class="w-full text-xs font-medium px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
                         </div>
+
+                        <!-- Profile Photo Upload -->
+                        <div class="space-y-1 sm:col-span-3">
+                            <label class="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">{{ __('messages.profile_photo') ?? 'Profile Photo' }} <span class="text-[9px] text-slate-400 font-normal">(JPG, PNG max 2MB)</span></label>
+                            <input type="file" name="photo" accept="image/*" class="w-full text-xs font-medium px-2 py-1.5 bg-slate-50/50 border border-slate-200 rounded-md focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition file:mr-3 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-600 hover:file:bg-primary-100">
+                        </div>
                     </div>
                 </div>
 
@@ -148,10 +154,10 @@
                                     <option value="{{ $area->id }}" {{ old('area_id') == $area->id ? 'selected' : '' }}>{{ $area->name }}{{ $area->pincode ? ' (' . $area->pincode . ')' : '' }}</option>
                                 @endforeach
                             </select>
-                            <p class="text-[10px] text-slate-400 mt-1">{{ __('messages.area_auto_fill_note') }}</p>
                         </div>
-                        <div class="sm:col-span-1">
-                            <input type="hidden" name="city" value="{{ old('city', '') }}">
+                        <div class="space-y-1 sm:col-span-1">
+                            <label class="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">{{ __('messages.city') }} <span class="text-rose-500">*</span></label>
+                            <input type="text" name="city" value="{{ old('city') }}" placeholder="e.g. Ahmedabad" required class="w-full text-xs font-medium px-2 py-1.5 bg-slate-50/50 border border-slate-200 rounded-md focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
                             <input type="hidden" name="state" value="{{ old('state', 'Gujarat') }}">
                             <input type="hidden" name="pincode" value="{{ old('pincode') }}">
                         </div>

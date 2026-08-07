@@ -173,7 +173,7 @@
                 <a href="{{ route('event.details', $event->id) }}" class="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col block cursor-pointer">
                     
                     <!-- Image -->
-                    <div class="relative h-44 w-full overflow-hidden shrink-0">
+                    <div class="relative h-44 w-full overflow-hidden shrink-0 bg-white">
                         {{-- Always-visible Red Background + Calendar Icon (base layer) --}}
                         <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 16px 12px; background: linear-gradient(135deg, #dc2626 0%, #e11d48 60%, #be123c 100%);">
                             <div style="position:absolute; inset:0; background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px); background-size: 14px 14px; pointer-events:none;"></div>
@@ -200,7 +200,7 @@
                         {{-- Actual image on top (covers calendar when loaded successfully) --}}
                         @if(!empty($event->banner_path))
                             <img
-                                class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                class="absolute inset-0 w-full h-full object-contain bg-white group-hover:scale-105 transition-transform duration-500"
                                 src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}"
                                 alt="{{ $event->title }}"
                                 onerror="this.style.display='none'">

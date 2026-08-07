@@ -13,7 +13,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             @forelse($events as $event)
                 <a href="{{ route('event.details', $event->id) }}" class="group bg-white rounded-3xl overflow-hidden border border-slate-200/60 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block cursor-pointer">
-                    <div class="relative h-44 w-full overflow-hidden shrink-0">
+                    <div class="relative h-44 w-full overflow-hidden shrink-0 bg-white">
                         {{-- Always-visible Red Background + Calendar Icon (base layer) --}}
                         <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 16px 12px; background: linear-gradient(135deg, #dc2626 0%, #e11d48 60%, #be123c 100%);">
                             {{-- Dot grid texture --}}
@@ -43,7 +43,7 @@
                         {{-- Actual image on top (covers calendar when loaded successfully) --}}
                         @if(!empty($event->banner_path))
                             <img
-                                class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                class="absolute inset-0 w-full h-full object-contain bg-white group-hover:scale-105 transition-transform duration-500"
                                 src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}"
                                 alt="{{ $event->title }}"
                                 onerror="this.style.display='none'">

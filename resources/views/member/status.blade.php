@@ -24,9 +24,14 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex items-center justify-center p-6">
     <div class="max-w-md w-full bg-white rounded-3xl border border-slate-100 p-8 text-center space-y-6 shadow-sm">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary-500 to-secondary-500 flex items-center justify-center text-white font-extrabold text-2xl mx-auto shadow-md">
-            S
-        </div>
+        @if(App\Models\Setting::get('website_logo'))
+            <img class="w-16 h-16 rounded-2xl object-contain bg-white p-1.5 shadow-md border border-slate-100 mx-auto"
+                src="{{ asset('storage/' . App\Models\Setting::get('website_logo')) }}" alt="Logo">
+        @else
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary-500 to-secondary-500 flex items-center justify-center text-white font-extrabold text-2xl mx-auto shadow-md">
+                S
+            </div>
+        @endif
 
         <div class="space-y-2">
             <h2 class="text-xl font-black text-slate-900">{{ __('messages.hello') }}, {{ $user->name }}</h2>

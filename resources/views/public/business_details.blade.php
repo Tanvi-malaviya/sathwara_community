@@ -15,7 +15,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                     </svg>
-                    Back to Directory
+                    {{ __('messages.back_to_directory') }}
                 </a>
             </div>
 
@@ -26,10 +26,10 @@
                 <div class="text-center md:text-left space-y-1.5">
                     <span
                         class="text-[10px] font-black text-primary-400 bg-primary-500/10 border border-primary-500/20 px-3 py-0.5 rounded-full uppercase tracking-wider inline-block">
-                        {{ $business->category?->name ?? 'General' }}
+                        {{ $business->category?->name ?? __('messages.general') }}
                     </span>
                     <h1 class="text-2xl md:text-3xl font-black tracking-tight">{{ $business->business_name }}</h1>
-                    <p class="text-xs text-slate-400 font-semibold">Owned by: <span
+                    <p class="text-xs text-slate-400 font-semibold">{{ __('messages.owned_by') }}: <span
                             class="text-white font-bold">{{ $business->owner_name }}</span></p>
                 </div>
             </div>
@@ -49,7 +49,7 @@
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
                         </path>
                     </svg>
-                    About the Business
+                    {{ __('messages.about_the_business') }}
                 </h2>
                 @if($business->description)
                     <p class="text-xs text-slate-600 leading-relaxed whitespace-pre-line font-medium">
@@ -57,7 +57,7 @@
                 @else
                     <div
                         class="text-center py-4 text-slate-400 font-bold text-xs bg-slate-50 rounded-xl border border-slate-100">
-                        This business has not provided a description yet.
+                        {{ __('messages.no_business_description') }}
                     </div>
                 @endif
             </div>
@@ -72,7 +72,7 @@
                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
                             </path>
                         </svg>
-                        Product Portfolio / Gallery
+                        {{ __('messages.product_portfolio_gallery') }}
                     </h2>
                     <div class="grid grid-cols-3 sm:grid-cols-6 gap-3" x-data="{ 
                                  lightbox: false, 
@@ -81,7 +81,7 @@
                                      @foreach($business->gallery_images as $img)
                                          {
                                              src: '{{ str_starts_with($img, 'http') ? $img : asset('storage/' . $img) }}',
-                                             caption: '{{ addslashes($business->business_name) }} Portfolio Image'
+                                             caption: '{{ addslashes($business->business_name) }} {{ __('messages.portfolio_image') }}'
                                          },
                                      @endforeach
                                  ],
@@ -205,7 +205,7 @@
                             d="M3 19v-8.93a2 2 0 01.89-1.664l8-4.666a2 2 0 012.22 0l8 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-2.25-1.5a2 2 0 00-2.22 0l-2.25 1.5">
                         </path>
                     </svg>
-                    Contact Information
+                    {{ __('messages.contact_information') }}
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs font-semibold text-slate-700">
@@ -220,7 +220,7 @@
                                 </path>
                             </svg>
                             <div>
-                                <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Registered Since</h4>
+                                <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.registered_since') }}</h4>
                                 <p class="text-slate-800 font-bold mt-0.5">{{ $business->created_at->format('d M Y') }}</p>
                             </div>
                         </div>
@@ -234,11 +234,11 @@
                                     </path>
                                 </svg>
                                 <div>
-                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Subscription Status</h4>
+                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.subscription_status') }}</h4>
                                     @if($business->membership_status === 'active')
-                                        <span class="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded mt-0.5 inline-block uppercase">Active</span>
+                                        <span class="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded mt-0.5 inline-block uppercase">{{ __('messages.active') }}</span>
                                     @else
-                                        <span class="text-[9px] font-extrabold text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded mt-0.5 inline-block uppercase">Expired</span>
+                                        <span class="text-[9px] font-extrabold text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded mt-0.5 inline-block uppercase">{{ __('messages.expired') }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -250,7 +250,7 @@
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                                 <div>
-                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Subscription Expiry</h4>
+                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.subscription_expiry') }}</h4>
                                     <p class="text-slate-800 font-bold mt-0.5">{{ $business->approved_at->addYear()->format('d M Y') }}</p>
                                 </div>
                             </div>
@@ -264,7 +264,7 @@
                                         d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2H5z"></path>
                                 </svg>
                                 <div>
-                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Member ID</h4>
+                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.member_id') }}</h4>
                                     <p class="text-slate-800 font-bold mt-0.5">{{ $business->member_id }}</p>
                                 </div>
                             </div>
@@ -282,7 +282,7 @@
                                     </path>
                                 </svg>
                                 <div>
-                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Area / Location</h4>
+                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.area_location') }}</h4>
                                     <p class="text-slate-800 font-bold mt-0.5">{{ $business->area->name }}</p>
                                 </div>
                             </div>
@@ -298,7 +298,7 @@
                                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
                             <div>
-                                <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Address</h4>
+                                <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.address') }}</h4>
                                 <p class="text-slate-800 font-medium mt-0.5 leading-snug">{{ $business->address }}</p>
                             </div>
                         </div>
@@ -322,19 +322,19 @@
                                 </svg>
                                 <div class="space-y-1">
                                     <div class="flex items-center gap-1">
-                                        <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Phone & WhatsApp</h4>
-                                        <span class="text-[8px] font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-100">Same</span>
+                                        <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.phone_and_whatsapp') }}</h4>
+                                        <span class="text-[8px] font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-100">{{ __('messages.same') }}</span>
                                     </div>
                                     <p class="text-slate-900 font-black text-xs">{{ $business->phone }}</p>
 
                                     <div class="flex items-center gap-1.5 pt-1">
                                         <a href="tel:{{ $business->phone }}"
                                             class="text-[9px] font-extrabold text-primary-600 bg-primary-50 hover:bg-primary-100 px-2 py-1 rounded transition-colors inline-flex items-center gap-1">
-                                            📞 Call
+                                            📞 {{ __('messages.call') }}
                                         </a>
                                         <a href="https://wa.me/{{ $cleanPhone }}" target="_blank"
                                             class="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded transition-colors inline-flex items-center gap-1">
-                                            💬 WhatsApp
+                                            💬 {{ __('messages.whatsapp') }}
                                         </a>
                                     </div>
                                 </div>
@@ -344,11 +344,11 @@
                                 <svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
                                     </path>
                                 </svg>
                                 <div>
-                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Phone Number</h4>
+                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.phone_number') }}</h4>
                                     <a href="tel:{{ $business->phone }}"
                                         class="text-primary-500 font-bold hover:underline mt-0.5 inline-block text-xs">{{ $business->phone }}</a>
                                 </div>
@@ -362,7 +362,7 @@
                                             d="M12.004 2C6.51 2 2.014 6.5 2.014 12c0 1.89.52 3.65 1.43 5.17L2.06 22l5.02-1.32c1.47.8 3.14 1.26 4.92 1.26 5.5 0 9.99-4.5 9.99-10S17.5 2 12.004 2zm4.8 13.9c-.2.58-1.16 1.09-1.6 1.15-.42.06-.9.1-2.9-.73-2.58-1.07-4.22-3.7-4.35-3.87-.13-.17-1.11-1.48-1.11-2.82 0-1.35.7-2 .95-2.27.26-.26.56-.33.74-.33h.53c.17 0 .39-.06.6.45.2.5.7 1.76.77 1.9.07.13.11.3.02.48-.09.18-.13.3-.27.46-.14.16-.3.35-.43.47-.15.15-.3.32-.13.62.17.3.74 1.22 1.59 1.97.92.8 1.69 1.05 1.93 1.17.24.12.38.1.52-.06.14-.16.6-7.01.76-.94.16-.14.32-.12.54-.04.22.08 1.4.66 1.64.78.25.12.41.18.47.28.06.11.06.63-.14 1.21z" />
                                     </svg>
                                     <div>
-                                        <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">WhatsApp Number</h4>
+                                        <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.whatsapp_number') }}</h4>
                                         <a href="https://wa.me/{{ $cleanWhatsapp }}" target="_blank"
                                             class="text-emerald-500 font-bold hover:underline mt-0.5 inline-block text-xs">{{ $business->whatsapp }}</a>
                                     </div>
@@ -382,7 +382,7 @@
                                     </path>
                                 </svg>
                                 <div>
-                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Email Address</h4>
+                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.email_address') }}</h4>
                                     <a href="mailto:{{ $business->email }}"
                                         class="text-slate-700 hover:underline mt-0.5 inline-block truncate max-w-[150px] font-bold">{{ $business->email }}</a>
                                 </div>
@@ -398,7 +398,7 @@
                                     </path>
                                 </svg>
                                 <div>
-                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">Website</h4>
+                                    <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.website') }}</h4>
                                     <a href="{{ $business->website }}" target="_blank"
                                         class="text-primary-500 hover:underline mt-0.5 inline-block truncate max-w-[150px] font-bold">{{ $business->website }}</a>
                                 </div>
@@ -407,7 +407,7 @@
 
                         @if($business->facebook || $business->instagram || $business->youtube || $business->linkedin)
                             <div class="pt-1">
-                                <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide mb-1.5">Social Connections</h4>
+                                <h4 class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide mb-1.5">{{ __('messages.social_connections') }}</h4>
                                 <div class="flex flex-wrap gap-1.5">
                                     @if($business->facebook)
                                         <a href="{{ $business->facebook }}" target="_blank"
