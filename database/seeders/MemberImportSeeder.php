@@ -13890,20 +13890,22 @@ class MemberImportSeeder extends Seeder
   ),
 );
 
+        $defaultPassword = Hash::make('password123');
+
         foreach ($records as $item) {
-            $memberCode = $item['member_code'] ?: null;
-            $surname = trim($item['surname']);
-            $firstName = trim($item['first_name']);
-            $middleName = trim($item['middle_name']);
+            $memberCode = !empty($item['member_code']) ? trim($item['member_code']) : null;
+            $surname = trim($item['surname'] ?? '');
+            $firstName = trim($item['first_name'] ?? '');
+            $middleName = trim($item['middle_name'] ?? '');
             
             $fullName = trim(implode(' ', array_filter([$surname, $firstName, $middleName])));
             if (empty($fullName)) {
                 continue;
             }
 
-            $email = !empty($item['email']) && filter_var($item['email'], FILTER_VALIDATE_EMAIL)
-                ? $item['email']
-                : (strtolower($memberCode ?: 'member_' . uniqid()) . '@sathwaracommunity.org');
+            $email = !empty($item['email']) && filter_var(trim($item['email']), FILTER_VALIDATE_EMAIL)
+                ? trim($item['email'])
+                : null;
 
             $phone = !empty($item['phone']) ? preg_replace('/[^0-9]/', '', $item['phone']) : null;
             if ($phone && strlen($phone) > 10) {
@@ -13920,7 +13922,7 @@ class MemberImportSeeder extends Seeder
                 }
             }
 
-            // Check if user exists by email or member_code
+            // Check if user exists by member_code or email
             $user = null;
             if ($memberCode) {
                 $user = User::where('member_code', $memberCode)->first();
@@ -13933,19 +13935,22 @@ class MemberImportSeeder extends Seeder
                 $user = User::create([
                     'name' => $fullName,
                     'email' => $email,
-                    'password' => Hash::make('password123'),
+                    'password' => $defaultPassword,
                     'status' => 'approved',
                     'member_code' => $memberCode,
                 ]);
+                $user->assignRole($memberRole);
             } else {
                 $user->update([
                     'name' => $fullName,
+                    'email' => $email ?: $user->email,
                     'status' => 'approved',
                     'member_code' => $memberCode ?: $user->member_code,
                 ]);
+                if (!$user->hasRole('Member')) {
+                    $user->assignRole($memberRole);
+                }
             }
-
-            $user->assignRole($memberRole);
 
             // Create or update member profile
             MemberProfile::updateOrCreate(
