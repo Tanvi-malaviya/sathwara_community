@@ -21,7 +21,15 @@ return new class extends Migration
             $users = User::all();
             foreach ($users as $user) {
                 if (empty($user->member_code)) {
-                    $user->member_code = 'SSAM' . sprintf('%04d', $user->id);
+                    if ($user->email === 'admin@community.com') {
+                        $user->member_code = 'ADMIN001';
+                    } elseif ($user->email === 'member@community.com') {
+                        $user->member_code = 'MEMBER001';
+                    } elseif ($user->email === 'pending@community.com') {
+                        $user->member_code = 'PENDING001';
+                    } else {
+                        $user->member_code = 'SSAM' . sprintf('%04d', $user->id);
+                    }
                     $user->save();
                 }
             }
