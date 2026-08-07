@@ -399,6 +399,7 @@ class MemberImportSeeder extends Seeder
     'email' => 'lakumvijay9550@gmail.com',
     'phone' => '9898045060',
     'address' => 'C-302, sanskar lackview, opp SMVS temple, nr angel residency, nikol, ahmedabad.382350',
+    
     'area' => 'nikol',
   ),
   35 => 
