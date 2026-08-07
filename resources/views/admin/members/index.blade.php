@@ -103,7 +103,9 @@
                             <td class="py-2.5 px-4">
                                 <div class="min-w-0">
                                     <span class="text-slate-900 font-bold block">{{ $m->name }}</span>
+                                     @if($m->email)
                                     <span class="text-[10px] text-slate-400 font-medium">{{ $m->email }}</span>
+                                      @endif
                                 </div>
                             </td>
                             <td class="py-2.5 px-4">{{ $m->memberProfile->phone ?? __('messages.not_set') }}</td>
