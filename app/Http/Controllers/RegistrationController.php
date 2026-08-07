@@ -61,6 +61,8 @@ class RegistrationController extends Controller
             'password' => Hash::make($validated['password']),
             'status' => 'pending',
         ]);
+        $user->member_code = 'SSAM' . sprintf('%04d', $user->id);
+        $user->save();
 
         // Assign Member role
         $memberRole = Role::findByName('Member');

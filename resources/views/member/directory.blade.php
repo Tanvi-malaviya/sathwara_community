@@ -91,10 +91,14 @@
                         <div class="space-y-0.5 flex-1 min-w-0">
                             <div class="flex items-center justify-between gap-1">
                                 <span class="text-[9px] font-extrabold text-primary-600 bg-primary-50 px-1.5 py-0.25 rounded-md tracking-wide shrink-0">
-                                    #{{ sprintf('%05d', $member->id) }}
+                                    {{ $member->formatted_member_id }}
                                 </span>
-                                @if(!empty($profile->city))
-                                    <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.25 rounded-md truncate max-w-[80px]">
+                                @if(!empty($profile->area->name))
+                                    <span class="text-[9px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.25 rounded-md truncate max-w-[95px]" title="{{ $profile->area->name }}">
+                                        {{ $profile->area->name }}
+                                    </span>
+                                @elseif(!empty($profile->city))
+                                    <span class="text-[9px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.25 rounded-md truncate max-w-[95px]" title="{{ $profile->city }}">
                                         {{ $profile->city }}
                                     </span>
                                 @endif

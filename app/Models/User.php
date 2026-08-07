@@ -26,7 +26,13 @@ class User extends Authenticatable
         'password',
         'status',
         'rejection_reason',
+        'member_code',
     ];
+
+    public function getFormattedMemberIdAttribute(): string
+    {
+        return $this->member_code ?: ('SSAM' . sprintf('%04d', $this->id));
+    }
 
     /**
      * The attributes that should be hidden for serialization.
