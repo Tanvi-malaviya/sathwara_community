@@ -3,7 +3,7 @@
 @section('page_title', __('messages.system_settings'))
 
 @section('content')
-<div class="w-full" x-data="{ activeTab: '{{ session('active_settings_tab', 'general') }}' }">
+<div class="w-full" x-data="{ activeTab: '{{ old('active_tab', session('active_settings_tab', 'general')) }}' }">
 
     <!-- Tab Navigation -->
     <div class="flex items-center gap-1 bg-slate-100 rounded-2xl p-1 mb-6 w-fit">
@@ -43,6 +43,7 @@
         <div class="bg-white border border-slate-100 rounded-2xl p-4 sm:p-6 shadow-sm w-full">
             <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
+                <input type="hidden" name="active_tab" value="general">
 
                 <!-- Section: Branding & General -->
                 <div class="space-y-4">
@@ -112,6 +113,7 @@
         <div class="bg-white border border-slate-100 rounded-2xl p-4 sm:p-6 shadow-sm w-full">
             <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
+                <input type="hidden" name="active_tab" value="contact">
 
                 <!-- Contact Details -->
                 <div class="space-y-4">
@@ -215,6 +217,7 @@
 
                 <form method="POST" action="{{ route('admin.email_settings.update') }}" class="space-y-5">
                     @csrf
+                    <input type="hidden" name="active_tab" value="email">
 
                     <!-- Row 1: Mailer Driver & Encryption -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

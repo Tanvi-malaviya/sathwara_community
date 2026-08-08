@@ -75,7 +75,9 @@ class EmailSettingsController extends Controller
 
         $this->updateEnvFile($envUpdates);
 
-        return redirect()->back()->with('success', __('messages.email_settings_updated_successfully') ?? 'Email settings updated successfully and saved to .env!');
+        return redirect()->back()
+            ->with('success', __('messages.email_settings_updated_successfully') ?? 'Email settings updated successfully and saved to .env!')
+            ->with('active_settings_tab', 'email');
     }
 
     /**
@@ -116,11 +118,15 @@ class EmailSettingsController extends Controller
                     ->subject("Sathwara Community - SMTP Test Email");
             });
 
-            return redirect()->back()->with('success', __('messages.test_email_sent_successfully', ['email' => $recipient]) ?? "Test email sent successfully to {$recipient}!");
+            return redirect()->back()
+                ->with('success', __('messages.test_email_sent_successfully', ['email' => $recipient]) ?? "Test email sent successfully to {$recipient}!")
+                ->with('active_settings_tab', 'email');
 
         } catch (\Throwable $e) {
             Log::error("SMTP Test Email Error: " . $e->getMessage());
-            return redirect()->back()->with('error', "Failed to send test email. Error: " . $e->getMessage());
+            return redirect()->back()
+                ->with('error', "Failed to send test email. Error: " . $e->getMessage())
+                ->with('active_settings_tab', 'email');
         }
     }
 
