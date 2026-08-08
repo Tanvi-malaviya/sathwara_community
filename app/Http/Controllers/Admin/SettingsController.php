@@ -57,14 +57,26 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'website_name' => 'required|string|max:255',
-            'primary_color' => 'nullable|string|max:10',
+            'website_name' => 'sometimes|required|string|max:255',
+            'footer_text' => 'nullable|string|max:255',
+            'seo_title' => 'nullable|string|max:255',
+            'seo_description' => 'nullable|string|max:2000',
+            'primary_color' => 'nullable|string|max:20',
+            'contact_phone' => 'nullable|string|max:50',
             'contact_email' => 'nullable|email|max:255',
-            'website_logo' => 'nullable|image|max:1024',
-            'website_favicon' => 'nullable|image|max:512',
+            'contact_whatsapp' => 'nullable|string|max:50',
+            'contact_address' => 'nullable|string|max:1000',
+            'contact_map_iframe' => 'nullable|string',
+            'social_facebook' => 'nullable|string|max:255',
+            'social_twitter' => 'nullable|string|max:255',
+            'social_instagram' => 'nullable|string|max:255',
+            'social_youtube' => 'nullable|string|max:255',
+            'website_logo' => 'nullable|image|max:2048',
+            'website_favicon' => 'nullable|image|max:1024',
         ]);
 
-        $keys = $request->except(['_token', 'website_logo', 'website_favicon']);
+        $activeTab = $request->input('active_tab', 'general');
+        $keys = $request->except(['_token', 'active_tab', 'website_logo', 'website_favicon']);
 
         foreach ($keys as $key => $val) {
             Setting::set($key, $val);
@@ -90,7 +102,9 @@ class SettingsController extends Controller
             Setting::set('website_favicon', $faviconPath);
         }
 
-        return redirect()->back()->with('success', 'Settings updated successfully.');
+        return redirect()->back()
+            ->with('success', 'Settings updated successfully.')
+            ->with('active_settings_tab', $activeTab);
     }
 
     /**
