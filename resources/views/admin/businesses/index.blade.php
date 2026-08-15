@@ -60,7 +60,6 @@
             </div>
         </div>
 
-
         {{-- LISTINGS TAB --}}
         <div x-show="activeTab==='listings'" x-cloak class="space-y-3">
             <!-- Single Integrated Toolbar Line -->
@@ -135,7 +134,9 @@
                         </a>
                     </div>
                 </div>
-            </div            <div class="bg-white border border-slate-100 rounded-2xl overflow-x-auto shadow-sm">
+            </div>
+
+            <div class="bg-white border border-slate-100 rounded-2xl overflow-x-auto shadow-sm">
                 <table class="w-full text-left border-collapse min-w-full">
                     <thead>
                         <tr
