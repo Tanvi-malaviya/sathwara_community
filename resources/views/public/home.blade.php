@@ -6,22 +6,43 @@
             width: 100%;
             height: 48vh;
             min-height: 240px;
-            max-height: 450px;
+            max-height: 420px;
+            position: relative;
+        }
+
+        .hero-slider-controls {
+            position: absolute !important;
+            bottom: 12px !important;
+            right: 12px !important;
+            top: auto !important;
+            left: auto !important;
+            z-index: 40 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            gap: 6px !important;
         }
 
         @media (min-width: 640px) {
             .hero-slider-container {
                 height: 55vh;
                 min-height: 360px;
-                max-height: 550px;
+                max-height: 520px;
+            }
+            .hero-slider-controls {
+                bottom: 24px !important;
+                right: 32px !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 12px !important;
             }
         }
 
         @media (min-width: 1024px) {
             .hero-slider-container {
                 height: calc(100vh - 80px);
-                min-height: 520px;
-                max-height: 750px;
+                min-height: 500px;
+                max-height: 680px;
             }
         }
     </style>
@@ -39,7 +60,7 @@
         }">
         @if($sliders->count() > 0)
             <!-- Responsive Edge-to-Edge Slider Wrapper -->
-            <div class="hero-slider-container relative w-full overflow-hidden bg-slate-950 flex items-center">
+            <div class="hero-slider-container relative w-full overflow-hidden bg-slate-950">
 
                 @foreach($sliders as $idx => $slide)
                     <div x-show="activeSlide === {{ $idx }}" x-transition:enter="transition ease-out duration-700 transform"
@@ -48,7 +69,7 @@
                         x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                         class="absolute inset-0 w-full h-full flex items-center">
 
-                        <!-- Slide Full Screen Edge-to-Edge Image -->
+                        <!-- Slide Full Screen Edge-to-Edge Image (No blur, full screen only image) -->
                         <img src="{{ str_starts_with($slide->image_path, 'http') ? $slide->image_path : asset('storage/' . $slide->image_path) }}"
                             alt="{{ $slide->title ?? 'Banner Slide' }}"
                             class="w-full h-full object-cover object-center transition-transform duration-1000 scale-100"
@@ -57,9 +78,8 @@
                     </div>
                 @endforeach
 
-                <!-- Hero Slider Controls & Action Button (Bottom Right Corner) -->
-                <div
-                    class="absolute bottom-3 sm:bottom-6 right-3 sm:right-8 z-30 flex items-center gap-2 sm:gap-3 pointer-events-auto">
+                <!-- Hero Slider Controls & Action Button (Bottom Right Corner on Mobile and Desktop) -->
+                <div class="hero-slider-controls pointer-events-auto">
 
                     <!-- Dynamic Action Button (Shows if button_text is set) -->
                     <template
