@@ -51,8 +51,8 @@
                         class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
                         <th class="py-2.5 px-3 w-16">{{ __('messages.icon') }}</th>
                         <th class="py-2.5 px-3 w-40">{{ __('messages.title') }}</th>
-                        <th class="py-2.5 px-3">Description (English)</th>
-                        <th class="py-2.5 px-3">Description (Gujarati)</th>
+                        <th class="py-2.5 px-3">{{ __('messages.desc_english_label') }}</th>
+                        <th class="py-2.5 px-3">{{ __('messages.desc_gujarati_label') }}</th>
                         <th class="py-2.5 px-3 w-20 text-center">{{ __('messages.order') }}</th>
                         <th class="py-2.5 px-3 w-24 text-right">{{ __('messages.actions') }}</th>
                     </tr>
@@ -142,7 +142,7 @@
             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
             x-cloak>
             <div @click.away="showEditModal = false"
-                class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative">
+                class="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xl max-w-2xl w-full space-y-4 relative">
                 <button @click="showEditModal = false"
                     class="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
@@ -155,8 +155,8 @@
 
                 <!-- Display Agenda Info Header -->
                 <div class="p-3 bg-slate-50 border border-slate-200/60 rounded-xl space-y-0.5">
-                    <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Agenda</span>
-                    <h4 class="text-xs font-black text-slate-900 truncate" x-text="editAgenda.title"></h4>
+                    <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">{{ __('messages.core_agendas') }}</span>
+                    <h4 class="text-xs font-black text-slate-900 truncate" x-text="editAgenda.title + (editAgenda.title_gu ? ' / ' + editAgenda.title_gu : '')"></h4>
                 </div>
 
                 <form method="POST" :action="editAgenda.update_url" class="space-y-4">
@@ -184,24 +184,20 @@
                         <!-- English Description -->
                         <div class="space-y-1.5">
                             <label class="text-[11px] font-extrabold text-slate-700 flex items-center justify-between">
-                                <span>Description (English) <span class="text-rose-500">*</span></span>
-                                <!-- <span
-                                    class="text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 uppercase">EN</span> -->
+                                <span>{{ __('messages.desc_english_label') }} <span class="text-rose-500">*</span></span>
                             </label>
                             <textarea name="description" rows="4" required x-model="editAgenda.description"
-                                placeholder="Enter description in English..."
+                                placeholder="{{ __('messages.enter_desc_en') }}"
                                 class="w-full text-xs font-semibold px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:outline-none transition-all leading-relaxed"></textarea>
                         </div>
 
                         <!-- Gujarati Description -->
                         <div class="space-y-1.5">
                             <label class="text-[11px] font-extrabold text-slate-700 flex items-center justify-between">
-                                <span>Description ( ગુજરાતી)</span>
-                                <!-- <span
-                                    class="text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 uppercase">GU</span> -->
+                                <span>{{ __('messages.desc_gujarati_label') }}</span>
                             </label>
                             <textarea name="description_gu" rows="4" x-model="editAgenda.description_gu"
-                                placeholder="એજન્ડા વર્ણન ગુજરાતીમાં લખો..."
+                                placeholder="{{ __('messages.enter_desc_gu') }}"
                                 class="w-full text-xs font-semibold font-gujarati px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:outline-none transition-all leading-relaxed"></textarea>
                         </div>
                     </div>

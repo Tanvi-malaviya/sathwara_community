@@ -12,7 +12,7 @@
                 {{ $title }}
             </h1>
             @if(!empty($subtitle))
-                <p class="text-xs font-bold text-primary-600 uppercase tracking-widest">
+                <p class="text-sm sm:text-base font-bold text-primary-600 tracking-wide mt-1">
                     {{ $subtitle }}
                 </p>
             @endif

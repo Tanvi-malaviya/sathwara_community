@@ -58,8 +58,8 @@
                 <thead>
                     <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
                         <th class="py-3 px-4">{{ __('messages.member') }}</th>
-                        <th class="py-3 px-4">Designation (English)</th>
-                        <th class="py-3 px-4">Designation (Gujarati)</th>
+                        <th class="py-3 px-4">{{ __('messages.designation_en_label') }}</th>
+                        <th class="py-3 px-4">{{ __('messages.designation_gu_label') }}</th>
                         <th class="py-3 px-4 text-center">{{ __('messages.display_order') }}</th>
                         <th class="py-3 px-4 text-center">{{ __('messages.status') }}</th>
                         <th class="py-3 px-4 text-right">{{ __('messages.actions') }}</th>
@@ -194,15 +194,15 @@
                     <!-- Side-by-Side Name Fields -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                         <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-700">Name (English) <span class="text-rose-500">*</span></label>
+                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.name_en_label') }} <span class="text-rose-500">*</span></label>
                             <input type="text" name="name" value="{{ old('name') }}" required
-                                placeholder="Enter full name in English"
+                                placeholder="{{ __('messages.enter_name_en') }}"
                                 class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-700">Name (Gujarati / ગુજરાતી)</label>
+                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.name_gu_label') }}</label>
                             <input type="text" name="name_gu" value="{{ old('name_gu') }}"
-                                placeholder="પૂરું નામ ગુજરાતીમાં લખો"
+                                placeholder="{{ __('messages.enter_name_gu') }}"
                                 class="w-full text-xs font-semibold font-gujarati px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                     </div>
@@ -210,15 +210,15 @@
                     <!-- Side-by-Side Designation Fields -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                         <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-700">Designation (English) <span class="text-rose-500">*</span></label>
+                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.designation_en_label') }} <span class="text-rose-500">*</span></label>
                             <input type="text" name="designation" value="{{ old('designation') }}" required
-                                placeholder="e.g. Community President"
+                                placeholder="{{ __('messages.designation_en_placeholder') }}"
                                 class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-700">Designation (Gujarati / ગુજરાતી)</label>
+                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.designation_gu_label') }}</label>
                             <input type="text" name="designation_gu" value="{{ old('designation_gu') }}"
-                                placeholder="હોદ્દો ગુજરાતીમાં લખો (દા.ત. પ્રમુખ)"
+                                placeholder="{{ __('messages.designation_gu_placeholder') }}"
                                 class="w-full text-xs font-semibold font-gujarati px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                     </div>
@@ -287,15 +287,15 @@
                     <!-- Side-by-Side Name Fields in Edit Modal -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                         <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-700">Name (English) <span class="text-rose-500">*</span></label>
+                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.name_en_label') }} <span class="text-rose-500">*</span></label>
                             <input type="text" name="name" :value="editDesk.name" required
-                                placeholder="Enter full name in English"
+                                placeholder="{{ __('messages.enter_name_en') }}"
                                 class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-700">Name (Gujarati / ગુજરાતી)</label>
+                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.name_gu_label') }}</label>
                             <input type="text" name="name_gu" x-model="editDesk.name_gu"
-                                placeholder="પૂરું નામ ગુજરાતીમાં લખો"
+                                placeholder="{{ __('messages.enter_name_gu') }}"
                                 class="w-full text-xs font-semibold font-gujarati px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                     </div>
@@ -303,15 +303,15 @@
                     <!-- Side-by-Side Designation Fields in Edit Modal -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                         <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-700">Designation (English) <span class="text-rose-500">*</span></label>
+                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.designation_en_label') }} <span class="text-rose-500">*</span></label>
                             <input type="text" name="designation" :value="editDesk.designation" required
-                                placeholder="e.g. Community President"
+                                placeholder="{{ __('messages.designation_en_placeholder') }}"
                                 class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[11px] font-bold text-slate-700">Designation (Gujarati / ગુજરાતી)</label>
+                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.designation_gu_label') }}</label>
                             <input type="text" name="designation_gu" x-model="editDesk.designation_gu"
-                                placeholder="હોદ્દો ગુજરાતીમાં લખો (દા.ત. પ્રમુખ)"
+                                placeholder="{{ __('messages.designation_gu_placeholder') }}"
                                 class="w-full text-xs font-semibold font-gujarati px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         </div>
                     </div>

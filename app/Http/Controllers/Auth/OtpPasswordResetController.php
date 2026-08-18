@@ -31,7 +31,7 @@ class OtpPasswordResetController extends Controller
         $request->validate([
             'email' => ['required', 'email', 'exists:users,email'],
         ], [
-            'email.exists' => 'We could not find a user with that email address.',
+            'email.exists' => __('messages.email_not_found_error'),
         ]);
 
         $email = $request->email;
@@ -66,7 +66,7 @@ class OtpPasswordResetController extends Controller
     {
         if (!session()->has('reset_email')) {
             return redirect()->route('password.request')
-                ->withErrors(['email' => 'Please enter your email address first.']);
+                ->withErrors(['email' => __('messages.email_not_found_error')]);
         }
 
         return view('auth.verify-otp');
@@ -81,7 +81,7 @@ class OtpPasswordResetController extends Controller
 
         if (!$email) {
             return redirect()->route('password.request')
-                ->withErrors(['email' => 'Please enter your email address first.']);
+                ->withErrors(['email' => __('messages.email_not_found_error')]);
         }
 
         $request->validate([
@@ -91,17 +91,17 @@ class OtpPasswordResetController extends Controller
         $record = DB::table('password_reset_tokens')->where('email', $email)->first();
 
         if (!$record) {
-            return back()->withErrors(['otp' => 'No verification code was found. Please request a new one.']);
+            return back()->withErrors(['otp' => __('messages.otp_not_found_error')]);
         }
 
         // Check Expiration (15 minutes)
         if (now()->subMinutes(15)->gt($record->created_at)) {
-            return back()->withErrors(['otp' => 'The verification code has expired. Please request a new one.']);
+            return back()->withErrors(['otp' => __('messages.otp_expired_error')]);
         }
 
         // Verify Code Hash
         if (!Hash::check($request->otp, $record->token)) {
-            return back()->withErrors(['otp' => 'The verification code is incorrect.']);
+            return back()->withErrors(['otp' => __('messages.otp_incorrect_error')]);
         }
 
         // Mark as verified in session and clear reset_email

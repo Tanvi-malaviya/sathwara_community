@@ -47,14 +47,13 @@
                     </select>
                 </div>
 
-                <!-- Registration Checkbox (Appears next to Event Type when NOT normal) -->
-                <div x-show="eventType !== 'normal'" x-cloak class="md:col-span-3 space-y-0.5">
+                <!-- Registration Checkbox -->
+                <div class="md:col-span-3 space-y-0.5">
                     <label class="text-[10px] font-bold text-slate-500 uppercase block">{{ __('messages.register_form') }}</label>
                     <label class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100/80 transition-colors h-[34px]">
                         <input type="hidden" name="has_registration_form" value="0">
                         <input type="checkbox" name="has_registration_form" value="1" 
-                            :disabled="eventType === 'normal'"
-                            {{ old('has_registration_form', $event->has_registration_form ?? $event->registration_option) ? 'checked' : '' }}
+                            {{ old('has_registration_form', $event->has_registration_form ?? $event->registration_option ?? 1) ? 'checked' : '' }}
                             class="w-4 h-4 text-primary-600 bg-white border-slate-300 rounded focus:ring-primary-500 cursor-pointer shrink-0">
                         <span class="text-[11px] font-bold text-slate-700 select-none truncate">{{ __('messages.enable_registration_form') }}</span>
                     </label>
@@ -64,7 +63,7 @@
             <!-- Date, Time, and Banner Image with Compact Inline Preview (Zero Vertical Space Bug) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase">Event Date</label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">{{ __('messages.event_date') }}</label>
                     <input type="date" name="date" value="{{ old('date', $event->date) }}" required
                         class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
@@ -94,8 +93,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
                 <div class="space-y-0.5">
                     <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
-                        <span>Form Published Date</span>
-                        <span class="text-[9px] text-slate-400 font-normal">(Form Start Date)</span>
+                        <span>{{ __('messages.form_published_date') }}</span>
+                        <span class="text-[9px] text-slate-400 font-normal">({{ __('messages.form_start_date') }})</span>
                     </label>
                     <input type="date" name="published_date" value="{{ old('published_date', $event->published_date ? $event->published_date->format('Y-m-d') : ($event->created_at ? $event->created_at->format('Y-m-d') : '')) }}"
                            @click="$event.target.showPicker?.()"
@@ -105,8 +104,8 @@
 
                 <div class="space-y-0.5">
                     <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
-                        <span>Form Fill Up Last Date</span>
-                        <span class="text-[9px] text-rose-500 font-bold">(Last Date / Deadline)</span>
+                        <span>{{ __('messages.form_fillup_last_date') }}</span>
+                        <span class="text-[9px] text-rose-500 font-bold">({{ __('messages.last_date_deadline') }})</span>
                     </label>
                     <input type="date" name="registration_end_date" value="{{ old('registration_end_date', $event->registration_end_date ? $event->registration_end_date->format('Y-m-d') : '') }}"
                            @click="$event.target.showPicker?.()"
@@ -123,8 +122,8 @@
 
             <div class="space-y-0.5">
                 <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
-                    <span>Google Map Link / Embed URL</span>
-                    <span class="text-[9px] text-slate-400 font-normal">(Google Map Link / iframe Embed Code)</span>
+                    <span>{{ __('messages.google_map_link_embed_url') }}</span>
+                    <span class="text-[9px] text-slate-400 font-normal">({{ __('messages.google_map_iframe_code') }})</span>
                 </label>
                 <input type="text" name="google_map_link" value="{{ old('google_map_link', $event->google_map_link) }}" placeholder="e.g. https://www.google.com/maps/embed?pb=... or Google Map Link"
                     class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">

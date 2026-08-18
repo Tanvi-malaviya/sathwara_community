@@ -21,7 +21,9 @@ class RegistrationController extends Controller
     public function showMemberRegister()
     {
         $areas = Area::orderBy('name')->get();
-        return view('public.register_member', compact('areas'));
+        $signupFee = (float) \App\Models\Setting::get('member_signup_fee', '1000');
+        $razorpayKeyId = \App\Models\Setting::get('razorpay_key_id', env('RAZORPAY_KEY_ID', ''));
+        return view('public.register_member', compact('areas', 'signupFee', 'razorpayKeyId'));
     }
 
     /**
@@ -52,14 +54,22 @@ class RegistrationController extends Controller
             'state' => 'nullable|string|max:100',
             'pincode' => 'nullable|string|max:10',
             'photo' => 'nullable|image|max:2048',
+            'razorpay_payment_id' => 'nullable|string|max:255',
         ]);
 
-        // 1. Create Login User
+        $signupFee = (float) \App\Models\Setting::get('member_signup_fee', '1000');
+        $paymentId = $request->input('razorpay_payment_id');
+        $paymentStatus = (!empty($paymentId) || $signupFee <= 0) ? 'paid' : 'unpaid';
+
+        // 1. Create Login User (status remains 'pending' for Admin Approval)
         $user = User::create([
             'name' => $validated['first_name'] . ' ' . $validated['last_name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'status' => 'pending',
+            'payment_id' => $paymentId,
+            'payment_status' => $paymentStatus,
+            'payment_amount' => $signupFee,
         ]);
         $user->member_code = 'SSAM' . sprintf('%04d', $user->id);
         $user->save();
@@ -116,6 +126,8 @@ class RegistrationController extends Controller
     {
         $categories = BusinessCategory::orderBy('name')->get();
         $areas = Area::orderBy('name')->get();
+        $businessFee = (float) \App\Models\Setting::get('business_registration_fee', '500');
+        $razorpayKeyId = \App\Models\Setting::get('razorpay_key_id', env('RAZORPAY_KEY_ID', ''));
 
         $existingBusiness = null;
         if (auth()->check()) {
@@ -128,7 +140,7 @@ class RegistrationController extends Controller
                                 ->first();
         }
 
-        return view('public.register_business', compact('categories', 'areas', 'existingBusiness'));
+        return view('public.register_business', compact('categories', 'areas', 'existingBusiness', 'businessFee', 'razorpayKeyId'));
     }
 
     /**
@@ -155,11 +167,16 @@ class RegistrationController extends Controller
             'logo' => 'required|file|mimes:jpeg,jpg,png,webp,gif,bmp,pdf|max:10240', // Attach Business Logo / Visiting Card
             'gallery' => 'nullable|array|max:6',
             'gallery.*' => 'nullable|file|mimes:jpeg,jpg,png,webp,gif,bmp|max:10240',
+            'razorpay_payment_id' => 'nullable|string|max:255',
         ], [
             'logo.required' => 'Please upload your Business Logo or Visiting Card.',
             'logo.mimes' => 'Business Logo must be an image file (JPG, PNG, WEBP) or a PDF document.',
             'logo.max' => 'Business Logo file size must not exceed 10MB.',
         ]);
+
+        $businessFee = (float) \App\Models\Setting::get('business_registration_fee', '500');
+        $paymentId = $request->input('razorpay_payment_id');
+        $paymentStatus = (!empty($paymentId) || $businessFee <= 0) ? 'paid' : 'unpaid';
 
         $userId = null;
         $rawMemberId = null;
@@ -254,6 +271,9 @@ class RegistrationController extends Controller
             'logo_path' => $logoPath,
             'gallery_images' => $galleryPaths,
             'status' => 'pending',
+            'payment_id' => $paymentId,
+            'payment_status' => $paymentStatus,
+            'payment_amount' => $businessFee,
         ]);
 
         return redirect()->route('business.directory')->with('success', 'Your business directory registration has been submitted successfully and is pending admin approval.');

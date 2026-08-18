@@ -27,6 +27,9 @@ class User extends Authenticatable
         'status',
         'rejection_reason',
         'member_code',
+        'payment_id',
+        'payment_status',
+        'payment_amount',
     ];
 
     public function getFormattedMemberIdAttribute(): string

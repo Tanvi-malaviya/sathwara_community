@@ -179,7 +179,7 @@ class PublicController extends Controller
     {
         $event = Event::published()->findOrFail($id);
 
-        if (!($event->has_registration_form ?? $event->registration_option)) {
+        if ($event->event_type !== 'normal' && !($event->has_registration_form || $event->registration_option)) {
             return redirect()->route('event.details', $event->id)->with('warning', 'Registration form is not enabled for this event.');
         }
         
@@ -216,7 +216,7 @@ class PublicController extends Controller
             $user = auth()->user();
         }
 
-        if (!($event->has_registration_form ?? $event->registration_option)) {
+        if ($event->event_type !== 'normal' && !($event->has_registration_form || $event->registration_option)) {
             return redirect()->back()->with('error', 'Registration is not required for this event.');
         }
 
@@ -296,8 +296,14 @@ class PublicController extends Controller
             $formData['contact_number'] = $formData['mobile_no'] ?? '';
             $formData['submission_date'] = now()->format('d-M-Y h:i A');
         } else {
-            $formData = $request->only(['remarks', 'full_name', 'contact_number']);
-            $formData['submission_date'] = now()->format('d-M-Y h:i A');
+            $personCount = max(1, (int)$request->input('person_count', 1));
+            $formData = [
+                'full_name' => $request->input('full_name', $user ? $user->name : 'Participant'),
+                'contact_number' => $request->input('contact_number', ($user && $user->memberProfile) ? $user->memberProfile->phone : ''),
+                'person_count' => $personCount,
+                'remarks' => $request->input('remarks'),
+                'submission_date' => now()->format('d-M-Y h:i A'),
+            ];
         }
 
         // Filter out null or empty string fields
@@ -314,7 +320,11 @@ class PublicController extends Controller
         // Check if matching registration exists for this specific student/participant
         $existingRegistration = null;
         if ($user) {
-            if (!empty($formData['student_name'])) {
+            if ($event->event_type !== 'inam_vitaran' && $event->event_type !== 'yuva_melo') {
+                $existingRegistration = EventRegistration::where('event_id', $event->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+            } elseif (!empty($formData['student_name'])) {
                 $registrations = EventRegistration::where('event_id', $event->id)
                     ->where('user_id', $user->id)
                     ->get();
@@ -336,6 +346,12 @@ class PublicController extends Controller
                 }
             }
         }
+
+        $passFee = (float)($event->pass_fee ?? 0);
+        $personCount = max(1, (int)($formData['person_count'] ?? 1));
+        $totalAmount = $passFee * $personCount;
+        $paymentId = $request->input('razorpay_payment_id');
+        $paymentStatus = (!empty($paymentId) || $totalAmount <= 0) ? 'paid' : 'unpaid';
 
         if ($existingRegistration) {
             if (!empty($existingRegistration->form_data['registration_no'])) {
@@ -360,6 +376,9 @@ class PublicController extends Controller
 
             $existingRegistration->update([
                 'form_data' => array_merge($existingRegistration->form_data ?? [], $formData),
+                'payment_id' => $paymentId ?: $existingRegistration->payment_id,
+                'payment_status' => $paymentStatus,
+                'payment_amount' => $totalAmount > 0 ? $totalAmount : $existingRegistration->payment_amount,
             ]);
             return $redirectTarget->with('success', 'Registration updated successfully.');
         }
@@ -381,6 +400,9 @@ class PublicController extends Controller
             'user_id' => $user ? $user->id : null,
             'status' => 'approved',
             'form_data' => $formData,
+            'payment_id' => $paymentId,
+            'payment_status' => $paymentStatus,
+            'payment_amount' => $totalAmount,
         ]);
 
         return $redirectTarget->with('success', 'Registration submitted successfully!');
