@@ -11,6 +11,11 @@ use App\Models\Area;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use App\Mail\VerifyEmailOtpMail;
+use App\Mail\RegisterEmailOtpMail;
 use Spatie\Permission\Models\Role;
 
 class RegistrationController extends Controller
@@ -24,6 +29,128 @@ class RegistrationController extends Controller
         $signupFee = (float) \App\Models\Setting::get('member_signup_fee', '1000');
         $razorpayKeyId = \App\Models\Setting::get('razorpay_key_id', env('RAZORPAY_KEY_ID', ''));
         return view('public.register_member', compact('areas', 'signupFee', 'razorpayKeyId'));
+    }
+
+    /**
+     * Send OTP for Member Registration Email Verification
+     */
+    public function sendRegistrationOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first('email'),
+            ], 422);
+        }
+
+        $email = strtolower(trim($request->email));
+
+        // Check if email already registered
+        if (User::where('email', $email)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This email address is already in use by another registered account.',
+            ], 422);
+        }
+
+        $otp = (string) mt_rand(100000, 999999);
+
+        // Save OTP to session explicitly
+        session([
+            'reg_otp_email'   => $email,
+            'reg_otp_code'    => $otp,
+            'reg_otp_expires' => now()->addMinutes(10),
+        ]);
+        session()->save(); // Explicit save for AJAX/database sessions
+
+        Log::info("Member Registration OTP for {$email}: {$otp} | Session ID: " . session()->getId());
+
+        try {
+            Mail::to($email)->send(new RegisterEmailOtpMail($otp, $email));
+        } catch (\Exception $e) {
+            Log::error("Failed to send Member Registration Email OTP: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send verification email. Please check your SMTP mail configuration.',
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.otp_sent_success'),
+        ]);
+    }
+
+    /**
+     * Verify OTP for Member Registration Email
+     */
+    public function verifyRegistrationOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'otp' => 'required|string|size:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please enter a valid 6-digit OTP code.',
+            ], 422);
+        }
+
+        $sessionEmail   = session('reg_otp_email');
+        $sessionOtp     = session('reg_otp_code');
+        $sessionExpires = session('reg_otp_expires');
+
+        $inputEmail = strtolower(trim($request->email));
+        $inputOtp   = trim($request->otp);
+
+        // Debug log — always log to help diagnose session issues
+        Log::info("OTP Verify attempt | Session ID: " . session()->getId() .
+            " | session_email=[{$sessionEmail}] input_email=[{$inputEmail}]" .
+            " | session_otp=[{$sessionOtp}] input_otp=[{$inputOtp}]" .
+            " | expires=[{$sessionExpires}]");
+
+        if (!$sessionEmail || !$sessionOtp || !$sessionExpires) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No active OTP session found. Please click Send OTP to request a new code.',
+            ], 400);
+        }
+
+        if ($sessionEmail !== $inputEmail) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email address mismatch. Please request a new OTP for this email.',
+            ], 400);
+        }
+
+        if (now()->greaterThan($sessionExpires)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP has expired. Please click Send OTP to receive a new code.',
+            ], 400);
+        }
+
+        if ($inputOtp !== (string)$sessionOtp) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.otp_invalid'),
+            ], 400);
+        }
+
+        // Mark email as verified in session
+        session(['reg_email_verified' => $inputEmail]);
+        session()->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.email_verified'),
+        ]);
     }
 
     /**
@@ -56,6 +183,14 @@ class RegistrationController extends Controller
             'photo' => 'nullable|image|max:2048',
             'razorpay_payment_id' => 'nullable|string|max:255',
         ]);
+
+        // Server-side check that email was verified via OTP
+        $verifiedEmail = session('reg_email_verified');
+        if (empty($verifiedEmail) || strtolower(trim($validated['email'])) !== strtolower(trim($verifiedEmail))) {
+            return redirect()->back()->withInput()->withErrors([
+                'email' => __('messages.please_verify_email'),
+            ]);
+        }
 
         $signupFee = (float) \App\Models\Setting::get('member_signup_fee', '1000');
         $paymentId = $request->input('razorpay_payment_id');
@@ -113,8 +248,13 @@ class RegistrationController extends Controller
             'pan_path' => null,
         ]);
 
+        // Clear OTP verification session
+        session()->forget(['reg_otp_email', 'reg_otp_code', 'reg_otp_expires', 'reg_email_verified']);
+
+
         // Log the user in and redirect to account status page
         auth()->login($user);
+
 
         return redirect()->route('account.status')->with('success', 'Your membership registration has been submitted successfully and is pending approval.');
     }

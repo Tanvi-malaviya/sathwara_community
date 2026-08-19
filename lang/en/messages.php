@@ -752,7 +752,7 @@ return [
     'occupation_placeholder' => 'e.g. Business Analyst',
     'if_registered' => '(If Registered)',
     'father_id_placeholder' => 'e.g. #00005',
-    'contact_login_account' => 'Contact & Login Account',
+    'contact_login_account' => 'Login Account',
     'mobile_whatsapp_number' => 'Mobile / WhatsApp Number',
     'password' => 'Password',
     'address_details' => 'Address Details',
@@ -1226,4 +1226,27 @@ return [
     'razorpay_key_id_help' => 'Get your API Key from Razorpay Dashboard > Settings > API Keys.',
     'razorpay_key_secret' => 'Razorpay Key Secret',
     'save_payment_settings' => 'Save Payment Settings',
+
+    // Email OTP Verification
+    'send_otp' => 'Send OTP',
+    'enter_otp' => 'Enter OTP Code',
+    'verify_otp' => 'Verify OTP',
+    'email_verified' => 'Email Verified',
+    'change_email' => 'Change Email',
+    'please_verify_email' => 'Please verify your email address using OTP before completing registration.',
+    'otp_sent_success' => 'A 6-digit verification OTP has been sent to your email address.',
+    'otp_invalid' => 'Invalid or expired OTP code. Please try again.',
+    'resend_otp' => 'Resend OTP',
+    'email_verification' => 'Email Verification',
+    'otp_sent_to_inbox_desc' => 'A 6-digit code has been sent to your inbox',
+    'verification_code_sent_to' => 'Verification code sent to',
+    'did_not_receive_code' => "Didn't receive the code?",
+    'cancel' => 'Cancel',
+    'sending_otp' => 'Sending OTP...',
+    'sending_new_otp' => 'Sending new OTP to your email...',
+    'new_otp_sent_success' => 'New OTP sent to your email!',
+    'enter_6_digit_otp_error' => 'Please enter the 6-digit OTP code.',
+    'network_error_retry' => 'Network error. Please try again.',
 ];
+
+

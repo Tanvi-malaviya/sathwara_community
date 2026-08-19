@@ -98,6 +98,12 @@
                             <input type="text" name="father_member_id" value="{{ old('father_member_id') }}" placeholder="{{ __('messages.father_id_placeholder') }}" class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
                         </div>
 
+                        <!-- Mobile Number — moved to Personal Details -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.mobile_whatsapp_number') }} <span class="text-rose-500">*</span></label>
+                            <input type="text" name="phone" value="{{ old('phone') }}" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
+                        </div>
+
                         <!-- Profile Photo Upload -->
                         <div class="space-y-1 sm:col-span-3">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.profile_photo') ?? 'Profile Photo' }} <span class="text-xs text-slate-400 font-normal">(JPG, PNG max 2MB)</span></label>
@@ -106,38 +112,10 @@
                     </div>
                 </div>
 
-                <!-- SECTION 2: CONTACT & ACCOUNT DETAILS -->
+                <!-- SECTION 2: ADDRESS DETAILS -->
                 <div>
                     <div class="flex items-center space-x-2 border-b border-slate-100 pb-2.5 mb-4">
                         <span class="w-5 h-5 rounded-md bg-primary-50 text-primary-600 font-black text-xs flex items-center justify-center">2</span>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">{{ __('messages.contact_login_account') }}</h3>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                        <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.mobile_whatsapp_number') }} <span class="text-rose-500">*</span></label>
-                            <input type="text" name="phone" value="{{ old('phone') }}" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.member_email_id') }} <span class="text-rose-500">*</span></label>
-                            <input type="email" name="email" value="{{ old('email') }}" required class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
-                        </div>
-
-                        <div class="space-y-1 sm:col-span-1">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.password') }} <span class="text-rose-500">*</span></label>
-                            <input type="password" name="password" required class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
-                        </div>
-                        <div class="space-y-1 sm:col-span-1">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.confirm_password') }} <span class="text-rose-500">*</span></label>
-                            <input type="password" name="password_confirmation" required class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION 3: ADDRESS DETAILS -->
-                <div>
-                    <div class="flex items-center space-x-2 border-b border-slate-100 pb-2.5 mb-4">
-                        <span class="w-5 h-5 rounded-md bg-primary-50 text-primary-600 font-black text-xs flex items-center justify-center">3</span>
                         <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">{{ __('messages.address_details') }}</h3>
                     </div>
 
@@ -157,9 +135,46 @@
                         </div>
                         <div class="space-y-1 sm:col-span-1">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.city') }} <span class="text-rose-500">*</span></label>
-                            <input type="text" name="city" value="{{ old('city') }}" placeholder="e.g. Ahmedabad" required class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
+                            <input type="text" name="city" value="{{ old('city', 'Ahmedabad') }}" readonly required class="w-full text-sm font-semibold px-3 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition cursor-not-allowed">
                             <input type="hidden" name="state" value="{{ old('state', 'Gujarat') }}">
                             <input type="hidden" name="pincode" value="{{ old('pincode') }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: LOGIN ACCOUNT -->
+                <div>
+                    <div class="flex items-center space-x-2 border-b border-slate-100 pb-2.5 mb-4">
+                        <span class="w-5 h-5 rounded-md bg-primary-50 text-primary-600 font-black text-xs flex items-center justify-center">3</span>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">{{ __('messages.contact_login_account') }}</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.member_email_id') }} <span class="text-rose-500">*</span></label>
+                                <span id="emailVerifiedBadge" class="hidden text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                    ✓ {{ __('messages.email_verified') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <input type="email" id="emailInput" name="email" value="{{ old('email') }}" required class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
+                                <button type="button" id="sendOtpBtn" class="shrink-0 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-lg shadow transition-all active:scale-95 cursor-pointer">
+                                    <span id="sendOtpBtnText">{{ __('messages.send_otp') }}</span>
+                                </button>
+                                <button type="button" id="changeEmailBtn" class="hidden shrink-0 px-2.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-lg transition-all cursor-pointer">
+                                    {{ __('messages.change_email') }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.password') }} <span class="text-rose-500">*</span></label>
+                            <input type="password" name="password" required class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.confirm_password') }} <span class="text-rose-500">*</span></label>
+                            <input type="password" name="password_confirmation" required class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
                         </div>
                     </div>
                 </div>
@@ -195,8 +210,92 @@
     </div>
 </section>
 
+<!-- Custom Alert Modal (warnings/errors) -->
+<div id="otpAlertModal" class="fixed inset-0 flex items-center justify-center hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999 !important;" role="dialog" aria-modal="true" aria-labelledby="otpAlertTitle">
+    <div id="otpModalBackdrop" style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px);"></div>
+    <div class="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="otpModalPanel">
+        <div id="otpModalAccent" class="h-1.5 w-full bg-rose-500"></div>
+        <div class="p-6">
+            <div class="flex items-start gap-3 mb-3">
+                <div id="otpModalIcon" class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-rose-100 text-rose-600">⚠️</div>
+                <div>
+                    <h3 id="otpAlertTitle" class="text-sm font-extrabold text-slate-900 leading-tight">Verification Required</h3>
+                    <p id="otpAlertMessage" class="text-xs text-slate-600 mt-1 leading-relaxed"></p>
+                </div>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button id="otpModalCloseBtn" type="button" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow cursor-pointer">OK, Got it</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- OTP Entry Popup Modal -->
+<div id="otpEntryModal" class="fixed inset-0 flex items-center justify-center hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999998 !important;" role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <div style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px);"></div>
+    <!-- Panel -->
+    <div class="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="otpEntryPanel">
+
+        <!-- Header (Red theme matching site branding) -->
+        <div style="background: linear-gradient(135deg, #dc2626 0%, #dc2626 100%); padding: 20px 24px;">
+            <div class="flex items-center gap-3">
+                <div style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📧</div>
+                <div>
+                    <h3 style="color:#fff;font-size:15px;font-weight:800;margin:0;letter-spacing:0.02em;">{{ __('messages.email_verification') }}</h3>
+                    <p style="color:#fecdd3;font-size:11px;margin:3px 0 0 0;">{{ __('messages.otp_sent_to_inbox_desc') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="p-5 space-y-4">
+
+            <!-- Email target -->
+            <div class="text-center">
+                <p class="text-xs text-slate-500">{{ __('messages.verification_code_sent_to') }}</p>
+                <p id="otpTargetEmail" class="text-sm font-extrabold break-all mt-0.5" style="color:#dc2626;"></p>
+            </div>
+
+            <!-- OTP Input -->
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-600 uppercase tracking-widest block">{{ __('messages.enter_otp') }} <span class="text-rose-500">*</span></label>
+                <input type="text" id="otpInput" inputmode="numeric" maxlength="6" placeholder="0  0  0  0  0  0"
+                    style="width:100%;font-size:22px;font-weight:900;letter-spacing:0.35em;text-align:center;padding:12px 16px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box;"
+                    onfocus="this.style.borderColor='#dc2626';this.style.boxShadow='0 0 0 3px rgba(220,38,38,0.15)'"
+                    onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
+                <div id="otpStatusMsg" class="text-xs font-semibold min-h-[18px] text-center"></div>
+            </div>
+
+            <!-- Resend -->
+            <p class="text-center" style="font-size:11px;color:#94a3b8;margin:0;">
+                {{ __('messages.did_not_receive_code') }} &nbsp;
+                <button type="button" id="resendOtpBtn" style="font-weight:700;color:#dc2626;text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;outline:none;">{{ __('messages.resend_otp') }}</button>
+                <span id="otpResendTimer" style="color:#94a3b8;font-weight:600;"></span>
+            </p>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div style="display:flex;gap:10px;padding:0 20px 20px;">
+            <button type="button" id="cancelOtpModalBtn"
+                style="flex:1;padding:10px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#475569;font-weight:700;font-size:12px;border-radius:10px;cursor:pointer;transition:background 0.15s;"
+                onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                {{ __('messages.cancel') }}
+            </button>
+            <button type="button" id="verifyOtpBtn"
+                style="flex:1;padding:10px;background:#16a34a;color:#fff;font-weight:800;font-size:12px;border-radius:10px;cursor:pointer;border:none;box-shadow:0 2px 8px rgba(22,163,74,0.3);transition:background 0.15s;"
+                onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
+                <span id="verifyOtpBtnText">{{ __('messages.verify_otp') }}</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
 @if(($signupFee ?? 1000) > 0)
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+@endif
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('memberRegisterForm') || document.querySelector('form[action="{{ route('register.member.submit') }}"]');
@@ -204,57 +303,377 @@ document.addEventListener('DOMContentLoaded', function () {
 
     form.id = 'memberRegisterForm';
 
+    // ── Custom Modal Helper ──────────────────────────────────────
+    const otpAlertModal = document.getElementById('otpAlertModal');
+    const otpModalPanel = document.getElementById('otpModalPanel');
+    const otpModalAccent = document.getElementById('otpModalAccent');
+    const otpModalIcon = document.getElementById('otpModalIcon');
+    const otpAlertTitle = document.getElementById('otpAlertTitle');
+    const otpAlertMessage = document.getElementById('otpAlertMessage');
+    const otpModalCloseBtn = document.getElementById('otpModalCloseBtn');
+    const otpModalBackdrop = document.getElementById('otpModalBackdrop');
+
+    // Move modals to body so they sit above header regardless of container hierarchy
+    if (otpAlertModal && otpAlertModal.parentElement !== document.body) {
+        document.body.appendChild(otpAlertModal);
+    }
+    const otpEntryModal   = document.getElementById('otpEntryModal');
+    if (otpEntryModal && otpEntryModal.parentElement !== document.body) {
+        document.body.appendChild(otpEntryModal);
+    }
+
+    const modalConfig = {
+        warning: { accent: 'bg-amber-500', icon: '⚠️', iconBg: 'bg-amber-100 text-amber-600', btnBg: 'bg-amber-500 hover:bg-amber-600', title: 'Warning' },
+        error:   { accent: 'bg-rose-500',  icon: '❌', iconBg: 'bg-rose-100 text-rose-600',   btnBg: 'bg-rose-600 hover:bg-rose-700',   title: 'Error' },
+        success: { accent: 'bg-emerald-500', icon: '✅', iconBg: 'bg-emerald-100 text-emerald-600', btnBg: 'bg-emerald-600 hover:bg-emerald-700', title: 'Success' },
+        info:    { accent: 'bg-primary-500', icon: 'ℹ️', iconBg: 'bg-primary-100 text-primary-600', btnBg: 'bg-primary-600 hover:bg-primary-700', title: 'Info' },
+    };
+
+    function showModal(message, type = 'warning', title = null) {
+        const cfg = modalConfig[type] || modalConfig.warning;
+        // Set accent color
+        otpModalAccent.className = 'h-1.5 w-full ' + cfg.accent;
+        // Set icon
+        otpModalIcon.className = 'shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xl ' + cfg.iconBg;
+        otpModalIcon.textContent = cfg.icon;
+        // Set btn color
+        otpModalCloseBtn.className = 'px-5 py-2 font-extrabold text-xs text-white rounded-xl transition-all active:scale-95 shadow cursor-pointer ' + cfg.btnBg;
+        // Set content
+        otpAlertTitle.textContent = title || cfg.title;
+        otpAlertMessage.textContent = message;
+        // Show
+        otpAlertModal.classList.remove('hidden');
+        setTimeout(() => {
+            otpModalPanel.classList.remove('scale-95', 'opacity-0');
+            otpModalPanel.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeModal() {
+        otpModalPanel.classList.remove('scale-100', 'opacity-100');
+        otpModalPanel.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => otpAlertModal.classList.add('hidden'), 200);
+    }
+
+    if (otpModalCloseBtn) otpModalCloseBtn.addEventListener('click', closeModal);
+    if (otpModalBackdrop) otpModalBackdrop.addEventListener('click', closeModal);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    // ─────────────────────────────────────────────────────────────
+
+    // Email OTP Variables
+    const emailInput      = document.getElementById('emailInput');
+    const sendOtpBtn      = document.getElementById('sendOtpBtn');
+    const sendOtpBtnText  = document.getElementById('sendOtpBtnText');
+    const changeEmailBtn  = document.getElementById('changeEmailBtn');
+    const emailVerifiedBadge = document.getElementById('emailVerifiedBadge');
+
+    // OTP Entry Modal elements
+    const otpEntryPanel   = document.getElementById('otpEntryPanel');
+    const otpTargetEmail  = document.getElementById('otpTargetEmail');
+    const otpInput        = document.getElementById('otpInput');
+    const verifyOtpBtn    = document.getElementById('verifyOtpBtn');
+    const verifyOtpBtnText= document.getElementById('verifyOtpBtnText');
+    const otpStatusMsg    = document.getElementById('otpStatusMsg');
+    const cancelOtpModalBtn = document.getElementById('cancelOtpModalBtn');
+    const resendOtpBtn    = document.getElementById('resendOtpBtn');
+    const otpResendTimer  = document.getElementById('otpResendTimer');
+
+    let isEmailVerified = false;
+    let resendInterval  = null;
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+    // ── OTP Modal open / close ────────────────────────────────────
+    function openOtpModal(email) {
+        if (otpTargetEmail) otpTargetEmail.textContent = email;
+        if (otpInput) otpInput.value = '';
+        otpEntryModal.classList.remove('hidden');
+        setTimeout(() => {
+            otpEntryPanel.classList.remove('scale-95', 'opacity-0');
+            otpEntryPanel.classList.add('scale-100', 'opacity-100');
+            if (otpInput) otpInput.focus();
+        }, 10);
+    }
+
+    function closeOtpModal() {
+        otpEntryPanel.classList.remove('scale-100', 'opacity-100');
+        otpEntryPanel.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => otpEntryModal.classList.add('hidden'), 200);
+    }
+
+    if (cancelOtpModalBtn) cancelOtpModalBtn.addEventListener('click', closeOtpModal);
+    // ─────────────────────────────────────────────────────────────
+
+    // Resend button state management
+    function setResendButtonState(enabled, timeLeft = 0) {
+        if (!resendOtpBtn) return;
+        if (enabled) {
+            resendOtpBtn.disabled = false;
+            resendOtpBtn.style.color = '#dc2626';
+            resendOtpBtn.style.cursor = 'pointer';
+            resendOtpBtn.style.textDecoration = 'underline';
+            resendOtpBtn.style.opacity = '1';
+            if (otpResendTimer) otpResendTimer.textContent = '';
+        } else {
+            resendOtpBtn.disabled = true;
+            resendOtpBtn.style.color = '#94a3b8';
+            resendOtpBtn.style.cursor = 'not-allowed';
+            resendOtpBtn.style.textDecoration = 'none';
+            resendOtpBtn.style.opacity = '0.7';
+            if (otpResendTimer) otpResendTimer.textContent = timeLeft > 0 ? ` (${timeLeft}s)` : '';
+        }
+    }
+
+    function startResendTimer(seconds = 30) {
+        let t = seconds;
+        clearInterval(resendInterval);
+        setResendButtonState(false, t);
+        resendInterval = setInterval(() => {
+            t--;
+            if (t <= 0) {
+                clearInterval(resendInterval);
+                setResendButtonState(true);
+            } else {
+                setResendButtonState(false, t);
+            }
+        }, 1000);
+    }
+
+    // ── Localized Messages ───────────────────────────────────────
+    const msgSendingOtp        = "{{ __('messages.sending_otp') }}";
+    const msgSendingNewOtp     = "{{ __('messages.sending_new_otp') }}";
+    const msgOtpSentSuccess    = "{{ __('messages.otp_sent_success') }}";
+    const msgNewOtpSentSuccess = "{{ __('messages.new_otp_sent_success') }}";
+    const msgEnter6Digit       = "{{ __('messages.enter_6_digit_otp_error') }}";
+    const msgNetworkError      = "{{ __('messages.network_error_retry') }}";
+
+    // ── Core send OTP function ────────────────────────────────────
+    function doSendOtp(email) {
+        sendOtpBtn.disabled = true;
+        sendOtpBtnText.textContent = msgSendingOtp;
+
+        fetch("{{ route('register.member.send_otp') }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ email: email })
+        })
+        .then(res => res.json())
+        .then(data => {
+            sendOtpBtnText.textContent = "{{ __('messages.send_otp') }}";
+            sendOtpBtn.disabled = false;
+            if (data.success) {
+                openOtpModal(email);
+                if (otpStatusMsg) {
+                    otpStatusMsg.innerHTML = '<span style="color:#16a34a;font-weight:600;">✓ ' + (data.message || msgOtpSentSuccess) + '</span>';
+                }
+                startResendTimer(30);
+            } else {
+                showModal(data.message || 'Failed to send OTP.', 'error', 'Send OTP Failed');
+            }
+        })
+        .catch(() => {
+            sendOtpBtn.disabled = false;
+            sendOtpBtnText.textContent = "{{ __('messages.send_otp') }}";
+            showModal(msgNetworkError, 'error', 'Connection Error');
+        });
+    }
+
+    if (sendOtpBtn) {
+        sendOtpBtn.addEventListener('click', function () {
+            const email = emailInput ? emailInput.value.trim() : '';
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailRegex.test(email)) {
+                showModal('Please enter a valid email address first.', 'warning', 'Invalid Email');
+                if (emailInput) emailInput.focus();
+                return;
+            }
+            doSendOtp(email);
+        });
+    }
+
+    // ── Resend OTP inside Modal ───────────────────────────────────
+    if (resendOtpBtn) {
+        resendOtpBtn.addEventListener('click', function () {
+            if (resendOtpBtn.disabled) return;
+            const email = emailInput ? emailInput.value.trim() : '';
+            if (!email) return;
+
+            setResendButtonState(false, 0);
+            if (otpStatusMsg) {
+                otpStatusMsg.innerHTML = '<span style="color:#dc2626;font-weight:600;">⏳ ' + msgSendingNewOtp + '</span>';
+            }
+
+            fetch("{{ route('register.member.send_otp') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (otpInput) {
+                        otpInput.value = '';
+                        otpInput.focus();
+                    }
+                    if (otpStatusMsg) {
+                        otpStatusMsg.innerHTML = '<span style="color:#16a34a;font-weight:700;">✓ ' + msgNewOtpSentSuccess + '</span>';
+                    }
+                    startResendTimer(30);
+                } else {
+                    setResendButtonState(true);
+                    if (otpStatusMsg) {
+                        otpStatusMsg.innerHTML = '<span style="color:#dc2626;font-weight:700;">❌ ' + (data.message || 'Failed to send OTP.') + '</span>';
+                    }
+                }
+            })
+            .catch(() => {
+                setResendButtonState(true);
+                if (otpStatusMsg) {
+                    otpStatusMsg.innerHTML = '<span style="color:#dc2626;font-weight:700;">❌ ' + msgNetworkError + '</span>';
+                }
+            });
+        });
+    }
+
+    // ── Verify OTP ───────────────────────────────────────────────
+    if (verifyOtpBtn) {
+        verifyOtpBtn.addEventListener('click', function () {
+            const email = emailInput ? emailInput.value.trim() : '';
+            const otp   = otpInput ? otpInput.value.trim() : '';
+
+            if (!otp || otp.length !== 6) {
+                if (otpStatusMsg) {
+                    otpStatusMsg.innerHTML = '<span style="color:#dc2626;font-weight:700;">' + msgEnter6Digit + '</span>';
+                }
+                if (otpInput) otpInput.focus();
+                return;
+            }
+
+            verifyOtpBtn.disabled = true;
+            verifyOtpBtnText.textContent = '...';
+
+            fetch("{{ route('register.member.verify_otp') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                body: JSON.stringify({ email: email, otp: otp })
+            })
+            .then(res => res.json())
+            .then(data => {
+                verifyOtpBtn.disabled = false;
+                verifyOtpBtnText.textContent = "{{ __('messages.verify_otp') }}";
+
+                if (data.success) {
+                    isEmailVerified = true;
+                    closeOtpModal();
+                    clearInterval(resendInterval);
+                    emailVerifiedBadge.classList.remove('hidden');
+                    changeEmailBtn.classList.remove('hidden');
+                    sendOtpBtn.classList.add('hidden');
+                    emailInput.readOnly = true;
+                    emailInput.classList.add('bg-slate-100', 'text-slate-600', 'cursor-not-allowed');
+                } else {
+                    if (otpStatusMsg) {
+                        otpStatusMsg.innerHTML = '<span style="color:#dc2626;font-weight:700;">' + (data.message || "{{ __('messages.otp_invalid') }}") + '</span>';
+                    }
+                }
+            })
+            .catch(() => {
+                verifyOtpBtn.disabled = false;
+                verifyOtpBtnText.textContent = "{{ __('messages.verify_otp') }}";
+                if (otpStatusMsg) {
+                    otpStatusMsg.innerHTML = '<span style="color:#dc2626;font-weight:700;">' + msgNetworkError + '</span>';
+                }
+            });
+        });
+    }
+
+    // Allow Enter key in OTP input to trigger verify
+    if (otpInput) {
+        otpInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); verifyOtpBtn?.click(); } });
+        otpInput.addEventListener('input', function () { this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6); });
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeOtpModal(); closeModal(); } });
+
+    if (changeEmailBtn) {
+        changeEmailBtn.addEventListener('click', function () {
+            isEmailVerified = false;
+            emailInput.readOnly = false;
+            emailInput.classList.remove('bg-slate-100', 'text-slate-600', 'cursor-not-allowed');
+            emailVerifiedBadge.classList.add('hidden');
+            changeEmailBtn.classList.add('hidden');
+            sendOtpBtn.classList.remove('hidden');
+            sendOtpBtn.disabled = false;
+            otpTimerText.textContent = '';
+        });
+    }
+
+    // Form submit listener
     form.addEventListener('submit', function (e) {
+        if (!isEmailVerified) {
+            e.preventDefault();
+            e.stopPropagation();
+            showModal("{{ __('messages.please_verify_email') }}", 'warning', 'Email Verification Required');
+            if (!sendOtpBtn.classList.contains('hidden')) {
+                sendOtpBtn.focus();
+            } else if (otpInput) {
+                otpInput.focus();
+            }
+            return false;
+        }
+
         const paymentIdInput = document.getElementById('razorpay_payment_id');
         if (paymentIdInput && paymentIdInput.value) {
-            return true; // Already paid, allow normal submit
+            return true; // Already paid, allow submit
         }
 
-        e.preventDefault();
+        @if(($signupFee ?? 1000) > 0)
+            e.preventDefault();
 
-        // Trigger HTML5 validation check
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-
-        const razorpayKey = "{{ $razorpayKeyId ?? '' }}";
-        const feeAmountPaise = {{ ($signupFee ?? 1000) * 100 }};
-        const firstName = form.querySelector('[name="first_name"]')?.value || '';
-        const lastName = form.querySelector('[name="last_name"]')?.value || '';
-        const email = form.querySelector('[name="email"]')?.value || '';
-        const phone = form.querySelector('[name="phone"]')?.value || '';
-
-        const options = {
-            "key": razorpayKey || "rzp_test_key",
-            "amount": feeAmountPaise,
-            "currency": "INR",
-            "name": "{{ config('app.name', 'Sathwara Community') }}",
-            "description": "Membership Registration Fee",
-            "handler": function (response) {
-                paymentIdInput.value = response.razorpay_payment_id;
-                form.submit();
-            },
-            "prefill": {
-                "name": firstName + " " + lastName,
-                "email": email,
-                "contact": phone
-            },
-            "theme": {
-                "color": "#2563EB"
+            // HTML5 validation
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
             }
-        };
 
-        if (window.Razorpay) {
-            const rzp = new Razorpay(options);
-            rzp.open();
-        } else {
-            alert('Razorpay Payment Gateway failed to load. Submitting application...');
-            form.submit();
-        }
+            const razorpayKey = "{{ $razorpayKeyId ?? '' }}";
+            const feeAmountPaise = {{ ($signupFee ?? 1000) * 100 }};
+            const firstName = form.querySelector('[name="first_name"]')?.value || '';
+            const lastName = form.querySelector('[name="last_name"]')?.value || '';
+            const email = form.querySelector('[name="email"]')?.value || '';
+            const phone = form.querySelector('[name="phone"]')?.value || '';
+
+            const options = {
+                "key": razorpayKey || "rzp_test_key",
+                "amount": feeAmountPaise,
+                "currency": "INR",
+                "name": "{{ config('app.name', 'Sathwara Community') }}",
+                "description": "Membership Registration Fee",
+                "handler": function (response) {
+                    paymentIdInput.value = response.razorpay_payment_id;
+                    form.submit();
+                },
+                "prefill": {
+                    "name": firstName + " " + lastName,
+                    "email": email,
+                    "contact": phone
+                },
+                "theme": {
+                    "color": "#2563EB"
+                }
+            };
+
+            if (window.Razorpay) {
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                showModal('Razorpay Payment Gateway failed to load. Your application will be submitted without payment.', 'error', 'Payment Gateway Error');
+                setTimeout(() => form.submit(), 2000);
+            }
+        @endif
     });
 });
 </script>
-@endif
 @endsection
+
 
