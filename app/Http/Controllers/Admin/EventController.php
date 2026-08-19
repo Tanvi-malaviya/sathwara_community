@@ -16,7 +16,7 @@ class EventController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Event::withCount('registrations');
+        $query = Event::with('registrations');
 
         $user = auth()->user();
         if ($user->hasRole('Sub Admin') && !$user->permissions->pluck('name')->contains('events_manage')) {
@@ -48,10 +48,21 @@ class EventController extends Controller
     {
         $event = Event::withCount('registrations')->findOrFail($id);
         $gallery = Gallery::where('event_id', $event->id)->orderBy('display_order')->get();
-        $registrations = EventRegistration::where('event_id', $event->id)
+        $allRegistrations = EventRegistration::where('event_id', $event->id)
             ->with(['user.memberProfile'])
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // For inam_vitaran and yuva_melo events, only show student/candidate form registrations on the show page
+        $registrations = $allRegistrations->filter(function($r) use ($event) {
+            if ($event->event_type === 'inam_vitaran') {
+                return !empty($r->form_data['student_name']);
+            }
+            if ($event->event_type === 'yuva_melo') {
+                return !empty($r->form_data['surname']) || !empty($r->form_data['qualification']) || !empty($r->form_data['birth_date']) || !empty($r->form_data['first_name']);
+            }
+            return true;
+        });
 
         return view('admin.events.show', compact('event', 'gallery', 'registrations'));
     }
@@ -82,6 +93,7 @@ class EventController extends Controller
             'banner' => 'nullable|image|max:3072',
             'has_registration_form' => 'required|boolean',
             'pass_fee' => 'nullable|numeric|min:0',
+            'form_fee' => 'nullable|numeric|min:0',
             'max_participants' => 'nullable|integer|min:0',
             'status' => 'required|in:draft,published,cancelled',
         ]);
@@ -105,6 +117,7 @@ class EventController extends Controller
             'registration_option' => $request->has_registration_form,
             'has_registration_form' => $request->has_registration_form,
             'pass_fee' => $request->pass_fee ?? 0.00,
+            'form_fee' => $request->form_fee ?? 0.00,
             'max_participants' => $request->max_participants,
             'status' => $request->status,
         ]);
@@ -169,6 +182,7 @@ class EventController extends Controller
             'banner' => 'nullable|image|max:3072',
             'has_registration_form' => 'required|boolean',
             'pass_fee' => 'nullable|numeric|min:0',
+            'form_fee' => 'nullable|numeric|min:0',
             'max_participants' => 'nullable|integer|min:0',
             'status' => 'required|in:draft,published,cancelled',
         ]);
@@ -195,6 +209,7 @@ class EventController extends Controller
             'registration_option' => $request->has_registration_form,
             'has_registration_form' => $request->has_registration_form,
             'pass_fee' => $request->pass_fee ?? 0.00,
+            'form_fee' => $request->form_fee ?? 0.00,
             'max_participants' => $request->max_participants,
             'status' => $request->status,
         ]);
@@ -215,15 +230,26 @@ class EventController extends Controller
     }
 
     /**
-     * View Registered Participants
+     * View Registered Participants (Pass Registrations)
      */
     public function registrations($id)
     {
         $event = Event::findOrFail($id);
-        $registrations = EventRegistration::where('event_id', $event->id)
+        $allRegistrations = EventRegistration::where('event_id', $event->id)
             ->with(['user.memberProfile'])
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // For inam_vitaran and yuva_melo events: in registrations (Pass Registrations) list, ONLY show general event pass attendees (exclude student/candidate forms)
+        $registrations = $allRegistrations->filter(function($r) use ($event) {
+            if ($event->event_type === 'inam_vitaran') {
+                return empty($r->form_data['student_name']);
+            }
+            if ($event->event_type === 'yuva_melo') {
+                return empty($r->form_data['surname']) && empty($r->form_data['qualification']) && empty($r->form_data['birth_date']) && empty($r->form_data['first_name']);
+            }
+            return true;
+        });
 
         return view('admin.events.registrations', compact('event', 'registrations'));
     }
@@ -254,30 +280,165 @@ class EventController extends Controller
     }
 
     /**
-     * Upload Event Gallery Photos
+     * Upload Event Gallery Photos (Supports Multiple Images & ZIP file)
      */
     public function uploadGallery(Request $request, $id)
     {
         $event = Event::findOrFail($id);
 
         $request->validate([
-            'images.*' => 'required|image|max:3072',
-            'caption' => 'nullable|string|max:255',
+            'image' => 'nullable|file|mimes:zip,jpeg,png,jpg,gif,svg,webp|max:51200',
+            'images.*' => 'nullable|file|mimes:zip,jpeg,png,jpg,gif,svg,webp|max:51200',
         ]);
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
+        $uploadedCount = 0;
+
+        // Handle single file / ZIP file upload
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            if ($extension === 'zip') {
+                if (!class_exists('\ZipArchive')) {
+                    return redirect()->back()->with('error', 'PHP ZipArchive extension is not enabled on this server.');
+                }
+
+                $zip = new \ZipArchive();
+                if ($zip->open($file->getRealPath()) === true) {
+                    $tempPath = storage_path('app/temp_event_zip_' . time() . '_' . uniqid());
+                    if (!file_exists($tempPath)) {
+                        mkdir($tempPath, 0777, true);
+                    }
+
+                    $zip->extractTo($tempPath);
+                    $zip->close();
+
+                    $files = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($tempPath),
+                        \RecursiveIteratorIterator::LEAVES_ONLY
+                    );
+
+                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+
+                    foreach ($files as $name => $f) {
+                        if (!$f->isDir()) {
+                            $filePath = $f->getRealPath();
+                            $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
+                            if (in_array($fileExtension, $allowedExtensions)) {
+                                $fileName = 'zip_' . uniqid() . '.' . $fileExtension;
+                                $destinationDir = 'events/gallery';
+                                Storage::disk('public')->makeDirectory($destinationDir);
+
+                                $publicPath = $destinationDir . '/' . $fileName;
+                                Storage::disk('public')->put($publicPath, file_get_contents($filePath));
+
+                                Gallery::create([
+                                    'event_id' => $event->id,
+                                    'image_path' => $publicPath,
+                                    'caption' => $event->title,
+                                    'display_order' => Gallery::where('event_id', $event->id)->max('display_order') + 1,
+                                ]);
+                                $uploadedCount++;
+                            }
+                        }
+                    }
+
+                    $this->deleteTempDir($tempPath);
+
+                    if ($uploadedCount === 0) {
+                        return redirect()->back()->with('error', 'No valid images found inside the ZIP archive.');
+                    }
+
+                    return redirect()->back()->with('success', "$uploadedCount photos extracted and uploaded successfully from ZIP archive.");
+                } else {
+                    return redirect()->back()->with('error', 'Failed to open the ZIP file.');
+                }
+            } else {
                 $path = $file->store('events/gallery', 'public');
                 Gallery::create([
                     'event_id' => $event->id,
                     'image_path' => $path,
-                    'caption' => $request->caption ?? $event->title,
+                    'caption' => $event->title,
                     'display_order' => Gallery::where('event_id', $event->id)->max('display_order') + 1,
                 ]);
+                $uploadedCount++;
             }
         }
 
-        return redirect()->back()->with('success', 'Gallery photos uploaded successfully.');
+        // Handle multiple image uploads (including if a zip was passed in array)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $extension = strtolower($file->getClientOriginalExtension());
+                if ($extension === 'zip') {
+                    if (class_exists('\ZipArchive')) {
+                        $zip = new \ZipArchive();
+                        if ($zip->open($file->getRealPath()) === true) {
+                            $tempPath = storage_path('app/temp_event_zip_' . time() . '_' . uniqid());
+                            if (!file_exists($tempPath)) {
+                                mkdir($tempPath, 0777, true);
+                            }
+                            $zip->extractTo($tempPath);
+                            $zip->close();
+
+                            $files = new \RecursiveIteratorIterator(
+                                new \RecursiveDirectoryIterator($tempPath),
+                                \RecursiveIteratorIterator::LEAVES_ONLY
+                            );
+                            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                            foreach ($files as $name => $f) {
+                                if (!$f->isDir()) {
+                                    $filePath = $f->getRealPath();
+                                    $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                                    if (in_array($fileExtension, $allowedExtensions)) {
+                                        $fileName = 'zip_' . uniqid() . '.' . $fileExtension;
+                                        $destinationDir = 'events/gallery';
+                                        Storage::disk('public')->makeDirectory($destinationDir);
+                                        $publicPath = $destinationDir . '/' . $fileName;
+                                        Storage::disk('public')->put($publicPath, file_get_contents($filePath));
+                                        Gallery::create([
+                                            'event_id' => $event->id,
+                                            'image_path' => $publicPath,
+                                            'caption' => $event->title,
+                                            'display_order' => Gallery::where('event_id', $event->id)->max('display_order') + 1,
+                                        ]);
+                                        $uploadedCount++;
+                                    }
+                                }
+                            }
+                            $this->deleteTempDir($tempPath);
+                        }
+                    }
+                } else {
+                    $path = $file->store('events/gallery', 'public');
+                    Gallery::create([
+                        'event_id' => $event->id,
+                        'image_path' => $path,
+                        'caption' => $event->title,
+                        'display_order' => Gallery::where('event_id', $event->id)->max('display_order') + 1,
+                    ]);
+                    $uploadedCount++;
+                }
+            }
+        }
+
+        if ($uploadedCount === 0) {
+            return redirect()->back()->with('error', 'Please select images or a ZIP file to upload.');
+        }
+
+        return redirect()->back()->with('success', "$uploadedCount gallery photos uploaded successfully.");
+    }
+
+    private function deleteTempDir($dirPath)
+    {
+        if (!is_dir($dirPath)) {
+            return;
+        }
+        $files = array_diff(scandir($dirPath), ['.', '..']);
+        foreach ($files as $file) {
+            (is_dir("$dirPath/$file")) ? $this->deleteTempDir("$dirPath/$file") : unlink("$dirPath/$file");
+        }
+        rmdir($dirPath);
     }
 
     /**
@@ -355,12 +516,23 @@ class EventController extends Controller
     }
 
     /**
-     * Export Event Registrations CSV / Excel
+     * Export Event Registrations CSV / Excel (Pass Registrations)
      */
     public function exportRegistrationsCsv($id)
     {
         $event = Event::findOrFail($id);
-        $registrations = EventRegistration::where('event_id', $event->id)->with('user')->orderBy('created_at', 'asc')->get();
+        $allRegistrations = EventRegistration::where('event_id', $event->id)->with('user.memberProfile')->orderBy('created_at', 'asc')->get();
+
+        // For inam_vitaran and yuva_melo events: export pass attendees only
+        $registrations = $allRegistrations->filter(function($r) use ($event) {
+            if ($event->event_type === 'inam_vitaran') {
+                return empty($r->form_data['student_name']);
+            }
+            if ($event->event_type === 'yuva_melo') {
+                return empty($r->form_data['surname']) && empty($r->form_data['qualification']) && empty($r->form_data['birth_date']) && empty($r->form_data['first_name']);
+            }
+            return true;
+        });
 
         $headers = [
             "Content-type" => "text/csv; charset=UTF-8",
@@ -374,161 +546,21 @@ class EventController extends Controller
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            if ($event->event_type === 'inam_vitaran') {
-                fputcsv($file, ['Reg ID', 'Member ID', 'Member Name', 'Student Name', 'Education', 'School/College', 'Total Marks', 'Obtained Marks', 'Percentage', 'Marksheet File URL', 'Submission Date', 'Remarks']);
-                foreach ($registrations as $index => $r) {
-                    $fd = $r->form_data ?? [];
-                    fputcsv($file, [
-                        $fd['registration_no'] ?? ($index + 1),
-                        $fd['member_id'] ?? ($r->user ? '#' . sprintf('%05d', $r->user->id) : ''),
-                        $fd['parent_name'] ?? ($r->user ? $r->user->name : ''),
-                        $fd['student_name'] ?? ($r->user ? $r->user->name : ''),
-                        $fd['education'] ?? '',
-                        $fd['school_college'] ?? '',
-                        $fd['total_marks'] ?? '',
-                        $fd['received_marks'] ?? '',
-                        !empty($fd['percentage']) ? (str_contains($fd['percentage'], '%') ? $fd['percentage'] : $fd['percentage'] . '%') : '',
-                        $fd['marksheet_url'] ?? '',
-                        $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
-                        $fd['remarks'] ?? '',
-                    ]);
-                }
-            } elseif ($event->event_type === 'yuva_melo') {
+            fputcsv($file, ['Reg ID', 'Member ID', 'Participant Name', 'Contact Number', 'Person Count', 'Pass Fee (INR)', 'Payment Status', 'Payment ID', 'Submission Date', 'Remarks']);
+            foreach ($registrations as $index => $r) {
+                $fd = $r->form_data ?? [];
                 fputcsv($file, [
-                    'Id',
-                    'Date',
-                    'Status',
-                    'Application Id',
-                    'Name',
-                    'Surname',
-                    'Gender',
-                    'Father Name',
-                    'Grandpa Name',
-                    'Address',
-                    'Mobile Number 1',
-                    'Whatsapp Number',
-                    'Birth Date',
-                    'Age',
-                    'Height',
-                    'Weight',
-                    'Qualification',
-                    'Occupation',
-                    'Occupation Address',
-                    'Monthly Income',
-                    'Elder Brothers',
-                    'Married Elder Brothers',
-                    'Younger Brothers',
-                    'Married Younger Brothers',
-                    'Elder Sisters',
-                    'Married Elder Sisters',
-                    'Younger Sisters',
-                    'Married Younger Sisters',
-                    'Father Occupation',
-                    'Father Occupation Address',
-                    'Father Mobile',
-                    'Father Age',
-                    'Father Income',
-                    'Native Place',
-                    'Mother Name',
-                    'Mother Occupation',
-                    'Maternal Uncle Name',
-                    'Maternal Grandfather Name',
-                    'Maternal Grandfather Address',
-                    'Maternal Grandfather Occupation',
-                    'Business',
-                    'House',
-                    'Own House',
-                    'Vehicle',
-                    'Divorce',
-                    'Special Need',
-                    'Physical Disability',
-                    'Disability Duration',
-                    'Other Info',
-                    'Special Info',
-                    'Member Number',
-                    'Payment Number',
-                    'Photo URL',
-                    'Aadhaar Photo URL',
-                    'Selfie URL',
-                    'WhatsApp Image URL',
-                    'Payment Image URL'
+                    $fd['registration_no'] ?? ($index + 1),
+                    $r->user ? sprintf('#%05d', $r->user->id) : ($fd['member_id'] ?? ''),
+                    $fd['full_name'] ?? ($r->user ? $r->user->name : 'Participant'),
+                    $fd['contact_number'] ?? ($r->user->memberProfile->phone ?? ($fd['mobile'] ?? '')),
+                    $fd['person_count'] ?? 1,
+                    $r->payment_amount ?? 0,
+                    ucfirst($r->payment_status ?? 'paid'),
+                    $r->payment_id ?? '-',
+                    $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
+                    $fd['remarks'] ?? '',
                 ]);
-                foreach ($registrations as $index => $r) {
-                    $fd = $r->form_data ?? [];
-                    fputcsv($file, [
-                        $fd['registration_no'] ?? ($index + 1),
-                        $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
-                        ucfirst($r->status ?? 'approved'),
-                        $fd['member_number'] ?? ($r->user ? '#' . sprintf('%05d', $r->user->id) : ''),
-                        $fd['first_name'] ?? ($r->user ? $r->user->name : ''),
-                        $fd['surname'] ?? '',
-                        $fd['gender'] ?? '',
-                        $fd['father_name'] ?? '',
-                        $fd['grandfather_name'] ?? '',
-                        $fd['address'] ?? '',
-                        $fd['mobile_no'] ?? '',
-                        $fd['whatsapp'] ?? '',
-                        $fd['birth_date'] ?? '',
-                        $fd['age'] ?? '',
-                        $fd['height'] ?? '',
-                        $fd['weight'] ?? '',
-                        $fd['qualification'] ?? '',
-                        $fd['occupation'] ?? '',
-                        $fd['occupation_address'] ?? '',
-                        $fd['monthly_income'] ?? '',
-                        $fd['elder_brother'] ?? '',
-                        $fd['elder_brother_married'] ?? '',
-                        $fd['younger_brother'] ?? '',
-                        $fd['younger_brother_married'] ?? '',
-                        $fd['elder_sister'] ?? '',
-                        $fd['elder_sister_married'] ?? '',
-                        $fd['younger_sister'] ?? '',
-                        $fd['younger_sister_married'] ?? '',
-                        $fd['father_occupation'] ?? '',
-                        $fd['father_occupation_address'] ?? '',
-                        $fd['father_mobile'] ?? '',
-                        $fd['father_age'] ?? '',
-                        $fd['father_income'] ?? '',
-                        $fd['native_place'] ?? '',
-                        $fd['mother_name'] ?? '',
-                        $fd['mother_occupation'] ?? '',
-                        $fd['maternal_uncle_name'] ?? '',
-                        $fd['maternal_grandfather_name'] ?? '',
-                        $fd['maternal_grandfather_address'] ?? '',
-                        $fd['maternal_grandfather_occupation'] ?? '',
-                        $fd['business'] ?? '',
-                        $fd['house'] ?? '',
-                        $fd['own_house'] ?? '',
-                        $fd['vehicle'] ?? '',
-                        $fd['divorce'] ?? '',
-                        $fd['special_need'] ?? '',
-                        $fd['physical_disability'] ?? '',
-                        $fd['disability_duration'] ?? '',
-                        $fd['other_info'] ?? '',
-                        $fd['special_info'] ?? '',
-                        $fd['member_number'] ?? '',
-                        $fd['payment_number'] ?? '',
-                        $fd['member_photo_url'] ?? '',
-                        $fd['aadhaar_photo_url'] ?? '',
-                        $fd['selfie_url'] ?? '',
-                        $fd['whatsapp_image_url'] ?? '',
-                        $fd['payment_image_url'] ?? '',
-                    ]);
-                }
-            } else {
-                fputcsv($file, ['Reg ID', 'Member Name', 'Participant Name', 'Contact Number', 'Person Count', 'Remarks', 'Submission Date']);
-                foreach ($registrations as $index => $r) {
-                    $fd = $r->form_data ?? [];
-                    fputcsv($file, [
-                        $fd['registration_no'] ?? ($index + 1),
-                        $r->user ? $r->user->name : '',
-                        $fd['full_name'] ?? ($r->user ? $r->user->name : ''),
-                        $fd['contact_number'] ?? '',
-                        $fd['person_count'] ?? 1,
-                        $fd['remarks'] ?? '',
-                        $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
-                    ]);
-                }
             }
 
             fclose($file);
@@ -555,5 +587,159 @@ class EventController extends Controller
         $registration = EventRegistration::findOrFail($id);
         $registration->update(['status' => 'rejected']);
         return redirect()->back()->with('success', 'Registration rejected.');
+    }
+
+    /**
+     * Export Inam Vitaran Student Submissions CSV
+     */
+    public function exportInamSubmissionsCsv($id)
+    {
+        $event = Event::findOrFail($id);
+        $allRegistrations = EventRegistration::where('event_id', $event->id)
+            ->with(['user.memberProfile'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $registrations = $allRegistrations->filter(function($r) {
+            return !empty($r->form_data['student_name']);
+        });
+
+        $headers = [
+            "Content-type" => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=inam_submissions_event_" . $event->id . "_" . date('Y-m-d') . ".csv",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $callback = function () use ($registrations, $event) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, ['Reg ID', 'Member ID', 'Parent Name', 'Student Name', 'Education', 'School/College', 'Total Marks', 'Obtained Marks', 'Percentage', 'Marksheet File URL', 'Contact Number', 'City', 'Status', 'Submission Date', 'Remarks']);
+            foreach ($registrations as $index => $r) {
+                $fd = $r->form_data ?? [];
+                $phone = $fd['mobile'] ?? $fd['contact_number'] ?? ($r->user->memberProfile->phone ?? '');
+                $city = $fd['city'] ?? $fd['area'] ?? ($r->user->memberProfile->city ?? '');
+                if (is_array($city)) {
+                    $city = implode(', ', array_filter($city, 'is_scalar'));
+                }
+                fputcsv($file, [
+                    $fd['registration_no'] ?? ($index + 1),
+                    $r->user ? '#' . sprintf('%05d', $r->user->id) : ($fd['member_id'] ?? ''),
+                    $fd['parent_name'] ?? ($r->user ? $r->user->name : ''),
+                    $fd['student_name'] ?? ($r->user ? $r->user->name : ''),
+                    $fd['education'] ?? '',
+                    $fd['school_college'] ?? '',
+                    $fd['total_marks'] ?? '',
+                    $fd['received_marks'] ?? '',
+                    !empty($fd['percentage']) ? (str_contains((string)$fd['percentage'], '%') ? $fd['percentage'] : $fd['percentage'] . '%') : '',
+                    $fd['marksheet_url'] ?? '',
+                    $phone,
+                    $city,
+                    ucfirst($r->status ?? 'approved'),
+                    $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
+                    $fd['remarks'] ?? '',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export Yuva Melo Candidate Submissions CSV
+     */
+    public function exportYuvaSubmissionsCsv($id)
+    {
+        $event = Event::findOrFail($id);
+        $allRegistrations = EventRegistration::where('event_id', $event->id)
+            ->with(['user.memberProfile'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $registrations = $allRegistrations->filter(function($r) {
+            return !empty($r->form_data['surname']) || !empty($r->form_data['qualification']) || !empty($r->form_data['birth_date']) || !empty($r->form_data['first_name']);
+        });
+
+        $headers = [
+            "Content-type" => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=yuva_melo_candidates_event_" . $event->id . "_" . date('Y-m-d') . ".csv",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $callback = function () use ($registrations, $event) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, [
+                'Id', 'Date', 'Status', 'Member ID', 'Name', 'Surname', 'Gender', 'Father Name', 'Grandpa Name', 'Address', 'Mobile Number 1', 'Whatsapp Number', 'Birth Date', 'Age', 'Height', 'Weight', 'Qualification', 'Occupation', 'Occupation Address', 'Monthly Income', 'Elder Brothers', 'Married Elder Brothers', 'Younger Brothers', 'Married Younger Brothers', 'Elder Sisters', 'Married Elder Sisters', 'Younger Sisters', 'Married Younger Sisters', 'Father Occupation', 'Father Occupation Address', 'Father Mobile', 'Father Age', 'Father Income', 'Native Place', 'Mother Name', 'Mother Occupation', 'Maternal Uncle Name', 'Maternal Grandfather Name', 'Maternal Grandfather Address', 'Maternal Grandfather Occupation', 'Business', 'House', 'Own House', 'Vehicle', 'Divorce', 'Special Need', 'Physical Disability', 'Disability Duration', 'Other Info', 'Special Info', 'Photo URL'
+            ]);
+
+            foreach ($registrations as $index => $r) {
+                $fd = $r->form_data ?? [];
+                fputcsv($file, [
+                    $fd['registration_no'] ?? ($index + 1),
+                    $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
+                    ucfirst($r->status ?? 'approved'),
+                    $fd['member_number'] ?? ($r->user ? '#' . sprintf('%05d', $r->user->id) : ''),
+                    $fd['first_name'] ?? ($r->user ? $r->user->name : ''),
+                    $fd['surname'] ?? '',
+                    $fd['gender'] ?? '',
+                    $fd['father_name'] ?? '',
+                    $fd['grandfather_name'] ?? '',
+                    $fd['address'] ?? '',
+                    $fd['mobile_no'] ?? '',
+                    $fd['whatsapp'] ?? '',
+                    $fd['birth_date'] ?? '',
+                    $fd['age'] ?? '',
+                    $fd['height'] ?? '',
+                    $fd['weight'] ?? '',
+                    $fd['qualification'] ?? '',
+                    $fd['occupation'] ?? '',
+                    $fd['occupation_address'] ?? '',
+                    $fd['monthly_income'] ?? '',
+                    $fd['elder_brother'] ?? '',
+                    $fd['elder_brother_married'] ?? '',
+                    $fd['younger_brother'] ?? '',
+                    $fd['younger_brother_married'] ?? '',
+                    $fd['elder_sister'] ?? '',
+                    $fd['elder_sister_married'] ?? '',
+                    $fd['younger_sister'] ?? '',
+                    $fd['younger_sister_married'] ?? '',
+                    $fd['father_occupation'] ?? '',
+                    $fd['father_occupation_address'] ?? '',
+                    $fd['father_mobile'] ?? '',
+                    $fd['father_age'] ?? '',
+                    $fd['father_income'] ?? '',
+                    $fd['native_place'] ?? '',
+                    $fd['mother_name'] ?? '',
+                    $fd['mother_occupation'] ?? '',
+                    $fd['maternal_uncle_name'] ?? '',
+                    $fd['maternal_grandfather_name'] ?? '',
+                    $fd['maternal_grandfather_address'] ?? '',
+                    $fd['maternal_grandfather_occupation'] ?? '',
+                    $fd['business'] ?? '',
+                    $fd['house'] ?? '',
+                    $fd['own_house'] ?? '',
+                    $fd['vehicle'] ?? '',
+                    $fd['divorce'] ?? '',
+                    $fd['special_need'] ?? '',
+                    $fd['physical_disability'] ?? '',
+                    $fd['disability_duration'] ?? '',
+                    $fd['other_info'] ?? '',
+                    $fd['special_info'] ?? '',
+                    $fd['member_photo_url'] ?? ($fd['selfie_url'] ?? ''),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

@@ -24,6 +24,7 @@ class Event extends Model
         'registration_option',
         'has_registration_form',
         'pass_fee',
+        'form_fee',
         'max_participants',
         'status',
     ];
@@ -34,6 +35,7 @@ class Event extends Model
         'registration_option' => 'boolean',
         'has_registration_form' => 'boolean',
         'pass_fee' => 'decimal:2',
+        'form_fee' => 'decimal:2',
     ];
 
     public function registrations()

@@ -37,6 +37,8 @@
         $totalPersonsSum = $registrations->sum(function($r) {
             return (int) ($r->form_data['person_count'] ?? 1);
         });
+        $totalFeeCollected = $registrations->where('payment_status', 'paid')->sum('payment_amount');
+        $paidCount = $registrations->where('payment_status', 'paid')->count();
     @endphp
 
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm">
@@ -63,6 +65,14 @@
                 <span>👥 {{ __('messages.total_attending_persons') }}:</span>
                 <span class="font-black text-primary-700 text-sm">{{ $totalPersonsSum }}</span>
             </div>
+
+            @if($event->pass_fee > 0)
+                <div class="px-3 py-1.5 bg-amber-50/90 border border-amber-200/80 rounded-xl text-amber-900 text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs">
+                    <span>💰 Fee Collected:</span>
+                    <span class="font-black text-amber-700 text-sm">₹{{ number_format($totalFeeCollected, 0) }}</span>
+                    <span class="text-[10px] text-amber-600 font-semibold">({{ $paidCount }} paid)</span>
+                </div>
+            @endif
         </div>
 
         <!-- Search input & Export -->
@@ -90,18 +100,39 @@
         @forelse($registrations as $index => $reg)
             @php
                 $fd = $reg->form_data ?? [];
-                $userName = $reg->user ? $reg->user->name : ($fd['student_name'] ?? $fd['full_name'] ?? $fd['first_name'] ?? 'Guest Participant');
-                $userEmail = $reg->user ? $reg->user->email : ($fd['email'] ?? null);
-                $userPhone = $fd['contact_number'] ?? $fd['mobile_no'] ?? ($reg->user ? ($reg->user->memberProfile->phone ?? null) : null);
-                $userCity = $fd['city'] ?? $fd['district'] ?? ($reg->user ? ($reg->user->memberProfile->city ?? null) : null);
-                $regNo = $fd['registration_no'] ?? ($index + 1);
+                $memberCode = $reg->user ? sprintf('#%05d', $reg->user->id) : (is_scalar($fd['member_id'] ?? null) ? (string)$fd['member_id'] : '-');
+                $rawName = $reg->user ? $reg->user->name : ($fd['full_name'] ?? $fd['student_name'] ?? $fd['first_name'] ?? 'Guest Participant');
+                $userName = is_scalar($rawName) ? (string)$rawName : 'Participant';
+
+                $rawEmail = $reg->user ? $reg->user->email : ($fd['email'] ?? null);
+                $userEmail = is_scalar($rawEmail) ? (string)$rawEmail : null;
+
+                $rawPhone = $fd['mobile'] ?? $fd['contact_number'] ?? $fd['mobile_no'] ?? ($reg->user ? ($reg->user->memberProfile->phone ?? null) : null);
+                $userPhone = is_scalar($rawPhone) ? (string)$rawPhone : null;
+
+                $rawCity = $fd['city'] ?? $fd['area'] ?? $fd['district'] ?? ($reg->user ? ($reg->user->memberProfile->city ?? null) : null);
+                if (is_array($rawCity)) {
+                    $userCity = implode(', ', array_filter($rawCity, 'is_scalar'));
+                } elseif (is_object($rawCity)) {
+                    $userCity = $rawCity->name ?? (string)$rawCity;
+                } else {
+                    $userCity = is_scalar($rawCity) ? (string)$rawCity : null;
+                }
+
+                $personCount = (int)($fd['person_count'] ?? 1);
+                $regNo = is_scalar($fd['registration_no'] ?? null) ? $fd['registration_no'] : ($index + 1);
 
                 $modalData = [
+                    'member_code' => $memberCode,
                     'user_name' => $userName,
                     'email' => $userEmail ?? '-',
                     'phone' => $userPhone ?? '-',
                     'city' => $userCity ?? '-',
+                    'person_count' => $personCount,
                     'is_selected' => (bool)$reg->is_selected,
+                    'payment_status' => $reg->payment_status ?? 'unpaid',
+                    'payment_amount' => $reg->payment_amount ?? 0,
+                    'payment_id' => $reg->payment_id ?? '-',
                     'date' => $reg->created_at->format('d-M-Y h:i A'),
                     'form_data' => $fd,
                 ];
@@ -109,14 +140,15 @@
             <div x-show="(activeTab === 'all' || (activeTab === 'selected' && {{ $reg->is_selected ? 'true' : 'false' }})) && 
                         (!search || 
                          '{{ addslashes(strtolower($userName)) }}'.includes(search.toLowerCase()) || 
+                         '{{ addslashes(strtolower($memberCode)) }}'.includes(search.toLowerCase()) || 
                          '{{ addslashes(strtolower($userEmail ?? '')) }}'.includes(search.toLowerCase()) || 
                          '{{ addslashes(strtolower($userPhone ?? '')) }}'.includes(search.toLowerCase()) || 
                          '{{ addslashes(strtolower($userCity ?? '')) }}'.includes(search.toLowerCase()))" 
-                 class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs hover:shadow-md hover:border-primary-400 transition-all space-y-2 relative group flex flex-col justify-between">
+                 class="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-2xs hover:shadow-md hover:border-primary-400 transition-all space-y-2.5 relative group flex flex-col justify-between">
                 
-                <div class="space-y-2">
-                    <!-- Card Header: Checkbox + Reg # + Name & Date -->
-                    <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
+                <div class="space-y-2.5">
+                    <!-- Card Header: Checkbox + Member Code + Reg Date -->
+                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
                         <div class="flex items-center gap-2 min-w-0">
                             <form method="POST" action="{{ route('admin.events.registrations.toggle_select', $reg->id) }}">
                                 @csrf
@@ -126,59 +158,61 @@
                                        class="rounded border-slate-300 text-primary-600 focus:ring-primary-500 w-3.5 h-3.5 {{ $canEditThisEvent ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }}">
                             </form>
                             
-                            <span class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200/80 text-[10px] font-black text-slate-700 shrink-0">#{{ $regNo }}</span>
-
-                            <div class="min-w-0">
-                                <h4 class="text-xs font-black text-slate-900 truncate group-hover:text-primary-600 transition-colors">
-                                    {{ $userName }}
-                                </h4>
-                                @if($userCity)
-                                    <p class="text-[9px] text-slate-400 font-semibold truncate">{{ $userCity }}</p>
-                                @endif
-                            </div>
+                            <!-- Member Code Badge -->
+                            <span class="px-2 py-0.5 rounded-lg bg-slate-900 text-white text-[10px] font-black tracking-wider shadow-2xs">
+                                🆔 {{ $memberCode }}
+                            </span>
                         </div>
 
                         <div class="text-right shrink-0">
                             <span class="text-[9px] font-bold text-slate-400 block">{{ $reg->created_at->format('d-M-Y') }}</span>
-                            <span class="text-[8px] font-medium text-slate-300 block">{{ $reg->created_at->format('h:i A') }}</span>
                         </div>
                     </div>
 
-                    <!-- Member Contact Details Pill -->
-                    <div class="bg-slate-50/80 p-2 rounded-xl border border-slate-100 space-y-1">
-                        @if(!empty($fd['contact_number']))
-                            <div class="flex items-center gap-1 text-[10px] text-slate-700 font-bold">
-                                <span>📞</span>
-                                <span>{{ $fd['contact_number'] }}</span>
-                            </div>
+                    <!-- Participant Name & City -->
+                    <div>
+                        <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Participant Name</span>
+                        <h4 class="text-xs font-black text-slate-900 truncate group-hover:text-primary-600 transition-colors">
+                            {{ $userName }}
+                        </h4>
+                        @if($userCity)
+                            <p class="text-[9px] text-slate-400 font-semibold truncate mt-0.5">📍 {{ $userCity }}</p>
                         @endif
+                    </div>
+
+                    <!-- Mobile & Email Contact Pill -->
+                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 space-y-1 text-[10px]">
+                        <div class="flex items-center gap-1.5 font-black text-slate-800">
+                            <span>📞</span>
+                            <span>{{ $userPhone ?: '-' }}</span>
+                        </div>
                         @if(!empty($userEmail))
-                            <div class="flex items-center gap-1 text-[9px] text-slate-500 font-semibold truncate">
+                            <div class="flex items-center gap-1.5 text-[9px] text-slate-500 font-semibold truncate" title="{{ $userEmail }}">
+                                <span>✉️</span>
                                 <span>{{ $userEmail }}</span>
                             </div>
                         @endif
                     </div>
 
-                    <!-- Direct Form Data Details Embedded Inside Card -->
+                    <!-- Persons Count & Pass Fee Info -->
                     <div class="grid grid-cols-2 gap-1.5 text-[10px]">
-                        @if(!empty($fd['education_type']))
-                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100 col-span-2">
-                                <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Education Type</span>
-                                <span class="font-bold text-slate-800 truncate block">{{ $fd['education_type'] }}</span>
-                            </div>
-                        @endif
+                        <!-- Ketla Person Attending -->
+                        <div class="bg-primary-50/90 p-2 rounded-xl border border-primary-100 col-span-2 flex items-center justify-between">
+                            <span class="text-[9px] font-black text-primary-800 uppercase tracking-wider">👥 Attending Persons:</span>
+                            <span class="font-black text-primary-700 text-xs px-2 py-0.5 bg-white rounded-lg border border-primary-200 shadow-2xs">
+                                {{ $personCount }} {{ $personCount > 1 ? 'Persons' : 'Person' }}
+                            </span>
+                        </div>
 
-                        @if(!empty($fd['person_count']))
-                            <div class="bg-primary-50/80 p-1.5 rounded-lg border border-primary-100 col-span-2">
-                                <span class="text-[8px] font-extrabold text-primary-700 uppercase block tracking-wider">{{ __('messages.ketla_person_attending') }}</span>
-                                <span class="font-black text-primary-800 block text-xs">👥 {{ $fd['person_count'] }} {{ __('messages.person') }}(s)</span>
-                            </div>
-                        @endif
-
-                        @if(!empty($fd['occupation']))
-                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
-                                <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Occupation</span>
-                                <span class="font-bold text-slate-800 truncate block">{{ $fd['occupation'] }}</span>
+                        @if($event->pass_fee > 0)
+                            <div class="col-span-2 p-2 rounded-xl border flex items-center justify-between {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'bg-emerald-50/90 border-emerald-200' : 'bg-rose-50 border-rose-200' }}">
+                                <div>
+                                    <span class="text-[8px] font-extrabold uppercase block tracking-wider {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'text-emerald-700' : 'text-rose-600' }}">💳 Pass Fee</span>
+                                    <span class="font-black text-xs {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'text-emerald-800' : 'text-rose-700' }}">₹{{ number_format($reg->payment_amount ?? $event->pass_fee, 0) }}</span>
+                                </div>
+                                <span class="text-[8px] font-extrabold px-2 py-0.5 rounded-md uppercase {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-700' }}">
+                                    {{ strtoupper($reg->payment_status ?? 'unpaid') }}
+                                </span>
                             </div>
                         @endif
                     </div>
@@ -251,6 +285,14 @@
                                   :class="selectedRegistration.is_selected ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-200 text-slate-700'" 
                                   x-text="selectedRegistration.is_selected ? 'Selected' : 'Not Selected'"></span>
                         </div>
+                        <template x-if="selectedRegistration.payment_amount > 0 || selectedRegistration.payment_status === 'paid'">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Payment</span>
+                                <span class="font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded inline-block mt-0.5"
+                                      :class="selectedRegistration.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200'"
+                                      x-text="'₹' + selectedRegistration.payment_amount + ' (' + (selectedRegistration.payment_status || 'unpaid').toUpperCase() + ')'"></span>
+                            </div>
+                        </template>
                     </div>
 
                     <!-- Uploaded Documents & Media Grid -->

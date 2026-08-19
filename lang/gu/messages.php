@@ -1091,6 +1091,8 @@ return [
     'persons' => 'વ્યક્તિઓ',
     'registered_status' => 'નોંધાયેલ',
     'attending_persons_count' => 'હાજરી: :count વ્યક્તિ(ઓ)',
+    'purchase_more_passes' => 'વધુ પાસ બુક કરો',
+    'purchase_pass' => 'પાસ બુક કરો',
     'update_person_count' => 'વ્યક્તિઓની સંખ્યા બદલો',
     'attending_persons_label' => 'હાજર રહેનાર વ્યક્તિઓ',
     'total_persons_coming' => 'આવનાર કુલ વ્યક્તિઓ',

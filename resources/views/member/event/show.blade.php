@@ -85,9 +85,15 @@
                                         Normal Event</span>
                                 @endif
 
+                                @if(($event->event_type ?? 'normal') === 'yuva_melo' && ($event->form_fee ?? 0) > 0)
+                                    <span
+                                        class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200/80 text-[10px] font-black uppercase">₹{{ number_format($event->form_fee, 0) }}
+                                        Form Fee</span>
+                                @endif
+
                                 @if(($event->pass_fee ?? 0) > 0)
                                     <span
-                                        class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-black uppercase">₹{{ number_format($event->pass_fee, 0) }}
+                                        class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-black uppercase">🎟️ ₹{{ number_format($event->pass_fee, 0) }}
                                         Pass Fee</span>
                                 @else
                                     <span
@@ -490,10 +496,34 @@
                                                     <span>{{ __('messages.direct_register_now') }}</span> &rarr;
                                                 </button>
                                             </form>
-                                        @endif
-                                    @endif
+                                                  @endif
                                 @else
-                                    @if($registration)
+                                    @if(($event->event_type ?? 'normal') === 'yuva_melo')
+                                        <div class="space-y-3">
+                                            <!-- Fill Yuva Form Button -->
+                                            <a href="{{ route('member.events.register_form', $event->id) }}"
+                                                class="w-full flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs font-black rounded-xl shadow-md hover:shadow-lg transition-all text-center gap-1.5">
+                                                <span>⚡ Fill Yuva Melo Form</span>
+                                                <span>&rarr;</span>
+                                            </a>
+
+                                            @if(($event->pass_fee ?? 0) > 0)
+                                                <div class="pt-2.5 border-t border-slate-100 space-y-2">
+                                                    <div class="flex items-center justify-between text-[11px]">
+                                                        <span class="text-slate-500 font-bold">🎟️ Attendee Pass:</span>
+                                                        <span class="text-slate-900 font-black">₹{{ number_format($event->pass_fee, 0) }}</span>
+                                                    </div>
+                                                    <form method="POST" action="{{ route('events.register', $event->id) }}" class="space-y-2">
+                                                        @csrf
+                                                        <input type="hidden" name="person_count" value="1">
+                                                        <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all text-center cursor-pointer">
+                                                            🎟️ Book Attendee Pass &rarr;
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @elseif($registration)
                                         <div
                                             class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1">
                                             <span class="flex items-center gap-1">Registered ✅</span>
@@ -502,11 +532,6 @@
                                             <a href="{{ route('member.events.register_form', $event->id) }}"
                                                 class="w-full flex items-center justify-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
                                                 🏆 Fill Inam Form &rarr;
-                                            </a>
-                                        @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                            <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                class="w-full flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
-                                                ⚡ Fill Yuva Form &rarr;
                                             </a>
                                         @else
                                             <a href="{{ route('member.events.register_form', $event->id) }}"
@@ -531,11 +556,6 @@
                                                 <a href="{{ route('member.events.register_form', $event->id) }}"
                                                     class="w-full flex items-center justify-center px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
                                                     🏆 Fill Inam Form &rarr;
-                                                </a>
-                                            @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                                <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                    class="w-full flex items-center justify-center px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
-                                                    ⚡ Fill Yuva Form &rarr;
                                                 </a>
                                             @else
                                                 <a href="{{ route('member.events.register_form', $event->id) }}"

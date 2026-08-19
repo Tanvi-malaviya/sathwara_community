@@ -310,6 +310,8 @@
                     percentage: @json(old('percentage', '')),
                     remarks: @json(old('remarks', '')),
                     isEditing: false,
+                    editingRegistrationId: null,
+                    previewLang: @json(app()->getLocale() === 'gu' ? 'gu' : 'en'),
                     marksheetUrl: '',
                     yuvaTab: 1,
                     showDetailsModal: false,
@@ -353,7 +355,11 @@
                     },
                     editRegistration(reg) {
                         let fd = reg.form_data || {};
-                        this.selectedStudent = fd.student_name || '';
+                        this.isEditing = true;
+                        this.editingRegistrationId = reg.id;
+                        this.selectedStudent = fd.student_name || fd.full_name || ((fd.first_name || '') + ' ' + (fd.surname || '')).trim() || 'Candidate';
+
+                        // 1. Inam Vitaran bindings
                         let rawEt = fd.education_type || '';
                         let mappedEt = rawEt;
                         if (rawEt === 'Primary' || rawEt === 'Secondary' || rawEt === 'Higher Secondary') mappedEt = 'School';
@@ -392,15 +398,51 @@
                         this.percentage = fd.percentage || '';
                         this.remarks = fd.remarks || '';
                         this.marksheetUrl = fd.marksheet_url || '';
-                        this.isEditing = true;
                         this.calcPercentage();
-                        const elem = document.getElementById('registrationFormCard');
+
+                        // 2. Yuva Melo Form Fields Prefill
+                        this.$nextTick(() => {
+                            const form = document.getElementById('eventDynamicRegisterForm');
+                            if (form) {
+                                for (const [key, val] of Object.entries(fd)) {
+                                    const inputs = form.querySelectorAll(`[name="${key}"]`);
+                                    inputs.forEach(input => {
+                                        if (input.type === 'file') return;
+                                        if (input.type === 'radio') {
+                                            input.checked = (input.value == val);
+                                        } else if (input.type === 'checkbox') {
+                                            input.checked = Boolean(val);
+                                        } else {
+                                            input.value = val;
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                        // 3. Siblings list prefill
+                        this.siblings = [];
+                        if (fd.siblings_json) {
+                            try {
+                                this.siblings = typeof fd.siblings_json === 'string' ? JSON.parse(fd.siblings_json) : fd.siblings_json;
+                            } catch (e) {
+                                this.siblings = [];
+                            }
+                        }
+                        this.syncSiblingFields();
+
+                        // Switch to step 1
+                        this.yuvaTab = 1;
+
+                        // Scroll smoothly to form card
+                        const elem = document.getElementById('registrationFormCard') || document.getElementById('eventDynamicRegisterForm');
                         if (elem) {
-                            elem.scrollIntoView({ behavior: 'smooth' });
+                            elem.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }
                     },
                     cancelEdit() {
                         this.isEditing = false;
+                        this.editingRegistrationId = null;
                         this.selectedStudent = '';
                         this.educationType = '';
                         this.education = '';
@@ -413,6 +455,10 @@
                         this.percentage = '';
                         this.remarks = '';
                         this.marksheetUrl = '';
+                        this.siblings = [];
+                        this.syncSiblingFields();
+                        const form = document.getElementById('eventDynamicRegisterForm');
+                        if (form) form.reset();
                     },
                     addSibling() {
                         if (!this.newSibling.relation) return;
@@ -439,6 +485,53 @@
                         this.legacyYoungerSM = this.siblings.some(s => s.relation === 'Younger Sister' && s.married === 'Yes') ? 'Yes' : (this.siblings.some(s => s.relation === 'Younger Sister') ? 'No' : '');
                     },
                     selectedRegistration: {},
+                    getPhotoUrl(fd) {
+                        if (!fd) return '';
+                        if (fd.member_photo_url) return fd.member_photo_url;
+                        if (fd.selfie_url) return fd.selfie_url;
+                        if (fd.whatsapp_image_url) return fd.whatsapp_image_url;
+                        if (fd.member_photo && typeof fd.member_photo === 'string' && (fd.member_photo.startsWith('http') || fd.member_photo.startsWith('/storage/'))) return fd.member_photo;
+                        return '';
+                    },
+                    getSiblingStat(fd, type, isMarried) {
+                        const noneText = this.previewLang === 'en' ? 'None' : 'નથી';
+                        if (!fd) return noneText;
+                        let arr = [];
+                        if (fd.siblings_json) {
+                            try {
+                                arr = typeof fd.siblings_json === 'string' ? JSON.parse(fd.siblings_json) : fd.siblings_json;
+                            } catch (e) {
+                                arr = [];
+                            }
+                        }
+                        if (Array.isArray(arr) && arr.length > 0) {
+                            const filtered = arr.filter(s => {
+                                const relMatch = s.relation && s.relation.toLowerCase().includes(type.toLowerCase());
+                                const marMatch = isMarried ? (s.married === 'Yes' || s.married === 'Married') : (s.married !== 'Yes' && s.married !== 'Married');
+                                return relMatch && marMatch;
+                            });
+                            if (filtered.length > 0) {
+                                return filtered.length + ' (' + filtered.map(s => s.details || '1').join(', ') + ')';
+                            }
+                        }
+                        if (type.toLowerCase().includes('elder') && type.toLowerCase().includes('brother')) {
+                            const val = isMarried ? fd.elder_brother_married : fd.elder_brother;
+                            return (val && val !== 'No' && val !== '0') ? val : noneText;
+                        }
+                        if (type.toLowerCase().includes('younger') && type.toLowerCase().includes('brother')) {
+                            const val = isMarried ? fd.younger_brother_married : fd.younger_brother;
+                            return (val && val !== 'No' && val !== '0') ? val : noneText;
+                        }
+                        if (type.toLowerCase().includes('elder') && type.toLowerCase().includes('sister')) {
+                            const val = isMarried ? fd.elder_sister_married : fd.elder_sister;
+                            return (val && val !== 'No' && val !== '0') ? val : noneText;
+                        }
+                        if (type.toLowerCase().includes('younger') && type.toLowerCase().includes('sister')) {
+                            const val = isMarried ? fd.younger_sister_married : fd.younger_sister;
+                            return (val && val !== 'No' && val !== '0') ? val : noneText;
+                        }
+                        return noneText;
+                    },
                     calcPercentage() {
                         let t = parseFloat(this.totalMarks);
                         let r = parseFloat(this.receivedMarks);
@@ -573,6 +666,29 @@
 
 
                 </div>
+            @elseif(($event->event_type ?? 'normal') === 'inam_vitaran' && !($hasEventPass ?? false))
+                <!-- PASS REQUIRED WARNING CARD -->
+                <div class="bg-white rounded-2xl border border-amber-200/90 p-6 sm:p-8 text-center shadow-sm space-y-4 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 text-3xl shadow-2xs">
+                        🎟️
+                    </div>
+                    <div class="max-w-md space-y-2">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/90 text-amber-800 font-extrabold text-[10px] uppercase tracking-wider">
+                            <span>Event Pass Required</span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-black text-slate-900">Event registration pass is required</h3>
+                        <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                            To fill the prize distribution form, you must have an event pass / registration for this event. Please get the pass from the event page first.
+                        </p>
+                        <div class="pt-3">
+                            <a href="{{ route('event.details', $event->id) }}" 
+                               class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer">
+                                <span>🎟️ Purchase Event Pass</span>
+                                <span>&rarr;</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             @else
                 <!-- MAIN FORM CARD CONTAINER -->
                 <div id="registrationFormCard"
@@ -595,8 +711,22 @@
 
                         <!-- Registration Form -->
                         <form method="POST" action="{{ route('events.public_register', $event->id) }}"
-                            enctype="multipart/form-data" class="space-y-4">
+                            id="eventDynamicRegisterForm"
+                            enctype="multipart/form-data" class="space-y-4" novalidate>
                             @csrf
+                            <input type="hidden" name="registration_id" id="editing_registration_id" :value="editingRegistrationId">
+                            <input type="hidden" name="razorpay_payment_id" id="dynamic_razorpay_payment_id">
+
+                            <!-- Inline Form Error Notification Banner -->
+                            <div id="yuvaFormErrorBanner" style="display: none;"
+                                class="bg-rose-50 border border-rose-200 text-rose-800 p-3.5 rounded-xl text-xs font-bold flex items-center justify-between gap-3 shadow-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-rose-600 text-base">⚠️</span>
+                                    <span id="yuvaFormErrorMessage"></span>
+                                </div>
+                                <button type="button" onclick="document.getElementById('yuvaFormErrorBanner').style.display='none'"
+                                    class="text-rose-500 hover:text-rose-700 font-black cursor-pointer">✕</button>
+                            </div>
 
                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                 <!-- Inam Vitaran Academic & Marksheet Form Fields -->
@@ -1467,6 +1597,22 @@
                                         </div>
                                     </div>
 
+                                    @if(($event->form_fee ?? 0) > 0)
+                                        <div class="p-3.5 bg-purple-50/90 border border-purple-200 rounded-xl flex items-center justify-between shadow-2xs">
+                                            <div class="flex items-center gap-2.5">
+                                                <span class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center text-sm font-bold shadow-xs">💳</span>
+                                                <div>
+                                                    <h4 class="text-xs font-black text-purple-950">Youth Biodata Registration Fee</h4>
+                                                    <p class="text-[10px] text-purple-700 font-medium">Online payment required upon submitting this application</p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider block">Form Fee</span>
+                                                <span class="text-base font-black text-purple-950">₹{{ number_format($event->form_fee, 0) }}</span>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     <!-- Tab 3 Prev Button -->
                                     <div class="flex justify-start pt-2">
                                         <button type="button" @click="yuvaTab = 2"
@@ -1576,7 +1722,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($registrations as $index => $reg)
-                            @if(!empty($reg->form_data))
+                            @if(!empty($reg->form_data) && (($event->event_type ?? 'normal') !== 'inam_vitaran' || !empty($reg->form_data['student_name'])))
                                     @php 
                                                                     $fd = $reg->form_data;
                                         $cardIndex = $registrations->count() - $index;
@@ -1588,6 +1734,8 @@
                                     'reg_no' => $regNo,
                                     'date' => $fd['submission_date'] ?? ($reg->created_at ? $reg->created_at->format('d-M-Y h:i A') : '-'),
                                     'status' => $reg->status,
+                                    'payment_status' => $reg->payment_status ?? 'unpaid',
+                                    'payment_amount' => $reg->payment_amount ?? 0,
                                     'form_data' => $fd
                                 ]) }}; showDetailsModal = true"
                                         class="bg-white border border-slate-200/90 rounded-xl p-4 space-y-3 shadow-xs hover:shadow-md hover:border-primary-400 transition-all cursor-pointer group">
@@ -1657,6 +1805,15 @@
                                                     </div>
                                                 </div>
                                             @endif
+
+                                            @if(($event->pass_fee ?? 0) > 0 && ($event->event_type ?? 'normal') === 'normal')
+                                                <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                                                    <span class="font-bold text-slate-500">💳 Pass Fee:</span>
+                                                    <span class="font-extrabold px-1.5 py-0.5 rounded {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700' }}">
+                                                        ₹{{ number_format($reg->payment_amount ?? $event->pass_fee, 0) }} ({{ strtoupper($reg->payment_status ?? 'unpaid') }})
+                                                    </span>
+                                                </div>
+                                            @endif
                                         </div>
 
                                         <!-- Card Footer Action Actions (Details, Edit, Delete till last date) -->
@@ -1709,93 +1866,322 @@
                 </div>
             @endif
 
-            <!-- FULL REGISTRATION DETAILS MODAL POPUP (COMPACT SPACING & HIGH DENSITY) -->
+            <!-- FULL REGISTRATION DETAILS MODAL POPUP (BILINGUAL GUJARATI / ENGLISH BIODATA BOOKLET FORMAT) -->
             <template x-teleport="body">
                 <div x-show="showDetailsModal"
-                    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm"
+                    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/75 backdrop-blur-sm"
                     x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0"
                     x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-150"
                     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-cloak>
                     <div @click.away="showDetailsModal = false"
-                        class="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden relative">
+                        class="bg-white rounded-2xl border border-slate-300 shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden relative">
 
-                        <!-- Modal Header -->
-                        <div class="px-4 py-3 bg-slate-900 text-white flex items-center justify-between shrink-0">
-                            <div>
-                                <h3 class="text-xs font-extrabold flex items-center gap-2">
-                                    <span>Submitted Registration Details</span>
-                                    <span class="px-2 py-0.5 rounded bg-primary-500 text-white text-[10px]"
-                                        x-text="'#' + selectedRegistration.index"></span>
-                                </h3>
-                                <p class="text-[10px] text-slate-400 font-medium mt-0.5"
-                                    x-text="'Submitted on: ' + (selectedRegistration.date || '')"></p>
+                        <!-- Modal Top Header Bar -->
+                        <div class="px-4 py-2.5 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                            <div class="flex items-center gap-2">
+                                <div>
+                                    <h3 class="text-xs font-extrabold flex items-center gap-2">
+                                        <span x-text="(('{{ $event->event_type ?? 'normal' }}' === 'yuva_melo' || selectedRegistration.form_data?.surname) ? (previewLang === 'en' ? 'Candidate Biodata Preview' : 'ઉમેદવાર બાયોડેટા પ્રીવ્યૂ (Candidate Biodata)') : 'Submitted Registration Details')"></span>
+                                        <span class="px-2 py-0.5 rounded bg-primary-500 text-white text-[10px]"
+                                            x-text="'#' + selectedRegistration.index"></span>
+                                    </h3>
+                                    <p class="text-[10px] text-slate-400 font-medium"
+                                        x-text="(previewLang === 'en' ? 'Submitted on: ' : 'સબમિટ તારીખ: ') + (selectedRegistration.date || '')"></p>
+                                </div>
                             </div>
-                            <button type="button" @click="showDetailsModal = false"
-                                class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs">
-                                ✕
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <!-- Language Toggle Switch (GU / EN) -->
+                                <div class="inline-flex rounded-lg border border-slate-700 p-0.5 bg-slate-800 text-[11px] font-bold">
+                                    <button type="button" @click="previewLang = 'gu'" 
+                                        :class="previewLang === 'gu' ? 'bg-primary-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'"
+                                        class="px-2 py-0.5 rounded-md transition-colors cursor-pointer">
+                                        ગુજરાતી
+                                    </button>
+                                    <button type="button" @click="previewLang = 'en'" 
+                                        :class="previewLang === 'en' ? 'bg-primary-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'"
+                                        class="px-2 py-0.5 rounded-md transition-colors cursor-pointer">
+                                        English
+                                    </button>
+                                </div>
+
+                                <button type="button" @click="window.print()"
+                                    class="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer">
+                                    <span>🖨️ <span x-text="previewLang === 'en' ? 'Print' : 'પ્રિન્ટ'"></span></span>
+                                </button>
+                                <button type="button" @click="showDetailsModal = false"
+                                    class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs cursor-pointer">
+                                    ✕
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Modal Body (Scrollable Compact Padding) -->
-                        <div class="p-3.5 space-y-3 overflow-y-auto text-xs">
+                        <!-- Modal Body (Compact Scrollable with Traditional Gujarati Biodata Layout) -->
+                        <div class="p-3 sm:p-4 overflow-y-auto text-xs bg-slate-100/70">
 
-                            <!-- Uploaded Documents & Photos Compact Strip -->
-                            <template
-                                x-if="Object.keys(selectedRegistration.form_data || {}).some(k => k.endsWith('_url'))">
-                                <div class="space-y-1">
-                                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Uploaded
-                                        Documents & Photos</h4>
-                                    <div
-                                        class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
-                                        <template x-for="(val, key) in (selectedRegistration.form_data || {})" :key="key">
-                                            <template x-if="key.endsWith('_url') && val">
-                                                <div
-                                                    class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-2xs">
-                                                    <a :href="val" target="_blank"
-                                                        class="block w-8 h-8 shrink-0 overflow-hidden rounded bg-slate-100 border border-slate-200">
-                                                        <img :src="val" class="w-full h-full object-cover">
-                                                    </a>
-                                                    <div class="min-w-0">
-                                                        <span
-                                                            class="text-[9px] font-bold text-slate-700 uppercase block truncate max-w-[100px]"
-                                                            x-text="key.replace('_url', '').replace(/_/g, ' ')"></span>
-                                                        <a :href="val" target="_blank"
-                                                            class="text-[9px] font-bold text-primary-600 hover:underline">View
-                                                            File ↗</a>
+                            <!-- YUVA MELO TRADITIONAL BIODATA BOOKLET VIEW -->
+                            <template x-if="'{{ $event->event_type ?? 'normal' }}' === 'yuva_melo' || selectedRegistration.form_data?.surname">
+                                <div id="printableBiodata" class="bg-white p-3 border-2 border-slate-900 shadow-sm font-sans text-slate-900 space-y-2.5 max-w-[620px] mx-auto print:border-none print:p-0 print:shadow-none print:max-w-full">
+                                    
+                                    <!-- Top Box: Candidate Photo + Personal Header Summary -->
+                                    <div class="border-2 border-slate-900 p-2.5 bg-white">
+                                        <div class="flex gap-3 items-start">
+                                            <!-- Left Photo Box (Fixed Passport Size) -->
+                                            <div class="w-[105px] h-[135px] shrink-0 border border-slate-900 rounded-xs bg-slate-50 overflow-hidden relative flex items-center justify-center shadow-2xs">
+                                                <template x-if="getPhotoUrl(selectedRegistration.form_data)">
+                                                    <img :src="getPhotoUrl(selectedRegistration.form_data)" class="w-full h-full object-cover">
+                                                </template>
+                                                <template x-if="!getPhotoUrl(selectedRegistration.form_data)">
+                                                    <div class="text-center p-1 text-slate-400">
+                                                        <span class="text-3xl block">👤</span>
+                                                        <span class="text-[9px] font-bold" x-text="previewLang === 'en' ? 'No Photo' : 'ફોટો નથી'"></span>
+                                                    </div>
+                                                </template>
+                                            </div>
+
+                                            <!-- Right Personal & Contact Info -->
+                                            <div class="flex-1 min-w-0 space-y-1 text-xs">
+                                                <!-- Candidate Name (Red Bold) -->
+                                                <h2 class="text-sm sm:text-base font-black text-rose-600 leading-tight"
+                                                    x-text="((selectedRegistration.form_data?.first_name || '') + ' ' + (selectedRegistration.form_data?.surname || '')).trim() || selectedRegistration.form_data?.full_name || '-'">
+                                                </h2>
+
+                                                <!-- Father / Grandfather Full Name -->
+                                                <div class="font-bold text-slate-800 text-[11px] leading-tight">
+                                                    <span x-text="((selectedRegistration.form_data?.father_name || '') + ' ' + (selectedRegistration.form_data?.grandfather_name || '') + ' ' + (selectedRegistration.form_data?.surname || '')).trim() || '-'"></span>
+                                                </div>
+
+                                                <!-- Full Address -->
+                                                <div class="text-[10.5px] text-slate-700 leading-tight">
+                                                    <span x-text="[selectedRegistration.form_data?.address, selectedRegistration.form_data?.district, selectedRegistration.form_data?.state].filter(Boolean).join(', ') || '-'"></span>
+                                                </div>
+
+                                                <!-- Mobile Numbers -->
+                                                <div class="text-[10.5px] font-bold flex flex-wrap gap-x-3 gap-y-0.5 pt-0.5">
+                                                    <div>
+                                                        <span class="text-slate-800" x-text="previewLang === 'en' ? 'Cand. Mob.:' : 'ઉ. મો.:'"></span>
+                                                        <span class="text-blue-700 font-bold ml-0.5" x-text="selectedRegistration.form_data?.mobile_no || '-'"></span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-slate-800" x-text="previewLang === 'en' ? 'Guard. Mob.:' : 'વા. મો.:'"></span>
+                                                        <span class="text-blue-700 font-bold ml-0.5" x-text="selectedRegistration.form_data?.father_mobile || selectedRegistration.form_data?.whatsapp || '-'"></span>
                                                     </div>
                                                 </div>
+
+                                                <!-- Mini Stats Table (DOB, Age, Height, Weight) -->
+                                                <table class="w-full border-collapse border border-slate-900 text-[10px] text-center mt-1 table-fixed">
+                                                    <colgroup>
+                                                        <col style="width: 25%;">
+                                                        <col style="width: 25%;">
+                                                        <col style="width: 25%;">
+                                                        <col style="width: 25%;">
+                                                    </colgroup>
+                                                    <tbody>
+                                                        <tr class="border-b border-slate-900">
+                                                            <td class="border-r border-slate-900 font-bold py-0.5 px-1 bg-slate-50 text-slate-800" x-text="previewLang === 'en' ? 'Birth Date' : 'જન્મ તારીખ'"></td>
+                                                            <td class="border-r border-slate-900 font-bold py-0.5 px-1 text-blue-700 truncate" x-text="selectedRegistration.form_data?.birth_date || '-'"></td>
+                                                            <td class="border-r border-slate-900 font-bold py-0.5 px-1 bg-slate-50 text-slate-800" x-text="previewLang === 'en' ? 'Age' : 'ઉંમર વર્ષ'"></td>
+                                                            <td class="font-bold py-0.5 px-1 text-blue-700 truncate" x-text="(selectedRegistration.form_data?.age ? selectedRegistration.form_data?.age + (previewLang === 'en' ? ' Yrs' : ' વર્ષ') : '-')"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="border-r border-slate-900 font-bold py-0.5 px-1 bg-slate-50 text-slate-800" x-text="previewLang === 'en' ? 'Height' : 'ઊંચાઈ'"></td>
+                                                            <td class="border-r border-slate-900 font-bold py-0.5 px-1 text-blue-700 truncate" x-text="selectedRegistration.form_data?.height || '-'"></td>
+                                                            <td class="border-r border-slate-900 font-bold py-0.5 px-1 bg-slate-50 text-slate-800" x-text="previewLang === 'en' ? 'Weight' : 'વજન'"></td>
+                                                            <td class="font-bold py-0.5 px-1 text-blue-700 truncate" x-text="selectedRegistration.form_data?.weight || '-'"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                <!-- Native Place -->
+                                                <div class="text-[10.5px] font-bold pt-0.5">
+                                                    <span class="text-slate-800" x-text="previewLang === 'en' ? 'Native Place, District: ' : 'મૂળ વતન, ગામ, જિલ્લો: '"></span>
+                                                    <span class="text-blue-700" x-text="selectedRegistration.form_data?.native_place ? selectedRegistration.form_data?.native_place + (selectedRegistration.form_data?.district ? ', ' + selectedRegistration.form_data?.district : '') : (selectedRegistration.form_data?.district || '-')"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Main Structured Table (Labels Left, Blue Values Right) -->
+                                    <table class="w-full border-collapse border-2 border-slate-900 text-[10.5px] sm:text-[11px] text-left bg-white table-fixed">
+                                        <colgroup>
+                                            <col style="width: 34%;">
+                                            <col style="width: 16%;">
+                                            <col style="width: 34%;">
+                                            <col style="width: 16%;">
+                                        </colgroup>
+                                        <tbody>
+                                            <!-- Row 1: Qualification -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Candidate Qualification' : 'ઉમેદવારની શૈક્ષણિક લાયકાત'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.qualification || '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 2: Occupation -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Candidate Occupation' : 'ઉમેદવારનો વ્યવસાય'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.occupation || '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 3: Occupation Address -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Occupation Address' : 'ઉમેદવારના વ્યવસાય નું સરનામું'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.occupation_address || '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 4: Monthly Income -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Monthly Income' : 'ઉમેદવારની માસિક આવક'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.monthly_income ? '₹ ' + selectedRegistration.form_data?.monthly_income : '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 5: Sibling - Elder Brothers -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Elder Brothers Count' : 'ઉમેદવારના મોટાભાઈની સંખ્યા'"></td>
+                                                <td class="border-r border-slate-900 py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="getSiblingStat(selectedRegistration.form_data, 'Elder Brother', false)"></td>
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80 text-[10px]" x-text="previewLang === 'en' ? 'Married Elder Brothers' : 'પરણેલા મોટાભાઈની સંખ્યા'"></td>
+                                                <td class="py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="getSiblingStat(selectedRegistration.form_data, 'Elder Brother', true)"></td>
+                                            </tr>
+
+                                            <!-- Row 6: Sibling - Younger Brothers -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Younger Brothers Count' : 'ઉમેદવારના નાનાભાઈની સંખ્યા'"></td>
+                                                <td class="border-r border-slate-900 py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="getSiblingStat(selectedRegistration.form_data, 'Younger Brother', false)"></td>
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80 text-[10px]" x-text="previewLang === 'en' ? 'Married Younger Brothers' : 'પરણેલા નાનાભાઈની સંખ્યા'"></td>
+                                                <td class="py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="getSiblingStat(selectedRegistration.form_data, 'Younger Brother', true)"></td>
+                                            </tr>
+
+                                            <!-- Row 7: Sibling - Elder Sisters -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Elder Sisters Count' : 'ઉમેદવારના મોટા બહેનો ની સંખ્યા'"></td>
+                                                <td class="border-r border-slate-900 py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="getSiblingStat(selectedRegistration.form_data, 'Elder Sister', false)"></td>
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80 text-[10px]" x-text="previewLang === 'en' ? 'Married Elder Sisters' : 'પરણેલા મોટા બહેનો ની સંખ્યા'"></td>
+                                                <td class="py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="getSiblingStat(selectedRegistration.form_data, 'Elder Sister', true)"></td>
+                                            </tr>
+
+                                            <!-- Row 8: Sibling - Younger Sisters -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Younger Sisters Count' : 'ઉમેદવારના નાના બહેનો ની સંખ્યા'"></td>
+                                                <td class="border-r border-slate-900 py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="getSiblingStat(selectedRegistration.form_data, 'Younger Sister', false)"></td>
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80 text-[10px]" x-text="previewLang === 'en' ? 'Married Younger Sisters' : 'પરણેલા નાના બહેનો ની સંખ્યા'"></td>
+                                                <td class="py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="getSiblingStat(selectedRegistration.form_data, 'Younger Sister', true)"></td>
+                                            </tr>
+
+                                            <!-- Row 9: Father's Occupation -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Father Occupation' : 'ઉમેદવારના પિતાનો વ્યવસાય'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.father_occupation || '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 10: Father's Occupation Address -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Father Occupation Address' : 'ઉમેદવારના પિતાના વ્યવસાયનું સરનામું'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.father_occupation_address || '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 11: Mother's Name -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Mother Name' : 'ઉમેદવારના માતાનું નામ'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.mother_name || '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 12: Maternal Grandfather Address -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Maternal Address' : 'ઉમેદવારના મોસાળ નું સરનામું'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.maternal_grandfather_address || '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 13: Maternal Elder Name -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Maternal Uncle / Grandfather' : 'મોસાળ ના વડીલનું નામ'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="[selectedRegistration.form_data?.maternal_uncle_name, selectedRegistration.form_data?.maternal_grandfather_name].filter(Boolean).join(' / ') || '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 14: Maternal Elder Occupation -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Maternal Uncle / Grandfather Occupation' : 'મોસાળ ના વડીલ નો વ્યવસાય'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.maternal_grandfather_occupation || '-'"></td>
+                                            </tr>
+
+                                            <!-- Row 15: Physical Disability -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Physical Disability' : 'ઉમેદવારની શારીરિક ખોડ-ખાંપણ'"></td>
+                                                <td class="border-r border-slate-900 py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="selectedRegistration.form_data?.physical_disability || (previewLang === 'en' ? 'None' : 'નથી')"></td>
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80 text-[10px]" x-text="previewLang === 'en' ? 'Duration' : 'કેટલા સમયથી'"></td>
+                                                <td class="py-1 px-1.5 font-bold text-blue-700 text-center break-words" x-text="selectedRegistration.form_data?.disability_duration || (previewLang === 'en' ? 'None' : 'નથી')"></td>
+                                            </tr>
+
+                                            <!-- Row 16: Divorce / Second Marriage -->
+                                            <tr class="border-b border-slate-900">
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Divorce / Other Details' : 'છૂટા-છેડા, બીજા લગ્ન અન્ય માહિતી'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="(selectedRegistration.form_data?.divorce === 'Yes' ? (previewLang === 'en' ? 'Yes (Divorced)' : 'હા (Yes)') : (previewLang === 'en' ? 'None' : 'નથી')) + (selectedRegistration.form_data?.other_info ? ' - ' + selectedRegistration.form_data?.other_info : '')"></td>
+                                            </tr>
+
+                                            <!-- Row 17: Special Info -->
+                                            <tr>
+                                                <td class="border-r border-slate-900 py-1 px-2 font-bold text-slate-800 bg-slate-50/80" x-text="previewLang === 'en' ? 'Special Information' : 'વિશેષ માહિતી'"></td>
+                                                <td colspan="3" class="py-1 px-2 font-bold text-blue-700 break-words" x-text="selectedRegistration.form_data?.special_info || '-'"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                  
+                                </div>
+                            </template>
+
+                            <!-- STANDARD / INAM VITARAN EVENT DETAILS VIEW -->
+                            <template x-if="'{{ $event->event_type ?? 'normal' }}' !== 'yuva_melo' && !selectedRegistration.form_data?.surname">
+                                <div class="space-y-2.5">
+                                    <!-- Uploaded Documents & Photos Compact Strip -->
+                                    <template x-if="Object.keys(selectedRegistration.form_data || {}).some(k => k.endsWith('_url'))">
+                                        <div class="space-y-1">
+                                            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Uploaded Documents & Photos</h4>
+                                            <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                                <template x-for="(val, key) in (selectedRegistration.form_data || {})" :key="key">
+                                                    <template x-if="key.endsWith('_url') && val">
+                                                        <div class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                                                            <a :href="val" target="_blank"
+                                                                class="block w-8 h-8 shrink-0 overflow-hidden rounded bg-slate-100 border border-slate-200">
+                                                                <img :src="val" class="w-full h-full object-cover">
+                                                            </a>
+                                                            <div class="min-w-0">
+                                                                <span class="text-[9px] font-bold text-slate-700 uppercase block truncate max-w-[100px]"
+                                                                    x-text="key.replace('_url', '').replace(/_/g, ' ')"></span>
+                                                                <a :href="val" target="_blank"
+                                                                    class="text-[9px] font-bold text-primary-600 hover:underline">View File ↗</a>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Complete Form Data Grid -->
+                                    <div class="space-y-1">
+                                        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Submitted Form Fields</h4>
+                                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
+                                            <template x-for="(val, key) in (selectedRegistration.form_data || {})" :key="key">
+                                                <template x-if="!key.endsWith('_url') && key !== 'submission_date'">
+                                                    <div class="bg-white px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors shadow-2xs">
+                                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-wider block truncate"
+                                                            x-text="key.replace(/_/g, ' ')"></span>
+                                                        <span class="font-bold text-slate-900 text-[10.5px] block break-words leading-tight mt-0.5"
+                                                            x-text="val || '-'"></span>
+                                                    </div>
+                                                </template>
                                             </template>
-                                        </template>
+                                        </div>
                                     </div>
                                 </div>
                             </template>
 
-                            <!-- Complete Form Data Grid - Compact 3 to 4 Columns -->
-                            <div class="space-y-1.5">
-                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Submitted Form
-                                    Fields
-                                </h4>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
-                                    <template x-for="(val, key) in (selectedRegistration.form_data || {})" :key="key">
-                                        <template x-if="!key.endsWith('_url') && key !== 'submission_date'">
-                                            <div
-                                                class="bg-slate-50/90 px-2.5 py-1.5 rounded-lg border border-slate-100 hover:bg-slate-100/80 transition-colors">
-                                                <span
-                                                    class="text-[8px] font-black text-slate-400 uppercase tracking-wider block truncate"
-                                                    x-text="key.replace(/_/g, ' ')"></span>
-                                                <span
-                                                    class="font-bold text-slate-900 text-[11px] block break-words leading-tight mt-0.5"
-                                                    x-text="val || '-'"></span>
-                                            </div>
-                                        </template>
-                                    </template>
-                                </div>
-                            </div>
-
                         </div>
 
                         <!-- Modal Footer -->
-                        <div class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-end shrink-0">
+                        <div class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
+                            <button type="button" @click="window.print()"
+                                class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5">
+                                <span>🖨️ Print Biodata</span>
+                            </button>
                             <button type="button" @click="showDetailsModal = false"
                                 class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer">
                                 Close Details
@@ -1892,4 +2278,198 @@
         @if(!request()->routeIs('member.*') || !auth()->check())
             </div>
         @endif
+
+@if(($event->event_type ?? 'normal') === 'yuva_melo')
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('eventDynamicRegisterForm');
+    if (!form) return;
+
+    function showFormError(message, tabNumber, inputElement) {
+        const banner = document.getElementById('yuvaFormErrorBanner');
+        const msgSpan = document.getElementById('yuvaFormErrorMessage');
+        if (banner && msgSpan) {
+            msgSpan.textContent = message;
+            banner.style.display = 'flex';
+            banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        if (tabNumber) {
+            const alpineEl = form.closest('[x-data]');
+            if (alpineEl && window.Alpine) {
+                Alpine.$data(alpineEl).yuvaTab = tabNumber;
+            }
+        }
+
+        if (inputElement) {
+            setTimeout(function () {
+                inputElement.focus();
+                inputElement.classList.add('ring-2', 'ring-rose-500', 'border-rose-500');
+                setTimeout(function () {
+                    inputElement.classList.remove('ring-2', 'ring-rose-500', 'border-rose-500');
+                }, 4000);
+            }, 200);
+        }
+    }
+
+    form.addEventListener('submit', function (e) {
+        const paymentIdInput = document.getElementById('dynamic_razorpay_payment_id');
+        if (paymentIdInput && paymentIdInput.value) {
+            return true; // Already paid, let submit proceed
+        }
+
+        // 1. Validate Step 1 (Candidate Info)
+        const surnameInput = form.querySelector('[name="surname"]');
+        const firstNameInput = form.querySelector('[name="first_name"]');
+        const genderInput = form.querySelector('[name="gender"]');
+        const birthDateInput = form.querySelector('[name="birth_date"]');
+        const ageInput = form.querySelector('[name="age"]');
+        const addressInput = form.querySelector('[name="address"]');
+        const mobileInput = form.querySelector('[name="mobile_no"]');
+        const qualInput = form.querySelector('[name="qualification"]');
+        const occInput = form.querySelector('[name="occupation"]');
+
+        if (!surnameInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 1: Please enter candidate's Surname.", 1, surnameInput);
+            return false;
+        }
+        if (!firstNameInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 1: Please enter candidate's First Name.", 1, firstNameInput);
+            return false;
+        }
+        if (!genderInput?.value) {
+            e.preventDefault();
+            showFormError("Step 1: Please select Gender.", 1, genderInput);
+            return false;
+        }
+        if (!birthDateInput?.value) {
+            e.preventDefault();
+            showFormError("Step 1: Please select Birth Date.", 1, birthDateInput);
+            return false;
+        }
+        if (!ageInput?.value || parseInt(ageInput.value) <= 0) {
+            e.preventDefault();
+            showFormError("Step 1: Please enter valid Age.", 1, ageInput);
+            return false;
+        }
+        if (!addressInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 1: Please enter candidate's Address.", 1, addressInput);
+            return false;
+        }
+        if (!mobileInput?.value.trim() || mobileInput.value.trim().length < 10) {
+            e.preventDefault();
+            showFormError("Step 1: Please enter 10-digit Mobile Number.", 1, mobileInput);
+            return false;
+        }
+        if (!qualInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 1: Please enter Qualification.", 1, qualInput);
+            return false;
+        }
+        if (!occInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 1: Please enter Occupation.", 1, occInput);
+            return false;
+        }
+
+        // 2. Validate Step 2 (Father & Family Info)
+        const fatherInput = form.querySelector('[name="father_name"]');
+        const grandFatherInput = form.querySelector('[name="grandfather_name"]');
+        const motherInput = form.querySelector('[name="mother_name"]');
+        const nativeInput = form.querySelector('[name="native_place"]');
+
+        if (!fatherInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 2: Please enter Father's Name.", 2, fatherInput);
+            return false;
+        }
+        if (!grandFatherInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 2: Please enter Grandfather's Name.", 2, grandFatherInput);
+            return false;
+        }
+        if (!motherInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 2: Please enter Mother's Name.", 2, motherInput);
+            return false;
+        }
+        if (!nativeInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 2: Please enter Native Place.", 2, nativeInput);
+            return false;
+        }
+
+        // 3. Validate Step 3 (Maternal Info)
+        const maternalUncleInput = form.querySelector('[name="maternal_uncle_name"]');
+        const maternalGrandfatherInput = form.querySelector('[name="maternal_grandfather_name"]');
+
+        if (!maternalUncleInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 3: Please enter Maternal Uncle's Name.", 3, maternalUncleInput);
+            return false;
+        }
+        if (!maternalGrandfatherInput?.value.trim()) {
+            e.preventDefault();
+            showFormError("Step 3: Please enter Maternal Grandfather's Name.", 3, maternalGrandfatherInput);
+            return false;
+        }
+
+        // Hide any previous error banner
+        const banner = document.getElementById('yuvaFormErrorBanner');
+        if (banner) banner.style.display = 'none';
+
+        const formFee = {{ (float)($event->form_fee ?? 0) }};
+        if (formFee <= 0) {
+            // Free form - allow direct submission
+            return true;
+        }
+
+        e.preventDefault();
+
+        const totalAmountPaise = Math.round(formFee * 100);
+        const razorpayKey = "{{ \App\Models\Setting::get('razorpay_key_id', env('RAZORPAY_KEY_ID', '')) }}";
+        
+        const candidateName = ((surnameInput?.value || '') + ' ' + (firstNameInput?.value || '')).trim() || "{{ auth()->user() ? auth()->user()->name : '' }}";
+        const candidatePhone = mobileInput?.value || "{{ (auth()->user() && auth()->user()->memberProfile) ? auth()->user()->memberProfile->phone : '' }}";
+        const candidateEmail = form.querySelector('[name="email"]')?.value || "{{ auth()->user() ? auth()->user()->email : '' }}";
+
+        const options = {
+            "key": razorpayKey || "rzp_test_key",
+            "amount": totalAmountPaise,
+            "currency": "INR",
+            "name": "{{ config('app.name', 'Sathwara Community') }}",
+            "description": "Yuva Melo Registration Form Fee - {{ addslashes($event->title) }}",
+            "handler": function (response) {
+                if (paymentIdInput) {
+                    paymentIdInput.value = response.razorpay_payment_id;
+                }
+                form.submit();
+            },
+            "prefill": {
+                "name": candidateName,
+                "email": candidateEmail,
+                "contact": candidatePhone
+            },
+            "theme": {
+                "color": "#7C3AED"
+            }
+        };
+
+        if (window.Razorpay) {
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                showFormError("Payment Failed: " + (response.error.description || "Could not complete transaction."), null, null);
+            });
+            rzp.open();
+        } else {
+            showFormError("Razorpay Payment Gateway could not be loaded. Please refresh and try again.", null, null);
+        }
+    });
+});
+</script>
+@endif
 @endsection

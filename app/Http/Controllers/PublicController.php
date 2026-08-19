@@ -166,6 +166,15 @@ class PublicController extends Controller
         if (auth()->check()) {
             $registration = EventRegistration::where('event_id', $event->id)
                 ->where('user_id', auth()->id())
+                ->where(function($q) use ($event) {
+                    if ($event->event_type === 'inam_vitaran') {
+                        $q->whereNull('form_data->student_name');
+                    } elseif ($event->event_type === 'yuva_melo') {
+                        $q->whereNull('form_data->surname')
+                          ->whereNull('form_data->qualification');
+                    }
+                })
+                ->latest()
                 ->first();
         }
 
@@ -188,12 +197,27 @@ class PublicController extends Controller
         }
 
         $user = auth()->user();
-        $registrations = $user ? $user->eventRegistrations()->where('event_id', $id)->orderBy('created_at', 'desc')->get() : collect();
+        $allUserRegistrations = $user ? $user->eventRegistrations()->where('event_id', $id)->orderBy('created_at', 'desc')->get() : collect();
+
+        // Check if user has registered / purchased a pass for this event
+        $hasEventPass = $allUserRegistrations->isNotEmpty();
+
+        // Filter registrations to show in the submitted cards list
+        $registrations = $allUserRegistrations->filter(function($r) use ($event) {
+            if ($event->event_type === 'inam_vitaran') {
+                return !empty($r->form_data['student_name']);
+            }
+            if ($event->event_type === 'yuva_melo') {
+                return !empty($r->form_data['surname']) || !empty($r->form_data['first_name']) || !empty($r->form_data['qualification']);
+            }
+            return true;
+        });
+
         $registration = $registrations->first();
         $familyMembers = $user ? $user->familyMembers()->orderBy('name')->get() : collect();
         $areas = \App\Models\Area::orderBy('name')->get();
 
-        return view('member.event.register', compact('event', 'registration', 'registrations', 'familyMembers', 'areas'));
+        return view('member.event.register', compact('event', 'registration', 'registrations', 'familyMembers', 'areas', 'hasEventPass'));
     }
 
     /**
@@ -224,9 +248,21 @@ class PublicController extends Controller
             return redirect()->back()->with('error', 'Registration for this event closed on ' . date('d-M-Y', strtotime($event->registration_end_date)) . '.');
         }
 
+        $isStudentForm = ($event->event_type === 'inam_vitaran' && $request->filled('student_name'));
+        $isYuvaMeloCandidateForm = ($event->event_type === 'yuva_melo' && ($request->filled('surname') || $request->filled('qualification') || $request->filled('first_name')));
+
+        // For inam_vitaran student form: check if user has purchased pass / registered for the event
+        if ($isStudentForm) {
+            $hasEventPass = $user ? $user->eventRegistrations()->where('event_id', $id)->exists() : false;
+
+            if (!$hasEventPass) {
+                return redirect()->route('event.details', $event->id)->with('error', 'ઇનામ વિતરણ ફોર્મ ભરવા માટે પહેલા આ ઇવેન્ટ માટે પાસ બુક કરવો જરૂરી છે.');
+            }
+        }
+
         // Capture form data depending on event type
         $formData = [];
-        if ($event->event_type === 'inam_vitaran') {
+        if ($isStudentForm) {
             $profile = $user ? $user->memberProfile : null;
 
             // Handle Marksheet File Upload
@@ -241,6 +277,7 @@ class PublicController extends Controller
             $formData = [
                 'member_id' => $user ? sprintf('#%05d', $user->id) : ($request->input('member_number') ?? ''),
                 'parent_name' => $user ? $user->name : '',
+                'full_name' => $request->input('full_name', $user ? $user->name : 'Participant'),
                 'email' => $user ? $user->email : '',
                 'mobile' => $profile->phone ?? '',
                 'address' => $profile->address ?? '',
@@ -253,10 +290,11 @@ class PublicController extends Controller
                 'percentage' => $request->input('percentage'),
                 'marksheet_url' => $marksheetUrl,
                 'school_college' => $request->input('school_college'),
+                'person_count' => max(1, (int)$request->input('person_count', 1)),
                 'submission_date' => now()->format('d-M-Y h:i A'),
                 'remarks' => $request->input('remarks'),
             ];
-        } elseif ($event->event_type === 'yuva_melo') {
+        } elseif ($isYuvaMeloCandidateForm) {
             $formData = $request->only([
                 'state', 'district', 'area_id', 'association', 'surname', 'first_name', 'gender',
                 'father_name', 'grandfather_name', 'father_gyanti', 'address', 'mobile_no', 'whatsapp',
@@ -293,9 +331,11 @@ class PublicController extends Controller
             if (empty($formData['full_name'])) {
                 $formData['full_name'] = $user ? $user->name : 'Participant';
             }
+            $formData['person_count'] = max(1, (int)$request->input('person_count', 1));
             $formData['contact_number'] = $formData['mobile_no'] ?? '';
             $formData['submission_date'] = now()->format('d-M-Y h:i A');
         } else {
+            // General Event Pass Registration
             $personCount = max(1, (int)$request->input('person_count', 1));
             $formData = [
                 'full_name' => $request->input('full_name', $user ? $user->name : 'Participant'),
@@ -317,14 +357,13 @@ class PublicController extends Controller
             ? redirect()->route('member.events.register_form', $event->id) 
             : redirect()->back();
 
-        // Check if matching registration exists for this specific student/participant
+        // Check if matching registration exists for this specific student/participant or user
         $existingRegistration = null;
-        if ($user) {
-            if ($event->event_type !== 'inam_vitaran' && $event->event_type !== 'yuva_melo') {
-                $existingRegistration = EventRegistration::where('event_id', $event->id)
-                    ->where('user_id', $user->id)
-                    ->first();
-            } elseif (!empty($formData['student_name'])) {
+        if ($request->filled('registration_id')) {
+            $existingRegistration = EventRegistration::where('event_id', $event->id)->find($request->input('registration_id'));
+        }
+        if (!$existingRegistration && $user) {
+            if (!empty($formData['student_name'])) {
                 $registrations = EventRegistration::where('event_id', $event->id)
                     ->where('user_id', $user->id)
                     ->get();
@@ -334,22 +373,30 @@ class PublicController extends Controller
                         break;
                     }
                 }
-            } elseif (!empty($formData['full_name'])) {
-                $registrations = EventRegistration::where('event_id', $event->id)
+            } elseif ($isYuvaMeloCandidateForm) {
+                $existingRegistration = EventRegistration::where('event_id', $event->id)
                     ->where('user_id', $user->id)
-                    ->get();
-                foreach ($registrations as $r) {
-                    if (isset($r->form_data['full_name']) && trim(mb_strtolower($r->form_data['full_name'])) === trim(mb_strtolower($formData['full_name']))) {
-                        $existingRegistration = $r;
-                        break;
-                    }
-                }
+                    ->whereNotNull('form_data->surname')
+                    ->first();
+            } else {
+                $existingRegistration = EventRegistration::where('event_id', $event->id)
+                    ->where('user_id', $user->id)
+                    ->whereNull('form_data->student_name')
+                    ->whereNull('form_data->surname')
+                    ->first();
             }
         }
 
-        $passFee = (float)($event->pass_fee ?? 0);
-        $personCount = max(1, (int)($formData['person_count'] ?? 1));
-        $totalAmount = $passFee * $personCount;
+        if ($isYuvaMeloCandidateForm) {
+            $totalAmount = (float)($event->form_fee ?? 0);
+        } elseif ($isStudentForm) {
+            $totalAmount = 0;
+        } else {
+            $passFee = (float)($event->pass_fee ?? 0);
+            $personCount = max(1, (int)($formData['person_count'] ?? 1));
+            $totalAmount = $passFee * $personCount;
+        }
+
         $paymentId = $request->input('razorpay_payment_id');
         $paymentStatus = (!empty($paymentId) || $totalAmount <= 0) ? 'paid' : 'unpaid';
 
@@ -374,13 +421,40 @@ class PublicController extends Controller
                 }
             }
 
+            if ($isStudentForm) {
+                $existingRegistration->update([
+                    'form_data' => array_merge($existingRegistration->form_data ?? [], $formData),
+                    'status' => 'approved',
+                ]);
+                return $redirectTarget->with('success', 'Student registration details updated successfully.');
+            }
+
+            if ($isYuvaMeloCandidateForm) {
+                $existingRegistration->update([
+                    'form_data' => array_merge($existingRegistration->form_data ?? [], $formData),
+                    'payment_id' => $paymentId ?: $existingRegistration->payment_id,
+                    'payment_status' => ($paymentStatus === 'paid' || $existingRegistration->payment_status === 'paid') ? 'paid' : 'unpaid',
+                    'payment_amount' => $totalAmount > 0 ? $totalAmount : $existingRegistration->payment_amount,
+                    'status' => 'approved',
+                ]);
+                return $redirectTarget->with('success', 'Yuva Melo registration details updated successfully.');
+            }
+
+            // Accumulate person count and payment amount when buying passes
+            $currentPersons = (int)($existingRegistration->form_data['person_count'] ?? 1);
+            $newTotalPersons = $currentPersons + $personCount;
+            $formData['person_count'] = $newTotalPersons;
+
+            $prevPaidAmount = (float)($existingRegistration->payment_amount ?? 0);
+            $newTotalAmount = $prevPaidAmount + $totalAmount;
+
             $existingRegistration->update([
                 'form_data' => array_merge($existingRegistration->form_data ?? [], $formData),
                 'payment_id' => $paymentId ?: $existingRegistration->payment_id,
-                'payment_status' => $paymentStatus,
-                'payment_amount' => $totalAmount > 0 ? $totalAmount : $existingRegistration->payment_amount,
+                'payment_status' => ($paymentStatus === 'paid' || $existingRegistration->payment_status === 'paid') ? 'paid' : 'unpaid',
+                'payment_amount' => $newTotalAmount > 0 ? $newTotalAmount : $existingRegistration->payment_amount,
             ]);
-            return $redirectTarget->with('success', 'Registration updated successfully.');
+            return $redirectTarget->with('success', 'Pass purchased successfully! Total registered persons: ' . $newTotalPersons);
         }
 
         // Check capacity

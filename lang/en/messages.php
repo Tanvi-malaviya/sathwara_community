@@ -1091,6 +1091,8 @@ return [
     'persons' => 'Persons',
     'registered_status' => 'Registered',
     'attending_persons_count' => 'Attending: :count Person(s)',
+    'purchase_more_passes' => 'Purchase More Passes',
+    'purchase_pass' => 'Purchase Pass',
     'update_person_count' => 'Update Person Count',
     'attending_persons_label' => 'Attending persons',
     'total_persons_coming' => 'Total persons coming',

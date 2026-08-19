@@ -131,11 +131,21 @@
                     class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 gap-3" :class="eventType === 'yuva_melo' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'">
                 <div class="space-y-0.5">
                     <label class="text-[10px] font-bold text-slate-500 uppercase">{{ __('messages.event_pass_fee') }}</label>
                     <input type="number" name="pass_fee" step="1" min="0" value="{{ old('pass_fee', '0') }}" placeholder="0 for Free Event"
                         class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
+                </div>
+
+                <!-- Yuva Melo Registration Form Fee -->
+                <div class="space-y-0.5" x-show="eventType === 'yuva_melo'" x-transition>
+                    <label class="text-[10px] font-bold text-purple-700 uppercase flex items-center justify-between">
+                        <span>⚡ Form Fee (₹)</span>
+                        <span class="text-[9px] text-purple-500 font-normal">(Youth Form Fee)</span>
+                    </label>
+                    <input type="number" name="form_fee" step="1" min="0" value="{{ old('form_fee', '0') }}" placeholder="0 for Free Form"
+                        class="w-full text-xs font-bold text-purple-900 px-3 py-1.5 bg-purple-50/50 border border-purple-200 rounded-lg focus:bg-white focus:border-purple-500">
                 </div>
 
                 <div class="space-y-0.5">
