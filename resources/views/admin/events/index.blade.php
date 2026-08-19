@@ -109,9 +109,16 @@
                             {{ date('d-M-Y', strtotime($e->date)) }}
                         </td>
                         <td class="py-2 px-2 whitespace-nowrap text-[11px]">
+                            @php
+                                $passCount = ($e->event_type === 'inam_vitaran') 
+                                    ? ($e->registrations ? $e->registrations->filter(fn($r) => empty($r->form_data['student_name']))->count() : 0)
+                                    : (($e->event_type === 'yuva_melo')
+                                        ? ($e->registrations ? $e->registrations->filter(fn($r) => empty($r->form_data['surname']) && empty($r->form_data['qualification']) && empty($r->form_data['birth_date']))->count() : 0)
+                                        : ($e->registrations ? $e->registrations->count() : 0));
+                            @endphp
                             @if($e->has_registration_form || $e->registration_option || ($e->event_type ?? 'normal') === 'normal')
                                 <a href="{{ route('admin.events.registrations', $e->id) }}" class="text-primary-600 font-bold hover:underline inline-flex items-center gap-1">
-                                    <span>{{ $e->registrations_count }} {{ __('messages.registered') }}</span>
+                                    <span>{{ $passCount }} {{ __('messages.registered') }}</span>
                                 </a>
                             @else
                                 <span class="text-slate-400 font-medium">{{ __('messages.open_entry') }}</span>

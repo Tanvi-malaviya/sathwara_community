@@ -54,11 +54,26 @@ class EventController extends Controller
             return redirect()->route('member.events.show', $event->id)->with('warning', 'Registration form is not enabled for this event.');
         }
         $user = auth()->user();
-        $registrations = $user->eventRegistrations()->where('event_id', $id)->orderBy('created_at', 'desc')->get();
+        $allUserRegistrations = $user ? $user->eventRegistrations()->where('event_id', $id)->orderBy('created_at', 'desc')->get() : collect();
+
+        // Check if user has registered / purchased a pass for this event
+        $hasEventPass = $allUserRegistrations->isNotEmpty();
+
+        // Filter registrations to show in the submitted cards list
+        $registrations = $allUserRegistrations->filter(function($r) use ($event) {
+            if ($event->event_type === 'inam_vitaran') {
+                return !empty($r->form_data['student_name']);
+            }
+            if ($event->event_type === 'yuva_melo') {
+                return !empty($r->form_data['surname']) || !empty($r->form_data['first_name']) || !empty($r->form_data['qualification']);
+            }
+            return true;
+        });
+
         $registration = $registrations->first();
-        $familyMembers = $user->familyMembers()->orderBy('name')->get();
+        $familyMembers = $user ? $user->familyMembers()->orderBy('name')->get() : collect();
         $areas = \App\Models\Area::orderBy('name')->get();
 
-        return view('member.event.register', compact('event', 'registration', 'registrations', 'familyMembers', 'areas'));
+        return view('member.event.register', compact('event', 'registration', 'registrations', 'familyMembers', 'areas', 'hasEventPass'));
     }
 }

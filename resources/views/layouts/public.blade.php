@@ -376,7 +376,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow pt-20 relative z-10">
+    <main class="flex-grow pt-20 relative">
         <!-- Toast Alerts -->
         @if (session('success') || session('error') || session('warning') || session('info'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-2" x-data="{ show: true }"
