@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('page_title', 'Edit Business Directory Entry')
+@section('page_title', __('messages.edit_business_entry'))
 
 @section('content')
 <div class="max-w-6xl bg-white border border-slate-100 rounded-xl p-5 shadow-sm space-y-4">
@@ -8,7 +8,7 @@
     <!-- Validation Errors -->
     @if ($errors->any())
         <div class="p-3 bg-rose-50 border border-rose-100 text-rose-800 rounded-xl">
-            <p class="text-xs font-bold mb-1">Please correct the following errors:</p>
+            <p class="text-xs font-bold mb-1">{{ __('messages.please_correct_errors') }}</p>
             <ul class="list-disc pl-4 text-[11px] font-medium space-y-0.5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -27,33 +27,33 @@
         <!-- SECTION 1: BASIC INFORMATION -->
         <div>
             <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2.5 pb-1 border-b border-slate-100">
-                1. Basic Information
+                1. {{ __('messages.basic_information_sec') }}
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Member ID <span class="text-slate-400 font-normal">(Optional)</span></label>
-                    <input type="text" name="member_id" value="{{ old('member_id', $business->member_id) }}" placeholder="e.g. #00005 (Optional)" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.member_id_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
+                    <input type="text" name="member_id" value="{{ old('member_id', $business->member_id) }}" placeholder="e.g. #00005 ({{ __('messages.optional') }})" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Business Name <span class="text-rose-500">*</span></label>
-                    <input type="text" name="business_name" value="{{ old('business_name', $business->business_name) }}" required placeholder="e.g. Acme Corporation" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.firm_name_label') }} <span class="text-rose-500">*</span></label>
+                    <input type="text" name="business_name" value="{{ old('business_name', $business->business_name) }}" required placeholder="{{ __('messages.firm_name_placeholder') }}" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Owner Name <span class="text-rose-500">*</span></label>
-                    <input type="text" name="owner_name" value="{{ old('owner_name', $business->owner_name) }}" required placeholder="e.g. John Doe" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.contact_person_label') }} <span class="text-rose-500">*</span></label>
+                    <input type="text" name="owner_name" value="{{ old('owner_name', $business->owner_name) }}" required placeholder="{{ __('messages.contact_person_placeholder') }}" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Status <span class="text-rose-500">*</span></label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.status_label') }} <span class="text-rose-500">*</span></label>
                     <select name="status" required class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
-                        <option value="pending" {{ old('status', $business->status) == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="approved" {{ old('status', $business->status) == 'approved' ? 'selected' : '' }}>Approved</option>
-                        <option value="rejected" {{ old('status', $business->status) == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                        <option value="pending" {{ old('status', $business->status) == 'pending' ? 'selected' : '' }}>{{ __('messages.pending') }}</option>
+                        <option value="approved" {{ old('status', $business->status) == 'approved' ? 'selected' : '' }}>{{ __('messages.approved') }}</option>
+                        <option value="rejected" {{ old('status', $business->status) == 'rejected' ? 'selected' : '' }}>{{ __('messages.rejected') }}</option>
                     </select>
                 </div>
 
@@ -66,7 +66,7 @@
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Subscription Purchase Date</label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.subscription_purchase_date') }}</label>
                     <input type="date" name="approved_at" value="{{ old('approved_at', $business->approved_at ? $business->approved_at->format('Y-m-d') : '') }}" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
@@ -76,13 +76,13 @@
         <!-- SECTION 2: CONTACT DETAILS & CATEGORY -->
         <div class="pt-1">
             <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2.5 pb-1 border-b border-slate-100">
-                2. Category, Contact Info & Social Media
+                2. {{ __('messages.category_contact_social_sec') }}
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Category (Optional)</label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.business_category_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
                     <select name="category_id" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
-                        <option value="">-- Select Category --</option>
+                        <option value="">-- {{ __('messages.select_category') }} --</option>
                         @foreach($categories as $cat)
                             <option value="{{ $cat->id }}" {{ old('category_id', $business->category_id) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                         @endforeach
@@ -90,54 +90,54 @@
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Area <span class="text-rose-500">*</span></label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.area_label') }} <span class="text-rose-500">*</span></label>
                     <select name="area_id" required class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
-                        <option value="">-- Select Area --</option>
+                        <option value="">-- {{ __('messages.select_area') }} --</option>
                         @foreach($areas as $area)
                             <option value="{{ $area->id }}" {{ old('area_id', $business->area_id) == $area->id ? 'selected' : '' }}>{{ $area->name }}</option>
                         @endforeach
                     </select>
                 </div>
 
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Phone / WhatsApp Number</label>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.phone_whatsapp_number') }}</label>
                     <input type="text" name="phone" value="{{ old('phone', $business->phone) }}" required placeholder="e.g. 9876543210" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Email Address</label>
-                    <input type="email" name="email" value="{{ old('email', $business->email) }}" placeholder="e.g. info@acme.com" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.email_address_label') }}</label>
+                    <input type="email" name="email" value="{{ old('email', $business->email) }}" placeholder="{{ __('messages.email_placeholder') }}" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Website URL</label>
-                    <input type="url" name="website" value="{{ old('website', $business->website) }}" placeholder="e.g. https://www.acme.com" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.website_url_label') }}</label>
+                    <input type="url" name="website" value="{{ old('website', $business->website) }}" placeholder="https://example.com" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Facebook Link</label>
-                    <input type="text" name="facebook" value="{{ old('facebook', $business->facebook) }}" placeholder="e.g. https://facebook.com/username" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.facebook_link_label') }}</label>
+                    <input type="text" name="facebook" value="{{ old('facebook', $business->facebook) }}" placeholder="https://facebook.com/username" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Instagram Link</label>
-                    <input type="text" name="instagram" value="{{ old('instagram', $business->instagram) }}" placeholder="e.g. https://instagram.com/username" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.instagram_link_label') }}</label>
+                    <input type="text" name="instagram" value="{{ old('instagram', $business->instagram) }}" placeholder="https://instagram.com/username" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">YouTube Link</label>
-                    <input type="text" name="youtube" value="{{ old('youtube', $business->youtube) }}" placeholder="e.g. https://youtube.com/@username" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.youtube_link_label') }}</label>
+                    <input type="text" name="youtube" value="{{ old('youtube', $business->youtube) }}" placeholder="https://youtube.com/@username" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">LinkedIn Link</label>
-                    <input type="text" name="linkedin" value="{{ old('linkedin', $business->linkedin) }}" placeholder="e.g. https://linkedin.com/in/username" 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.linkedin_link_label') }}</label>
+                    <input type="text" name="linkedin" value="{{ old('linkedin', $business->linkedin) }}" placeholder="https://linkedin.com/in/username" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
             </div>
@@ -146,18 +146,18 @@
         <!-- SECTION 3: DESCRIPTION & ADDRESS -->
         <div class="pt-1">
             <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2.5 pb-1 border-b border-slate-100">
-                3. Business Details
+                3. {{ __('messages.business_details_sec') }}
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Description (Optional)</label>
-                    <textarea name="description" rows="3" placeholder="Describe your business, products, services..." 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.business_desc_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
+                    <textarea name="description" rows="3" placeholder="{{ __('messages.business_desc_placeholder') }}" 
                               class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">{{ old('description', $business->description) }}</textarea>
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Full Address <span class="text-rose-500">*</span></label>
-                    <textarea name="address" rows="3" required placeholder="Shop number, street, locality, city..." 
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.office_address_label') }} <span class="text-rose-500">*</span></label>
+                    <textarea name="address" rows="3" required placeholder="{{ __('messages.office_address_placeholder') }}" 
                               class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">{{ old('address', $business->address) }}</textarea>
                 </div>
             </div>
@@ -166,12 +166,12 @@
         <!-- SECTION 4: MEDIA (LOGO, PAYMENT SCREENSHOT & GALLERY) -->
         <div class="pt-1">
             <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2.5 pb-1 border-b border-slate-100">
-                4. Logo, Payment Screenshot & Showcase Gallery
+                4. {{ __('messages.media_gallery_sec') }}
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- LOGO UPLOAD -->
                 <div class="space-y-2 border border-slate-100 rounded-xl p-3 bg-slate-50/50">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase block">Logo Image / V.Card</label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase block">{{ __('messages.business_logo_label') }}</label>
                     <div class="flex items-center space-x-3">
                         <img src="{{ str_starts_with($business->logo_path, 'http') ? $business->logo_path : asset('storage/' . $business->logo_path) }}" 
                              class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-white shadow-sm shrink-0" alt="Logo">
@@ -185,13 +185,13 @@
 
                 <!-- PAYMENT SCREENSHOT UPLOAD -->
                 <div class="space-y-2 border border-slate-100 rounded-xl p-3 bg-slate-50/50">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase block">Payment Screenshot <span class="text-slate-400 font-normal">(Optional)</span></label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase block">{{ __('messages.payment_screenshot_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
                     <div class="flex items-center space-x-3">
                         @if($business->payment_screenshot_path)
                             <img src="{{ asset('storage/' . $business->payment_screenshot_path) }}" 
                                  class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-white shadow-sm shrink-0" alt="Payment Screenshot">
                         @else
-                            <div class="w-12 h-12 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0 text-[8px] font-extrabold text-slate-400">None</div>
+                            <div class="w-12 h-12 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0 text-[8px] font-extrabold text-slate-400">{{ __('messages.none') }}</div>
                         @endif
                         <div class="space-y-1">
                             <input type="file" name="payment_screenshot" accept="image/*" 
@@ -205,8 +205,8 @@
                 <div class="space-y-4 border border-slate-200/80 rounded-2xl p-4 bg-slate-50/60 shadow-2xs md:col-span-3" x-data="multiShowcaseUploader({{ $existingCount }})">
                     <div class="flex items-center justify-between gap-3 pb-1 flex-wrap">
                         <div>
-                            <label class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider block">Add Showcase Photos</label>
-                            <p class="text-[10px] text-slate-400 font-medium">Select photos to append (Max 6 total per business). Previously saved photos remain.</p>
+                            <label class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider block">{{ __('messages.showcase_photos_label') }}</label>
+                            <p class="text-[10px] text-slate-400 font-medium">{{ __('messages.select_multiple_append') }}</p>
                         </div>
 
                         <div class="flex items-center gap-2">
@@ -218,7 +218,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                                 </svg>
-                                <span>SELECT FILES</span>
+                                <span>{{ __('messages.select_files') }}</span>
                             </button>
 
                             <!-- CLEAR BUTTON -->
@@ -227,7 +227,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                                <span>CLEAR</span>
+                                <span>{{ __('messages.clear') }}</span>
                             </button>
                         </div>
                     </div>
@@ -250,18 +250,18 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                             </div>
-                            <p class="text-xs font-extrabold text-slate-700">Drop Your Files Here or <span class="text-blue-600 underline">Browse</span></p>
+                            <p class="text-xs font-extrabold text-slate-700">{{ __('messages.drop_files_here_or') }} <span class="text-blue-600 underline">{{ __('messages.browse') }}</span></p>
                             <p class="text-[10px] text-slate-400 font-medium">
-                                Allowed Slots Available: <strong class="text-blue-600 font-bold" x-text="maxFiles"></strong> photo(s) can be added (6 Total Allowed)
+                                {{ __('messages.drop_files_subtitle') }}
                             </p>
                         </div>
 
                         <!-- Selected Photos Thumbnails Grid -->
                         <div x-show="files.length > 0" class="space-y-2" @click.stop x-cloak>
                             <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 px-1 border-b border-slate-100 pb-2">
-                                <span>New Showcase Photos To Add:</span>
+                                <span>{{ __('messages.selected_showcase_photos') }}</span>
                                 <span class="text-blue-600 font-black bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/80" 
-                                      x-text="files.length + '/' + maxFiles + ' New Selected (' + (existingCount + files.length) + '/6 Total)'"></span>
+                                      x-text="files.length + '/' + maxFiles + ' Selected'"></span>
                             </div>
 
                             <div class="flex flex-wrap items-center gap-3 pt-1">
@@ -289,9 +289,9 @@
                     @if($business->gallery_images && count($business->gallery_images) > 0)
                         <div class="mt-4 pt-4 border-t border-slate-200/80">
                             <div class="flex items-center justify-between mb-2">
-                                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Existing Showcase Photos (Select to Delete)</p>
+                                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">{{ __('messages.existing_showcase_photos') }}</p>
                                 <span x-show="removedImages.length > 0" class="text-[10px] font-extrabold text-rose-600 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-md">
-                                    <span x-text="removedImages.length"></span> photo(s) marked for removal (Frees up <span x-text="removedImages.length"></span> slot<span x-show="removedImages.length > 1">s</span>)
+                                    <span x-text="removedImages.length"></span> photo(s) marked for removal
                                 </span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
@@ -303,7 +303,7 @@
                                              :class="isRemoved('{{ $img }}') ? 'opacity-30 grayscale' : 'group-hover:opacity-85'">
                                         
                                         <div x-show="isRemoved('{{ $img }}')" class="absolute inset-0 bg-rose-950/40 flex flex-col items-center justify-center text-white">
-                                            <span class="text-[9px] font-black uppercase tracking-wider bg-rose-600 px-2 py-0.5 rounded-md shadow-sm">Will Delete</span>
+                                            <span class="text-[9px] font-black uppercase tracking-wider bg-rose-600 px-2 py-0.5 rounded-md shadow-sm">{{ __('messages.will_delete') }}</span>
                                         </div>
 
                                         <input type="checkbox" name="remove_gallery_images[]" value="{{ $img }}" 
@@ -335,16 +335,15 @@
                             </div>
 
                             <div class="space-y-1.5">
-                                <h3 class="text-base font-black text-slate-900">Photo Limit Reached</h3>
+                                <h3 class="text-base font-black text-slate-900">{{ __('messages.photo_limit_reached') }}</h3>
                                 <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                                    Maximum <strong class="text-amber-600 font-bold">6 total showcase photos</strong> allowed per business directory entry.
-                                    <br><span class="text-[11px] text-slate-500 block mt-1">You currently have <strong x-text="existingCount"></strong> active saved photo(s). Select checkboxes under Existing Showcase Photos to remove old ones and free up slots.</span>
+                                    {{ __('messages.photo_limit_desc') }}
                                 </p>
                             </div>
 
                             <button type="button" @click="showLimitModal = false" 
                                 class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer">
-                                Got it, thanks!
+                                {{ __('messages.got_it_thanks') }}
                             </button>
                         </div>
                     </div>
@@ -356,11 +355,11 @@
         <div class="pt-3 border-t border-slate-100 flex justify-end items-center space-x-2">
             <a href="{{ route('admin.businesses.index') }}" 
                class="px-3.5 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">
-                Cancel
+                {{ __('messages.cancel') }}
             </a>
             <button type="submit" 
                     class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">
-                Save Updates
+                {{ __('messages.save_changes') }}
             </button>
         </div>
     </form>

@@ -95,4 +95,59 @@ class MemberEventRegistrationTest extends TestCase
         // first option is the placeholder, so expect 7 options total for 6 family members
         $this->assertCount(7, $matches[0]);
     }
+
+    public function test_normal_event_direct_registration_with_person_count(): void
+    {
+        Role::firstOrCreate(['name' => 'Member', 'guard_name' => 'web']);
+
+        $user = User::factory()->create([
+            'name' => 'Normal Event Member',
+            'email' => 'normalmember@example.com',
+            'status' => 'approved',
+        ]);
+        $user->assignRole('Member');
+
+        $event = Event::create([
+            'title' => 'Normal Community Event',
+            'event_type' => 'normal',
+            'description' => 'A normal community gathering',
+            'venue' => 'Community Hall',
+            'date' => now()->addDays(5),
+            'time' => '17:00:00',
+            'banner_path' => 'normal-banner.jpg',
+            'registration_option' => true,
+            'has_registration_form' => true,
+            'status' => 'published',
+        ]);
+
+        // Direct registration with 3 persons
+        $response = $this->actingAs($user)->post(route('events.public_register', $event->id), [
+            'person_count' => 3,
+            'full_name' => 'Normal Event Member',
+            'contact_number' => '9876543210',
+        ]);
+
+        $response->assertRedirect();
+        
+        $this->assertDatabaseHas('event_registrations', [
+            'event_id' => $event->id,
+            'user_id' => $user->id,
+            'status' => 'approved',
+        ]);
+
+        $reg = \App\Models\EventRegistration::where('event_id', $event->id)->where('user_id', $user->id)->first();
+        $this->assertEquals(3, $reg->form_data['person_count']);
+
+        // Test updating person count to 5
+        $updateResponse = $this->actingAs($user)->post(route('events.public_register', $event->id), [
+            'person_count' => 5,
+            'full_name' => 'Normal Event Member',
+            'contact_number' => '9876543210',
+        ]);
+
+        $updateResponse->assertRedirect();
+
+        $reg->refresh();
+        $this->assertEquals(5, $reg->form_data['person_count']);
+    }
 }

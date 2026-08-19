@@ -142,8 +142,7 @@
                                     </div>
                                     <div>
                                         <span
-                                            class="text-[9px] text-rose-500 block font-extrabold uppercase tracking-wider leading-none">Form
-                                            Fill Up Last Date</span>
+                                            class="text-[9px] text-rose-500 block font-extrabold uppercase tracking-wider leading-none">{{ __('messages.form_fill_up_last_date') }}</span>
                                         <span
                                             class="text-rose-700 font-bold">{{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
                                     </div>
@@ -389,22 +388,111 @@
 
                     <!-- Ticket Bottom Section -->
                     <div class="px-4 pt-1 space-y-3">
-                        @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
-                            <div class="space-y-3">
-                                @if($event->date < now()->toDateString())
-                                    <!-- Concluded -->
-                                    <div
-                                        class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-xs font-bold text-center">
-                                        This event has concluded.
-                                    </div>
-                                @elseif($event->status === 'cancelled')
-                                    <!-- Cancelled -->
-                                    <div
-                                        class="p-3 rounded-xl bg-rose-50 border border-rose-100/50 text-rose-600 text-xs font-bold text-center">
-                                        This event has been cancelled.
-                                    </div>
+                        <div class="space-y-3">
+                            @if($event->date < now()->toDateString())
+                                <!-- Concluded -->
+                                <div
+                                    class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-xs font-bold text-center">
+                                    This event has concluded.
+                                </div>
+                            @elseif($event->status === 'cancelled')
+                                <!-- Cancelled -->
+                                <div
+                                    class="p-3 rounded-xl bg-rose-50 border border-rose-100/50 text-rose-600 text-xs font-bold text-center">
+                                    This event has been cancelled.
+                                </div>
+                            @else
+                                <!-- Active Flow -->
+                                @if(($event->event_type ?? 'normal') === 'normal')
+                                    @if($registration)
+                                        <div class="space-y-3">
+                                            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1">
+                                                <span class="flex items-center gap-1">✅ {{ __('messages.registered_status') }}</span>
+                                                <span class="text-[10px] text-emerald-700 font-semibold">
+                                                    {{ __('messages.attending_persons_count', ['count' => $registration->form_data['person_count'] ?? 1]) }}
+                                                </span>
+                                            </div>
+
+                                            <form method="POST" action="{{ route('events.register', $event->id) }}" class="space-y-3">
+                                                @csrf
+                                                <div x-data="{ count: {{ $registration->form_data['person_count'] ?? 1 }} }" class="space-y-1.5">
+                                                    <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                                                        <span>{{ __('messages.update_person_count') }}</span>
+                                                    </label>
+                                                    <div class="flex items-center justify-between bg-slate-100/90 p-1.5 rounded-xl border border-slate-200/80">
+                                                        <button type="button" 
+                                                                @click="if (count > 1) count--" 
+                                                                :disabled="count <= 1"
+                                                                class="w-8 h-8 rounded-lg bg-white hover:bg-slate-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-slate-800 font-black text-lg flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                                            &minus;
+                                                        </button>
+
+                                                        <div class="flex items-center gap-1 px-2">
+                                                            <span class="text-base font-black text-primary-600" x-text="count"></span>
+                                                            <span class="text-[11px] font-bold text-slate-700 uppercase" x-text="count > 1 ? '{{ __('messages.persons') }}' : '{{ __('messages.person') }}'"></span>
+                                                        </div>
+
+                                                        <button type="button" 
+                                                                @click="count++" 
+                                                                class="w-8 h-8 rounded-lg bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-black text-lg flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                                            &#43;
+                                                        </button>
+                                                    </div>
+                                                    <input type="hidden" name="person_count" :value="count">
+                                                </div>
+
+                                                <button type="submit" class="w-full flex items-center justify-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all text-center cursor-pointer gap-1">
+                                                    <span>{{ __('messages.update_person_count') }}</span> &rarr;
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @else
+                                        <!-- Check Capacity -->
+                                        @php
+                                            $currentCount = $event->registrations()->whereIn('status', ['pending', 'approved'])->count();
+                                            $isFull = $event->max_participants && ($currentCount >= $event->max_participants);
+                                        @endphp
+
+                                        @if($isFull)
+                                            <div class="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 text-xs font-bold text-center">
+                                                Capacity Full ❌
+                                            </div>
+                                        @else
+                                            <form method="POST" action="{{ route('events.register', $event->id) }}" class="space-y-3">
+                                                @csrf
+                                                <div x-data="{ count: 1 }" class="space-y-1.5">
+                                                    <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                                                        <span>{{ __('messages.ketla_person_attending') }}</span>
+                                                    </label>
+                                                    <div class="flex items-center justify-between bg-slate-100/90 p-1.5 rounded-xl border border-slate-200/80">
+                                                        <button type="button" 
+                                                                @click="if (count > 1) count--" 
+                                                                :disabled="count <= 1"
+                                                                class="w-8 h-8 rounded-lg bg-white hover:bg-slate-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-slate-800 font-black text-lg flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                                            &minus;
+                                                        </button>
+
+                                                        <div class="flex items-center gap-1 px-2">
+                                                            <span class="text-base font-black text-primary-600" x-text="count"></span>
+                                                            <span class="text-[11px] font-bold text-slate-700 uppercase" x-text="count > 1 ? '{{ __('messages.persons') }}' : '{{ __('messages.person') }}'"></span>
+                                                        </div>
+
+                                                        <button type="button" 
+                                                                @click="count++" 
+                                                                class="w-8 h-8 rounded-lg bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-black text-lg flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                                            &#43;
+                                                        </button>
+                                                    </div>
+                                                    <input type="hidden" name="person_count" :value="count">
+                                                </div>
+
+                                                <button type="submit" class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-xs font-extrabold rounded-xl shadow-sm transition-all text-center cursor-pointer gap-1">
+                                                    <span>{{ __('messages.direct_register_now') }}</span> &rarr;
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endif
                                 @else
-                                    <!-- Active Flow -->
                                     @if($registration)
                                         <div
                                             class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1">
@@ -458,13 +546,8 @@
                                         @endif
                                     @endif
                                 @endif
-                            </div>
-                        @else
-                            <div
-                                class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-500 text-xs font-bold text-center">
-                                Open entry. No registration required.
-                            </div>
-                        @endif
+                            @endif
+                        </div>
 
                         <!-- Ticket Barcode Footer decoration -->
                         <div class="flex flex-col items-center justify-center pt-1.5 space-y-1 opacity-60">
@@ -487,4 +570,61 @@
             </div>
         </div>
     </div>
+
+@if(($event->pass_fee ?? 0) > 0)
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('memberEventRegisterForm');
+    if (!form) return;
+
+    form.addEventListener('submit', function (e) {
+        const paymentIdInput = document.getElementById('member_event_razorpay_payment_id');
+        if (paymentIdInput && paymentIdInput.value) {
+            return true; // Already paid
+        }
+
+        e.preventDefault();
+
+        const passFee = {{ (float)($event->pass_fee ?? 0) }};
+        const personCountInput = form.querySelector('[name="person_count"]');
+        const personCount = personCountInput ? parseInt(personCountInput.value) || 1 : 1;
+        const totalAmountPaise = Math.round(passFee * personCount * 100);
+
+        const razorpayKey = "{{ \App\Models\Setting::get('razorpay_key_id', env('RAZORPAY_KEY_ID', '')) }}";
+        const userEmail = "{{ auth()->user() ? auth()->user()->email : '' }}";
+        const userName = "{{ auth()->user() ? auth()->user()->name : '' }}";
+        const userPhone = "{{ (auth()->user() && auth()->user()->memberProfile) ? auth()->user()->memberProfile->phone : '' }}";
+
+        const options = {
+            "key": razorpayKey || "rzp_test_key",
+            "amount": totalAmountPaise,
+            "currency": "INR",
+            "name": "{{ config('app.name', 'Sathwara Community') }}",
+            "description": "Event Pass Booking - {{ addslashes($event->title) }} (" + personCount + " Person/s)",
+            "handler": function (response) {
+                paymentIdInput.value = response.razorpay_payment_id;
+                form.submit();
+            },
+            "prefill": {
+                "name": userName,
+                "email": userEmail,
+                "contact": userPhone
+            },
+            "theme": {
+                "color": "#2563EB"
+            }
+        };
+
+        if (window.Razorpay) {
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            alert('Razorpay Payment Gateway failed to load. Submitting registration...');
+            form.submit();
+        }
+    });
+});
+</script>
+@endif
 @endsection

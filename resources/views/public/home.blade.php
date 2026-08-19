@@ -159,11 +159,11 @@
             <!-- Clean Section Header -->
             <div class="text-center max-w-2xl mx-auto mb-10 space-y-2">
                 <span
-                    class="text-xs font-bold text-primary-600 uppercase tracking-widest">{{ __('messages.agenda') }}</span>
+                    class="text-sm sm:text-base font-extrabold text-primary-600 uppercase tracking-widest">{{ __('messages.agenda') }}</span>
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                     {{ __('messages.core_mission_values') }}
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500">
+                <p class="text-sm sm:text-base text-slate-600 font-medium">
                     {{ __('messages.core_mission_subtitle') }}
                 </p>
             </div>
@@ -203,7 +203,7 @@
             <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
                 <div class="space-y-1.5 text-center sm:text-left">
                     <span
-                        class="text-xs font-bold text-primary-600 uppercase tracking-widest">{{ __('messages.upcoming_events') }}</span>
+                        class="text-sm sm:text-base font-extrabold text-primary-600 uppercase tracking-widest">{{ __('messages.upcoming_events') }}</span>
                     <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                         {{ __('messages.gatherings_activities') }}
                     </h2>
@@ -315,7 +315,7 @@
                                 @if(!empty($event->registration_end_date))
                                     <span
                                         class="text-[9px] font-extrabold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 whitespace-nowrap">
-                                        ⏳ Last Date: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
+                                        ⏳ {{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
                                     </span>
                                 @endif
                             </div>
@@ -337,7 +337,7 @@
             <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
                 <div class="space-y-1.5 text-center sm:text-left">
                     <span
-                        class="text-xs font-bold text-primary-600 uppercase tracking-widest">{{ __('messages.latest_updates') }}</span>
+                        class="text-sm sm:text-base font-extrabold text-primary-600 uppercase tracking-widest">{{ __('messages.latest_updates') }}</span>
                     <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                         {{ __('messages.community_bulletins') }}
                     </h2>
@@ -423,7 +423,7 @@
             <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
                 <div class="space-y-1.5 text-center sm:text-left">
                     <span
-                        class="text-xs font-bold text-primary-600 uppercase tracking-widest">{{ __('messages.gallery_preview') }}</span>
+                        class="text-sm sm:text-base font-extrabold text-primary-600 uppercase tracking-widest">{{ __('messages.gallery_preview') }}</span>
                     <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                         {{ __('messages.moments_togetherness') }}
                     </h2>

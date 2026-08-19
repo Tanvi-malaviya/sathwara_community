@@ -492,23 +492,23 @@
                     </svg>
                     <div class="space-y-1 flex-1 min-w-0">
                         <div class="flex items-center justify-between gap-2 flex-wrap">
-                            <span class="font-extrabold text-amber-900 text-xs">Notice / Instructions:</span>
+                            <span class="text-xs font-black text-amber-900 uppercase tracking-wide">
+                                {{ __('messages.notice_instructions') }}
+                            </span>
                             @if(!empty($event->registration_end_date))
                                 <span
-                                    class="text-[10px] font-extrabold text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded-lg border border-amber-200/80">
-                                    Last Date: ⏳ {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
+                                    class="text-[9px] font-bold text-amber-700 bg-amber-100/90 px-2 py-0.5 rounded-full border border-amber-200/80 shrink-0">
+                                    {{ __('messages.last_date') }}: ⌛ {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
                                 </span>
                             @endif
                         </div>
                         <div class="text-[11px] font-medium text-amber-800 leading-relaxed">
                             @if(in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo']))
-                                Please select details and fill in all mandatory fields carefully before submitting your
-                                registration.
+                                {{ __('messages.notice_instructions_desc') }}
                             @elseif(!empty($event->description))
                                 {!! $event->description !!}
                             @else
-                                Please select student/candidate details and fill in all mandatory fields carefully before
-                                submitting.
+                                {{ __('messages.notice_instructions_desc') }}
                             @endif
                         </div>
                     </div>
@@ -606,14 +606,13 @@
                                     @endphp
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
-                                            <span>Student / Candidate Full Name <span class="text-rose-500">*</span></span>
-                                            <span class="text-[10px] font-normal text-slate-400">(Select student from family
-                                                members)</span>
+                                            <span>{{ __('messages.student_candidate_full_name') }} <span class="text-rose-500">*</span></span>
+                                            <span class="text-[10px] font-normal text-slate-400">{{ __('messages.select_student_from_family') }}</span>
                                         </label>
                                         @if($familyMembers->count() > 0)
                                             <select name="student_name" x-model="selectedStudent" required
                                                 class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 transition-all outline-none">
-                                                <option value="">-- Select Student / Child --</option>
+                                                <option value="">-- {{ __('messages.select_student_child') }} --</option>
                                                 @foreach($familyMembers as $fm)
                                                     <option value="{{ $fm->name }}">{{ $fm->name }} ({{ $fm->relationship }})</option>
                                                 @endforeach
@@ -621,12 +620,11 @@
                                         @else
                                             <div
                                                 class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-2">
-                                                <p class="font-bold">No family members found on your profile.</p>
-                                                <p class="text-[11px]">Please add your children / student under Family Members first to
-                                                    register for Inam Vitaran.</p>
+                                                <p class="font-bold">{{ __('messages.no_family_members_found') }}</p>
+                                                <p class="text-[11px]">{{ __('messages.add_children_family_first') }}</p>
                                                 <a href="{{ route('member.family.index') }}"
                                                     class="inline-block px-3.5 py-1.5 bg-amber-600 text-white font-bold rounded-lg text-[11px]">
-                                                    + Add Family Member
+                                                    + {{ __('messages.add_family_member') }}
                                                 </a>
                                             </div>
                                         @endif
@@ -637,7 +635,7 @@
                                             <!-- STEP 1: Education Type Dropdown -->
                                             <div class="space-y-1">
                                                 <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                    Education Type <span class="text-rose-500">*</span>
+                                                    {{ __('messages.education_type') }} <span class="text-rose-500">*</span>
                                                 </label>
                                                 <select name="education_type" x-model="educationType" required
                                                     @change="education = ''; otherCourse = ''; schoolStandard = ''; schoolStream = ''"
@@ -660,12 +658,12 @@
                                                 <!-- Standard Dropdown -->
                                                 <div class="space-y-1">
                                                     <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                        Standard / Class <span class="text-rose-500">*</span>
+                                                        {{ __('messages.standard_class') }} <span class="text-rose-500">*</span>
                                                     </label>
                                                     <select x-model="schoolStandard" @change="onStandardChange()"
                                                         :required="educationType === 'School'"
                                                         class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
-                                                        <option value="">-- Select Standard --</option>
+                                                        <option value="">-- {{ __('messages.select_standard') }} --</option>
                                                         <option value="1st Standard">1st Standard</option>
                                                         <option value="2nd Standard">2nd Standard</option>
                                                         <option value="3rd Standard">3rd Standard</option>
@@ -678,7 +676,7 @@
                                                         <option value="10th Standard">10th Standard</option>
                                                         <option value="11th Standard">11th Standard</option>
                                                         <option value="12th Standard">12th Standard</option>
-                                                        <option value="Other">Other</option>
+                                                        <option value="Other">{{ __('messages.other') }}</option>
                                                     </select>
                                                 </div>
 
@@ -689,16 +687,16 @@
                                                     x-transition:enter-start="opacity-0 -translate-y-1"
                                                     x-transition:enter-end="opacity-100 translate-y-0">
                                                     <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                        Stream / Branch <span class="text-rose-500">*</span>
+                                                        {{ __('messages.stream_branch') }} <span class="text-rose-500">*</span>
                                                     </label>
                                                     <select x-model="schoolStream" @change="onStreamChange()"
                                                         :required="educationType === 'School' && (schoolStandard === '11th Standard' || schoolStandard === '12th Standard')"
                                                         class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
-                                                        <option value="">-- Select Stream --</option>
+                                                        <option value="">-- {{ __('messages.select_stream') }} --</option>
                                                         <option value="Science">Science</option>
                                                         <option value="Commerce">Commerce</option>
                                                         <option value="Arts">Arts</option>
-                                                        <option value="Other">Other</option>
+                                                        <option value="Other">{{ __('messages.other') }}</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -710,7 +708,7 @@
                                                 x-transition:enter-start="opacity-0 -translate-y-1"
                                                 x-transition:enter-end="opacity-100 translate-y-0" style="display:none">
                                                 <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                    Course / Degree <span class="text-rose-500">*</span>
+                                                    {{ __('messages.course_degree') }} <span class="text-rose-500">*</span>
                                                 </label>
 
                                                 <!-- Custom Dropdown Trigger -->
@@ -720,7 +718,7 @@
                                                         class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-left flex items-center justify-between gap-2 focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none"
                                                         :class="courseDropdownOpen ? 'border-primary-500 ring-2 ring-primary-100 bg-white' : ''">
                                                         <span class="text-slate-900 font-bold"
-                                                            x-text="education || '- Select Course -'"></span>
+                                                            x-text="education || '- {{ __('messages.select_course') }} -'"></span>
                                                         <svg xmlns="http://www.w3.org/2000/svg"
                                                             class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200"
                                                             :class="courseDropdownOpen ? 'rotate-180' : ''" fill="none"
@@ -753,7 +751,7 @@
                                                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
                                                                 </svg>
                                                                 <input type="text" x-ref="courseSearchInput" x-model="courseSearch"
-                                                                    placeholder="Search course..."
+                                                                    placeholder="{{ __('messages.search_course') }}"
                                                                     class="flex-1 text-xs font-medium text-slate-700 bg-transparent outline-none placeholder-slate-400">
                                                                 <button type="button" x-show="courseSearch"
                                                                     @click="courseSearch = ''"
@@ -770,8 +768,7 @@
                                                         <!-- Course List -->
                                                         <div class="overflow-y-auto" style="max-height: 200px;">
                                                             <template x-if="filteredCoursesList.length === 0">
-                                                                <div class="px-4 py-3 text-xs text-slate-400 text-center">No course
-                                                                    found</div>
+                                                                <div class="px-4 py-3 text-xs text-slate-400 text-center">{{ __('messages.no_course_found') }}</div>
                                                             </template>
                                                             <template x-for="course in filteredCoursesList" :key="course">
                                                                 <div @click="education = course; courseDropdownOpen = false; courseSearch = ''"
@@ -798,20 +795,20 @@
                                                 x-transition:enter-start="opacity-0 -translate-y-1"
                                                 x-transition:enter-end="opacity-100 translate-y-0" style="display:none">
                                                 <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                    Enter Course / Standard Name <span class="text-rose-500">*</span>
+                                                    {{ __('messages.enter_course_standard_name') }} <span class="text-rose-500">*</span>
                                                 </label>
                                                 <input type="text" x-model="otherCourse"
                                                     :required="educationType === 'Other' || (educationType !== 'School' && education === 'Other') || (educationType === 'School' && (schoolStandard === 'Other' || schoolStream === 'Other'))"
-                                                    placeholder="Type your course / qualification name"
+                                                    placeholder="{{ __('messages.type_course_name_placeholder') }}"
                                                     class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
                                             </div>
 
                                             <div class="space-y-1">
                                                 <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                    School / College / Institute Name <span class="text-rose-500">*</span>
+                                                    {{ __('messages.school_college_institute_name') }} <span class="text-rose-500">*</span>
                                                 </label>
                                                 <input type="text" name="school_college" x-model="schoolCollege" required
-                                                    placeholder="Enter school or university name"
+                                                    placeholder="{{ __('messages.enter_school_name_placeholder') }}"
                                                     class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
                                             </div>
 
@@ -820,7 +817,7 @@
                                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                                     <div class="space-y-1">
                                                         <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                            Total Marks <span class="text-rose-500">*</span>
+                                                            {{ __('messages.total_marks') }} <span class="text-rose-500">*</span>
                                                         </label>
                                                         <input type="number" step="any" name="total_marks" x-model="totalMarks"
                                                             @input="calcPercentage()" @change="calcPercentage()" required
@@ -830,7 +827,7 @@
 
                                                     <div class="space-y-1">
                                                         <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                                                            Obtained Marks <span class="text-rose-500">*</span>
+                                                            {{ __('messages.obtained_marks') }} <span class="text-rose-500">*</span>
                                                         </label>
                                                         <input type="number" step="any" name="received_marks"
                                                             x-model="receivedMarks" @input="calcPercentage()"
@@ -841,13 +838,12 @@
                                                     <div class="space-y-1">
                                                         <label
                                                             class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
-                                                            <span>Percentage (%) <span class="text-rose-500">*</span></span>
+                                                            <span>{{ __('messages.percentage') }} <span class="text-rose-500">*</span></span>
                                                             <span
-                                                                class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80">Auto
-                                                                Calculated</span>
+                                                                class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80">{{ __('messages.auto_calculated') }}</span>
                                                         </label>
                                                         <input type="text" name="percentage" x-model="percentage" readonly
-                                                            tabindex="-1" required placeholder="Auto-calculated (e.g. 86.67%)"
+                                                            tabindex="-1" required placeholder="{{ __('messages.auto_calculated_placeholder') }}"
                                                             class="w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-lg text-xs font-black text-slate-800 cursor-not-allowed outline-none select-none focus:ring-0">
                                                     </div>
                                                 </div>
@@ -857,21 +853,17 @@
                                             <div class="space-y-1">
                                                 <label
                                                     class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
-                                                    <span>Upload Marksheet File (Image / PDF) <span class="text-rose-500"
+                                                    <span>{{ __('messages.upload_marksheet_file') }} <span class="text-rose-500"
                                                             x-show="!isEditing || !marksheetUrl">*</span></span>
-                                                    <span class="text-[10px] text-slate-400 font-medium">Supported: JPG, PNG, PDF
-                                                        (Max
-                                                        5MB)</span>
+                                                    <span class="text-[10px] text-slate-400 font-medium">{{ __('messages.supported_file_types') }}</span>
                                                 </label>
 
                                                 <template x-if="isEditing && marksheetUrl">
                                                     <div
                                                         class="text-[11px] font-semibold text-slate-700 bg-amber-50 p-2 rounded-lg border border-amber-200 flex items-center justify-between">
-                                                        <span>Current File: <a :href="marksheetUrl" target="_blank"
-                                                                class="font-extrabold text-primary-600 hover:underline">View
-                                                                Uploaded Marksheet ↗</a></span>
-                                                        <span class="text-[10px] text-slate-400 font-normal">(Upload new file below
-                                                            to replace)</span>
+                                                        <span>{{ __('messages.current_file') }} <a :href="marksheetUrl" target="_blank"
+                                                                class="font-extrabold text-primary-600 hover:underline">{{ __('messages.view_uploaded_marksheet') }} ↗</a></span>
+                                                        <span class="text-[10px] text-slate-400 font-normal">{{ __('messages.upload_new_file_to_replace') }}</span>
                                                     </div>
                                                 </template>
 
@@ -883,10 +875,9 @@
                                             </div>
 
                                             <div class="space-y-1">
-                                                <label class="text-[11px] font-bold text-slate-700">Special Achievement / Remarks
-                                                    (Optional)</label>
+                                                <label class="text-[11px] font-bold text-slate-700">{{ __('messages.special_achievement_remarks') }}</label>
                                                 <textarea name="remarks" x-model="remarks" rows="2"
-                                                    placeholder="Mention rank, board awards, sports honors or extra accomplishments"
+                                                    placeholder="{{ __('messages.remarks_placeholder') }}"
                                                     class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none"></textarea>
                                             </div>
                                         </div>
@@ -1509,6 +1500,33 @@
                                             class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all outline-none">
                                     </div>
 
+                                    <!-- Person Counter (+ Person -) -->
+                                    <div x-data="{ count: {{ old('person_count', (isset($registration) && !empty($registration->form_data['person_count'])) ? $registration->form_data['person_count'] : 1) }} }" class="space-y-1.5 pt-1">
+                                        <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                                            <span>{{ __('messages.ketla_person_attending') }} <span class="text-rose-500">*</span></span>
+                                        </label>
+                                        <div class="flex items-center justify-between bg-slate-100/90 p-1.5 rounded-xl border border-slate-200/80">
+                                            <button type="button" 
+                                                    @click="if (count > 1) count--" 
+                                                    :disabled="count <= 1"
+                                                    class="w-9 h-9 rounded-lg bg-white hover:bg-slate-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-slate-800 font-black text-lg flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                                &minus;
+                                            </button>
+
+                                            <div class="flex items-center gap-1.5 px-3">
+                                                <span class="text-base font-black text-primary-600" x-text="count"></span>
+                                                <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider" x-text="count > 1 ? '{{ __('messages.persons') }}' : '{{ __('messages.person') }}'"></span>
+                                            </div>
+
+                                            <button type="button" 
+                                                    @click="count++" 
+                                                    class="w-9 h-9 rounded-lg bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-black text-lg flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                                &#43;
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="person_count" :value="count">
+                                    </div>
+
                                     <div class="space-y-1">
                                         <label class="text-[11px] font-bold text-slate-700">Special Notes / Remarks
                                             (Optional)</label>
@@ -1525,12 +1543,12 @@
                                 @if(auth()->check())
                                     <a href="{{ route('member.events.index') }}"
                                         class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
-                                        Cancel
+                                        {{ __('messages.cancel') }}
                                     </a>
                                 @endif
                                 <button type="submit"
                                     class="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-md hover:shadow-lg transition-all transform active:scale-95 flex items-center gap-2 uppercase tracking-wider cursor-pointer">
-                                    <span>Submit Registration</span>
+                                    <span>{{ __('messages.submit_registration') }}</span>
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -1550,11 +1568,10 @@
                         <div class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                             <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider">
-                                Submitted Registration Details ({{ $registrations->count() }})
+                                {{ __('messages.submitted_registration_details') }} ({{ $registrations->count() }})
                             </h3>
                         </div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Click card to view full
-                            submitted details</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('messages.click_card_to_view_full') }}</span>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1629,11 +1646,15 @@
                                                     </div>
                                                 </div>
                                             @else
-                                                <div>
-                                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Participant
-                                                        Name</span>
-                                                    <span
-                                                        class="font-extrabold text-slate-900 text-xs block">{{ $fd['full_name'] ?? '-' }}</span>
+                                                <div class="space-y-1">
+                                                    <div>
+                                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Participant Name</span>
+                                                        <span class="font-extrabold text-slate-900 text-xs block">{{ $fd['full_name'] ?? '-' }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Ketla Person</span>
+                                                        <span class="font-bold text-primary-600 text-xs block">👥 {{ $fd['person_count'] ?? 1 }} Person(s)</span>
+                                                    </div>
                                                 </div>
                                             @endif
                                         </div>

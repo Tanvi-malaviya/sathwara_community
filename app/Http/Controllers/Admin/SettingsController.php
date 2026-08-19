@@ -48,7 +48,14 @@ class SettingsController extends Controller
             'mail_from_name'    => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Sathwara Community Portal')),
         ];
 
-        return view('admin.settings.index', compact('settings', 'emailSettings'));
+        $paymentSettings = [
+            'member_signup_fee'          => Setting::get('member_signup_fee', '1000'),
+            'business_registration_fee'  => Setting::get('business_registration_fee', '500'),
+            'razorpay_key_id'            => Setting::get('razorpay_key_id', env('RAZORPAY_KEY_ID', '')),
+            'razorpay_key_secret'        => Setting::get('razorpay_key_secret', env('RAZORPAY_KEY_SECRET', '')),
+        ];
+
+        return view('admin.settings.index', compact('settings', 'emailSettings', 'paymentSettings'));
     }
 
     /**
@@ -62,9 +69,9 @@ class SettingsController extends Controller
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string|max:2000',
             'primary_color' => 'nullable|string|max:20',
-            'contact_phone' => 'nullable|string|max:50',
+            'contact_phone' => 'nullable|digits:10',
             'contact_email' => 'nullable|email|max:255',
-            'contact_whatsapp' => 'nullable|string|max:50',
+            'contact_whatsapp' => 'nullable|digits:10',
             'contact_address' => 'nullable|string|max:1000',
             'contact_map_iframe' => 'nullable|string',
             'social_facebook' => 'nullable|string|max:255',

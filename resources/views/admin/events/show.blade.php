@@ -3,24 +3,40 @@
 @section('page_title', __('messages.event_details'))
 
 @section('content')
-<div class="space-y-2" x-data="{ activeTab: 'all', showDetailsModal: false, showDescModal: false, selectedRegistration: {} }">
+<div class="space-y-6" x-data="{ activeTab: 'all', showDetailsModal: false, showDescModal: false, selectedRegistration: {} }">
     <!-- Top Action Bar -->
     <div class="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-center gap-2.5">
             <a href="{{ route('admin.events.index') }}" 
-               class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors flex items-center justify-center font-bold text-xs" 
+               class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors flex items-center justify-center font-bold text-xs shrink-0" 
                title="{{ __('messages.back_to_website') }}">
                 &larr;
             </a>
             <div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                     <h1 class="text-sm font-extrabold text-slate-900 leading-tight">{{ $event->title }}</h1>
+                    
+                    <!-- Status Badge -->
                     <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider
                         {{ $event->status == 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($event->status == 'cancelled' ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-slate-100 text-slate-600 border border-slate-200') }}">
                         {{ __('messages.' . strtolower($event->status)) != 'messages.' . strtolower($event->status) ? __('messages.' . strtolower($event->status)) : ucfirst($event->status) }}
                     </span>
+
+                    <!-- Event Type Badge -->
+                    @if($event->event_type === 'inam_vitaran')
+                        <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-extrabold uppercase tracking-wider">🏆 {{ __('messages.inam_vitaran') }}</span>
+                    @elseif($event->event_type === 'yuva_melo')
+                        <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-800 border border-purple-200 text-[10px] font-extrabold uppercase tracking-wider">⚡ {{ __('messages.yuva_melo') }}</span>
+                    @else
+                        <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-extrabold uppercase tracking-wider">📢 {{ __('messages.general_event') }}</span>
+                    @endif
+
+                    <!-- Fee Badge -->
+                    @if($event->pass_fee > 0)
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold uppercase tracking-wider">₹{{ number_format($event->pass_fee, 2) }} {{ __('messages.fee') }}</span>
+                    @endif
                 </div>
-                <p class="text-[11px] text-slate-400 font-medium">{{ __('messages.created_on') }} {{ $event->created_at->format('d M Y, h:i A') }}</p>
+                <p class="text-[11px] text-slate-400 font-medium mt-0.5">{{ __('messages.created_on') }} {{ $event->created_at->format('d M Y, h:i A') }}</p>
             </div>
         </div>
 
@@ -77,38 +93,20 @@
     </div>
 
     <!-- Main Grid Content (50-50 Equal Split: Left Photo, Right Details) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-        <!-- Left Side: Cover Photo Card (Equal 50% Column) -->
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden relative">
-                <div class="relative w-full h-64 sm:h-80 lg:h-[400px] bg-slate-900">
-                    <img src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
-                         alt="{{ $event->title }}" 
-                         class="w-full h-full object-cover opacity-95">
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20"></div>
-                    
-                    <!-- Badges overlay -->
-                    <div class="absolute bottom-3.5 left-3.5 right-3.5 flex items-center gap-1.5 flex-wrap">
-                        @if($event->event_type === 'inam_vitaran')
-                            <span class="px-2.5 py-1 rounded-md bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">🏆 {{ __('messages.inam_vitaran') }}</span>
-                        @elseif($event->event_type === 'yuva_melo')
-                            <span class="px-2.5 py-1 rounded-md bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">⚡ {{ __('messages.yuva_melo') }}</span>
-                        @else
-                            <span class="px-2.5 py-1 rounded-md bg-slate-800 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">📢 {{ __('messages.general_event') }}</span>
-                        @endif
-
-                        @if($event->pass_fee > 0)
-                            <span class="px-2.5 py-1 rounded-md bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">₹{{ number_format($event->pass_fee, 2) }} Fee</span>
-                        @endif
-                    </div>
-                </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <!-- Left Side: Cover Photo Card -->
+        <div class="lg:col-span-1 flex flex-col">
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-3 flex-1 flex items-center justify-center min-h-[260px] max-h-[340px]">
+                <img src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
+                     alt="{{ $event->title }}" 
+                     class="w-full h-full object-contain max-h-[320px] rounded-lg">
             </div>
         </div>
 
-        <!-- Right Side: All Details (Equal 50% Column) -->
-        <div class="lg:col-span-1 space-y-4 flex flex-col justify-between">
+        <!-- Right Side: All Details -->
+        <div class="lg:col-span-1 space-y-3 flex flex-col justify-between">
             <!-- Event Schedule & Location Grid -->
-            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3.5">
+            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3">
                 <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">{{ __('messages.event_schedule_location') }}</h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -149,21 +147,28 @@
     </div>
 
     <!-- Embedded Event Registrations Section -->
-    @if($event->registration_option)
+    @if($event->registration_option || $event->has_registration_form || ($event->event_type ?? 'normal') === 'normal')
         @php
             $totalCount = count($registrations);
             $pendingCount = $registrations->where('status', 'pending')->count();
             $approvedCount = $registrations->where('status', 'approved')->count();
             $rejectedCount = $registrations->where('status', 'rejected')->count();
+            $totalPersonsSum = $registrations->sum(function($r) {
+                return (int) ($r->form_data['person_count'] ?? 1);
+            });
         @endphp
 
-        <div id="registrations-section" class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-4 pt-4">
+        <div id="registrations-section" class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-4 pt-4 mt-6">
             <!-- Section Title & Filter Tabs -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                 <div>
-                    <h2 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                    <h2 class="text-sm font-black text-slate-900 flex items-center gap-2 flex-wrap">
                         <span>{{ __('messages.event_registrations') }}</span>
                         <span class="px-2 py-0.5 rounded-full text-xs font-black bg-primary-50 text-primary-700 border border-primary-100">{{ $totalCount }} {{ __('messages.submitted') }}</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200/80 inline-flex items-center gap-1">
+                            <span>👥 {{ __('messages.total_attending_persons') }}:</span>
+                            <span class="text-emerald-700 font-extrabold">{{ $totalPersonsSum }}</span>
+                        </span>
                     </h2>
                     <p class="text-[11px] text-slate-400 font-medium">{{ __('messages.review_manage_registrations_desc') }}</p>
                 </div>
@@ -197,7 +202,10 @@
                         <span>{{ __('messages.rejected') }}</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-100 text-rose-800">{{ $rejectedCount }}</span>
                     </button>
-                       <!-- Registrations Cards Grid -->
+                </div>
+            </div>
+
+            <!-- Registrations Cards Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 @forelse($registrations as $index => $reg)
                     @php
@@ -304,6 +312,13 @@
                                     </div>
                                 @endif
 
+                                @if(!empty($fd['person_count']))
+                                    <div class="bg-primary-50/80 p-1.5 rounded-lg border border-primary-100 col-span-2">
+                                        <span class="text-[8px] font-extrabold text-primary-700 uppercase block tracking-wider">Ketla Person (Attending)</span>
+                                        <span class="font-black text-primary-800 block text-xs">👥 {{ $fd['person_count'] }} Person(s)</span>
+                                    </div>
+                                @endif
+
                                 @if(!empty($fd['occupation']))
                                     <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
                                         <span class="text-[8px] font-extrabold text-slate-400 uppercase block tracking-wider">Occupation</span>
@@ -340,7 +355,7 @@
                                     <form method="POST" action="{{ route('admin.events.registrations.reject', $reg->id) }}" class="inline">
                                         @csrf
                                         <button type="submit" title="{{ __('messages.reject') }}" 
-                                                class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 hover:bg-rose-100 text-[9px] font-empty text-[9px] font-extrabold border border-rose-200 transition-colors inline-flex items-center gap-0.5">
+                                                class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 hover:bg-rose-100 text-[9px] font-extrabold border border-rose-200 transition-colors inline-flex items-center gap-0.5">
                                             ✕ Reject
                                         </button>
                                     </form>

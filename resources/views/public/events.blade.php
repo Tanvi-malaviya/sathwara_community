@@ -65,9 +65,9 @@
                             @endif
 
                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                                <span class="text-[8px] font-black text-amber-800 bg-amber-50/95 backdrop-blur-sm border border-amber-200 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">🏆 Inam</span>
+                                <span class="text-[8px] font-black text-amber-800 bg-amber-50/95 backdrop-blur-sm border border-amber-200 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">🏆 {{ __('messages.inam') }}</span>
                             @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                <span class="text-[8px] font-black text-purple-800 bg-purple-50/95 backdrop-blur-sm border border-purple-200 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">⚡ Yuva</span>
+                                <span class="text-[8px] font-black text-purple-800 bg-purple-50/95 backdrop-blur-sm border border-purple-200 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">⚡ {{ __('messages.yuva') }}</span>
                             @endif
                         </div>
                     </div>
@@ -91,7 +91,7 @@
                             </div>
                             @if(!empty($event->registration_end_date))
                                 <span class="text-[9px] font-extrabold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 whitespace-nowrap">
-                                    ⏳ Last Date: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
+                                    ⏳ {{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
                                 </span>
                             @endif
                         </div>

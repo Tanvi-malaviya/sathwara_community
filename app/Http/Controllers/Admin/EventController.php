@@ -516,7 +516,7 @@ class EventController extends Controller
                     ]);
                 }
             } else {
-                fputcsv($file, ['Reg ID', 'Member Name', 'Participant Name', 'Contact Number', 'Remarks', 'Submission Date']);
+                fputcsv($file, ['Reg ID', 'Member Name', 'Participant Name', 'Contact Number', 'Person Count', 'Remarks', 'Submission Date']);
                 foreach ($registrations as $index => $r) {
                     $fd = $r->form_data ?? [];
                     fputcsv($file, [
@@ -524,6 +524,7 @@ class EventController extends Controller
                         $r->user ? $r->user->name : '',
                         $fd['full_name'] ?? ($r->user ? $r->user->name : ''),
                         $fd['contact_number'] ?? '',
+                        $fd['person_count'] ?? 1,
                         $fd['remarks'] ?? '',
                         $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
                     ]);

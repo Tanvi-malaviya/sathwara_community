@@ -90,7 +90,7 @@
                         <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 flex-wrap gap-1">
                             <span>📅 {{ date('d-M-Y', strtotime($event->date)) }}</span>
                             @if(!empty($event->registration_end_date))
-                                <span class="text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 font-extrabold">⏳ Last Date: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
+                                <span class="text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 font-extrabold">⏳ {{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
                             @else
                                 <span>🕒 {{ date('h:i A', strtotime($event->time)) }}</span>
                             @endif

@@ -231,7 +231,7 @@
                         </div>
                         <div class="space-y-0.5">
                             <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.phone_whatsapp_number') }} <span class="text-rose-500">*</span></label>
-                            <input type="text" name="phone" value="{{ old('phone') }}" required placeholder="9876543210" class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                            <input type="text" name="phone" value="{{ old('phone') }}" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="9876543210" class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
                         </div>
                     </div>
 

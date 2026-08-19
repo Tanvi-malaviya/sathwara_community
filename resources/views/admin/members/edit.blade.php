@@ -83,7 +83,7 @@
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase">Phone / WhatsApp Number</label>
+                    <label class="text-[11px] font-bold text-slate-500 uppercase">{{ __('messages.phone_whatsapp_number') }}</label>
                     <input type="text" name="phone" value="{{ old('phone', $profile ? $profile->phone : '') }}" required placeholder="9876543210" 
                            maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
                            class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">

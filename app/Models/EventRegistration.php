@@ -15,6 +15,9 @@ class EventRegistration extends Model
         'status',
         'form_data',
         'is_selected',
+        'payment_id',
+        'payment_status',
+        'payment_amount',
     ];
 
     protected $casts = [

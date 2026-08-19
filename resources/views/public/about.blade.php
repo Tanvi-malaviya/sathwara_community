@@ -13,7 +13,7 @@
         
         <!-- Clean Section Header -->
         <div class="text-center max-w-2xl mx-auto mb-6 space-y-1">
-            <span class="text-xs font-bold text-primary-600 uppercase tracking-widest">
+            <span class="text-sm sm:text-base font-extrabold text-primary-600 uppercase tracking-widest">
                 {{ __('messages.our_foundation') }}
             </span>
             <h2 class="text-xl md:text-2xl font-bold text-slate-900">
@@ -86,14 +86,14 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative">
                 <!-- Left Title Column -->
                 <div class="lg:col-span-4 space-y-2 border-b lg:border-b-0 lg:border-r border-slate-100 pb-4 lg:pb-0 lg:pr-6">
-                    <span class="text-[11px] font-bold text-primary-600 uppercase tracking-widest flex items-center gap-1.5">
+                    <span class="text-sm sm:text-base font-extrabold text-primary-600 uppercase tracking-widest flex items-center gap-1.5">
                         <span>🏛️</span>
                         <span>{{ __('messages.history') }}</span>
                     </span>
                     <h2 class="text-xl md:text-2xl font-extrabold text-slate-900 leading-tight">
                         {{ $historyTitle ?? __('messages.heritage_journey') }}
                     </h2>
-                    <p class="text-xs text-slate-500 font-medium">
+                    <p class="text-sm sm:text-base font-bold text-slate-500">
                         {{ __('messages.heritage_subtitle') }}
                     </p>
                 </div>
@@ -117,14 +117,14 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-2xl mx-auto mb-8 space-y-1">
-            <span class="text-xs font-bold text-primary-600 uppercase tracking-widest flex items-center justify-center gap-1.5">
+            <span class="text-sm sm:text-base font-extrabold text-primary-600 uppercase tracking-widest flex items-center justify-center gap-1.5">
                 <span>🚀</span>
                 <span>{{ __('messages.timeline') }}</span>
             </span>
             <h2 class="text-xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
                 {{ __('messages.milestones_achievements') }}
             </h2>
-            <p class="text-xs text-slate-500 font-medium">
+            <p class="text-sm font-semibold text-slate-600">
                 {{ __('messages.milestones_subtitle') }}
             </p>
         </div>

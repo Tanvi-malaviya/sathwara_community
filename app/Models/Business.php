@@ -32,6 +32,9 @@ class Business extends Model
         'youtube',
         'linkedin',
         'approved_at',
+        'payment_id',
+        'payment_status',
+        'payment_amount',
     ];
 
     protected $casts = [

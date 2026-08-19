@@ -27,7 +27,15 @@
             <!-- Session Status / Expiry Alerts -->
             @if (session('status'))
                 <div class="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg p-2.5 text-center">
-                    {{ session('status') }}
+                    @if(session('status') == 'We have emailed your password reset verification code.')
+                        {{ __('messages.otp_email_sent_status') }}
+                    @elseif(session('status') == 'Code verified. You can now reset your password.')
+                        {{ __('messages.otp_code_verified_status') }}
+                    @elseif(session('status') == 'Your password has been successfully reset. You can now log in.')
+                        {{ __('messages.password_reset_success_status') }}
+                    @else
+                        {{ session('status') }}
+                    @endif
                 </div>
             @endif
 
