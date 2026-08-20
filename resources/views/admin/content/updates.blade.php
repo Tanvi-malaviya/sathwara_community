@@ -66,7 +66,7 @@
             <table class="w-full text-left border-collapse table-fixed">
                 <thead>
                     <tr
-                        class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
+                        class="bg-slate-50 text-xs font-black uppercase text-slate-700 tracking-wider border-b border-slate-200">
                         <th class="py-2 px-3" style="width: 280px;">{{ __('messages.headline') }}</th>
                         <th class="py-2 px-3">{{ __('messages.description') }}</th>
                         <th class="py-2 px-3" style="width: 120px;">{{ __('messages.date') }}</th>
@@ -155,147 +155,151 @@
         </div>
 
         <!-- ============ ADD MODAL ============ -->
-        <div x-show="showAddModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
-            x-cloak>
-            <div @click.away="showAddModal = false"
-                class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
-                <button @click="showAddModal = false"
-                    class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <h3 class="text-xs font-bold text-slate-900 pr-6 font-display">
-                    {{ __('messages.new_announcement_bulletin') }}</h3>
-                <form method="POST" action="{{ route('admin.content.updates.store') }}" enctype="multipart/form-data"
-                    class="space-y-3">
-                    @csrf
-                    @if($errors->any())
-                        <div class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-[10px] font-semibold rounded-xl">
-                            <ul class="list-disc pl-4 space-y-0.5">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+        <template x-teleport="body">
+            <div x-show="showAddModal"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
+                x-cloak>
+                <div @click.away="showAddModal = false"
+                    class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
+                    <button @click="showAddModal = false"
+                        class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <h3 class="text-xs font-bold text-slate-900 pr-6 font-display">
+                        {{ __('messages.new_announcement_bulletin') }}</h3>
+                    <form method="POST" action="{{ route('admin.content.updates.store') }}" enctype="multipart/form-data"
+                        class="space-y-3">
+                        @csrf
+                        @if($errors->any())
+                            <div class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-[10px] font-semibold rounded-xl">
+                                <ul class="list-disc pl-4 space-y-0.5">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.headline_title') }}</label>
+                            <input type="text" name="title" value="{{ old('title') }}" required
+                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
                         </div>
-                    @endif
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.headline_title') }}</label>
-                        <input type="text" name="title" value="{{ old('title') }}" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.publish_date') }}</label>
-                        <input type="date" name="publish_date" value="{{ old('publish_date', date('Y-m-d')) }}" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.image_file_optional') }}</label>
-                        <input type="file" name="image"
-                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
-                        <select name="status" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
-                            <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>
-                                {{ __('messages.published') }}</option>
-                            <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.announcement_content') }}</label>
-                        <textarea name="description" rows="3" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">{{ old('description') }}</textarea>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showAddModal = false"
-                            class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
-                        <button type="submit"
-                            class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">{{ __('messages.publish_bulletin') }}</button>
-                    </div>
-                </form>
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.publish_date') }}</label>
+                            <input type="date" name="publish_date" value="{{ old('publish_date', date('Y-m-d')) }}" required
+                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                        </div>
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.image_file_optional') }}</label>
+                            <input type="file" name="image"
+                                class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                        </div>
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
+                            <select name="status" required
+                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                                <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>
+                                    {{ __('messages.published') }}</option>
+                                <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.announcement_content') }}</label>
+                            <textarea name="description" rows="3" required
+                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">{{ old('description') }}</textarea>
+                        </div>
+                        <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+                            <button type="button" @click="showAddModal = false"
+                                class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                            <button type="submit"
+                                class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">{{ __('messages.publish_bulletin') }}</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+        </template>
 
         <!-- ============ EDIT MODAL ============ -->
-        <div x-show="showEditModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
-            x-cloak>
-            <div @click.away="showEditModal = false"
-                class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
-                <button @click="showEditModal = false"
-                    class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <h3 class="text-xs font-bold text-slate-900 pr-6 font-display">
-                    {{ __('messages.edit_announcement_bulletin') }}</h3>
-                <form method="POST" :action="editUpdate.update_url" enctype="multipart/form-data" class="space-y-3">
-                    @csrf
-                    @method('PUT')
-                    @if($errors->any())
-                        <div class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-[10px] font-semibold rounded-xl">
-                            <ul class="list-disc pl-4 space-y-0.5">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+        <template x-teleport="body">
+            <div x-show="showEditModal"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
+                x-cloak>
+                <div @click.away="showEditModal = false"
+                    class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
+                    <button @click="showEditModal = false"
+                        class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <h3 class="text-xs font-bold text-slate-900 pr-6 font-display">
+                        {{ __('messages.edit_announcement_bulletin') }}</h3>
+                    <form method="POST" :action="editUpdate.update_url" enctype="multipart/form-data" class="space-y-3">
+                        @csrf
+                        @method('PUT')
+                        @if($errors->any())
+                            <div class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-[10px] font-semibold rounded-xl">
+                                <ul class="list-disc pl-4 space-y-0.5">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.headline_title') }}</label>
+                            <input type="text" name="title" :value="editUpdate.title" required
+                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
                         </div>
-                    @endif
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.headline_title') }}</label>
-                        <input type="text" name="title" :value="editUpdate.title" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.publish_date') }}</label>
-                        <input type="date" name="publish_date" :value="editUpdate.publish_date" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.replace_image_optional') }}</label>
-                        <input type="file" name="image"
-                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
-                        <select name="status" required
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
-                            <option value="published" :selected="editUpdate.status === 'published'">
-                                {{ __('messages.published') }}</option>
-                            <option value="draft" :selected="editUpdate.status === 'draft'">{{ __('messages.draft') }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="space-y-0.5">
-                        <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.announcement_content') }}</label>
-                        <textarea name="description" rows="3" required x-text="editUpdate.description"
-                            class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400"></textarea>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showEditModal = false"
-                            class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
-                        <button type="submit"
-                            class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">{{ __('messages.save_changes') }}</button>
-                    </div>
-                </form>
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.publish_date') }}</label>
+                            <input type="date" name="publish_date" :value="editUpdate.publish_date" required
+                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                        </div>
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.replace_image_optional') }}</label>
+                            <input type="file" name="image"
+                                class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                        </div>
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
+                            <select name="status" required
+                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                                <option value="published" :selected="editUpdate.status === 'published'">
+                                    {{ __('messages.published') }}</option>
+                                <option value="draft" :selected="editUpdate.status === 'draft'">{{ __('messages.draft') }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="space-y-0.5">
+                            <label
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.announcement_content') }}</label>
+                            <textarea name="description" rows="3" required x-text="editUpdate.description"
+                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400"></textarea>
+                        </div>
+                        <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+                            <button type="button" @click="showEditModal = false"
+                                class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                            <button type="submit"
+                                class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">{{ __('messages.save_changes') }}</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+        </template>
     </div>
 @endsection

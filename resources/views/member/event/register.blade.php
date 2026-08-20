@@ -1,6 +1,6 @@
 @extends(request()->routeIs('member.*') && auth()->check() ? 'layouts.member' : 'layouts.public')
 
-@section('page_title', $event->title . ' Registration')
+@section('page_title', $event->title . (app()->getLocale() === 'gu' ? ' - નોંધણી ફોર્મ' : ' Registration'))
 
 @section('content')
     @if(!request()->routeIs('member.*') || !auth()->check())
@@ -313,6 +313,7 @@
                     editingRegistrationId: null,
                     previewLang: @json(app()->getLocale() === 'gu' ? 'gu' : 'en'),
                     marksheetUrl: '',
+                    mainPageTab: 'form',
                     yuvaTab: 1,
                     showDetailsModal: false,
                     showSiblingModal: false,
@@ -354,6 +355,8 @@
                         }
                     },
                     editRegistration(reg) {
+                        this.showDetailsModal = false;
+                        this.mainPageTab = 'form';
                         let fd = reg.form_data || {};
                         this.isEditing = true;
                         this.editingRegistrationId = reg.id;
@@ -366,7 +369,7 @@
                         if (rawEt === 'College (UG / PG / Professional)') mappedEt = 'College';
                         if (rawEt === 'Diploma / Polytechnic') mappedEt = 'Diploma';
                         if (rawEt === 'ITI Trades') mappedEt = 'ITI';
-                        this.educationType = mappedEt;
+                        this.educationType = mappedEt || 'School';
 
                         let rawEdu = fd.education || '';
                         this.schoolStandard = '';
@@ -387,7 +390,7 @@
                                 this.education = 'Other';
                                 this.otherCourse = rawEdu;
                             } else {
-                                this.education = '';
+                                this.education = rawEdu;
                                 this.otherCourse = '';
                             }
                         }
@@ -435,10 +438,7 @@
                         this.yuvaTab = 1;
 
                         // Scroll smoothly to form card
-                        const elem = document.getElementById('registrationFormCard') || document.getElementById('eventDynamicRegisterForm');
-                        if (elem) {
-                            elem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     },
                     cancelEdit() {
                         this.isEditing = false;
@@ -541,30 +541,121 @@
                         } else {
                             this.percentage = '';
                         }
+                    },
+                    printBiodata() {
+                        const el = document.getElementById('printableBiodata');
+                        if (!el) return;
+                        const w = window.open('', '_blank', 'width=850,height=950');
+                        if (!w) {
+                            alert('Please allow pop-ups for this website to print/download biodata.');
+                            return;
+                        }
+                        const htmlContent = el.innerHTML;
+                        const docContent = '<!DOCTYPE html>' +
+'<html>' +
+'<head>' +
+'    <meta charset="utf-8">' +
+'    <title>Candidate Biodata - Sathwara Yuva Melo</title>' +
+'    <script src="https://cdn.tailwindcss.com"><\/script>' +
+'    <style>' +
+'        * { box-sizing: border-box; margin: 0; padding: 0; }' +
+'        body {' +
+'            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;' +
+'            background: #f1f5f9;' +
+'            color: #0f172a;' +
+'            padding: 16px;' +
+'            display: flex;' +
+'            justify-content: center;' +
+'        }' +
+'        .biodata-sheet {' +
+'            background: #ffffff;' +
+'            width: 100%;' +
+'            max-width: 680px;' +
+'            padding: 14px;' +
+'            border: 2px solid #0f172a;' +
+'            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' +
+'        }' +
+'        table { width: 100%; border-collapse: collapse; table-layout: fixed; }' +
+'        td, th { padding: 3px 6px; word-break: break-word; font-size: 11px; }' +
+'        @media print {' +
+'            body {' +
+'                background: #ffffff !important;' +
+'                padding: 0 !important;' +
+'                margin: 0 !important;' +
+'                display: block !important;' +
+'            }' +
+'            @page {' +
+'                margin: 6mm 8mm;' +
+'                size: A4 portrait;' +
+'            }' +
+'            .biodata-sheet {' +
+'                border: 2px solid #0f172a !important;' +
+'                box-shadow: none !important;' +
+'                max-width: 100% !important;' +
+'                padding: 10px !important;' +
+'                page-break-inside: avoid;' +
+'            }' +
+'            .no-print { display: none !important; }' +
+'        }' +
+'    </style>' +
+'</head>' +
+'<body>' +
+'    <div class="biodata-sheet">' +
+        htmlContent +
+'    </div>' +
+'</body>' +
+'</html>';
+                        w.document.write(docContent);
+                        w.document.close();
+                        setTimeout(() => { 
+                            w.focus(); 
+                            w.print(); 
+                        }, 500);
                     }
                 };
             }
         </script>
 
         <script type="module" src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs"></script>
-
-        <div class="space-y-3 w-full" x-data="eventRegistrationData()">
-
-            @php
-                $isRegistrationFormDisabled = !($event->has_registration_form ?? $event->registration_option);
-                $isRegistrationClosed = $isRegistrationFormDisabled || (!empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString());
-            @endphp
-
-            <!-- Back to Events Navigation Link -->
-            <div>
+        <div class="space-y-4" x-data="eventRegistrationData()">
+            <!-- Top Navigation & Action Header -->
+            <div class="flex items-center justify-between gap-3 flex-wrap">
                 <a href="{{ auth()->check() && request()->routeIs('member.*') ? route('member.events.index') : route('home') }}"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition-all shadow-2xs group">
                     <svg class="w-3.5 h-3.5 text-slate-400 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
                     </svg>
-                    <span>Back to Events</span>
+                    <span>{{ __('messages.back_to_events') }}</span>
                 </a>
+
+                @if(isset($registrations) && $registrations->count() > 0)
+                    <!-- Top Navigation Tabs -->
+                    <div class="flex items-center gap-1.5 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80">
+                        <button type="button" @click="mainPageTab = 'form'"
+                            :class="mainPageTab === 'form' ? 'bg-white text-slate-900 shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold'"
+                            class="px-3.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span>📝 {{ __('messages.new_registration') }}</span>
+                        </button>
+
+                        <button type="button" @click="mainPageTab = 'submitted'"
+                            :class="mainPageTab === 'submitted' ? 'bg-primary-600 text-white shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold'"
+                            class="px-3.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span>📋 {{ __('messages.submitted_registrations') }}</span>
+                            <span class="text-[10px] px-1.5 py-0.2 rounded-full font-black"
+                                  :class="mainPageTab === 'submitted' ? 'bg-white text-primary-700' : 'bg-primary-500 text-white'">
+                                {{ $registrations->count() }}
+                            </span>
+                        </button>
+                    </div>
+                @endif
             </div>
+
+            <!-- ================= TAB 1: NEW REGISTRATION FORM ================= -->
+            <div x-show="mainPageTab === 'form'" class="space-y-3">
+            @php
+                $isRegistrationFormDisabled = !($event->has_registration_form ?? $event->registration_option);
+                $isRegistrationClosed = $isRegistrationFormDisabled || (!empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString());
+            @endphp
 
             <!-- DEFAULT / CLOSED NOTICE BANNER -->
             @if($isRegistrationFormDisabled)
@@ -746,6 +837,9 @@
                                                 @foreach($familyMembers as $fm)
                                                     <option value="{{ $fm->name }}">{{ $fm->name }} ({{ $fm->relationship }})</option>
                                                 @endforeach
+                                                <template x-if="selectedStudent && !@json($familyMembers->pluck('name')).includes(selectedStudent)">
+                                                    <option :value="selectedStudent" x-text="selectedStudent" selected></option>
+                                                </template>
                                             </select>
                                         @else
                                             <div
@@ -1706,17 +1800,18 @@
                     </div>
                 </div>
             @endif
+            </div> <!-- END TAB 1: NEW REGISTRATION FORM -->
 
             @if(isset($registrations) && $registrations->count() > 0)
-                <!-- COMPACT CARD-STYLE SUBMITTED DETAILS LIST (CLICKABLE FOR FULL MODAL VIEW) -->
-                <div class="space-y-3 pt-2">
+                <!-- ================= TAB 2: SUBMITTED REGISTRATION DETAILS ================= -->
+                <div x-show="mainPageTab === 'submitted'" x-cloak class="space-y-3 pt-1">
                     <div class="flex items-center justify-between px-1">
                         <div class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                             <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider">
                                 {{ __('messages.submitted_registration_details') }} ({{ $registrations->count() }})
                             </h3>
-                        </div>
+</div>
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('messages.click_card_to_view_full') }}</span>
                     </div>
 
@@ -1724,34 +1819,35 @@
                         @foreach($registrations as $index => $reg)
                             @if(!empty($reg->form_data) && (($event->event_type ?? 'normal') !== 'inam_vitaran' || !empty($reg->form_data['student_name'])))
                                     @php 
-                                                                    $fd = $reg->form_data;
+                                        $fd = $reg->form_data;
                                         $cardIndex = $registrations->count() - $index;
-                                        $regNo = $fd['registration_no'] ?? $cardIndex;
+                                        $regNo = $reg->reference_number ? sprintf('%03d', $reg->reference_number) : (isset($fd['registration_no']) && is_numeric($fd['registration_no']) ? sprintf('%03d', (int)$fd['registration_no']) : sprintf('%03d', $cardIndex));
+                                        $isYuva = ($event->event_type ?? 'normal') === 'yuva_melo';
                                     @endphp
-                                    <div @click="selectedRegistration = {{ json_encode([
-                                    'id' => $reg->id,
-                                    'index' => $cardIndex,
-                                    'reg_no' => $regNo,
-                                    'date' => $fd['submission_date'] ?? ($reg->created_at ? $reg->created_at->format('d-M-Y h:i A') : '-'),
-                                    'status' => $reg->status,
-                                    'payment_status' => $reg->payment_status ?? 'unpaid',
-                                    'payment_amount' => $reg->payment_amount ?? 0,
-                                    'form_data' => $fd
-                                ]) }}; showDetailsModal = true"
-                                        class="bg-white border border-slate-200/90 rounded-xl p-4 space-y-3 shadow-xs hover:shadow-md hover:border-primary-400 transition-all cursor-pointer group">
+                                    <div @if($isYuva) @click="selectedRegistration = {{ json_encode([
+                                            'id' => $reg->id,
+                                            'index' => $cardIndex,
+                                            'reg_no' => $regNo,
+                                            'date' => $fd['submission_date'] ?? ($reg->created_at ? $reg->created_at->format('d-M-Y h:i A') : '-'),
+                                            'status' => $reg->status,
+                                            'payment_status' => $reg->payment_status ?? 'unpaid',
+                                            'payment_amount' => $reg->payment_amount ?? 0,
+                                            'form_data' => $fd
+                                        ]) }}; showDetailsModal = true" @endif
+                                        class="bg-white border border-slate-200/90 rounded-xl p-4 space-y-3 shadow-xs {{ $isYuva ? 'hover:shadow-md hover:border-primary-400 transition-all cursor-pointer group' : '' }}">
 
-                                        <!-- Card Header: #Index & Candidate Name -->
+                                        <!-- Card Header: Reference No & Candidate Name -->
                                         <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
                                             <div class="flex items-center gap-1.5 min-w-0">
-                                                <span class="text-xs font-black text-slate-400">#{{ $cardIndex }}</span>
+                                                <span class="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded font-mono font-bold text-[10px]">#{{ $regNo }}</span>
                                                 <h4
-                                                    class="text-xs font-black text-slate-900 truncate group-hover:text-primary-600 transition-colors">
-                                                    {{ $fd['full_name'] ?? $fd['student_name'] ?? 'Registration' }}
+                                                    class="text-xs font-black text-slate-900 truncate {{ $isYuva ? 'group-hover:text-primary-600 transition-colors' : '' }}">
+                                                    {{ $fd['full_name'] ?? $fd['student_name'] ?? __('messages.registration') }}
                                                 </h4>
                                             </div>
                                             <span
                                                 class="text-[9px] font-extrabold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
-                                                Submitted
+                                                {{ __('messages.submitted') }}
                                             </span>
                                         </div>
 
@@ -1759,56 +1855,50 @@
                                         <div class="space-y-2 text-[11px] text-slate-600">
                                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                                 <div>
-                                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Student
-                                                        Name</span>
-                                                    <span
-                                                        class="font-extrabold text-slate-900 text-xs block">{{ $fd['student_name'] ?? '-' }}</span>
+                                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.student_name') }}</span>
+                                                    <span class="font-extrabold text-slate-900 text-xs block">{{ $fd['student_name'] ?? '-' }}</span>
                                                 </div>
                                                 <div class="grid grid-cols-2 gap-2">
                                                     <div>
-                                                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Education</span>
+                                                        <span class="text-[9px] font-bold text-slate-400 uppercase block">{{ __('messages.education') }}</span>
                                                         <span class="font-bold text-slate-800">{{ $fd['education'] ?? '-' }}</span>
                                                     </div>
                                                     <div>
-                                                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Percentage</span>
-                                                        <span
-                                                            class="font-black text-amber-700 bg-amber-50 px-1 py-0.5 rounded border border-amber-200 inline-block text-[10px]">{{ $fd['percentage'] ?? '-' }}</span>
+                                                        <span class="text-[9px] font-bold text-slate-400 uppercase block">{{ __('messages.percentage') }}</span>
+                                                        <span class="font-black text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block text-[10px]">{{ $fd['percentage'] ?? '-' }}</span>
                                                     </div>
                                                 </div>
                                             @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
                                                 <div>
-                                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Full
-                                                        Name</span>
-                                                    <span
-                                                        class="font-extrabold text-slate-900 text-xs block">{{ $fd['full_name'] ?? '-' }}</span>
+                                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.full_name') }}</span>
+                                                    <span class="font-extrabold text-slate-900 text-xs block">{{ $fd['full_name'] ?? '-' }}</span>
                                                 </div>
                                                 <div class="grid grid-cols-2 gap-2">
                                                     <div>
-                                                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Age / Gender</span>
-                                                        <span class="font-bold text-slate-800">{{ $fd['age'] ?? '-' }} Yrs
-                                                            ({{ $fd['gender'] ?? '-' }})</span>
+                                                        <span class="text-[9px] font-bold text-slate-400 uppercase block">{{ __('messages.age_gender') }}</span>
+                                                        <span class="font-bold text-slate-800">{{ $fd['age'] ?? '-' }} {{ __('messages.years') }} ({{ $fd['gender'] ?? '-' }})</span>
                                                     </div>
                                                     <div>
-                                                        <span class="text-[9px] font-bold text-slate-400 uppercase block">Mobile</span>
+                                                        <span class="text-[9px] font-bold text-slate-400 uppercase block">{{ __('messages.mobile') }}</span>
                                                         <span class="font-bold text-slate-800">{{ $fd['mobile_no'] ?? '-' }}</span>
                                                     </div>
                                                 </div>
                                             @else
                                                 <div class="space-y-1">
                                                     <div>
-                                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Participant Name</span>
+                                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.participant_name') }}</span>
                                                         <span class="font-extrabold text-slate-900 text-xs block">{{ $fd['full_name'] ?? '-' }}</span>
                                                     </div>
                                                     <div>
-                                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Ketla Person</span>
-                                                        <span class="font-bold text-primary-600 text-xs block">👥 {{ $fd['person_count'] ?? 1 }} Person(s)</span>
+                                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">{{ __('messages.person_count') }}</span>
+                                                        <span class="font-bold text-primary-600 text-xs block">👥 {{ $fd['person_count'] ?? 1 }} {{ __('messages.persons') }}</span>
                                                     </div>
                                                 </div>
                                             @endif
 
                                             @if(($event->pass_fee ?? 0) > 0 && ($event->event_type ?? 'normal') === 'normal')
                                                 <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px]">
-                                                    <span class="font-bold text-slate-500">💳 Pass Fee:</span>
+                                                    <span class="font-bold text-slate-500">💳 {{ __('messages.pass_fee') }}:</span>
                                                     <span class="font-extrabold px-1.5 py-0.5 rounded {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700' }}">
                                                         ₹{{ number_format($reg->payment_amount ?? $event->pass_fee, 0) }} ({{ strtoupper($reg->payment_status ?? 'unpaid') }})
                                                     </span>
@@ -1819,43 +1909,51 @@
                                         <!-- Card Footer Action Actions (Details, Edit, Delete till last date) -->
                                         @php
                                             $isDeadlinePassed = !empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString();
+                                            $marksheetUrl = $fd['marksheet_url'] ?? null;
+                                            if ($marksheetUrl && !str_starts_with($marksheetUrl, 'http')) {
+                                                $marksheetUrl = asset('storage/' . $marksheetUrl);
+                                            }
                                         @endphp
                                         <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
-                                            <button type="button" @click.stop="selectedRegistration = {{ json_encode([
-                                    'id' => $reg->id,
-                                    'index' => $registrations->count() - $index,
-                                    'date' => $fd['submission_date'] ?? ($reg->created_at ? $reg->created_at->format('d-M-Y h:i A') : '-'),
-                                    'status' => $reg->status,
-                                    'form_data' => $fd
-                                ]) }}; showDetailsModal = true"
-                                                class="text-primary-600 hover:text-primary-700 font-extrabold flex items-center gap-1">
-                                                <span>🔍 Details</span>
-                                            </button>
+                                            @if($isYuva)
+                                                <button type="button" @click.stop="selectedRegistration = {{ json_encode([
+                                                    'id' => $reg->id,
+                                                    'index' => $cardIndex,
+                                                    'date' => $fd['submission_date'] ?? ($reg->created_at ? $reg->created_at->format('d-M-Y h:i A') : '-'),
+                                                    'status' => $reg->status,
+                                                    'form_data' => $fd
+                                                ]) }}; showDetailsModal = true"
+                                                    class="text-primary-600 hover:text-primary-700 font-extrabold flex items-center gap-1 cursor-pointer">
+                                                    <span>🔍 {{ __('messages.details') }}</span>
+                                                </button>
+                                            @elseif(!empty($marksheetUrl))
+                                                <a href="{{ $marksheetUrl }}" target="_blank"
+                                                   class="px-2.5 py-1 bg-primary-50 hover:bg-primary-100 active:scale-95 text-primary-700 font-extrabold text-[11px] rounded-lg border border-primary-200/80 transition-all flex items-center gap-1 cursor-pointer shadow-2xs">
+                                                    <span>📄 {{ __('messages.view_marksheet') }} ↗</span>
+                                                </a>
+                                            @else
+                                                <span class="text-[10px] text-slate-400 font-medium italic">{{ __('messages.no_marksheet') }}</span>
+                                            @endif
 
                                             @if(!$isDeadlinePassed)
                                                 <div class="flex items-center gap-1.5 shrink-0" @click.stop>
                                                     <button type="button"
-                                                        @click="editRegistration({{ json_encode(['id' => $reg->id, 'form_data' => $fd]) }})"
-                                                        class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 font-extrabold text-[11px] rounded-lg border border-amber-200/80 transition-colors flex items-center gap-1 cursor-pointer">
-                                                        ✏️ Edit
+                                                        @click.stop="editRegistration({{ json_encode(['id' => $reg->id, 'form_data' => $fd]) }})"
+                                                        class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-800 font-extrabold text-[11px] rounded-lg border border-amber-200/80 transition-all flex items-center gap-1 cursor-pointer shadow-2xs">
+                                                        ✏️ {{ __('messages.edit') }}
                                                     </button>
 
-                                                    <form method="POST" action="{{ route('member.events.registrations.destroy', $reg->id) }}"
-                                                        onsubmit="return confirm('Are you sure you want to delete registration for {{ $fd['student_name'] ?? $fd['full_name'] ?? 'this candidate' }}?');"
-                                                        class="inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-[11px] rounded-lg border border-rose-200/80 transition-colors flex items-center gap-1 cursor-pointer">
-                                                            🗑️ Delete
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                        @click.stop="$dispatch('confirm-delete', { action: '{{ route('member.events.registrations.destroy', $reg->id) }}', message: '{{ __('messages.confirm_delete_registration') }}' })"
+                                                        class="px-2 py-1 bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 font-extrabold text-[11px] rounded-lg border border-rose-200/80 transition-all flex items-center gap-1 cursor-pointer shadow-2xs">
+                                                        🗑️ {{ __('messages.delete') }}
+                                                    </button>
                                                 </div>
                                             @else
                                                 <span
                                                     class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200"
                                                     title="Editing period closed after last date">
-                                                    🔒 Closed
+                                                    🔒 {{ __('messages.closed') }}
                                                 </span>
                                             @endif
                                         </div>
@@ -1882,8 +1980,6 @@
                                 <div>
                                     <h3 class="text-xs font-extrabold flex items-center gap-2">
                                         <span x-text="(('{{ $event->event_type ?? 'normal' }}' === 'yuva_melo' || selectedRegistration.form_data?.surname) ? (previewLang === 'en' ? 'Candidate Biodata Preview' : 'ઉમેદવાર બાયોડેટા પ્રીવ્યૂ (Candidate Biodata)') : 'Submitted Registration Details')"></span>
-                                        <span class="px-2 py-0.5 rounded bg-primary-500 text-white text-[10px]"
-                                            x-text="'#' + selectedRegistration.index"></span>
                                     </h3>
                                     <p class="text-[10px] text-slate-400 font-medium"
                                         x-text="(previewLang === 'en' ? 'Submitted on: ' : 'સબમિટ તારીખ: ') + (selectedRegistration.date || '')"></p>
@@ -1904,7 +2000,7 @@
                                     </button>
                                 </div>
 
-                                <button type="button" @click="window.print()"
+                                <button type="button" @click="printBiodata()"
                                     class="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer">
                                     <span>🖨️ <span x-text="previewLang === 'en' ? 'Print' : 'પ્રિન્ટ'"></span></span>
                                 </button>
@@ -1926,9 +2022,12 @@
                                     <div class="border-2 border-slate-900 p-2.5 bg-white">
                                         <div class="flex gap-3 items-start">
                                             <!-- Left Photo Box (Fixed Passport Size) -->
-                                            <div class="w-[105px] h-[135px] shrink-0 border border-slate-900 rounded-xs bg-slate-50 overflow-hidden relative flex items-center justify-center shadow-2xs">
+                                            <div style="width: 110px; height: 140px; min-width: 110px; max-width: 110px; min-height: 140px; max-height: 140px; overflow: hidden; flex-shrink: 0;"
+                                                class="shrink-0 border border-slate-900 rounded-xs bg-slate-50 relative flex items-center justify-center shadow-2xs">
                                                 <template x-if="getPhotoUrl(selectedRegistration.form_data)">
-                                                    <img :src="getPhotoUrl(selectedRegistration.form_data)" class="w-full h-full object-cover">
+                                                    <img :src="getPhotoUrl(selectedRegistration.form_data)"
+                                                        style="width: 100%; height: 100%; object-fit: cover; display: block;"
+                                                        class="w-full h-full object-cover">
                                                 </template>
                                                 <template x-if="!getPhotoUrl(selectedRegistration.form_data)">
                                                     <div class="text-center p-1 text-slate-400">
@@ -2177,13 +2276,9 @@
                         </div>
 
                         <!-- Modal Footer -->
-                        <div class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
-                            <button type="button" @click="window.print()"
-                                class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5">
-                                <span>🖨️ Print Biodata</span>
-                            </button>
+                        <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end shrink-0">
                             <button type="button" @click="showDetailsModal = false"
-                                class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                                class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer">
                                 Close Details
                             </button>
                         </div>
@@ -2447,6 +2542,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (paymentIdInput) {
                     paymentIdInput.value = response.razorpay_payment_id;
                 }
+                window.dispatchEvent(new CustomEvent('close-all-modals'));
                 form.submit();
             },
             "prefill": {

@@ -157,8 +157,8 @@
                     🌳
                 </div>
                 <div>
-                    <h3 class="text-sm font-extrabold text-slate-950">{{ __('messages.family_tree_title') }}</h3>
-                    <p class="text-[10px] text-slate-400 font-medium">{{ __('messages.family_tree_subtitle') }}</p>
+                    <h3 class="text-sm sm:text-base font-black text-slate-900">{{ __('messages.family_tree_title') }}</h3>
+                    <p class="text-xs text-slate-400 font-medium">{{ __('messages.family_tree_subtitle') }}</p>
                 </div>
             </div>
             {{-- <a href="{{ route('member.family.index') }}" class="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs rounded-xl border border-emerald-200/60 transition-all inline-flex items-center gap-1.5 shrink-0">
@@ -193,7 +193,7 @@
                                     <span>👤</span> {{ $user->name }}
                                 </h4>
                                 <span class="text-[8px] font-bold text-primary-700 bg-white px-1.5 py-0.5 rounded border border-primary-200 inline-block mt-0.5">
-                                    Head (#{{ sprintf('%05d', $user->id) }})
+                                    {{ __('messages.head') }} (#{{ sprintf('%05d', $user->id) }})
                                 </span>
                             </div>
 
@@ -340,11 +340,11 @@
             <div class="p-8 text-center bg-slate-50/60 rounded-xl border border-slate-100 space-y-3">
                 <span class="text-3xl">👨‍👩‍👧‍👦</span>
                 <div class="space-y-1">
-                    <h4 class="text-xs font-bold text-slate-800">No family members added yet</h4>
-                    <p class="text-[11px] text-slate-400">Add your spouse, children, and family members to build your visual Family Tree.</p>
+                    <h4 class="text-xs font-bold text-slate-800">{{ __('messages.no_family_added') }}</h4>
+                    <p class="text-[11px] text-slate-400">{{ __('messages.add_family_tree_desc') }}</p>
                 </div>
                 <a href="{{ route('member.family.index') }}" class="inline-block px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-all">
-                    + Add Family Members
+                    + {{ __('messages.add_family_member') }}
                 </a>
             </div>
         @endif

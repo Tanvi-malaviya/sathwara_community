@@ -194,7 +194,7 @@
                                     {{ $event->title }}
                                 </h4>
                                 <span class="text-[10px] text-slate-400 font-semibold block">
-                                    {{ $event->galleries->count() }} Photos
+                                    {{ $event->galleries->count() }} {{ __('messages.photos') }}
                                 </span>
                             </div>
                         </div>

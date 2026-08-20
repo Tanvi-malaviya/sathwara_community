@@ -158,6 +158,24 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        /* Balanced Admin Table Headers */
+        table thead th,
+        table thead tr th {
+            font-size: 11.5px !important;
+            font-weight: 700 !important;
+            color: #475569 !important;
+            /* slate-600 */
+            letter-spacing: 0.015em;
+        }
+
+        .font-gujarati table thead th,
+        .font-gujarati table thead tr th {
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            color: #334155 !important;
+            /* slate-700 */
+        }
     </style>
 </head>
 

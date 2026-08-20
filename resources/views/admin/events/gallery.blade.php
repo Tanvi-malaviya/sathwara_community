@@ -49,57 +49,57 @@
     </div>
 
     <!-- Add Image Modal -->
-    <div x-show="showUploadModal" 
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm"
-         x-transition
-         x-cloak>
-        <div class="bg-white rounded-xl max-w-md w-full p-4 border border-slate-100 shadow-xl space-y-3.5 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200"
-             @click.away="showUploadModal = false">
-            
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                <h3 class="text-xs font-extrabold text-slate-950">Add Event Image</h3>
-                <button type="button" @click="showUploadModal = false" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+    <template x-teleport="body">
+        <div x-show="showUploadModal" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm"
+             x-transition
+             x-cloak>
+            <div class="bg-white rounded-xl max-w-md w-full p-4 border border-slate-100 shadow-xl space-y-3.5 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200"
+                 @click.away="showUploadModal = false">
+                
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <h3 class="text-xs font-extrabold text-slate-950">Add Event Image</h3>
+                    <button type="button" @click="showUploadModal = false" class="text-slate-400 hover:text-slate-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Modal Body -->
+                @if ($errors->any())
+                    <div class="p-3 bg-rose-50 text-rose-800 text-[11px] font-semibold rounded-xl">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('admin.gallery.store') }}" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="event_id" value="{{ $event->id }}">
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Select Image / ZIP (Max 50MB)</label>
+                        <input type="file" name="images[]" multiple required accept=".jpg,.jpeg,.png,.webp,.gif,.zip"
+                            @change="$el.name = ($el.files.length === 1 && $el.files[0].name.toLowerCase().endsWith('.zip')) ? 'image' : 'images[]'"
+                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" @click="showUploadModal = false" class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors">
+                            Upload to Gallery
+                        </button>
+                    </div>
+                </form>
             </div>
-            
-            <!-- Modal Body -->
-            @if ($errors->any())
-                <div class="p-3 bg-rose-50 text-rose-800 text-[11px] font-semibold rounded-xl">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('admin.gallery.store') }}" enctype="multipart/form-data" class="space-y-4">
-                @csrf
-                <input type="hidden" name="event_id" value="{{ $event->id }}">
-
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Select Image / ZIP (Max 50MB)</label>
-                    <input type="file" name="images[]" multiple required accept=".jpg,.jpeg,.png,.webp,.gif,.zip"
-                        @change="$el.name = ($el.files.length === 1 && $el.files[0].name.toLowerCase().endsWith('.zip')) ? 'image' : 'images[]'"
-                        class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
-                </div>
-
-
-
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" @click="showUploadModal = false" class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors">
-                        Upload to Gallery
-                    </button>
-                </div>
-            </form>
         </div>
-    </div>
+    </template>
 </div>
 @endsection

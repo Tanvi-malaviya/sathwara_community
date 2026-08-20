@@ -52,7 +52,7 @@
     <div class="bg-white border border-slate-100 rounded-xl overflow-x-auto no-scrollbar shadow-sm">
         <table class="w-full text-left border-collapse min-w-full">
             <thead>
-                <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
+                <tr class="bg-slate-50 text-xs font-black uppercase text-slate-700 tracking-wider border-b border-slate-200">
                     <th class="py-2.5 px-2">{{ __('messages.event_name') }}</th>
                     <th class="py-2.5 px-2">{{ __('messages.event_type') }}</th>
                     <th class="py-2.5 px-2">{{ __('messages.venue') }}</th>

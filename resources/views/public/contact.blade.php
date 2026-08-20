@@ -24,7 +24,7 @@
                     </div>
                     <div>
                         <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{{ __('messages.office_address') }}</span>
-                        <h4 class="text-xs font-bold text-slate-900 line-clamp-1">Sathwara Community Bhavan</h4>
+                        <h4 class="text-xs font-bold text-slate-900">{{ App\Models\Setting::get('website_name', 'Sathwara Community') }}</h4>
                     </div>
                 </div>
                 <p class="text-[11px] text-slate-500 leading-normal pl-12">
@@ -60,7 +60,7 @@
                     </div>
                     <div>
                         <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{{ __('messages.email_address') }}</span>
-                        <a href="mailto:{{ App\Models\Setting::get('contact_email', 'info@sathwaracommunity.org') }}" class="text-xs font-bold text-slate-900 hover:text-primary-600 transition-colors line-clamp-1">
+                        <a href="mailto:{{ App\Models\Setting::get('contact_email', 'info@sathwaracommunity.org') }}" class="text-xs font-bold text-slate-900 hover:text-primary-600 transition-colors break-all">
                             {{ App\Models\Setting::get('contact_email', 'info@sathwaracommunity.org') }}
                         </a>
                     </div>
@@ -106,8 +106,6 @@
                     </p>
                 </div>
 
-
-
                 <form method="POST" action="{{ route('contact.submit') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     @csrf
                     <div class="space-y-1">
@@ -136,7 +134,7 @@
 
                     <div class="sm:col-span-2 pt-2">
                         <button type="submit" 
-                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all transform active:scale-98 cursor-pointer gap-2">
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all transform active:scale-98 cursor-pointer gap-2 whitespace-nowrap">
                             <span>{{ __('messages.submit_message') }}</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -157,11 +155,17 @@
                 </div>
 
                 <!-- Styled Full-Height Iframe Wrapper -->
+                @php
+                    $rawMap = trim(App\Models\Setting::get('contact_map_iframe', ''));
+                @endphp
                 <div class="grow rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 relative [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0 [&>iframe]:min-h-[360px]">
-                    @if(App\Models\Setting::get('contact_map_iframe'))
-                        {!! App\Models\Setting::get('contact_map_iframe') !!}
+                    @if(!empty($rawMap))
+                        @if(str_starts_with($rawMap, '<iframe'))
+                            {!! $rawMap !!}
+                        @else
+                            <iframe src="{{ $rawMap }}" class="w-full h-full border-0 min-h-[360px]" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        @endif
                     @else
-                        <!-- Fallback Map view if no custom iframe in settings -->
                         <iframe src="https://maps.google.com/maps?q=Ahmedabad%20Gujarat&t=&z=13&ie=UTF8&iwloc=&output=embed" 
                             class="w-full h-full border-0 min-h-[360px]" loading="lazy"></iframe>
                     @endif
@@ -172,6 +176,4 @@
 
     </div>
 </section>
-
-
 @endsection

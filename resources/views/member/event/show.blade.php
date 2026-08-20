@@ -624,6 +624,7 @@ document.addEventListener('DOMContentLoaded', function () {
             "description": "Event Pass Booking - {{ addslashes($event->title) }} (" + personCount + " Person/s)",
             "handler": function (response) {
                 paymentIdInput.value = response.razorpay_payment_id;
+                window.dispatchEvent(new CustomEvent('close-all-modals'));
                 form.submit();
             },
             "prefill": {

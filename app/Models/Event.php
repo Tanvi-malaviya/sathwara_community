@@ -43,6 +43,45 @@ class Event extends Model
         return $this->hasMany(EventRegistration::class);
     }
 
+    public function passes()
+    {
+        return $this->hasMany(EventRegistration::class)->where(function ($q) {
+            $q->where('registration_type', 'pass')
+              ->orWhere(function ($sub) {
+                  $sub->whereNull('registration_type')->whereNotNull('pass_number');
+              });
+        });
+    }
+
+    public function inamSubmissions()
+    {
+        return $this->hasMany(EventRegistration::class)->where(function ($q) {
+            $q->where('registration_type', 'inam_vitran')->orWhereNotNull('inam_number');
+        });
+    }
+
+    public function yuvaMeloSubmissions()
+    {
+        return $this->hasMany(EventRegistration::class)->where(function ($q) {
+            $q->where('registration_type', 'yuva_melo')->orWhereNotNull('yuva_melo_number');
+        });
+    }
+
+    public function getLastPassNoAttribute(): int
+    {
+        return (int)$this->registrations()->whereNotNull('pass_number')->max('pass_number');
+    }
+
+    public function getLastInamNoAttribute(): int
+    {
+        return (int)$this->registrations()->whereNotNull('inam_number')->max('inam_number');
+    }
+
+    public function getLastYuvaMeloNoAttribute(): int
+    {
+        return (int)$this->registrations()->whereNotNull('yuva_melo_number')->max('yuva_melo_number');
+    }
+
     public function registeredUsers()
     {
         return $this->belongsToMany(User::class, 'event_registrations', 'event_id', 'user_id');

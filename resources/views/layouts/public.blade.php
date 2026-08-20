@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Styles / Scripts -->
@@ -29,7 +29,8 @@
 
     <style>
         .font-gujarati {
-            font-family: 'Noto Sans Gujarati', sans-serif !important;
+            font-family: 'Hind Vadodara', 'Noto Sans Gujarati', sans-serif !important;
+            letter-spacing: 0.01em;
         }
 
         .font-sans {
@@ -40,6 +41,8 @@
         body {
             max-width: 100vw;
             overflow-x: hidden !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
     </style>
 </head>
@@ -223,7 +226,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
-                                <span>Admin Desk</span>
+                                <span>{{ __('messages.admin_portal') }}</span>
                             </a>
                         @else
                             <a href="{{ route('member.dashboard') }}"
@@ -334,7 +337,7 @@
                 </div>
 
                 <div class="border-t border-slate-100 my-3 pt-3 px-2 flex justify-between items-center">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Language:</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('messages.language') }}:</span>
                     <div class="flex space-x-2">
                         <a href="{{ route('locale.set', 'en') }}"
                             class="px-3 py-1.5 text-xs font-extrabold rounded-lg transition-colors {{ app()->getLocale() == 'en' ? 'bg-primary-500 text-white shadow-xs' : 'bg-slate-100 text-slate-700' }}">EN</a>
@@ -349,7 +352,7 @@
                             @if(auth()->user()->hasRole('Administrator'))
                                 <a href="{{ route('admin.dashboard') }}"
                                     class="block w-full text-center px-4 py-3 bg-slate-900 text-white font-extrabold rounded-xl text-sm uppercase tracking-wider shadow-md">
-                                    Admin Desk
+                                    {{ __('messages.admin_portal') }}
                                 </a>
                             @else
                                 <a href="{{ route('member.dashboard') }}"
@@ -610,7 +613,8 @@
             <div
                 class="border-t border-slate-100 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
                 <span>
-                    © {{ date('Y') }} {{ App\Models\Setting::get('website_name', 'Sathwara Community') }}. {{ __('messages.all_rights_reserved') }}
+                    © {{ date('Y') }} {{ App\Models\Setting::get('website_name', 'Sathwara Community') }}.
+                    {{ __('messages.all_rights_reserved') }}
                 </span>
 
                 <div class="flex items-center gap-2 flex-wrap">
@@ -669,6 +673,7 @@
         </div>
     </footer>
     @include('partials.global_loader')
+    @include('partials.delete_confirm_modal')
 </body>
 
 </html>

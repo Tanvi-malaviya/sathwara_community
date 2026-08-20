@@ -116,7 +116,7 @@
     <div class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-xs">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
+                <tr class="bg-slate-50 text-xs font-black uppercase text-slate-700 tracking-wider border-b border-slate-200">
                     <th class="py-3 px-4">{{ __('messages.sub_admin_user') }}</th>
                     <th class="py-3 px-4">{{ __('messages.contact_phone') }}</th>
                     <th class="py-3 px-4">{{ __('messages.assigned_module_permissions') }}</th>

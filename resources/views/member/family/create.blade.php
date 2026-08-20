@@ -3,7 +3,10 @@
 @section('page_title', 'Add Family Member')
 
 @section('content')
-<div class="max-w-xl bg-white border border-slate-100 rounded-2xl p-4 md:p-5 shadow-sm">
+<div class="max-w-xl bg-white border border-slate-100 rounded-2xl p-5 sm:p-6 shadow-sm">
+    <h2 class="text-sm sm:text-base font-black text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2 mb-4">
+        👨‍👩‍👧‍👦 {{ __('messages.add_family_member') }}
+    </h2>
     
     <!-- Errors -->
     @if ($errors->any())
@@ -19,9 +22,9 @@
     <form method="POST" action="{{ route('member.family.store') }}" class="grid grid-cols-1 gap-4">
         @csrf
         
-        <div class="space-y-1">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Full Name</label>
-            <input type="text" name="name" value="{{ old('name') }}" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+        <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-700 block">{{ __('messages.name') }} <span class="text-rose-500">*</span></label>
+            <input type="text" name="name" value="{{ old('name') }}" required placeholder="Enter Full Name" class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
         </div>
 
         <div x-data="{ 
@@ -40,14 +43,14 @@
                 }
             }
         }" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Relationship</label>
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-700 block">{{ __('messages.relationship') }} <span class="text-rose-500">*</span></label>
                 @php
                     $userGender = $profile->gender ?? 'Male';
                     $isFemaleMember = strtolower($userGender) === 'female';
                     $hasExistingSpouse = isset($family) && $family->contains(fn($m) => in_array($m->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ']));
                 @endphp
-                <select name="relationship" required @change="onRelChange($event.target.value)" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                <select name="relationship" required @change="onRelChange($event.target.value)" class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
                     <option value="" disabled {{ old('relationship') ? '' : 'selected' }}>Select Relationship</option>
                     @if(!$hasExistingSpouse)
                         @if($isFemaleMember)
@@ -72,9 +75,9 @@
                     $daughters = isset($family) ? $family->filter(fn($m) => in_array($m->relationship, ['Daughter', 'Daughter (દીકરી)', 'દીકરી'])) : collect();
                 @endphp
 
-                <div x-show="['Grandson (Son\'s Son)', 'Granddaughter (Son\'s Daughter)', 'Daughter-in-law'].includes(rel)" class="space-y-1 mt-2">
-                    <label class="text-[10px] font-bold text-primary-600 uppercase tracking-wide">Select Parent Son / Husband</label>
-                    <select name="parent_id" class="w-full text-xs font-semibold px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
+                <div x-show="['Grandson (Son\'s Son)', 'Granddaughter (Son\'s Daughter)', 'Daughter-in-law'].includes(rel)" class="space-y-1.5 mt-2">
+                    <label class="text-xs font-bold text-primary-600 block">Select Parent Son / Husband</label>
+                    <select name="parent_id" class="w-full text-xs font-semibold h-10 px-3 bg-primary-50 border border-primary-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
                         <option value="">Select Son</option>
                         @foreach($sons as $s)
                             <option value="{{ $s->id }}" {{ old('parent_id') == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
@@ -82,9 +85,9 @@
                     </select>
                 </div>
 
-                <div x-show="['Grandson (Daughter\'s Son)', 'Granddaughter (Daughter\'s Daughter)', 'Son-in-law'].includes(rel)" class="space-y-1 mt-2">
-                    <label class="text-[10px] font-bold text-primary-600 uppercase tracking-wide">Select Parent Daughter / Wife</label>
-                    <select name="parent_id" class="w-full text-xs font-semibold px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
+                <div x-show="['Grandson (Daughter\'s Son)', 'Granddaughter (Daughter\'s Daughter)', 'Son-in-law'].includes(rel)" class="space-y-1.5 mt-2">
+                    <label class="text-xs font-bold text-primary-600 block">Select Parent Daughter / Wife</label>
+                    <select name="parent_id" class="w-full text-xs font-semibold h-10 px-3 bg-primary-50 border border-primary-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
                         <option value="">Select Daughter</option>
                         @foreach($daughters as $d)
                             <option value="{{ $d->id }}" {{ old('parent_id') == $d->id ? 'selected' : '' }}>{{ $d->name }}</option>
@@ -93,9 +96,9 @@
                 </div>
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Gender</label>
-                <select name="gender" x-model="gender" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-700 block">{{ __('messages.gender') }} <span class="text-rose-500">*</span></label>
+                <select name="gender" x-model="gender" required class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
@@ -104,41 +107,40 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Marital Status</label>
-                <select name="marital_status" x-model="marital_status" required class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-700 block">{{ __('messages.marital_status') }} <span class="text-rose-500">*</span></label>
+                <select name="marital_status" x-model="marital_status" required class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
                     <option value="Unmarried">Unmarried</option>
                     <option value="Married">Married</option>
                 </select>
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Date of Birth</label>
-                <input type="date" name="dob" value="{{ old('dob') }}" min="{{ auth()->user()->memberProfile && auth()->user()->memberProfile->dob ? \Carbon\Carbon::parse(auth()->user()->memberProfile->dob)->addDay()->format('Y-m-d') : '' }}" max="{{ \Carbon\Carbon::yesterday()->format('Y-m-d') }}" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-700 block">{{ __('messages.dob') }}</label>
+                <input type="date" name="dob" value="{{ old('dob') }}" min="{{ auth()->user()->memberProfile && auth()->user()->memberProfile->dob ? \Carbon\Carbon::parse(auth()->user()->memberProfile->dob)->addDay()->format('Y-m-d') : '' }}" max="{{ \Carbon\Carbon::yesterday()->format('Y-m-d') }}" class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
             </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Education</label>
-                <input type="text" name="education" value="{{ old('education') }}" placeholder="e.g. High School" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-700 block">{{ __('messages.education') }}</label>
+                <input type="text" name="education" value="{{ old('education') }}" placeholder="e.g. High School" class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
             </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Occupation</label>
-                <input type="text" name="occupation" value="{{ old('occupation') }}" placeholder="e.g. Student" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-700 block">{{ __('messages.occupation') }}</label>
+                <input type="text" name="occupation" value="{{ old('occupation') }}" placeholder="e.g. Student" class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
             </div>
+        </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Phone Number (Optional, 10 Digits)</label>
-                <input type="text" name="phone" value="{{ old('phone') }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-            </div>
+        <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-700 block">Phone Number (Optional, 10 Digits)</label>
+            <input type="text" name="phone" value="{{ old('phone') }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="10-digit number" class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none">
         </div>
 
         <div class="pt-3 border-t border-slate-100 flex justify-end items-center space-x-3">
-            <a href="{{ route('member.family.index') }}" class="px-4 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors">Cancel</a>
-            <button type="submit" class="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors">
+            <a href="{{ route('member.family.index') }}" class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors">Cancel</a>
+            <button type="submit" class="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors cursor-pointer">
                 Save Member
             </button>
         </div>
