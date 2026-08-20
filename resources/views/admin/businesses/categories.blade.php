@@ -37,7 +37,7 @@
     <div class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
+                <tr class="bg-slate-50 text-xs font-black uppercase text-slate-700 tracking-wider border-b border-slate-200">
                     <th class="py-2.5 px-4">Category Name</th>
                     <th class="py-2.5 px-4">URL Slug</th>
                     <th class="py-2.5 px-4">Total Shops</th>
@@ -80,74 +80,79 @@
     </div>
 
     <!-- Add Category Modal -->
-    <div x-show="addOpen" 
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm"
-         x-transition
-         x-cloak>
-        <div class="bg-white rounded-xl max-w-md w-full p-6 border border-slate-100 shadow-xl space-y-4"
-             @click.away="addOpen = false">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 class="text-sm font-extrabold text-slate-950">New Business Category</h3>
-                <button type="button" @click="addOpen = false" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+    <template x-teleport="body">
+        <div x-show="addOpen" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm"
+             x-transition
+             x-cloak>
+            <div class="bg-white rounded-xl max-w-md w-full p-6 border border-slate-100 shadow-xl space-y-4"
+                 @click.away="addOpen = false">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h3 class="text-sm font-extrabold text-slate-950">New Business Category</h3>
+                    <button type="button" @click="addOpen = false" class="text-slate-400 hover:text-slate-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <form method="POST" action="{{ route('admin.businesses.categories.store') }}" class="space-y-4">
+                    @csrf
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Category Name</label>
+                        <input type="text" name="name" required placeholder="e.g. Electrical Services" 
+                               class="w-full text-xs font-semibold px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500">
+                    </div>
+                    <div class="flex items-center justify-end space-x-2 pt-2">
+                        <button type="button" @click="addOpen = false" class="px-4 py-2 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors">
+                            Create Category
+                        </button>
+                    </div>
+                </form>
             </div>
-            
-            <form method="POST" action="{{ route('admin.businesses.categories.store') }}" class="space-y-4">
-                @csrf
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Category Name</label>
-                    <input type="text" name="name" required placeholder="e.g. Electrical Services" 
-                           class="w-full text-xs font-semibold px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500">
-                </div>
-                <div class="flex items-center justify-end space-x-2 pt-2">
-                    <button type="button" @click="addOpen = false" class="px-4 py-2 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition-colors">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors">
-                        Create Category
-                    </button>
-                </div>
-            </form>
         </div>
-    </div>
+    </template>
 
     <!-- Edit Category Modal -->
-    <div x-show="editOpen" 
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm"
-         x-transition
-         x-cloak>
-        <div class="bg-white rounded-xl max-w-md w-full p-6 border border-slate-100 shadow-xl space-y-4"
-             @click.away="editOpen = false">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 class="text-sm font-extrabold text-slate-950">Edit Category</h3>
-                <button type="button" @click="editOpen = false" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+    <template x-teleport="body">
+        <div x-show="editOpen" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm"
+             x-transition
+             x-cloak>
+            <div class="bg-white rounded-xl max-w-md w-full p-6 border border-slate-100 shadow-xl space-y-4"
+                 @click.away="editOpen = false">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h3 class="text-sm font-extrabold text-slate-950">Edit Business Category</h3>
+                    <button type="button" @click="editOpen = false" class="text-slate-400 hover:text-slate-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <form method="POST" :action="'{{ url('admin/businesses/categories') }}/' + editId" class="space-y-4">
+                    @csrf
+                    @method('PUT')
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Category Name</label>
+                        <input type="text" name="name" x-model="editName" required 
+                               class="w-full text-xs font-semibold px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500">
+                    </div>
+                    <div class="flex items-center justify-end space-x-2 pt-2">
+                        <button type="button" @click="editOpen = false" class="px-4 py-2 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors">
+                            Update Category
+                        </button>
+                    </div>
+                </form>
             </div>
-            
-            <form method="POST" :action="editUrl" class="space-y-4">
-                @csrf
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Category Name</label>
-                    <input type="text" name="name" required x-model="editName" placeholder="e.g. Electrical Services" 
-                           class="w-full text-xs font-semibold px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500">
-                </div>
-                <div class="flex items-center justify-end space-x-2 pt-2">
-                    <button type="button" @click="editOpen = false" class="px-4 py-2 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition-colors">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors">
-                        Save Changes
-                    </button>
-                </div>
-            </form>
         </div>
-    </div>
+    </template>
 
 </div>
 @endsection

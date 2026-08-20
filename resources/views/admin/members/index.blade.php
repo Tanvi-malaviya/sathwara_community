@@ -86,7 +86,7 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr
-                        class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
+                        class="bg-slate-50 text-xs font-black uppercase text-slate-700 tracking-wider border-b border-slate-200">
                         <th class="py-2.5 px-4">{{ __('messages.member_id') }}</th>
                         <th class="py-2.5 px-4">{{ __('messages.name') }}</th>
                         <th class="py-2.5 px-4">{{ __('messages.phone') }}</th>

@@ -53,6 +53,17 @@ class EventController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Calculate event summary statistics
+        $stats = [
+            'total_registrations' => $allRegistrations->count(),
+            'total_passes' => $allRegistrations->filter(fn($r) => empty($r->form_data['student_name']) && empty($r->form_data['surname']) && empty($r->form_data['qualification']) && empty($r->form_data['birth_date']) && empty($r->form_data['first_name']))->count(),
+            'total_inam_forms' => $allRegistrations->filter(fn($r) => !empty($r->form_data['student_name']))->count(),
+            'total_yuva_forms' => $allRegistrations->filter(fn($r) => !empty($r->form_data['surname']) || !empty($r->form_data['first_name']) || !empty($r->form_data['qualification']))->count(),
+            'last_pass_no' => (int)($allRegistrations->whereNotNull('pass_number')->max('pass_number') ?? 0),
+            'last_inam_no' => (int)($allRegistrations->whereNotNull('inam_number')->max('inam_number') ?? 0),
+            'last_yuva_melo_no' => (int)($allRegistrations->whereNotNull('yuva_melo_number')->max('yuva_melo_number') ?? 0),
+        ];
+
         // For inam_vitaran and yuva_melo events, only show student/candidate form registrations on the show page
         $registrations = $allRegistrations->filter(function($r) use ($event) {
             if ($event->event_type === 'inam_vitaran') {
@@ -64,7 +75,7 @@ class EventController extends Controller
             return true;
         });
 
-        return view('admin.events.show', compact('event', 'gallery', 'registrations'));
+        return view('admin.events.show', compact('event', 'gallery', 'registrations', 'stats'));
     }
 
     /**
@@ -546,12 +557,17 @@ class EventController extends Controller
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            fputcsv($file, ['Reg ID', 'Member ID', 'Participant Name', 'Contact Number', 'Person Count', 'Pass Fee (INR)', 'Payment Status', 'Payment ID', 'Submission Date', 'Remarks']);
+            fputcsv($file, ['ID', 'Event ID', 'Event Name', 'Pass No.', 'Member ID', 'Member Code', 'Participant Name', 'Contact Number', 'Person Count', 'Pass Fee (INR)', 'Payment Status', 'Payment ID', 'Purchase Date', 'Remarks']);
             foreach ($registrations as $index => $r) {
                 $fd = $r->form_data ?? [];
+                $passNo = $r->pass_number ? sprintf('%03d', $r->pass_number) : (isset($fd['registration_no']) && is_numeric($fd['registration_no']) ? sprintf('%03d', (int)$fd['registration_no']) : sprintf('%03d', $index + 1));
                 fputcsv($file, [
-                    $fd['registration_no'] ?? ($index + 1),
+                    $r->id,
+                    $event->id,
+                    $event->title,
+                    $passNo,
                     $r->user ? sprintf('#%05d', $r->user->id) : ($fd['member_id'] ?? ''),
+                    $r->user->member_code ?? '',
                     $fd['full_name'] ?? ($r->user ? $r->user->name : 'Participant'),
                     $fd['contact_number'] ?? ($r->user->memberProfile->phone ?? ($fd['mobile'] ?? '')),
                     $fd['person_count'] ?? 1,
@@ -597,12 +613,50 @@ class EventController extends Controller
         $event = Event::findOrFail($id);
         $allRegistrations = EventRegistration::where('event_id', $event->id)
             ->with(['user.memberProfile'])
-            ->orderBy('created_at', 'asc')
             ->get();
 
         $registrations = $allRegistrations->filter(function($r) {
             return !empty($r->form_data['student_name']);
         });
+
+        // Compute numeric percentage & standard
+        $processed = $registrations->map(function($r) {
+            $fd = $r->form_data ?? [];
+            $stdRaw = trim((string)($fd['schoolStandard'] ?? $fd['standard'] ?? $fd['school_standard'] ?? $fd['education'] ?? $fd['course'] ?? 'General'));
+            $stream = trim((string)($fd['schoolStream'] ?? $fd['stream'] ?? ''));
+            if (!empty($stream) && $stream !== 'Other' && !str_contains($stdRaw, $stream)) {
+                $stdName = $stdRaw . ' (' . $stream . ')';
+            } else {
+                $stdName = $stdRaw ?: 'General';
+            }
+            $r->std_name = $stdName;
+
+            $pct = 0;
+            if (!empty($fd['percentage'])) {
+                $pct = (float)preg_replace('/[^0-9.]/', '', (string)$fd['percentage']);
+            } elseif (!empty($fd['received_marks']) && !empty($fd['total_marks']) && (float)$fd['total_marks'] > 0) {
+                $pct = round(((float)$fd['received_marks'] / (float)$fd['total_marks']) * 100, 2);
+            }
+            $r->calc_pct = $pct;
+            return $r;
+        });
+
+        // Group by standard & sort by percentage descending
+        $grouped = $processed->groupBy('std_name')->sortBy(function($students, $key) {
+            if (preg_match('/(\d+)/', $key, $m)) {
+                return (int)$m[1];
+            }
+            return 999;
+        });
+
+        $sortedRows = collect();
+        foreach ($grouped as $stdName => $studentsInStd) {
+            $sortedStd = $studentsInStd->sortByDesc('calc_pct')->values();
+            foreach ($sortedStd as $idx => $student) {
+                $student->std_rank = $idx + 1;
+                $sortedRows->push($student);
+            }
+        }
 
         $headers = [
             "Content-type" => "text/csv; charset=UTF-8",
@@ -612,34 +666,39 @@ class EventController extends Controller
             "Expires" => "0"
         ];
 
-        $callback = function () use ($registrations, $event) {
+        $callback = function () use ($sortedRows, $event) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            fputcsv($file, ['Reg ID', 'Member ID', 'Parent Name', 'Student Name', 'Education', 'School/College', 'Total Marks', 'Obtained Marks', 'Percentage', 'Marksheet File URL', 'Contact Number', 'City', 'Status', 'Submission Date', 'Remarks']);
-            foreach ($registrations as $index => $r) {
+            fputcsv($file, ['ID', 'Event ID', 'Event Name', 'Inam No.', 'Standard', 'Rank in Std', 'Member ID', 'Member Code', 'Student Name', 'Parent Name', 'School/College', 'Total Marks', 'Obtained Marks', 'Percentage', 'Marksheet File URL', 'Contact Number', 'City', 'Status', 'Submission Date']);
+            foreach ($sortedRows as $r) {
                 $fd = $r->form_data ?? [];
-                $phone = $fd['mobile'] ?? $fd['contact_number'] ?? ($r->user->memberProfile->phone ?? '');
-                $city = $fd['city'] ?? $fd['area'] ?? ($r->user->memberProfile->city ?? '');
+                $phone = $fd['mobile_no'] ?? $fd['mobile'] ?? $fd['contact_number'] ?? ($r->user->memberProfile->phone ?? '');
+                $city = $fd['city'] ?? $fd['native_place'] ?? $fd['area'] ?? ($r->user->memberProfile->city ?? '');
                 if (is_array($city)) {
                     $city = implode(', ', array_filter($city, 'is_scalar'));
                 }
+                $inamNo = $r->inam_number ? sprintf('%03d', $r->inam_number) : (isset($fd['registration_no']) && is_numeric($fd['registration_no']) ? sprintf('%03d', (int)$fd['registration_no']) : $r->id);
                 fputcsv($file, [
-                    $fd['registration_no'] ?? ($index + 1),
+                    $r->id,
+                    $event->id,
+                    $event->title,
+                    $inamNo,
+                    $r->std_name,
+                    'Rank ' . ($r->std_rank ?? '-'),
                     $r->user ? '#' . sprintf('%05d', $r->user->id) : ($fd['member_id'] ?? ''),
-                    $fd['parent_name'] ?? ($r->user ? $r->user->name : ''),
+                    $r->user->member_code ?? '',
                     $fd['student_name'] ?? ($r->user ? $r->user->name : ''),
-                    $fd['education'] ?? '',
+                    $fd['father_name'] ?? ($fd['parent_name'] ?? ($r->user ? $r->user->name : '')),
                     $fd['school_college'] ?? '',
                     $fd['total_marks'] ?? '',
                     $fd['received_marks'] ?? '',
-                    !empty($fd['percentage']) ? (str_contains((string)$fd['percentage'], '%') ? $fd['percentage'] : $fd['percentage'] . '%') : '',
+                    !empty($fd['percentage']) ? (str_contains((string)$fd['percentage'], '%') ? $fd['percentage'] : $fd['percentage'] . '%') : ($r->calc_pct > 0 ? $r->calc_pct . '%' : ''),
                     $fd['marksheet_url'] ?? '',
                     $phone,
                     $city,
                     ucfirst($r->status ?? 'approved'),
                     $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
-                    $fd['remarks'] ?? '',
                 ]);
             }
 
@@ -677,16 +736,21 @@ class EventController extends Controller
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             fputcsv($file, [
-                'Id', 'Date', 'Status', 'Member ID', 'Name', 'Surname', 'Gender', 'Father Name', 'Grandpa Name', 'Address', 'Mobile Number 1', 'Whatsapp Number', 'Birth Date', 'Age', 'Height', 'Weight', 'Qualification', 'Occupation', 'Occupation Address', 'Monthly Income', 'Elder Brothers', 'Married Elder Brothers', 'Younger Brothers', 'Married Younger Brothers', 'Elder Sisters', 'Married Elder Sisters', 'Younger Sisters', 'Married Younger Sisters', 'Father Occupation', 'Father Occupation Address', 'Father Mobile', 'Father Age', 'Father Income', 'Native Place', 'Mother Name', 'Mother Occupation', 'Maternal Uncle Name', 'Maternal Grandfather Name', 'Maternal Grandfather Address', 'Maternal Grandfather Occupation', 'Business', 'House', 'Own House', 'Vehicle', 'Divorce', 'Special Need', 'Physical Disability', 'Disability Duration', 'Other Info', 'Special Info', 'Photo URL'
+                'ID', 'Event ID', 'Event Name', 'Yuva Melo No.', 'Submission Date', 'Status', 'Member ID', 'Member Code', 'Name', 'Surname', 'Gender', 'Father Name', 'Grandpa Name', 'Address', 'Mobile Number 1', 'Whatsapp Number', 'Birth Date', 'Age', 'Height', 'Weight', 'Qualification', 'Occupation', 'Occupation Address', 'Monthly Income', 'Elder Brothers', 'Married Elder Brothers', 'Younger Brothers', 'Married Younger Brothers', 'Elder Sisters', 'Married Elder Sisters', 'Younger Sisters', 'Married Younger Sisters', 'Father Occupation', 'Father Occupation Address', 'Father Mobile', 'Father Age', 'Father Income', 'Native Place', 'Mother Name', 'Mother Occupation', 'Maternal Uncle Name', 'Maternal Grandfather Name', 'Maternal Grandfather Address', 'Maternal Grandfather Occupation', 'Business', 'House', 'Own House', 'Vehicle', 'Divorce', 'Special Need', 'Physical Disability', 'Disability Duration', 'Other Info', 'Special Info', 'Photo URL'
             ]);
 
             foreach ($registrations as $index => $r) {
                 $fd = $r->form_data ?? [];
+                $yuvaNo = $r->yuva_melo_number ? sprintf('%03d', $r->yuva_melo_number) : (isset($fd['registration_no']) && is_numeric($fd['registration_no']) ? sprintf('%03d', (int)$fd['registration_no']) : sprintf('%03d', $index + 1));
                 fputcsv($file, [
-                    $fd['registration_no'] ?? ($index + 1),
+                    $r->id,
+                    $event->id,
+                    $event->title,
+                    $yuvaNo,
                     $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
                     ucfirst($r->status ?? 'approved'),
                     $fd['member_number'] ?? ($r->user ? '#' . sprintf('%05d', $r->user->id) : ''),
+                    $r->user->member_code ?? '',
                     $fd['first_name'] ?? ($r->user ? $r->user->name : ''),
                     $fd['surname'] ?? '',
                     $fd['gender'] ?? '',
@@ -741,5 +805,70 @@ class EventController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Show registration edit form for Admin.
+     */
+    public function editRegistration($id)
+    {
+        $registration = EventRegistration::findOrFail($id);
+        $event = $registration->event;
+        $areas = \App\Models\Area::orderBy('name')->get();
+        return view('admin.events.edit_registration', compact('registration', 'event', 'areas'));
+    }
+
+    /**
+     * Update registration data by Admin.
+     */
+    public function updateRegistration(Request $request, $id)
+    {
+        $registration = EventRegistration::findOrFail($id);
+        $event = $registration->event;
+
+        $formData = $registration->form_data ?? [];
+
+        // Merge inputs
+        $inputs = $request->except(['_token', 'member_photo', 'aadhaar_photo', 'selfie', 'whatsapp_image', 'payment_image', 'marksheet_file']);
+        foreach ($inputs as $k => $v) {
+            if (!is_null($v)) {
+                $formData[$k] = $v;
+            }
+        }
+
+        if ($request->filled('area_id')) {
+            $areaObj = \App\Models\Area::find($request->area_id);
+            if ($areaObj) {
+                $formData['area'] = $areaObj->name;
+            }
+        }
+
+        // File uploads
+        $fileFields = ['member_photo', 'aadhaar_photo', 'selfie', 'whatsapp_image', 'payment_image'];
+        foreach ($fileFields as $field) {
+            if ($request->hasFile($field)) {
+                $file = $request->file($field);
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('yuva_melo/' . $field, $filename, 'public');
+                $formData[$field . '_url'] = asset('storage/' . $path);
+            }
+        }
+
+        if ($request->hasFile('marksheet_file')) {
+            $file = $request->file('marksheet_file');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('marksheets', $filename, 'public');
+            $formData['marksheet_url'] = asset('storage/' . $path);
+        }
+
+        if (!empty($formData['first_name']) || !empty($formData['surname'])) {
+            $formData['full_name'] = trim(($formData['first_name'] ?? '') . ' ' . ($formData['surname'] ?? ''));
+        }
+
+        $registration->update([
+            'form_data' => $formData,
+        ]);
+
+        return redirect()->route('admin.events.show', $event->id)->with('success', 'Candidate registration details updated successfully.');
     }
 }

@@ -63,9 +63,13 @@
         }" class="space-y-4">
 
         <div
-            class="flex flex-col xl:flex-row xl:items-center justify-between bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm gap-3">
-            <p class="text-xs text-slate-500">{{ __('messages.family_manage_desc') }}
-            </p>
+            class="flex flex-col xl:flex-row xl:items-center justify-between bg-white p-3.5 sm:p-4 rounded-xl border border-slate-100 shadow-sm gap-3">
+            <div>
+                <h2 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+                    👨‍👩‍👧‍👦 {{ __('messages.family_members') }}
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">{{ __('messages.family_manage_desc') }}</p>
+            </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0 w-full xl:w-auto">
                 <!-- Search bar -->
                 <div class="relative flex-1 sm:flex-initial">
@@ -237,16 +241,17 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
-                    <h3 class="text-xs font-bold text-slate-900 pr-6 border-b border-slate-50 pb-1.5 mb-2.5">
-                        {{ __('messages.add_family_member') }}</h3>
+                    <h3 class="text-sm sm:text-base font-black text-slate-900 pr-6 border-b border-slate-100 pb-2 mb-3 flex items-center gap-2">
+                        👨‍👩‍👧‍👦 {{ __('messages.add_family_member') }}
+                    </h3>
 
                     <form id="add-member-form" x-ref="addForm" method="POST" action="{{ route('member.family.store') }}">
                         @csrf
 
-                        <div class="space-y-2.5">
+                        <div class="space-y-3">
                             @if($errors->any() && !session()->has('edit_id'))
                                 <div
-                                    class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-[10px] font-semibold rounded-xl">
+                                    class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-xs font-semibold rounded-xl">
                                     <ul class="list-disc pl-4 space-y-0.5">
                                         @foreach($errors->all() as $error)
                                             <li>{{ $error }}</li>
@@ -255,25 +260,25 @@
                                 </div>
                             @endif
 
-                            <div class="space-y-0.5">
+                            <div class="space-y-1">
                                 <label
-                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.name') }}</label>
+                                    class="text-xs font-bold text-slate-700 block">{{ __('messages.name') }} <span class="text-rose-500">*</span></label>
                                 <input type="text" name="name" value="{{ old('name') }}" required
                                     placeholder="Enter Full Name"
-                                    class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.relationship') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.relationship') }} <span class="text-rose-500">*</span></label>
                                     @php
                                         $userGender = $profile->gender ?? 'Male';
                                         $isFemaleMember = strtolower($userGender) === 'female';
                                         $hasExistingSpouse = $family->contains(fn($m) => in_array($m->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ']));
                                     @endphp
                                     <select name="relationship" required x-model="addRelationship"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                         <option value="" disabled>{{ __('messages.select_relationship') }}</option>
                                         @if(!$hasExistingSpouse)
                                             @if($isFemaleMember)
@@ -303,11 +308,11 @@
                                     @endphp
 
                                     <div x-show="['Grandson (Son\'s Son)', 'Granddaughter (Son\'s Daughter)', 'Daughter-in-law'].includes(addRelationship)"
-                                        class="space-y-0.5 mt-2">
+                                        class="space-y-1 mt-2">
                                         <label
-                                            class="text-[10px] font-bold text-primary-600 uppercase tracking-wide">{{ __('messages.select_parent_son') }}</label>
+                                            class="text-xs font-bold text-primary-600 block">{{ __('messages.select_parent_son') }}</label>
                                         <select name="parent_id"
-                                            class="w-full text-xs font-semibold px-2.5 py-1.5 bg-primary-50 border border-primary-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                            class="w-full text-xs font-semibold px-3 py-2 bg-primary-50 border border-primary-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                             <option value="">{{ __('messages.select_son') }}</option>
                                             @foreach($sons as $s)
                                                 <option value="{{ $s->id }}" {{ old('parent_id') == $s->id ? 'selected' : '' }}>
@@ -317,11 +322,11 @@
                                     </div>
 
                                     <div x-show="['Grandson (Daughter\'s Son)', 'Granddaughter (Daughter\'s Daughter)', 'Son-in-law'].includes(addRelationship)"
-                                        class="space-y-0.5 mt-2">
+                                        class="space-y-1 mt-2">
                                         <label
-                                            class="text-[10px] font-bold text-primary-600 uppercase tracking-wide">{{ __('messages.select_parent_daughter') }}</label>
+                                            class="text-xs font-bold text-primary-600 block">{{ __('messages.select_parent_daughter') }}</label>
                                         <select name="parent_id"
-                                            class="w-full text-xs font-semibold px-2.5 py-1.5 bg-primary-50 border border-primary-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                            class="w-full text-xs font-semibold px-3 py-2 bg-primary-50 border border-primary-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                             <option value="">{{ __('messages.select_daughter') }}</option>
                                             @foreach($daughters as $d)
                                                 <option value="{{ $d->id }}" {{ old('parent_id') == $d->id ? 'selected' : '' }}>
@@ -331,11 +336,11 @@
                                     </div>
                                 </div>
 
-                                <div class="space-y-0.5">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.gender') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.gender') }} <span class="text-rose-500">*</span></label>
                                     <select name="gender" required x-model="addGender"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                         <option value="Male">{{ __('messages.gender_male') }}</option>
                                         <option value="Female">{{ __('messages.gender_female') }}</option>
                                         <option value="Other">{{ __('messages.gender_other') }}</option>
@@ -343,42 +348,42 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.marital_status') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.marital_status') }} <span class="text-rose-500">*</span></label>
                                     <select name="marital_status" required x-model="addMaritalStatus"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                         <option value="Unmarried">{{ __('messages.unmarried') }}</option>
                                         <option value="Married">{{ __('messages.married') }}</option>
                                     </select>
                                 </div>
 
-                                <div class="space-y-0.5">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.dob') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.dob') }}</label>
                                     <input type="date" name="dob" value="{{ old('dob') }}"
                                         min="{{ auth()->user()->memberProfile && auth()->user()->memberProfile->dob ? \Carbon\Carbon::parse(auth()->user()->memberProfile->dob)->addDay()->format('Y-m-d') : '' }}"
                                         max="{{ \Carbon\Carbon::yesterday()->format('Y-m-d') }}"
                                         @click="$event.target.showPicker?.()" @focus="$event.target.showPicker?.()"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none cursor-pointer">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none cursor-pointer h-10">
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.education') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.education') }}</label>
                                     <input type="text" name="education" value="{{ old('education') }}"
                                         placeholder="e.g. Graduate"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                 </div>
 
-                                <div class="space-y-0.5">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.blood_group') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.blood_group') }}</label>
                                     <select name="blood_group"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                         <option value="">{{ __('messages.select_blood_group') }}</option>
                                         <option value="A+">A+</option>
                                         <option value="A-">A-</option>
@@ -392,41 +397,41 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.email') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.email') }}</label>
                                     <input type="email" name="email" value="{{ old('email') }}"
                                         placeholder="family@member.com"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                 </div>
 
-                                <div class="space-y-0.5">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.occupation') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.occupation') }}</label>
                                     <input type="text" name="occupation" value="{{ old('occupation') }}"
                                         placeholder="e.g. Student"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.phone') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.phone') }}</label>
                                     <input type="text" name="phone" value="{{ old('phone') }}" maxlength="10"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
                                         placeholder="10-digit number"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                 </div>
                                 <div></div>
                             </div>
 
-                            <div class="pt-2 border-t border-slate-100 flex justify-end items-center space-x-2">
+                            <div class="pt-3 border-t border-slate-100 flex justify-end items-center space-x-2">
                                 <button type="button" @click="showAddModal = false"
-                                    class="px-4 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                                    class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">{{ __('messages.cancel') }}</button>
                                 <button type="submit"
-                                    class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">
+                                    class="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors cursor-pointer">
                                     {{ __('messages.save_member') }}
                                 </button>
                             </div>
@@ -450,17 +455,18 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
-                    <h3 class="text-xs font-bold text-slate-900 pr-6 border-b border-slate-50 pb-1.5 mb-2.5">
-                        {{ __('messages.edit_family_member') }}</h3>
+                    <h3 class="text-sm sm:text-base font-black text-slate-900 pr-6 border-b border-slate-100 pb-2 mb-3 flex items-center gap-2">
+                        ✏️ {{ __('messages.edit_family_member') }}
+                    </h3>
 
                     <form method="POST" :action="editMember.update_url">
                         @csrf
                         @method('PUT')
 
-                        <div class="space-y-2.5">
+                        <div class="space-y-3">
                             @if($errors->any() && session()->has('edit_id'))
                                 <div
-                                    class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-[10px] font-semibold rounded-xl">
+                                    class="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-xs font-semibold rounded-xl">
                                     <ul class="list-disc pl-4 space-y-0.5">
                                         @foreach($errors->all() as $error)
                                             <li>{{ $error }}</li>
@@ -469,20 +475,20 @@
                                 </div>
                             @endif
 
-                            <div class="space-y-0.5">
+                            <div class="space-y-1">
                                 <label
-                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.name') }}</label>
+                                    class="text-xs font-bold text-slate-700 block">{{ __('messages.name') }} <span class="text-rose-500">*</span></label>
                                 <input type="text" name="name" x-model="editMember.name" required
                                     placeholder="Enter Full Name"
-                                    class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.relationship') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.relationship') }} <span class="text-rose-500">*</span></label>
                                     <select name="relationship" required x-model="editMember.relationship"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                         @if($isFemaleMember)
                                             <option value="Husband"
                                                 x-show="!{{ $hasExistingSpouse ? 'true' : 'false' }} || ['Husband', 'Spouse', 'પતિ'].includes(editMember.relationship)">
@@ -508,11 +514,11 @@
                                     </select>
 
                                     <div x-show="['Grandson (Son\'s Son)', 'Granddaughter (Son\'s Daughter)', 'Daughter-in-law', 'પૌત્ર', 'પૌત્રી', 'વહુ'].some(r => (editMember.relationship || '').includes(r))"
-                                        class="space-y-0.5 mt-2">
-                                        <label class="text-[10px] font-bold text-primary-600 uppercase tracking-wide">Select
+                                        class="space-y-1 mt-2">
+                                        <label class="text-xs font-bold text-primary-600 block">Select
                                             Parent Son / Husband</label>
                                         <select name="parent_id" x-model="editMember.parent_id"
-                                            class="w-full text-xs font-semibold px-2.5 py-1.5 bg-primary-50 border border-primary-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                            class="w-full text-xs font-semibold px-3 py-2 bg-primary-50 border border-primary-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                             <option value="">Select Son</option>
                                             @foreach($sons as $s)
                                                 <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -521,11 +527,11 @@
                                     </div>
 
                                     <div x-show="['Grandson (Daughter\'s Son)', 'Granddaughter (Daughter\'s Daughter)', 'Son-in-law', 'દોહિત્ર', 'દોહિત્રી', 'જમાઈ'].some(r => (editMember.relationship || '').includes(r))"
-                                        class="space-y-0.5 mt-2">
-                                        <label class="text-[10px] font-bold text-primary-600 uppercase tracking-wide">Select
+                                        class="space-y-1 mt-2">
+                                        <label class="text-xs font-bold text-primary-600 block">Select
                                             Parent Daughter / Wife</label>
                                         <select name="parent_id" x-model="editMember.parent_id"
-                                            class="w-full text-xs font-semibold px-2.5 py-1.5 bg-primary-50 border border-primary-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                            class="w-full text-xs font-semibold px-3 py-2 bg-primary-50 border border-primary-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                             <option value="">Select Daughter</option>
                                             @foreach($daughters as $d)
                                                 <option value="{{ $d->id }}">{{ $d->name }}</option>
@@ -534,11 +540,11 @@
                                     </div>
                                 </div>
 
-                                <div class="space-y-0.5">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.gender') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.gender') }} <span class="text-rose-500">*</span></label>
                                     <select name="gender" required x-model="editMember.gender"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
                                         <option value="Other">Other</option>
@@ -546,41 +552,40 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.marital_status') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.marital_status') }} <span class="text-rose-500">*</span></label>
                                     <select name="marital_status" required x-model="editMember.marital_status"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                         <option value="Unmarried">{{ __('messages.unmarried') }}</option>
                                         <option value="Married">{{ __('messages.married') }}</option>
                                     </select>
                                 </div>
 
-                                <div class="space-y-0.5">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.dob') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.dob') }}</label>
                                     <input type="date" name="dob" x-model="editMember.dob"
                                         min="{{ auth()->user()->memberProfile && auth()->user()->memberProfile->dob ? \Carbon\Carbon::parse(auth()->user()->memberProfile->dob)->addDay()->format('Y-m-d') : '' }}"
                                         max="{{ \Carbon\Carbon::yesterday()->format('Y-m-d') }}"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.education') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.education') }}</label>
                                     <input type="text" name="education" x-model="editMember.education"
                                         placeholder="e.g. Graduate"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                 </div>
 
-                                <div class="space-y-0.5">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Blood
-                                        Group</label>
+                                <div class="space-y-1">
+                                    <label class="text-xs font-bold text-slate-700 block">{{ __('messages.blood_group') }}</label>
                                     <select name="blood_group" x-model="editMember.blood_group"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                         <option value="">Select Blood Group</option>
                                         <option value="A+">A+</option>
                                         <option value="A-">A-</option>
@@ -594,41 +599,40 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Email
-                                        Address</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
+                                    <label class="text-xs font-bold text-slate-700 block">{{ __('messages.email') }}</label>
                                     <input type="email" name="email" x-model="editMember.email"
                                         placeholder="family@member.com"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                 </div>
 
-                                <div class="space-y-0.5">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.occupation') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.occupation') }}</label>
                                     <input type="text" name="occupation" x-model="editMember.occupation"
                                         placeholder="e.g. Student"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="space-y-1">
                                     <label
-                                        class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.phone') }}</label>
+                                        class="text-xs font-bold text-slate-700 block">{{ __('messages.phone') }}</label>
                                     <input type="text" name="phone" x-model="editMember.phone" maxlength="10"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
                                         placeholder="10-digit number"
-                                        class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none">
+                                        class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none h-10">
                                 </div>
                                 <div></div>
                             </div>
 
-                            <div class="pt-2 border-t border-slate-100 flex justify-end items-center space-x-2">
+                            <div class="pt-3 border-t border-slate-100 flex justify-end items-center space-x-2">
                                 <button type="button" @click="showEditModal = false"
-                                    class="px-4 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg transition-colors">Cancel</button>
+                                    class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">Cancel</button>
                                 <button type="submit"
-                                    class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">
+                                    class="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors cursor-pointer">
                                     {{ __('messages.update_details') }}
                                 </button>
                             </div>
@@ -656,7 +660,7 @@
                             🌳
                         </div>
                         <div>
-                            <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 tracking-wide">
+                            <h3 class="text-sm sm:text-base font-black text-slate-900 tracking-wide">
                                 {{ __('messages.family_tree_title') }}</h3>
                             <p class="text-[10px] text-slate-400">{{ __('messages.family_tree_subtitle') }}</p>
                         </div>

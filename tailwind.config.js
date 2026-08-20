@@ -13,7 +13,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Manrope', ...defaultTheme.fontFamily.sans],
-                gujarati: ['Noto Sans Gujarati', 'sans-serif'],
+                gujarati: ['"Hind Vadodara"', '"Noto Sans Gujarati"', 'sans-serif'],
             },
             colors: {
                 primary: {

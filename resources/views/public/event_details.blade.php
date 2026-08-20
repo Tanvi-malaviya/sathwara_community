@@ -236,24 +236,24 @@
                                         ⚡
                                     </div>
                                     <div>
-                                        <span class="text-[10px] font-extrabold text-purple-700 uppercase tracking-wider block">Candidate Biodata Form</span>
-                                        <h3 class="text-base sm:text-lg font-black text-slate-900 leading-tight">Yuva Melo Registration</h3>
+                                        <span class="text-[10px] font-extrabold text-purple-700 uppercase tracking-wider block">{{ __('messages.candidate_biodata_form') }}</span>
+                                        <h3 class="text-base sm:text-lg font-black text-slate-900 leading-tight">{{ __('messages.yuva_melo_registration') }}</h3>
                                     </div>
                                 </div>
 
                                 <!-- Fee Pill -->
                                 <div class="bg-white border border-purple-200 px-3.5 py-1.5 rounded-xl flex items-center gap-2 shadow-2xs">
-                                    <span class="text-xs text-slate-500 font-bold">Form Fee:</span>
+                                    <span class="text-xs text-slate-500 font-bold">{{ __('messages.form_fee') }}:</span>
                                     @if(($event->form_fee ?? 0) > 0)
                                         <span class="text-base font-black text-purple-700">₹{{ number_format($event->form_fee) }}</span>
                                     @else
-                                        <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Free</span>
+                                        <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">{{ __('messages.free') }}</span>
                                     @endif
                                 </div>
                             </div>
 
                             <p class="text-xs text-slate-600 leading-relaxed font-medium">
-                                All youth candidates and community members are invited to submit their registration and biodata details online for this Youth Meet.
+                                {{ __('messages.yuva_melo_card_desc') }}
                             </p>
 
                             <div class="pt-1 flex items-center">
@@ -304,7 +304,8 @@
                                 </div>
                             @else
                                 <!-- Active Event Registration check for all event types -->
-                                <div x-data="{ showPassModal: false, count: 1, passFee: {{ (float)($event->pass_fee ?? 0) }} }">
+                                <div x-data="{ showPassModal: false, showViewPassesModal: false, count: 1, passFee: {{ (float)($event->pass_fee ?? 0) }} }"
+                                     @close-all-modals.window="showPassModal = false; showViewPassesModal = false">
                                     @if(auth()->guest())
                                         <div class="space-y-4">
                                             @if(($event->pass_fee ?? 0) > 0)
@@ -334,37 +335,56 @@
                                                 <div class="bg-primary-50/90 border border-primary-200/80 rounded-2xl p-3.5 flex items-center justify-between shadow-2xs">
                                                     <div>
                                                         <span class="text-xs font-black text-primary-900 block">🎟️ {{ __('messages.pass_fee_per_person') }}</span>
-                                                        <span class="text-[10px] text-slate-500 font-semibold">Per Person Pass Fee</span>
+                                                        <span class="text-[10px] text-slate-500 font-semibold">{{ __('messages.per_person_pass_fee') }}</span>
                                                     </div>
                                                     <span class="text-base font-black text-primary-700">₹{{ number_format($event->pass_fee) }}</span>
                                                 </div>
                                             @else
                                                 <div class="bg-emerald-50/90 border border-emerald-200/80 rounded-2xl p-3 flex items-center justify-between">
-                                                    <span class="text-xs font-bold text-emerald-800">🎟️ Registration Fee:</span>
-                                                    <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-100 px-2 py-0.5 rounded-lg">Free Entry</span>
+                                                    <span class="text-xs font-bold text-emerald-800">🎟️ {{ __('messages.registration_fee') }}:</span>
+                                                    <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-100 px-2 py-0.5 rounded-lg">{{ __('messages.free_entry') }}</span>
                                                 </div>
                                             @endif
 
                                             @if($registration)
+                                                @php
+                                                    $regPersons = max(1, (int)($registration->form_data['person_count'] ?? 1));
+                                                    $userPasses = [];
+                                                    for ($i = 1; $i <= $regPersons; $i++) {
+                                                        $userPasses[] = sprintf('%03d', $i);
+                                                    }
+                                                    $attendeeName = $registration->form_data['full_name'] ?? (auth()->user() ? auth()->user()->name : 'Member');
+                                                    $memberId = auth()->user() ? sprintf('#%05d', auth()->user()->id) : ($registration->form_data['member_id'] ?? '-');
+                                                    $logoUrl = App\Models\Setting::get('website_logo') ? asset('storage/' . App\Models\Setting::get('website_logo')) : asset('logo.png');
+                                                @endphp
+
                                                 <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1.5 shadow-2xs">
                                                     <span class="flex items-center gap-1.5 text-emerald-900 font-black text-sm">
                                                         <span>✅ {{ __('messages.registered_status') }}</span>
                                                     </span>
                                                     <span class="text-xs text-emerald-700 font-semibold">
-                                                        {{ __('messages.attending_persons_count', ['count' => $registration->form_data['person_count'] ?? 1]) }}
+                                                        {{ __('messages.attending_persons_count', ['count' => $regPersons]) }}
                                                     </span>
                                                     @if(($event->pass_fee ?? 0) > 0)
                                                         <span class="text-[10px] px-2.5 py-0.5 rounded-full uppercase font-black bg-emerald-200/80 text-emerald-900 border border-emerald-300">
-                                                            💳 {{ strtoupper($registration->payment_status ?? 'unpaid') }} (₹{{ number_format($registration->payment_amount ?? $event->pass_fee) }})
+                                                            💳 {{ strtoupper($registration->payment_status ?? 'unpaid') }} (₹{{ number_format($registration->payment_amount ?? ($event->pass_fee * $regPersons)) }})
                                                         </span>
                                                     @endif
                                                 </div>
 
+                                                <!-- View My Passes Button -->
+                                                <button type="button" 
+                                                        @click="showViewPassesModal = true"
+                                                        class="w-full flex items-center justify-center px-4 py-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs font-extrabold rounded-2xl shadow-md hover:shadow-lg transition-all text-center cursor-pointer gap-2">
+                                                    <span>🎟️ {{ __('messages.view_my_passes', ['count' => $regPersons]) }}</span>
+                                                    <span>👁️</span>
+                                                </button>
+
                                                 <!-- Purchase More Passes Button -->
                                                 <button type="button" 
                                                         @click="count = 1; showPassModal = true;"
-                                                        class="w-full flex items-center justify-center px-4 py-3 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-extrabold rounded-2xl shadow-md hover:shadow-lg transition-all text-center cursor-pointer gap-2">
-                                                    <span>🎟️ {{ __('messages.purchase_more_passes') ?? 'Purchase More Passes' }}</span>
+                                                        class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-extrabold rounded-2xl shadow-sm hover:shadow-md transition-all text-center cursor-pointer gap-2">
+                                                    <span>➕ {{ __('messages.purchase_more_passes') }}</span>
                                                     <span>&rarr;</span>
                                                 </button>
                                             @else
@@ -372,11 +392,127 @@
                                                 <button type="button" 
                                                         @click="count = 1; showPassModal = true;"
                                                         class="w-full flex items-center justify-center px-4 py-3.5 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-extrabold rounded-2xl shadow-md hover:shadow-lg transition-all text-center cursor-pointer gap-2">
-                                                    <span>🎟️ Purchase Pass</span>
+                                                    <span>🎟️ {{ __('messages.purchase_pass') }}</span>
                                                     <span>&rarr;</span>
                                                 </button>
                                             @endif
                                         </div>
+
+                                        @if($registration)
+                                            <!-- View Passes Modal (Teleported to Body) -->
+                                            <template x-teleport="body">
+                                                <div x-show="showViewPassesModal" 
+                                                     class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md"
+                                                     x-transition
+                                                     x-cloak>
+                                                    <div @click.away="showViewPassesModal = false" 
+                                                         class="bg-white rounded-3xl border border-slate-100 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative">
+                                                        
+                                                        <!-- Modal Header -->
+                                                        <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                                                            <div class="flex items-center gap-3">
+                                                                <div class="w-9 h-9 rounded-xl bg-primary-600/30 border border-primary-500/40 text-primary-400 flex items-center justify-center text-lg">
+                                                                    🎟️
+                                                                </div>
+                                                                <div>
+                                                                    <h3 class="text-sm font-extrabold flex items-center gap-2">
+                                                                        <span>{{ __('messages.event_entry_passes') }}</span>
+                                                                        <span class="text-[10px] bg-primary-500 text-white font-black px-2 py-0.5 rounded-full">{{ count($userPasses) }} {{ __('messages.passes') }}</span>
+                                                                    </h3>
+                                                                    <p class="text-[11px] text-slate-400 font-medium truncate max-w-[280px] sm:max-w-md">{{ $event->title }}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="flex items-center gap-2">
+                                                                <button type="button" onclick="downloadAllPasses()" 
+                                                                        class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer">
+                                                                    ⬇️ {{ __('messages.download_all_pdf') }}
+                                                                </button>
+                                                                <button type="button" @click="showViewPassesModal = false" 
+                                                                        class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs font-bold cursor-pointer">
+                                                                    ✕
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Modal Scrollable Content containing all passes -->
+                                                        <div class="p-4 sm:p-6 overflow-y-auto space-y-6 bg-slate-50 flex-1" id="printablePassesArea">
+                                                            @foreach($userPasses as $idx => $pNo)
+                                                                <div class="bg-white rounded-2xl border-2 border-slate-900 shadow-sm overflow-hidden text-slate-900 print-pass-item" 
+                                                                     id="pass-card-{{ $idx }}"
+                                                                     data-pass-no="{{ $pNo }}"
+                                                                     data-event-title="{{ $event->title }}"
+                                                                     data-mandal="Satwara Gyati Mandal Ahm."
+                                                                     data-date="{{ date('d-M-Y', strtotime($event->date)) }}{{ $event->time ? ' | ⏰ ' . date('h:i A', strtotime($event->time)) : '' }}"
+                                                                     data-venue="{{ $event->venue }}"
+                                                                     data-logo="{{ $logoUrl }}">
+                                                                    <!-- Top Bar -->
+                                                                    <div class="bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-[11px] font-black uppercase tracking-wider">
+                                                                        <span>{{ __('messages.community_entry_pass') }}</span>
+                                                                        <span class="text-primary-400">{{ __('messages.pass') }}</span>
+                                                                    </div>
+
+                                                                    <!-- Pass Core (Sketch Layout) -->
+                                                                    <div class="p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
+                                                                        <!-- Left: Circular Logo -->
+                                                                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                                                                            <img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover" onerror="this.src='/logo.png'">
+                                                                        </div>
+
+                                                                        <!-- Middle Details: Mandal, Event Name, Date, Attendee -->
+                                                                        <div class="flex-1 space-y-1.5 text-center sm:text-left">
+                                                                            <div class="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-tight">
+                                                                                Satwara Gyati Mandal Ahm.
+                                                                            </div>
+                                                                            <div class="text-base sm:text-lg font-black text-rose-600 leading-tight">
+                                                                                {{ $event->title }}
+                                                                            </div>
+                                                                            <div class="text-xs font-bold text-slate-700 flex items-center justify-center sm:justify-start gap-1">
+                                                                                <span>📅 {{ __('messages.date') ?? 'Date' }}:</span>
+                                                                                <span>{{ date('d-M-Y', strtotime($event->date)) }}</span>
+                                                                                @if($event->time)
+                                                                                    <span class="text-slate-400">|</span>
+                                                                                    <span>⏰ {{ date('h:i A', strtotime($event->time)) }}</span>
+                                                                                @endif
+                                                                            </div>
+
+                                                                        </div>
+
+                                                                        <!-- Right: Dedicated Pass No. Box -->
+                                                                        <div class="shrink-0 flex flex-col items-center sm:items-end justify-between self-stretch pt-2 sm:pt-0">
+                                                                            <div class="border-2 border-slate-900 rounded-xl px-4 py-2 bg-slate-50 text-center shadow-xs">
+                                                                                <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">{{ __('messages.pass_no') }}</span>
+                                                                                <span class="text-xl font-black text-slate-900 block mt-0.5 tracking-widest">{{ $pNo }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Bottom Location Strip -->
+                                                                    <div class="border-t-2 border-dashed border-slate-200 bg-slate-50/80 px-4 py-2.5 text-xs font-bold text-slate-700 flex items-center justify-between gap-1.5">
+                                                                        <span class="flex items-center gap-1.5">
+                                                                            <span class="text-rose-500">📍</span>
+                                                                            <span><strong>{{ __('messages.location') ?? 'Location' }}:</strong> {{ $event->venue }}</span>
+                                                                        </span>
+                                                                        <button type="button" onclick="downloadSinglePass('pass-card-{{ $idx }}')"
+                                                                                class="flex items-center gap-1 px-2.5 py-1 bg-slate-900 hover:bg-slate-700 text-white text-[10px] font-extrabold rounded-lg transition-colors cursor-pointer no-print">
+                                                                            ⬇️ {{ __('messages.download') }}
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+
+                                                        <!-- Modal Footer -->
+                                                        <div class="px-6 py-3 bg-white border-t border-slate-100 flex items-center justify-between shrink-0">
+                                                            <span class="text-[11px] text-slate-400 font-medium">💡 {{ __('messages.present_pass_at_entrance') }}</span>
+                                                            <button type="button" @click="showViewPassesModal = false" 
+                                                                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                                                                {{ __('messages.close') ?? 'Close' }}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        @endif
 
                                         <!-- Purchase Pass Pop-up Modal -->
                                         <template x-teleport="body">
@@ -396,7 +532,7 @@
                                                     <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
                                                         <div>
                                                             <h3 class="text-sm font-extrabold flex items-center gap-2">
-                                                                <span>🎟️ Purchase Event Pass</span>
+                                                                <span>🎟️ {{ __('messages.purchase_event_pass') }}</span>
                                                             </h3>
                                                             <p class="text-[11px] text-slate-400 font-medium mt-0.5 truncate max-w-[280px]">{{ $event->title }}</p>
                                                         </div>
@@ -416,9 +552,9 @@
                                                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs">
                                                             <span class="font-bold text-slate-700">📅 {{ date('d-M-Y', strtotime($event->date)) }}</span>
                                                             @if(($event->pass_fee ?? 0) > 0)
-                                                                <span class="font-black text-primary-700 bg-primary-50 px-2.5 py-1 rounded-xl border border-primary-200 text-xs">₹{{ number_format($event->pass_fee) }} / pass</span>
+                                                                <span class="font-black text-primary-700 bg-primary-50 px-2.5 py-1 rounded-xl border border-primary-200 text-xs">₹{{ number_format($event->pass_fee) }} / {{ __('messages.pass') }}</span>
                                                             @else
-                                                                <span class="font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 text-xs">Free Entry</span>
+                                                                <span class="font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 text-xs">{{ __('messages.free_entry') }}</span>
                                                             @endif
                                                         </div>
 
@@ -443,29 +579,28 @@
                                                                 </div>
 
                                                                 <button type="button" 
-                                                                        @click="count++" 
-                                                                        class="w-12 h-12 rounded-xl bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-black text-2xl flex items-center justify-center transition-all cursor-pointer shadow-md">
-                                                                    &#43;
+                                                                        @click="if (count < 20) count++" 
+                                                                        :disabled="count >= 20"
+                                                                        class="w-12 h-12 rounded-xl bg-white hover:bg-slate-100 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-slate-800 font-black text-2xl flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                                                    &plus;
                                                                 </button>
                                                             </div>
                                                         </div>
 
-                                                        <!-- Price Calculation Card -->
-                                                        @if(($event->pass_fee ?? 0) > 0)
-                                                            <div class="bg-primary-50/80 border border-primary-200/90 rounded-2xl p-4 space-y-2">
-                                                                <div class="flex items-center justify-between text-xs text-slate-600 font-semibold">
-                                                                    <span>Pass Fee (₹{{ number_format($event->pass_fee) }} &times; <span x-text="count"></span>):</span>
-                                                                    <span class="font-bold text-slate-900">₹<span x-text="(count * passFee).toLocaleString()"></span></span>
-                                                                </div>
-                                                                <div class="pt-2 border-t border-primary-200 flex items-center justify-between">
-                                                                    <span class="text-xs font-extrabold text-primary-900 uppercase tracking-wide">{{ __('messages.total_amount') }}:</span>
-                                                                    <span class="text-xl font-black text-primary-700">₹<span x-text="(count * passFee).toLocaleString()"></span></span>
-                                                                </div>
+                                                        <!-- Total Breakdown -->
+                                                        <div class="p-4 bg-primary-50/80 border border-primary-200/80 rounded-2xl space-y-2">
+                                                            <div class="flex items-center justify-between text-xs font-bold text-slate-600">
+                                                                <span>{{ __('messages.pass_fee') }}:</span>
+                                                                <span>₹<span x-text="passFee"></span> &times; <span x-text="count"></span></span>
                                                             </div>
-                                                        @endif
+                                                            <div class="border-t border-primary-200/60 pt-2 flex items-center justify-between">
+                                                                <span class="text-xs font-extrabold text-primary-950">{{ __('messages.total_amount') }}:</span>
+                                                                <span class="text-lg font-black text-primary-700">₹<span x-text="(count * passFee).toLocaleString()"></span></span>
+                                                            </div>
+                                                        </div>
 
-                                                        <!-- Submit Button -->
-                                                        <div class="pt-2 flex items-center justify-end gap-3">
+                                                        <!-- Action Buttons -->
+                                                        <div class="flex items-center gap-3 pt-2">
                                                             <button type="button" @click="showPassModal = false" 
                                                                     class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition-colors cursor-pointer">
                                                                 {{ __('messages.cancel') }}
@@ -473,9 +608,9 @@
                                                             <button type="submit" 
                                                                     class="flex-1 py-3.5 px-4 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white font-black text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider">
                                                                 @if(($event->pass_fee ?? 0) > 0)
-                                                                    <span>Pay ₹<span x-text="(count * passFee).toLocaleString()"></span> & Confirm Booking</span>
+                                                                    <span>{{ __('messages.pay_and_confirm_booking') }} (₹<span x-text="(count * passFee).toLocaleString()"></span>)</span>
                                                                 @else
-                                                                    <span>Confirm Registration (<span x-text="count"></span> Person)</span>
+                                                                    <span>{{ __('messages.confirm_registration_count') }} (<span x-text="count"></span> {{ __('messages.person') }})</span>
                                                                 @endif
                                                                 <span>&rarr;</span>
                                                             </button>
@@ -527,6 +662,10 @@ document.addEventListener('DOMContentLoaded', function () {
             "description": "Event Pass Booking - {{ addslashes($event->title) }} (" + personCount + " Person/s)",
             "handler": function (response) {
                 paymentIdInput.value = response.razorpay_payment_id;
+                window.dispatchEvent(new CustomEvent('close-all-modals'));
+                document.querySelectorAll('[x-show="showPassModal"], [x-show="showViewPassesModal"]').forEach(function(el) {
+                    el.style.display = 'none';
+                });
                 form.submit();
             },
             "prefill": {
@@ -550,4 +689,131 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endif
+
+<script>
+/* =================== PASS PDF DOWNLOAD =================== */
+
+function _renderPassHtmlCard(passData) {
+    const logoSrc = passData.logo || '/logo.png';
+    const mandal = passData.mandal || 'Satwara Gyati Mandal Ahm.';
+    const title = passData.title || '';
+    const date = passData.date || '';
+    const passNo = passData.passNo || '001';
+    const venue = passData.venue || '';
+
+    return `
+    <div style="border: 2px solid #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 22px; page-break-inside: avoid; background: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-sizing: border-box;">
+        <!-- Top Bar -->
+        <table style="width: 100%; border-collapse: collapse; background-color: #0f172a; color: #ffffff;">
+            <tr>
+                <td style="padding: 7px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-align: left; color: #ffffff;">
+                    SATHWARA COMMUNITY ENTRY PASS
+                </td>
+                <td style="padding: 7px 16px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-align: right; color: #f59e0b;">
+                    ENTRY PASS
+                </td>
+            </tr>
+        </table>
+
+        <!-- Main Body -->
+        <table style="width: 100%; border-collapse: collapse; background-color: #ffffff;">
+            <tr>
+                <!-- Circular Logo -->
+                <td style="width: 90px; vertical-align: middle; padding: 14px 0 14px 16px; text-align: center;">
+                    <div style="width: 76px; height: 76px; border-radius: 50%; border: 2px solid #cbd5e1; background-color: #f8fafc; overflow: hidden; display: inline-block;">
+                        <img src="${logoSrc}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">
+                    </div>
+                </td>
+
+                <!-- Details (Mandal, Title, Date) -->
+                <td style="vertical-align: middle; padding: 14px 16px; text-align: left;">
+                    <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.2px; color: #0f172a; margin-bottom: 4px;">
+                        ${mandal}
+                    </div>
+                    <div style="font-size: 16px; font-weight: 900; color: #e11d48; line-height: 1.25; margin-bottom: 6px;">
+                        ${title}
+                    </div>
+                    <div style="font-size: 12px; font-weight: 700; color: #334155;">
+                        📅 ${date}
+                    </div>
+                </td>
+
+                <!-- Pass No Box -->
+                <td style="width: 110px; vertical-align: middle; padding: 14px 16px 14px 0; text-align: right;">
+                    <div style="display: inline-block; border: 2px solid #0f172a; border-radius: 10px; background-color: #f8fafc; padding: 8px 14px; text-align: center; min-width: 85px; box-sizing: border-box;">
+                        <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b;">PASS NO.</div>
+                        <div style="font-size: 22px; font-weight: 900; letter-spacing: 4px; color: #0f172a; margin-top: 2px;">${passNo}</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Bottom Location Strip -->
+        <div style="border-top: 2px dashed #e2e8f0; background-color: #f8fafc; padding: 9px 16px; font-size: 11px; font-weight: 700; color: #334155;">
+            📍 <strong>Location / Venue:</strong> ${venue}
+        </div>
+    </div>`;
+}
+
+function _openPassesPrintWindow(cardsHtml, title) {
+    const w = window.open('', '_blank', 'width=880,height=750');
+    if (!w) {
+        alert('Please allow pop-ups for this website to download passes.');
+        return;
+    }
+    w.document.write(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>${title}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #ffffff; padding: 24px; color: #0f172a; }
+        @media print {
+            body { padding: 0; }
+            @page { margin: 15mm; size: auto; }
+        }
+    </style>
+</head>
+<body>
+    ${cardsHtml}
+</body>
+</html>`);
+    w.document.close();
+    w.focus();
+    setTimeout(() => { w.print(); }, 500);
+}
+
+function downloadAllPasses() {
+    const cards = document.querySelectorAll('.print-pass-item');
+    if (!cards.length) return;
+    let html = '';
+    cards.forEach(card => {
+        const data = {
+            passNo: card.dataset.passNo || card.querySelector('.text-xl')?.innerText.trim() || '001',
+            title: card.dataset.eventTitle || '',
+            mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
+            date: card.dataset.date || '',
+            venue: card.dataset.venue || '',
+            logo: card.dataset.logo || card.querySelector('img')?.src || ''
+        };
+        html += _renderPassHtmlCard(data);
+    });
+    _openPassesPrintWindow(html, 'Event Entry Passes');
+}
+
+function downloadSinglePass(cardId) {
+    const card = document.getElementById(cardId);
+    if (!card) return;
+    const data = {
+        passNo: card.dataset.passNo || card.querySelector('.text-xl')?.innerText.trim() || '001',
+        title: card.dataset.eventTitle || '',
+        mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
+        date: card.dataset.date || '',
+        venue: card.dataset.venue || '',
+        logo: card.dataset.logo || card.querySelector('img')?.src || ''
+    };
+    _openPassesPrintWindow(_renderPassHtmlCard(data), 'Event Entry Pass - ' + data.passNo);
+}
+</script>
 @endsection

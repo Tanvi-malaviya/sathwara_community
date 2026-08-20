@@ -25,9 +25,14 @@ class EventController extends Controller
         }
         $events = $query->orderBy('date', 'desc')->paginate(10)->withQueryString();
         $user = auth()->user();
-        $registrations = $user->eventRegistrations()->pluck('status', 'event_id')->toArray();
+        $myRegistrations = $user 
+            ? $user->eventRegistrations()->passes()->with('event')->orderBy('created_at', 'desc')->get() 
+            : collect();
+        $registrations = $user 
+            ? $user->eventRegistrations()->pluck('status', 'event_id')->toArray() 
+            : [];
 
-        return view('member.event.index', compact('events', 'registrations'));
+        return view('member.event.index', compact('events', 'registrations', 'myRegistrations'));
     }
 
     /**

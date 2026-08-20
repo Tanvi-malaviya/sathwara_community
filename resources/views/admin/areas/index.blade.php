@@ -88,7 +88,7 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr
-                        class="bg-slate-50/70 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider border-b border-slate-100">
+                        class="bg-slate-50/70 text-xs font-black uppercase text-slate-700 tracking-wider border-b border-slate-200">
                         <th class="py-2.5 px-4">{{ __('messages.area_name') }}</th>
                         <th class="py-2.5 px-4">{{ __('messages.pincode') }}</th>
                         <th class="py-2.5 px-4">{{ __('messages.registered_members') }}</th>

@@ -15,6 +15,7 @@ use App\Models\BusinessCategory;
 use App\Models\Business;
 use App\Models\User;
 use App\Models\EventRegistration;
+use App\Services\EventSequenceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
@@ -454,7 +455,22 @@ class PublicController extends Controller
                 'payment_status' => ($paymentStatus === 'paid' || $existingRegistration->payment_status === 'paid') ? 'paid' : 'unpaid',
                 'payment_amount' => $newTotalAmount > 0 ? $newTotalAmount : $existingRegistration->payment_amount,
             ]);
-            return $redirectTarget->with('success', 'Pass purchased successfully! Total registered persons: ' . $newTotalPersons);
+
+            // Dispatch Pass Email for All Passes
+            $recipientEmail = $formData['email'] ?? ($user ? $user->email : null);
+            if (!empty($recipientEmail)) {
+                $passes = [];
+                for ($i = 1; $i <= $newTotalPersons; $i++) {
+                    $passes[] = sprintf('%03d', $i);
+                }
+                try {
+                    \Illuminate\Support\Facades\Mail::to($recipientEmail)->send(new \App\Mail\EventPassPurchasedMail($event, $existingRegistration, $user, $passes, $newTotalPersons));
+                } catch (\Throwable $th) {
+                    \Illuminate\Support\Facades\Log::error('Event Pass Mail Error: ' . $th->getMessage());
+                }
+            }
+
+            return $redirectTarget->with('success', 'Pass purchased successfully! Total registered persons: ' . $newTotalPersons . '. Pass details sent to your email.');
         }
 
         // Check capacity
@@ -465,12 +481,31 @@ class PublicController extends Controller
             }
         }
 
-        // Assign registration number starting from 1 for this specific event
-        $nextRegistrationNo = EventRegistration::where('event_id', $event->id)->count() + 1;
-        $formData['registration_no'] = $nextRegistrationNo;
+        // Assign event-wise sequential reference number starting from 1
+        $passNumber = null;
+        $inamNumber = null;
+        $yuvaMeloNumber = null;
 
-        EventRegistration::create([
+        if ($isStudentForm) {
+            $inamNumber = EventSequenceService::nextInamNumber($event->id);
+            $regType = 'inam_vitran';
+            $formData['registration_no'] = $inamNumber;
+        } elseif ($isYuvaMeloCandidateForm) {
+            $yuvaMeloNumber = EventSequenceService::nextYuvaMeloNumber($event->id);
+            $regType = 'yuva_melo';
+            $formData['registration_no'] = $yuvaMeloNumber;
+        } else {
+            $passNumber = EventSequenceService::nextPassNumber($event->id);
+            $regType = 'pass';
+            $formData['registration_no'] = $passNumber;
+        }
+
+        $newRegistration = EventRegistration::create([
             'event_id' => $event->id,
+            'pass_number' => $passNumber,
+            'inam_number' => $inamNumber,
+            'yuva_melo_number' => $yuvaMeloNumber,
+            'registration_type' => $regType,
             'user_id' => $user ? $user->id : null,
             'status' => 'approved',
             'form_data' => $formData,
@@ -479,7 +514,24 @@ class PublicController extends Controller
             'payment_amount' => $totalAmount,
         ]);
 
-        return $redirectTarget->with('success', 'Registration submitted successfully!');
+        // Dispatch Pass Email for General Pass Registration
+        if (!$isStudentForm && !$isYuvaMeloCandidateForm) {
+            $recipientEmail = $formData['email'] ?? ($user ? $user->email : null);
+            if (!empty($recipientEmail)) {
+                $finalPersons = max(1, (int)($formData['person_count'] ?? 1));
+                $passes = [];
+                for ($i = 1; $i <= $finalPersons; $i++) {
+                    $passes[] = sprintf('%03d', $i);
+                }
+                try {
+                    \Illuminate\Support\Facades\Mail::to($recipientEmail)->send(new \App\Mail\EventPassPurchasedMail($event, $newRegistration, $user, $passes, $finalPersons));
+                } catch (\Throwable $th) {
+                    \Illuminate\Support\Facades\Log::error('Event Pass Mail Error: ' . $th->getMessage());
+                }
+            }
+        }
+
+        return $redirectTarget->with('success', 'Registration submitted successfully! Entry passes have been generated.');
     }
 
     /**

@@ -231,7 +231,7 @@
                         <div x-show="files.length > 0" class="space-y-2" @click.stop x-cloak>
                             <div class="flex items-center justify-between text-xs font-bold text-slate-600 px-1 border-b border-slate-100 pb-1.5">
                                 <span>{{ __('messages.selected_showcase_photos') }}</span>
-                                <span class="text-blue-600 font-extrabold bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/80" x-text="files.length + '/6 Selected'"></span>
+                                <span class="text-blue-600 font-extrabold bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/80" x-text="files.length + '/6 {{ __('messages.selected') }}'"></span>
                             </div>
                             <div class="flex flex-wrap items-center gap-3 pt-1">
                                 <template x-for="(f, idx) in files" :key="f.id">

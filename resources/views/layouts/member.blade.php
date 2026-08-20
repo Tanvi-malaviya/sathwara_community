@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Styles / Scripts -->
@@ -73,11 +73,17 @@
 
     <style>
         .font-gujarati {
-            font-family: 'Noto Sans Gujarati', sans-serif !important;
+            font-family: 'Hind Vadodara', 'Noto Sans Gujarati', sans-serif !important;
+            letter-spacing: 0.01em;
         }
 
         .font-sans {
             font-family: 'Manrope', sans-serif !important;
+        }
+
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         [x-cloak] {
@@ -266,7 +272,8 @@
                     </svg>
                 </button>
                 <h2 class="font-extrabold text-base sm:text-lg lg:text-xl text-slate-950 truncate">
-                    @yield('page_title', __('messages.dashboard'))</h2>
+                    @yield('page_title', __('messages.dashboard'))
+                </h2>
             </div>
 
             <div class="flex items-center space-x-4">
@@ -316,6 +323,7 @@
     </div>
     @include('partials.global_loader')
     @include('partials.delete_confirm_modal')
+    @stack('scripts')
 </body>
 
 </html>

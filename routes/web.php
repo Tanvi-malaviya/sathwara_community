@@ -172,6 +172,8 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
         Route::get('/events/{id}/inam-submissions/export', [AdminEvent::class, 'exportInamSubmissionsCsv'])->name('events.inam_submissions.export');
         Route::get('/events/{id}/yuva-submissions/export', [AdminEvent::class, 'exportYuvaSubmissionsCsv'])->name('events.yuva_submissions.export');
         Route::get('/events/{id}/registrations', [AdminEvent::class, 'registrations'])->name('events.registrations');
+        Route::get('/events/registrations/{id}/edit', [AdminEvent::class, 'editRegistration'])->name('events.registrations.edit');
+        Route::post('/events/registrations/{id}/update', [AdminEvent::class, 'updateRegistration'])->name('events.registrations.update');
         Route::post('/events/registrations/{id}/toggle-select', [AdminEvent::class, 'toggleSelectRegistration'])->name('events.registrations.toggle_select');
         Route::post('/events/registrations/{id}/approve', [AdminEvent::class, 'approveRegistration'])->name('events.registrations.approve');
         Route::post('/events/registrations/{id}/reject', [AdminEvent::class, 'rejectRegistration'])->name('events.registrations.reject');

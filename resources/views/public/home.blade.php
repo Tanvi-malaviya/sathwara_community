@@ -134,18 +134,18 @@
                     <div
                         class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white text-xs font-bold border border-white/15 mx-auto">
                         <span class="w-2.5 h-2.5 rounded-full bg-primary-500"></span>
-                        <span class="uppercase tracking-widest text-[11px]">Sathwara Community Portal</span>
+                        <span class="uppercase tracking-widest text-[11px]">{{ App\Models\Setting::get('website_name', 'Sathwara Community Portal') }}</span>
                     </div>
                     <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight">
-                        Welcome to Sathwara Community
+                        {{ __('messages.welcome') }} - {{ App\Models\Setting::get('website_name', 'Sathwara Community') }}
                     </h1>
                     <p class="text-slate-300 text-base sm:text-xl max-w-2xl mx-auto leading-relaxed">
-                        Empowering unity, progress, and commercial networking for all Sathwara community members.
+                        {{ __('messages.home_fallback_desc') }}
                     </p>
                     <div class="pt-4">
                         <a href="{{ route('business.directory') }}"
                             class="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-extrabold text-base rounded-2xl transition-all shadow-xl">
-                            Explore Business Directory
+                            {{ __('messages.business_directory') }}
                         </a>
                     </div>
                 </div>
@@ -255,8 +255,7 @@
                                         </div>
                                     </div>
                                     <span
-                                        style="font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#fff; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); padding:2px 8px; border-radius:999px; white-space:nowrap;">Community
-                                        Event</span>
+                                        style="font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#fff; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); padding:2px 8px; border-radius:999px; white-space:nowrap;">{{ __('messages.community_event') }}</span>
                                 </div>
                             </div>
 

@@ -219,12 +219,12 @@
             <div class="flex items-start gap-3 mb-3">
                 <div id="otpModalIcon" class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-rose-100 text-rose-600">⚠️</div>
                 <div>
-                    <h3 id="otpAlertTitle" class="text-sm font-extrabold text-slate-900 leading-tight">Verification Required</h3>
+                    <h3 id="otpAlertTitle" class="text-sm font-extrabold text-slate-900 leading-tight">{{ __('messages.verification_required') }}</h3>
                     <p id="otpAlertMessage" class="text-xs text-slate-600 mt-1 leading-relaxed"></p>
                 </div>
             </div>
             <div class="flex justify-end pt-2">
-                <button id="otpModalCloseBtn" type="button" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow cursor-pointer">OK, Got it</button>
+                <button id="otpModalCloseBtn" type="button" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow cursor-pointer">{{ __('messages.ok_got_it') }}</button>
             </div>
         </div>
     </div>
@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 startResendTimer(30);
             } else {
-                showModal(data.message || 'Failed to send OTP.', 'error', 'Send OTP Failed');
+                showModal(data.message || "{{ __('messages.failed_to_send_otp') }}", 'error', "{{ __('messages.failed_to_send_otp') }}");
             }
         })
         .catch(() => {
@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const email = emailInput ? emailInput.value.trim() : '';
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!email || !emailRegex.test(email)) {
-                showModal('Please enter a valid email address first.', 'warning', 'Invalid Email');
+                showModal("{{ __('messages.please_enter_valid_email') }}", 'warning', "{{ __('messages.please_enter_valid_email') }}");
                 if (emailInput) emailInput.focus();
                 return;
             }
@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     setResendButtonState(true);
                     if (otpStatusMsg) {
-                        otpStatusMsg.innerHTML = '<span style="color:#dc2626;font-weight:700;">❌ ' + (data.message || 'Failed to send OTP.') + '</span>';
+                        otpStatusMsg.innerHTML = '<span style="color:#dc2626;font-weight:700;">❌ ' + (data.message || "{{ __('messages.failed_to_send_otp') }}") + '</span>';
                     }
                 }
             })
@@ -613,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!isEmailVerified) {
             e.preventDefault();
             e.stopPropagation();
-            showModal("{{ __('messages.please_verify_email') }}", 'warning', 'Email Verification Required');
+            showModal("{{ __('messages.please_verify_email') }}", 'warning', "{{ __('messages.verification_required') }}");
             if (!sendOtpBtn.classList.contains('hidden')) {
                 sendOtpBtn.focus();
             } else if (otpInput) {

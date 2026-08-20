@@ -36,7 +36,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <span style="font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:#fff; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); padding:2px 10px; border-radius:999px;">Community Event</span>
+                                <span style="font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:#fff; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); padding:2px 10px; border-radius:999px;">{{ __('messages.community_event') }}</span>
                             </div>
                         </div>
 
