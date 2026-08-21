@@ -57,7 +57,7 @@
             @foreach($members as $member)
                 @php
                     $profile = $member->memberProfile;
-                    $fullName = \Illuminate\Support\Facades\Lang::has('messages.' . $member->name) ? __('messages.' . $member->name) : $member->name;
+                    $fullName = $member->display_name;
                     $phone = $profile->phone ?? 'N/A';
                     $photoPath = $profile && $profile->photo_path 
                         ? (str_starts_with($profile->photo_path, 'http') 

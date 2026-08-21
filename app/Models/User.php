@@ -37,6 +37,24 @@ class User extends Authenticatable
         return $this->member_code ?: ('SSAM' . sprintf('%04d', $this->id));
     }
 
+    public function getDisplayNameAttribute(): string
+    {
+        if ($this->relationLoaded('memberProfile') || $this->memberProfile) {
+            $profile = $this->memberProfile;
+            if ($profile && ($profile->first_name || $profile->last_name)) {
+                $fullName = trim(preg_replace('/\s+/', ' ', implode(' ', array_filter([
+                    $profile->first_name,
+                    $profile->middle_name,
+                    $profile->last_name,
+                ]))));
+                if (!empty($fullName)) {
+                    return $fullName;
+                }
+            }
+        }
+        return $this->name ?: '';
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

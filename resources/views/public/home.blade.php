@@ -340,10 +340,10 @@
                     </h2>
                 </div>
                 <a href="{{ route('events') }}"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-50 hover:bg-primary-600 text-primary-600 hover:text-white border border-primary-200 hover:border-primary-600 text-xs sm:text-sm font-bold transition-all duration-200 shadow-xs hover:shadow-md shrink-0 group">
-                    <span>{{ __('messages.view_all_events') }}</span>
-                    <svg class="w-4 h-4 text-primary-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 !text-white text-white font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm shrink-0 group">
+                    <span class="!text-white text-white">{{ __('messages.view_all_events') }}</span>
+                    <svg class="w-4 h-4 !text-white text-white group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                 </a>
@@ -473,11 +473,11 @@
                         {{ __('messages.community_bulletins') }}
                     </h2>
                 </div>
-                  <a href="{{ route('updates') }}"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-50 hover:bg-primary-600 text-primary-600 hover:text-white border border-primary-200 hover:border-primary-600 text-xs sm:text-sm font-bold transition-all duration-200 shadow-xs hover:shadow-md shrink-0 group">
-                    <span>{{ __('messages.all_announcements') }}</span>
-                    <svg class="w-4 h-4 text-primary-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                <a href="{{ route('updates') }}"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 !text-white text-white font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm shrink-0 group">
+                    <span class="!text-white text-white">{{ __('messages.all_announcements') }}</span>
+                    <svg class="w-4 h-4 !text-white text-white group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                 </a>
@@ -501,8 +501,13 @@
                             <h3 class="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1" title="{{ $update->title }}">
                                 {{ $update->title }}
                             </h3>
-                            <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed break-words">
-                                {{ $update->description }}
+                            @php
+                                $cleanDesc = preg_replace('/<span class="ql-ui"[^>]*>.*?<\/span>/i', '', $update->description);
+                                $cleanDesc = strip_tags(str_replace(['<br>', '</p>', '</li>', '</div>'], ' ', $cleanDesc));
+                                $cleanDesc = trim(preg_replace('/\s+/', ' ', $cleanDesc));
+                            @endphp
+                            <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed break-words font-medium">
+                                {{ \Illuminate\Support\Str::limit($cleanDesc, 100, '...') }}
                             </p>
                         </div>
 
@@ -558,10 +563,10 @@
                     </h2>
                 </div>
                 <a href="{{ route('gallery') }}"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-50 hover:bg-primary-600 text-primary-600 hover:text-white border border-primary-200 hover:border-primary-600 text-xs sm:text-sm font-bold transition-all duration-200 shadow-xs hover:shadow-md shrink-0 group">
-                    <span>{{ __('messages.view_full_gallery') }}</span>
-                    <svg class="w-4 h-4 text-primary-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 !text-white text-white font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm shrink-0 group">
+                    <span class="!text-white text-white">{{ __('messages.view_full_gallery') }}</span>
+                    <svg class="w-4 h-4 !text-white text-white group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                 </a>

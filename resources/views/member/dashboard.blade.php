@@ -127,7 +127,7 @@
                                     <span>&rarr;</span>
                                 </button>
                             @else
-                                <a href="{{ route('member.events.register_form', $event->id) }}" 
+                                <a href="{{ route('event.details', $event->id) }}" 
                                    class="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0">
                                     <span>🎫 {{ $isGu ? 'પાસ બુક કરો' : 'Book Pass' }}</span>
                                     <span>&rarr;</span>

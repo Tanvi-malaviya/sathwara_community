@@ -104,7 +104,8 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $profile = $user->memberProfile;
-        return view('member.profile', compact('user', 'profile'));
+        $areas = \App\Models\Area::orderBy('name')->get();
+        return view('member.profile', compact('user', 'profile', 'areas'));
     }
 
     /**
@@ -128,25 +129,36 @@ class DashboardController extends Controller
             'phone' => 'required|digits:10',
             'whatsapp' => 'nullable|digits:10',
             'address' => 'required|string',
+            'area_id' => 'nullable|exists:areas,id',
             'city' => 'required|string|max:100',
-            'state' => 'required|string|max:100',
-            'pincode' => 'required|string|max:10',
+            'state' => 'nullable|string|max:100',
+            'pincode' => 'nullable|string|max:10',
             'photo' => 'nullable|image|max:2048',
         ]);
 
+        $fullName = trim(preg_replace('/\s+/', ' ', implode(' ', array_filter([$request->first_name, $request->middle_name, $request->last_name]))));
+
         // Update User name
         $user->update([
-            'name' => $request->first_name . ' ' . $request->last_name,
+            'name' => $fullName,
         ]);
 
         // Upload new photo if provided
         $photoPath = $profile->photo_path;
         if ($request->hasFile('photo')) {
             // Delete old photo
-            if (Storage::disk('public')->exists($profile->photo_path) && !str_starts_with($profile->photo_path, 'http')) {
-                Storage::disk('public')->delete($profile->photo_path);
+            if ($profile->photo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($profile->photo_path) && !str_starts_with($profile->photo_path, 'http')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($profile->photo_path);
             }
             $photoPath = $request->file('photo')->store('registrations/photos', 'public');
+        }
+
+        $pincode = $request->pincode ?: $profile->pincode;
+        if ($request->filled('area_id')) {
+            $selectedArea = \App\Models\Area::find($request->area_id);
+            if ($selectedArea && $selectedArea->pincode) {
+                $pincode = $selectedArea->pincode;
+            }
         }
 
         // Update Profile
@@ -163,9 +175,10 @@ class DashboardController extends Controller
             'phone' => $request->phone,
             'whatsapp' => $request->phone,
             'address' => $request->address,
+            'area_id' => $request->area_id,
             'city' => $request->city,
-            'state' => $request->state,
-            'pincode' => $request->pincode,
+            'state' => 'Gujarat',
+            'pincode' => $pincode,
             'photo_path' => $photoPath,
         ]);
 

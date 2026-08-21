@@ -573,7 +573,7 @@
 
                 <span class="text-xs font-bold bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg">
                     {{ __('messages.administrator') }}:
-                    {{ \Illuminate\Support\Facades\Lang::has('messages.' . auth()->user()->name) ? __('messages.' . auth()->user()->name) : auth()->user()->name }}
+                    {{ auth()->user()->display_name }}
                 </span>
             </div>
         </header>

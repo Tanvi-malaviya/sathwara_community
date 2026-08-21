@@ -503,8 +503,8 @@
                                         <div class="space-y-3">
                                             <!-- Fill Yuva Form Button -->
                                             <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                class="w-full flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs font-black rounded-xl shadow-xs transition-all text-center gap-1.5">
-                                                <span>⚡ Fill Yuva Melo Form</span>
+                                                class="w-full flex items-center justify-center px-4 py-3 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-black rounded-xl shadow-xs transition-all text-center gap-1.5">
+                                                <span>⚡ {{ __('messages.fill_yuva_form') ?? 'Fill Yuva Melo Form' }}</span>
                                                 <span>&rarr;</span>
                                             </a>
 
@@ -531,12 +531,12 @@
                                         </div>
                                         @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                             <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                class="w-full flex items-center justify-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
+                                                class="w-full flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
                                                 🏆 Fill Inam Form &rarr;
                                             </a>
                                         @else
                                             <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                class="w-full flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center">
+                                                class="w-full flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center">
                                                 View Registration Details &rarr;
                                             </a>
                                         @endif
@@ -555,12 +555,12 @@
                                         @else
                                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                                 <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                    class="w-full flex items-center justify-center px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
+                                                    class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
                                                     🏆 Fill Inam Form &rarr;
                                                 </a>
                                             @else
                                                 <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                    class="w-full flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center">
+                                                    class="w-full flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center">
                                                     Register for Event &rarr;
                                                 </a>
                                             @endif
