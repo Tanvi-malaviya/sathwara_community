@@ -1661,48 +1661,31 @@
                                         </div>
                                     </div>
 
-                                    <!-- Member & Payment Verification Section -->
-                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-3">
-                                        <h4 class="font-extrabold text-[11px] text-slate-600 uppercase tracking-wider">Member ID &
-                                            Payment Details</h4>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                            <div class="space-y-1">
-                                                <label
-                                                    class="text-[11px] font-bold text-slate-700">{{ __('messages.member_number') }}</label>
-                                                <input type="text" name="member_number"
-                                                    value="{{ old('member_number', auth()->check() ? '#' . sprintf('%05d', auth()->user()->id) : '') }}"
-                                                    placeholder="e.g. #00005"
-                                                    @if(auth()->check()) readonly @endif
-                                                    class="w-full px-3 py-2 {{ auth()->check() ? 'bg-slate-100 text-slate-800 font-extrabold cursor-not-allowed select-none border-slate-200' : 'bg-white border-slate-200 focus:border-primary-500' }} rounded-lg text-xs outline-none">
-                                            </div>
-                                            <div class="space-y-1">
-                                                <label
-                                                    class="text-[11px] font-bold text-slate-700">{{ __('messages.payment_number') }}</label>
-                                                <input type="text" name="payment_number" value="{{ old('payment_number') }}"
-                                                    placeholder="e.g. UTR / UPI Ref / Transaction No."
-                                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-primary-500 outline-none">
-                                            </div>
-                                        </div>
+                                    <!-- Member Verification Section -->
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 space-y-2">
+                                        <h4 class="font-extrabold text-[11px] text-slate-600 uppercase tracking-wider">{{ __('messages.member_number') }}</h4>
                                         <div class="space-y-1">
-                                            <label
-                                                class="text-[11px] font-bold text-slate-700 block">{{ __('messages.payment_image') }}</label>
-                                            <input type="file" name="payment_image" accept="image/*"
-                                                class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                                            <label class="text-[11px] font-bold text-slate-700">{{ __('messages.member_number') }}</label>
+                                            <input type="text" name="member_number"
+                                                value="{{ old('member_number', auth()->check() ? '#' . sprintf('%05d', auth()->user()->id) : '') }}"
+                                                placeholder="e.g. #00005"
+                                                @if(auth()->check()) readonly @endif
+                                                class="w-full px-3 py-2 {{ auth()->check() ? 'bg-slate-100 text-slate-800 font-extrabold cursor-not-allowed select-none border-slate-200' : 'bg-white border-slate-200 focus:border-primary-500' }} rounded-lg text-xs outline-none">
                                         </div>
                                     </div>
 
                                     @if(($event->form_fee ?? 0) > 0)
-                                        <div class="p-3.5 bg-purple-50/90 border border-purple-200 rounded-xl flex items-center justify-between shadow-2xs">
+                                        <div class="p-3.5 bg-primary-50/80 border border-primary-200 rounded-xl flex items-center justify-between shadow-2xs">
                                             <div class="flex items-center gap-2.5">
-                                                <span class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center text-sm font-bold shadow-xs">💳</span>
+                                                <span class="w-8 h-8 rounded-xl bg-primary-600 text-white flex items-center justify-center text-sm font-bold shadow-xs">💳</span>
                                                 <div>
-                                                    <h4 class="text-xs font-black text-purple-950">Youth Biodata Registration Fee</h4>
-                                                    <p class="text-[10px] text-purple-700 font-medium">Online payment required upon submitting this application</p>
+                                                    <h4 class="text-xs font-black text-slate-900">{{ app()->getLocale() === 'gu' ? 'યુવા બાયોડેટા નોંધણી ફી' : 'Youth Biodata Registration Fee' }}</h4>
+                                                    <p class="text-[10px] text-slate-500 font-medium">{{ app()->getLocale() === 'gu' ? 'આ અરજી સબમિટ કરતી વખતે ઓનલાઇન પેમેન્ટ જરૂરી છે' : 'Online payment required upon submitting this application' }}</p>
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider block">Form Fee</span>
-                                                <span class="text-base font-black text-purple-950">₹{{ number_format($event->form_fee, 0) }}</span>
+                                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">{{ __('messages.form_fee') }}</span>
+                                                <span class="text-base font-black text-primary-600">₹{{ number_format($event->form_fee, 0) }}</span>
                                             </div>
                                         </div>
                                     @endif

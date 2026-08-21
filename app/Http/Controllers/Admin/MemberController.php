@@ -69,7 +69,6 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'status' => 'required|in:pending,approved,rejected',
@@ -87,9 +86,11 @@ class MemberController extends Controller
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
+        $fullName = trim(preg_replace('/\s+/', ' ', implode(' ', array_filter([$request->first_name, $request->middle_name, $request->last_name]))));
+
         // Create User
         $user = User::create([
-            'name' => $request->name,
+            'name' => $fullName,
             'email' => $request->email,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
             'status' => $request->status,
@@ -152,7 +153,6 @@ class MemberController extends Controller
         $profile = $member->memberProfile;
 
         $request->validate([
-            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $member->id,
             'status' => 'required|in:pending,approved,rejected',
             'first_name' => 'required|string|max:255',
@@ -169,8 +169,10 @@ class MemberController extends Controller
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
+        $fullName = trim(preg_replace('/\s+/', ' ', implode(' ', array_filter([$request->first_name, $request->middle_name, $request->last_name]))));
+
         $member->update([
-            'name' => $request->name,
+            'name' => $fullName,
             'email' => $request->email,
             'status' => $request->status,
         ]);

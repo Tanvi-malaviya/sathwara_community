@@ -47,8 +47,8 @@
                     </select>
                 </div>
 
-                <!-- Registration Checkbox -->
-                <div class="md:col-span-3 space-y-0.5">
+                <!-- Registration Checkbox (Hidden when eventType is normal) -->
+                <div x-show="eventType !== 'normal'" x-cloak class="md:col-span-3 space-y-0.5 transition-all duration-200">
                     <label class="text-[10px] font-bold text-slate-500 uppercase block">{{ __('messages.register_form') }}</label>
                     <label class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100/80 transition-colors h-[34px]">
                         <input type="hidden" name="has_registration_form" value="0">

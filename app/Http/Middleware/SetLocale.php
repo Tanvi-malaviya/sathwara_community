@@ -17,8 +17,8 @@ class SetLocale
         if (session()->has('locale')) {
             App::setLocale(session()->get('locale'));
         } else {
-            // Default to English
-            App::setLocale('en');
+            // Default to Gujarati
+            App::setLocale('gu');
         }
 
         return $next($request);

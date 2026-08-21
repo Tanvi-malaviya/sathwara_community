@@ -31,25 +31,25 @@
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.member_id_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.member_id_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
                     <input type="text" name="member_id" value="{{ old('member_id', $business->member_id) }}" placeholder="e.g. #00005 ({{ __('messages.optional') }})" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.firm_name_label') }} <span class="text-rose-500">*</span></label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.firm_name_label') }} <span class="text-rose-500">*</span></label>
                     <input type="text" name="business_name" value="{{ old('business_name', $business->business_name) }}" required placeholder="{{ __('messages.firm_name_placeholder') }}" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.contact_person_label') }} <span class="text-rose-500">*</span></label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.contact_person_label') }} <span class="text-rose-500">*</span></label>
                     <input type="text" name="owner_name" value="{{ old('owner_name', $business->owner_name) }}" required placeholder="{{ __('messages.contact_person_placeholder') }}" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.status_label') }} <span class="text-rose-500">*</span></label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.status_label') }} <span class="text-rose-500">*</span></label>
                     <select name="status" required class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         <option value="pending" {{ old('status', $business->status) == 'pending' ? 'selected' : '' }}>{{ __('messages.pending') }}</option>
                         <option value="approved" {{ old('status', $business->status) == 'approved' ? 'selected' : '' }}>{{ __('messages.approved') }}</option>
@@ -58,7 +58,7 @@
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.membership_status') }} <span class="text-rose-500">*</span></label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.membership_status') }} <span class="text-rose-500">*</span></label>
                     <select name="membership_status" required class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         <option value="active" {{ old('membership_status', $business->membership_status) == 'active' ? 'selected' : '' }}>{{ __('messages.active') }}</option>
                         <option value="inactive" {{ old('membership_status', $business->membership_status) == 'inactive' ? 'selected' : '' }}>{{ __('messages.inactive') }}</option>
@@ -66,7 +66,7 @@
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.subscription_purchase_date') }}</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.subscription_purchase_date') }}</label>
                     <input type="date" name="approved_at" value="{{ old('approved_at', $business->approved_at ? $business->approved_at->format('Y-m-d') : '') }}" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
@@ -80,7 +80,7 @@
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.business_category_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.business_category_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
                     <select name="category_id" class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         <option value="">-- {{ __('messages.select_category') }} --</option>
                         @foreach($categories as $cat)
@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.area_label') }} <span class="text-rose-500">*</span></label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.area_label') }} <span class="text-rose-500">*</span></label>
                     <select name="area_id" required class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         <option value="">-- {{ __('messages.select_area') }} --</option>
                         @foreach($areas as $area)
@@ -100,43 +100,43 @@
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.phone_whatsapp_number') }}</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.phone_whatsapp_number') }}</label>
                     <input type="text" name="phone" value="{{ old('phone', $business->phone) }}" required placeholder="e.g. 9876543210" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.email_address_label') }}</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.email_address_label') }}</label>
                     <input type="email" name="email" value="{{ old('email', $business->email) }}" placeholder="{{ __('messages.email_placeholder') }}" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.website_url_label') }}</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.website_url_label') }}</label>
                     <input type="url" name="website" value="{{ old('website', $business->website) }}" placeholder="https://example.com" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.facebook_link_label') }}</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.facebook_link_label') }}</label>
                     <input type="text" name="facebook" value="{{ old('facebook', $business->facebook) }}" placeholder="https://facebook.com/username" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.instagram_link_label') }}</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.instagram_link_label') }}</label>
                     <input type="text" name="instagram" value="{{ old('instagram', $business->instagram) }}" placeholder="https://instagram.com/username" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.youtube_link_label') }}</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.youtube_link_label') }}</label>
                     <input type="text" name="youtube" value="{{ old('youtube', $business->youtube) }}" placeholder="https://youtube.com/@username" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.linkedin_link_label') }}</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.linkedin_link_label') }}</label>
                     <input type="text" name="linkedin" value="{{ old('linkedin', $business->linkedin) }}" placeholder="https://linkedin.com/in/username" 
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
@@ -150,63 +150,45 @@
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.business_desc_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.business_desc_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
                     <textarea name="description" rows="3" placeholder="{{ __('messages.business_desc_placeholder') }}" 
                               class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">{{ old('description', $business->description) }}</textarea>
                 </div>
 
                 <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">{{ __('messages.office_address_label') }} <span class="text-rose-500">*</span></label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.office_address_label') }} <span class="text-rose-500">*</span></label>
                     <textarea name="address" rows="3" required placeholder="{{ __('messages.office_address_placeholder') }}" 
                               class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">{{ old('address', $business->address) }}</textarea>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 4: MEDIA (LOGO, PAYMENT SCREENSHOT & GALLERY) -->
+        <!-- SECTION 4: MEDIA (LOGO & GALLERY) -->
         <div class="pt-1">
             <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2.5 pb-1 border-b border-slate-100">
                 4. {{ __('messages.media_gallery_sec') }}
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="space-y-4">
                 <!-- LOGO UPLOAD -->
-                <div class="space-y-2 border border-slate-100 rounded-xl p-3 bg-slate-50/50">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase block">{{ __('messages.business_logo_label') }}</label>
+                <div class="space-y-2 border border-slate-100 rounded-xl p-3.5 bg-slate-50/50 max-w-md">
+                    <label class="text-xs font-bold text-slate-500 uppercase block">{{ __('messages.business_logo_label') }}</label>
                     <div class="flex items-center space-x-3">
                         <img src="{{ str_starts_with($business->logo_path, 'http') ? $business->logo_path : asset('storage/' . $business->logo_path) }}" 
-                             class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-white shadow-sm shrink-0" alt="Logo">
+                             class="w-12 h-12 rounded-xl object-cover border border-slate-200 bg-white shadow-sm shrink-0" alt="Logo">
                         <div class="space-y-1">
                             <input type="file" name="logo" accept="image/*" 
-                                   class="text-xs font-semibold file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
-                            <p class="text-[9px] text-slate-400 font-semibold">Max 2MB</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PAYMENT SCREENSHOT UPLOAD -->
-                <div class="space-y-2 border border-slate-100 rounded-xl p-3 bg-slate-50/50">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase block">{{ __('messages.payment_screenshot_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
-                    <div class="flex items-center space-x-3">
-                        @if($business->payment_screenshot_path)
-                            <img src="{{ asset('storage/' . $business->payment_screenshot_path) }}" 
-                                 class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-white shadow-sm shrink-0" alt="Payment Screenshot">
-                        @else
-                            <div class="w-12 h-12 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0 text-[8px] font-extrabold text-slate-400">{{ __('messages.none') }}</div>
-                        @endif
-                        <div class="space-y-1">
-                            <input type="file" name="payment_screenshot" accept="image/*" 
-                                   class="text-xs font-semibold file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
-                            <p class="text-[9px] text-slate-400 font-semibold">Max 2MB</p>
+                                   class="text-xs font-semibold file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
+                            <p class="text-[10px] text-slate-400 font-semibold">Max 2MB</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- GALLERY UPLOAD & MANAGEMENT -->
-                <div class="space-y-4 border border-slate-200/80 rounded-2xl p-4 bg-slate-50/60 shadow-2xs md:col-span-3" x-data="multiShowcaseUploader({{ $existingCount }})">
+                <div class="space-y-4 border border-slate-200/80 rounded-2xl p-4 bg-slate-50/60 shadow-2xs" x-data="multiShowcaseUploader({{ $existingCount }})">
                     <div class="flex items-center justify-between gap-3 pb-1 flex-wrap">
                         <div>
-                            <label class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider block">{{ __('messages.showcase_photos_label') }}</label>
-                            <p class="text-[10px] text-slate-400 font-medium">{{ __('messages.select_multiple_append') }}</p>
+                            <label class="text-xs font-extrabold text-slate-700 uppercase tracking-wider block">{{ __('messages.showcase_photos_label') }}</label>
+                            <p class="text-[11px] text-slate-500 font-medium">{{ __('messages.select_multiple_append') }}</p>
                         </div>
 
                         <div class="flex items-center gap-2">

@@ -114,6 +114,8 @@ class EventController extends Controller
             $bannerPath = $request->file('banner')->store('events/banners', 'public');
         }
 
+        $hasRegistrationForm = ($request->event_type === 'normal') ? false : (bool) $request->has_registration_form;
+
         Event::create([
             'title' => $request->title,
             'event_type' => $request->event_type,
@@ -125,8 +127,8 @@ class EventController extends Controller
             'published_date' => $request->published_date,
             'registration_end_date' => $request->registration_end_date,
             'banner_path' => $bannerPath ?? '',
-            'registration_option' => $request->has_registration_form,
-            'has_registration_form' => $request->has_registration_form,
+            'registration_option' => $hasRegistrationForm,
+            'has_registration_form' => $hasRegistrationForm,
             'pass_fee' => $request->pass_fee ?? 0.00,
             'form_fee' => $request->form_fee ?? 0.00,
             'max_participants' => $request->max_participants,
@@ -206,6 +208,8 @@ class EventController extends Controller
             $bannerPath = $request->file('banner')->store('events/banners', 'public');
         }
 
+        $hasRegistrationForm = ($request->event_type === 'normal') ? false : (bool) $request->has_registration_form;
+
         $event->update([
             'title' => $request->title,
             'event_type' => $request->event_type,
@@ -217,8 +221,8 @@ class EventController extends Controller
             'published_date' => $request->published_date,
             'registration_end_date' => $request->registration_end_date,
             'banner_path' => $bannerPath ?? '',
-            'registration_option' => $request->has_registration_form,
-            'has_registration_form' => $request->has_registration_form,
+            'registration_option' => $hasRegistrationForm,
+            'has_registration_form' => $hasRegistrationForm,
             'pass_fee' => $request->pass_fee ?? 0.00,
             'form_fee' => $request->form_fee ?? 0.00,
             'max_participants' => $request->max_participants,

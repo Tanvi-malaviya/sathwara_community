@@ -41,7 +41,7 @@
                 <!-- Header: Member Name, Status Badge & Actions -->
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
                     <div>
-                        <h3 class="text-lg font-black text-slate-900 leading-tight">{{ $member->name }}</h3>
+                        <h3 class="text-lg font-black text-slate-900 leading-tight">{{ $member->display_name }}</h3>
                         <p class="text-[11px] text-slate-400 font-bold tracking-wider uppercase mt-1">
                             {{ __('messages.registered_at') }}: {{ $member->created_at->format('d-M-Y') }}
                         </p>

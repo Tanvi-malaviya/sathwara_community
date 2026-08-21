@@ -2,7 +2,31 @@
 @section('page_title', __('messages.edit_profile'))
 
 @section('content')
-<div class="max-w-5xl mx-auto space-y-3">
+@php
+    $areas = $areas ?? \App\Models\Area::orderBy('name')->get();
+@endphp
+<div class="max-w-5xl mx-auto space-y-4" 
+     x-data="{ 
+         photoPreview: null, 
+         fileName: '',
+         pincode: '{{ old('pincode', $profile->pincode ?? '') }}',
+         onAreaChange(event) {
+             const sel = event.target.options[event.target.selectedIndex];
+             const pin = sel ? sel.getAttribute('data-pincode') : '';
+             if (pin) {
+                 this.pincode = pin;
+             }
+         },
+         onPhotoChange(event) {
+             const file = event.target.files[0];
+             if (file) {
+                 this.fileName = file.name;
+                 const reader = new FileReader();
+                 reader.onload = (e) => { this.photoPreview = e.target.result; };
+                 reader.readAsDataURL(file);
+             }
+         }
+     }">
 
     <!-- Validation Errors -->
     @if ($errors->any())
@@ -11,8 +35,7 @@
                 <span>⚠️</span>
                 <span>{{ __('messages.please_correct_errors') }}</span>
             </p>
-            <ul class="list-disc pl-5 text-[11px] font-medium 
-            -y-1 text-rose-700">
+            <ul class="list-disc pl-5 text-[11px] font-medium space-y-1 text-rose-700">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -21,7 +44,7 @@
     @endif
 
     <!-- EDITABLE PROFILE FORM -->
-    <form method="POST" action="{{ route('member.profile.update') }}" enctype="multipart/form-data" id="member_profile_form" class="space-y-3">
+    <form method="POST" action="{{ route('member.profile.update') }}" enctype="multipart/form-data" id="member_profile_form" class="space-y-4">
         @csrf
         <input type="hidden" name="first_name" value="{{ old('first_name', $profile->first_name ?? '') }}">
         <input type="hidden" name="middle_name" value="{{ old('middle_name', $profile->middle_name ?? '') }}">
@@ -31,7 +54,7 @@
         <div class="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 shadow-sm">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <!-- User Info -->
-                <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                     <div class="relative group shrink-0">
                         @php
                             $hasProfilePhoto = ($profile && !empty($profile->photo_path) && !str_contains($profile->photo_path, 'unsplash.com') && $profile->photo_path !== 'NOT_SPECIFIED' && $profile->photo_path !== 'N/A');
@@ -41,13 +64,13 @@
                              src="{{ $profilePhotoUrl }}" 
                              alt="Profile Photo">
                     </div>
-                    <div class="space-y-1 min-w-0">
+                    <div class="space-y-1 min-w-0 flex-1">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="px-2.5 py-0.5 rounded-md bg-primary-50 text-primary-700 border border-primary-100 text-[10px] font-black uppercase tracking-wider">MEMBER ACCOUNT</span>
                             <span class="text-xs font-black text-slate-700 font-mono">{{ $user->member_code ?: $user->formatted_member_id }}</span>
                         </div>
-                        <h2 class="text-base sm:text-lg font-black text-slate-900 leading-tight truncate">
-                            {{ $profile->first_name ?? '' }} {{ $profile->middle_name ?? '' }} {{ $profile->last_name ?? '' }}
+                        <h2 class="text-base sm:text-lg font-black text-slate-900 leading-snug break-words">
+                            {{ $user->display_name }}
                         </h2>
                         <p class="text-xs text-slate-500 font-semibold flex items-center gap-1 truncate">
                             <span>✉️</span>
@@ -56,14 +79,29 @@
                     </div>
                 </div>
 
-                <!-- Photo Upload Field -->
-                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-3 shrink-0 w-full sm:w-auto overflow-hidden">
+                <!-- Photo Upload Field with Preview -->
+                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0 w-full sm:w-auto overflow-hidden">
                     <div class="space-y-0.5 shrink-0">
                         <label class="text-xs font-bold text-slate-700 block">{{ __('messages.profile_photo') }}</label>
                         <span class="text-[10px] text-slate-400 font-medium block">JPG, PNG or WEBP (Max 2MB)</span>
                     </div>
-                    <input type="file" name="photo" accept="image/*"
-                           class="w-full max-w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-primary-500 file:text-white hover:file:bg-primary-600 cursor-pointer transition-all">
+
+                    <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap">
+                        <!-- Small thumbnail preview -->
+                        <div x-show="photoPreview" class="shrink-0" x-cloak>
+                            <img :src="photoPreview" class="w-10 h-10 rounded-xl object-cover border-2 border-primary-500 shadow-xs">
+                        </div>
+
+                        <label class="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all shrink-0 hover:-translate-y-0.5"
+                               style="background-color: #e11d48 !important; color: #ffffff !important;">
+                            <svg class="w-4 h-4" style="color: #ffffff !important;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="!text-white" style="color: #ffffff !important;">{{ __('messages.choose_file') ?? 'Choose Photo' }}</span>
+                            <input type="file" name="photo" accept="image/*" @change="onPhotoChange($event)" class="hidden">
+                        </label>
+                        <span class="text-xs text-slate-500 font-semibold truncate max-w-[140px] sm:max-w-[200px]" x-text="fileName || 'No file chosen'"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -148,7 +186,7 @@
                             @if($fatherUser)
                                 <p class="text-[11px] text-emerald-600 font-bold mt-0.5 flex items-center gap-1">
                                     <span>✓</span>
-                                    <span>{{ $fatherUser->name }} (#{{ sprintf('%05d', $fatherUser->id) }})</span>
+                                    <span>{{ $fatherUser->display_name }} (#{{ sprintf('%05d', $fatherUser->id) }})</span>
                                 </p>
                             @endif
                         @endif
@@ -163,33 +201,41 @@
                     <span>{{ __('messages.address_location_sec') }}</span>
                 </h3>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <!-- Street Address -->
-                    <div class="space-y-1.5 sm:col-span-2 md:col-span-4">
+                    <div class="space-y-1.5 sm:col-span-3">
                         <label class="text-xs font-bold text-slate-700 block">{{ __('messages.street_address') }} <span class="text-rose-500">*</span></label>
-                        <input type="text" name="address" value="{{ old('address', $profile->address ?? '') }}" required placeholder="House No, Society, Street, Area..."
+                        <input type="text" name="address" value="{{ old('address', $profile->address ?? '') }}" required placeholder="House No, Society, Street..."
                                class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
+                    <!-- Area Dropdown (From Admin Area Management) -->
+                    <div class="space-y-1.5 sm:col-span-1">
+                        <label class="text-xs font-bold text-slate-700 block">{{ __('messages.area') }}</label>
+                        <select name="area_id"
+                                class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
+                            <option value="">-- {{ __('messages.select_area') }} --</option>
+                            @foreach($areas as $area)
+                                <option value="{{ $area->id }}" 
+                                        {{ old('area_id', $profile->area_id ?? '') == $area->id ? 'selected' : '' }}>
+                                    {{ $area->name }}{{ $area->pincode ? ' (' . $area->pincode . ')' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <!-- City -->
-                    <div class="space-y-1.5 sm:col-span-1 md:col-span-1">
+                    <div class="space-y-1.5 sm:col-span-1">
                         <label class="text-xs font-bold text-slate-700 block">{{ __('messages.city') }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="city" value="{{ old('city', $profile->city ?? '') }}" required placeholder="City"
                                class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
-                    <!-- State -->
-                    <div class="space-y-1.5 sm:col-span-1 md:col-span-2">
+                    <!-- State (Fixed to Gujarat) -->
+                    <div class="space-y-1.5 sm:col-span-1">
                         <label class="text-xs font-bold text-slate-700 block">{{ __('messages.state') }} <span class="text-rose-500">*</span></label>
-                        <input type="text" name="state" value="{{ old('state', $profile->state ?? '') }}" required placeholder="State"
-                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
-                    </div>
-
-                    <!-- Pincode -->
-                    <div class="space-y-1.5 sm:col-span-1 md:col-span-1">
-                        <label class="text-xs font-bold text-slate-700 block">{{ __('messages.pincode') }} <span class="text-rose-500">*</span></label>
-                        <input type="text" name="pincode" value="{{ old('pincode', $profile->pincode ?? '') }}" required placeholder="Pincode"
-                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
+                        <input type="text" name="state" value="Gujarat" readonly
+                               class="w-full text-xs font-bold h-10 px-3 bg-slate-100 text-slate-600 border border-slate-200 rounded-xl cursor-not-allowed select-none">
                     </div>
                 </div>
             </div>

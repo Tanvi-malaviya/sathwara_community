@@ -56,4 +56,13 @@ class MemberProfile extends Model
         }
         return null;
     }
+
+    public function getFullNameAttribute(): string
+    {
+        return trim(preg_replace('/\s+/', ' ', implode(' ', array_filter([
+            $this->first_name,
+            $this->middle_name,
+            $this->last_name,
+        ]))));
+    }
 }

@@ -254,14 +254,9 @@
                                     @endif
                                 </div>
 
-                                @if(($event->event_type ?? 'normal') === 'inam_vitaran')
+                                @if(($event->event_type ?? 'normal') === 'inam_vitaran' || ($event->event_type ?? 'normal') === 'yuva_melo')
                                     <a href="{{ route('member.events.register_form', $event->id) }}"
-                                       class="inline-flex items-center px-3 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-extrabold rounded-lg transition-all gap-1 shadow-2xs">
-                                        📝 {{ $isGu ? 'ફોર્મ ભરો' : 'Fill Form' }}
-                                    </a>
-                                @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                    <a href="{{ route('member.events.register_form', $event->id) }}"
-                                       class="inline-flex items-center px-3 py-1.5 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs font-extrabold rounded-lg transition-all gap-1 shadow-2xs">
+                                       class="inline-flex items-center px-3.5 py-1.5 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-extrabold rounded-lg transition-all gap-1 shadow-2xs">
                                         📝 {{ $isGu ? 'ફોર્મ ભરો' : 'Fill Form' }}
                                     </a>
                                 @endif

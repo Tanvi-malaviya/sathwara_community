@@ -246,20 +246,19 @@
         class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 flex flex-col shrink-0 transition-transform duration-300 transform md:translate-x-0 md:static md:h-screen md:sticky md:top-0 overflow-hidden"
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
         <!-- Sidebar User Card (Top Header) -->
-        <div class="h-16 px-5 border-b border-slate-100 flex items-center justify-between shrink-0">
-            <div class="flex items-center space-x-3 min-w-0 overflow-hidden">
+        <div class="min-h-16 py-3 px-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3 min-w-0 flex-1">
                 @php
                     $sidebarProfile = auth()->user()->memberProfile;
                     $sidebarHasPhoto = ($sidebarProfile && !empty($sidebarProfile->photo_path) && !str_contains($sidebarProfile->photo_path, 'unsplash.com') && $sidebarProfile->photo_path !== 'NOT_SPECIFIED' && $sidebarProfile->photo_path !== 'N/A');
                     $sidebarPhoto = $sidebarHasPhoto ? (str_starts_with($sidebarProfile->photo_path, 'http') ? $sidebarProfile->photo_path : asset('storage/' . $sidebarProfile->photo_path)) : asset('logo.png');
                 @endphp
-                <img class="w-9 h-9 rounded-full object-cover shadow-xs bg-slate-100 p-0.5 border border-slate-200 shrink-0"
+                <img class="w-10 h-10 rounded-full object-cover shadow-xs bg-slate-100 p-0.5 border border-slate-200 shrink-0"
                     src="{{ $sidebarPhoto }}" alt="User avatar">
-                <div class="min-w-0 flex-1 overflow-hidden">
-                    <h4 class="text-[15px] font-bold text-slate-800 leading-tight truncate">
-                        {{ \Illuminate\Support\Facades\Lang::has('messages.' . auth()->user()->name) ? __('messages.' . auth()->user()->name) : auth()->user()->name }}
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-xs sm:text-[13px] font-bold text-slate-800 leading-snug break-words">
+                        {{ auth()->user()->display_name }}
                     </h4>
-
                 </div>
             </div>
             <!-- Mobile Close Button -->

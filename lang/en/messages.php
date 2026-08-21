@@ -1061,6 +1061,7 @@ return [
     'ten_digit_whatsapp_placeholder' => '10-digit WhatsApp number',
     'select_multiple_append' => 'Select multiple times to append',
     'select_files' => 'SELECT FILES',
+    'choose_file' => 'Choose Photo',
     'clear' => 'CLEAR',
     'drop_files_here_or' => 'Drop Your Files Here or',
     'browse' => 'Browse',
