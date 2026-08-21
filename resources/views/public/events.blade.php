@@ -105,7 +105,7 @@
                             <div class="min-w-0 flex-1">
                                 <span class="text-xs sm:text-sm font-bold text-slate-500 truncate block" title="{{ $event->venue }}">📍 {{ $event->venue }}</span>
                             </div>
-                            @if(!empty($event->registration_end_date))
+                            @if(!empty($event->registration_end_date) && ($event->event_type ?? 'normal') !== 'normal')
                                 <span class="text-xs font-extrabold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100 whitespace-nowrap">
                                     ⏳ {{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
                                 </span>

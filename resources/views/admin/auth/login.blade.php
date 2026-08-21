@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Admin Portal Sign In - {{ config('app.name', 'Sathwara Community') }}</title>
+    <title>Admin Portal Sign In - {{ config('app.name', 'Satwara Community') }}</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,7 +79,7 @@
                         Admin Email / Phone / ID <span class="text-rose-500">*</span>
                     </label>
                     <input id="login" type="text" name="login" value="{{ old('login') }}" required autofocus
-                        placeholder="e.g. admin@sathwara.org"
+                        placeholder="e.g. admin@satwara.org"
                         class="w-full text-xs font-semibold px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all">
                 </div>
 

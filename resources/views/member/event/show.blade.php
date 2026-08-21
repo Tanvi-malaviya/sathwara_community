@@ -137,7 +137,7 @@
                                 </div>
                             </div>
 
-                            @if(!empty($event->registration_end_date))
+                            @if(!empty($event->registration_end_date) && ($event->event_type ?? 'normal') !== 'normal')
                                 <div class="flex items-center gap-3 text-xs font-semibold text-slate-600">
                                     <div class="p-1.5 bg-rose-50 text-rose-500 rounded-lg shrink-0">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -621,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function () {
             "key": razorpayKey || "rzp_test_key",
             "amount": totalAmountPaise,
             "currency": "INR",
-            "name": "{{ config('app.name', 'Sathwara Community') }}",
+            "name": "{{ config('app.name', 'Satwara Community') }}",
             "description": "Event Pass Booking - {{ addslashes($event->title) }} (" + personCount + " Person/s)",
             "handler": function (response) {
                 paymentIdInput.value = response.razorpay_payment_id;

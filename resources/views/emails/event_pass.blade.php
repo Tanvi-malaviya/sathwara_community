@@ -241,7 +241,7 @@
 
             <div class="footer-note">
                 <p style="margin: 0 0 5px 0;">આ પાસ તમારા મોબાઇલમાં સાચવી રાખો અથવા પ્રિન્ટ કરીને સાથે લાવો.</p>
-                <p style="margin: 0; font-size: 11px; color: #94a3b8;">&copy; {{ date('Y') }} Samast Sathwara Gyati Mandal Ahmedabad. All rights reserved.</p>
+                <p style="margin: 0; font-size: 11px; color: #94a3b8;">&copy; {{ date('Y') }} Samast Satwara Gyati Mandal Ahmedabad. All rights reserved.</p>
             </div>
         </div>
     </div>

@@ -232,7 +232,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div class="space-y-0.5">
                             <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.sub_admin_full_name') }} <span class="text-rose-500">*</span></label>
-                            <input type="text" name="name" value="{{ old('name') }}" required placeholder="e.g. Ramesh Sathwara" class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                            <input type="text" name="name" value="{{ old('name') }}" required placeholder="e.g. Ramesh Satwara" class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
                         </div>
                         <div class="space-y-0.5">
                             <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.phone_whatsapp_number') }} <span class="text-rose-500">*</span></label>
@@ -243,7 +243,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div class="space-y-0.5">
                             <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.email_address_login') }} <span class="text-rose-500">*</span></label>
-                            <input type="email" name="email" value="{{ old('email') }}" required placeholder="subadmin@sathwara.org" class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                            <input type="email" name="email" value="{{ old('email') }}" required placeholder="subadmin@satwara.org" class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
                         </div>
                         <div class="space-y-0.5">
                             <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.password') }} <span class="text-rose-500">*</span></label>

@@ -91,7 +91,7 @@
 
             <!-- Published Date & Form Fill Up Last Date -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
-                <div class="space-y-0.5">
+                <div :class="eventType !== 'normal' ? 'md:col-span-1' : 'md:col-span-2'" class="space-y-0.5 transition-all duration-200">
                     <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
                         <span>{{ __('messages.form_published_date') }}</span>
                         <span class="text-[9px] text-slate-400 font-normal">({{ __('messages.form_start_date') }})</span>
@@ -102,7 +102,8 @@
                            class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
-                <div class="space-y-0.5">
+                <!-- Form Fill Up Last Date (Hidden on Normal Event) -->
+                <div x-show="eventType !== 'normal'" x-cloak class="md:col-span-1 space-y-0.5 transition-all duration-200">
                     <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
                         <span>{{ __('messages.form_fillup_last_date') }}</span>
                         <span class="text-[9px] text-rose-500 font-bold">({{ __('messages.last_date_deadline') }})</span>

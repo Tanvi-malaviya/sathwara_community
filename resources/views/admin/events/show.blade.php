@@ -1291,7 +1291,7 @@
 '<html>' +
 '<head>' +
 '    <meta charset="utf-8">' +
-'    <title>Candidate Biodata - Sathwara Yuva Melo</title>' +
+'    <title>Candidate Biodata - Satwara Yuva Melo</title>' +
 '    <script src="https://cdn.tailwindcss.com"><\/script>' +
 '    <style>' +
 '        * { box-sizing: border-box; margin: 0; padding: 0; }' +

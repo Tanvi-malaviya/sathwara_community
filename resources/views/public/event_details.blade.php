@@ -85,7 +85,7 @@
                             <span>📍</span>
                             <span class="truncate max-w-xs sm:max-w-md" title="{{ $event->venue }}">{{ $event->venue }}</span>
                         </div>
-                        @if(!empty($event->registration_end_date))
+                        @if(!empty($event->registration_end_date) && ($event->event_type ?? 'normal') !== 'normal')
                             <div class="inline-flex items-center gap-2 text-rose-200 font-extrabold bg-rose-950 px-4 py-2.5 rounded-xl border border-rose-800 whitespace-nowrap shadow-xs">
                                 <span>⏳</span>
                                 <span>{{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
@@ -672,7 +672,7 @@ document.addEventListener('DOMContentLoaded', function () {
             "key": razorpayKey || "rzp_test_key",
             "amount": totalAmountPaise,
             "currency": "INR",
-            "name": "{{ config('app.name', 'Sathwara Community') }}",
+            "name": "{{ config('app.name', 'Satwara Community') }}",
             "description": "Event Pass Booking - {{ addslashes($event->title) }} (" + personCount + " Person/s)",
             "handler": function (response) {
                 paymentIdInput.value = response.razorpay_payment_id;
@@ -721,7 +721,7 @@ function _renderPassHtmlCard(passData) {
         <table style="width: 100%; border-collapse: collapse; background-color: #0f172a; color: #ffffff;">
             <tr>
                 <td style="padding: 7px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-align: left; color: #ffffff;">
-                    SATHWARA COMMUNITY ENTRY PASS
+                    SATWARA COMMUNITY ENTRY PASS
                 </td>
                 <td style="padding: 7px 16px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-align: right; color: #f59e0b;">
                     ENTRY PASS

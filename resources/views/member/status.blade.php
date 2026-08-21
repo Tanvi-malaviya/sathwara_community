@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('messages.account_status') }} - {{ App\Models\Setting::get('website_name', 'Sathwara Portal') }}
+    <title>{{ __('messages.account_status') }} - {{ App\Models\Setting::get('website_name', 'Satwara Portal') }}
     </title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -283,7 +283,7 @@ function _renderMemberPassHtmlCard(passData) {
     const venue = passData.venue || '';
     const attendee = passData.attendee || '';
     const memberCode = passData.memberCode || '';
-    const topNameWithCode = attendee ? (attendee + (memberCode ? ' (' + memberCode + ')' : '')) : 'SATHWARA COMMUNITY ENTRY PASS';
+    const topNameWithCode = attendee ? (attendee + (memberCode ? ' (' + memberCode + ')' : '')) : 'SATWARA COMMUNITY ENTRY PASS';
 
     return `
     <div style="border: 2px solid #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 22px; page-break-inside: avoid; background: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-sizing: border-box;">

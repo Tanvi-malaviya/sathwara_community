@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>
-        {{ $title ?? App\Models\Setting::get('seo_title', App\Models\Setting::get('website_name', 'Sathwara Community Portal')) }}
+        {{ $title ?? App\Models\Setting::get('seo_title', App\Models\Setting::get('website_name', 'Satwara Community Portal')) }}
     </title>
     @if(App\Models\Setting::get('seo_description'))
         <meta name="description" content="{{ App\Models\Setting::get('seo_description') }}">
@@ -29,7 +29,7 @@
 
     <style>
         /* ============================================================
-           TYPOGRAPHY SYSTEM — Sathwara Community Website
+           TYPOGRAPHY SYSTEM — Satwara Community Website
            English  : Plus Jakarta Sans
            Gujarati : Hind Vadodara + Noto Sans Gujarati fallback
            ============================================================ */
@@ -303,7 +303,7 @@
                         @if(App\Models\Setting::get('website_logo'))
                             <img class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-md shadow-primary-500/10 border border-slate-100 group-hover:scale-105 transition-transform duration-300"
                                 src="{{ asset('storage/' . App\Models\Setting::get('website_logo')) }}"
-                                alt="{{ App\Models\Setting::get('website_name', 'Sathwara') }}">
+                                alt="{{ App\Models\Setting::get('website_name', 'Satwara') }}">
                         @else
                             <div
                                 class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-primary-600 via-primary-500 to-rose-500 flex items-center justify-center text-white font-black text-xl shadow-md shadow-primary-500/20 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
@@ -680,7 +680,7 @@
                         @if(App\Models\Setting::get('website_logo'))
                             <img class="h-8 w-auto object-contain rounded-lg"
                                 src="{{ asset('storage/' . App\Models\Setting::get('website_logo')) }}"
-                                alt="{{ App\Models\Setting::get('website_name', 'Sathwara') }}">
+                                alt="{{ App\Models\Setting::get('website_name', 'Satwara') }}">
                         @else
                             <div
                                 class="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary-600 via-primary-500 to-rose-500 flex items-center justify-center text-white font-black text-sm shadow-md shadow-primary-500/20">
@@ -688,7 +688,7 @@
                             </div>
                         @endif
                         <span class="font-extrabold text-lg text-slate-900 tracking-tight">
-                            {{ App\Models\Setting::get('website_name', 'Sathwara Community') }}
+                            {{ App\Models\Setting::get('website_name', 'Satwara Community') }}
                         </span>
                     </div>
                     <p class="text-xs text-slate-500 leading-relaxed">
@@ -846,7 +846,7 @@
             <div
                 class="border-t border-slate-100 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
                 <span>
-                    © {{ date('Y') }} {{ App\Models\Setting::get('website_name', 'Sathwara Community') }}.
+                    © {{ date('Y') }} {{ App\Models\Setting::get('website_name', 'Satwara Community') }}.
                     {{ __('messages.all_rights_reserved') }}
                 </span>
 

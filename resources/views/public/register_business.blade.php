@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
             "key": razorpayKey || "rzp_test_key",
             "amount": feeAmountPaise,
             "currency": "INR",
-            "name": "{{ config('app.name', 'Sathwara Community') }}",
+            "name": "{{ config('app.name', 'Satwara Community') }}",
             "description": "Business Registration Fee - " + businessName,
             "handler": function (response) {
                 paymentIdInput.value = response.razorpay_payment_id;
