@@ -233,6 +233,7 @@ return [
     'view_family_tree' => 'Preview Family Tree',
     'family_tree_title' => 'Family Tree Preview',
     'family_tree_subtitle' => 'Visual hierarchy of your registered family members',
+    'print_family_tree' => 'Print Family Tree',
     'generation_1' => 'Father / Head Ancestor',
     'generation_2' => 'Primary Member & Spouse',
     'generation_3' => 'Children (Son / Daughter)',
