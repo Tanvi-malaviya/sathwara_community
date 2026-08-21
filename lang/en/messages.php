@@ -1320,4 +1320,5 @@ return [
     'verification_code_sent_to_email' => 'A verification code has been sent to :email. Please check your inbox (including spam folder).',
     'total_pass_count' => 'Total Pass Count',
     'total_passes' => 'Total Passes',
+    'upload_photos' => 'Upload Photos',
 ];

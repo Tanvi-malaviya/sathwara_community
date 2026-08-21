@@ -1320,6 +1320,7 @@ return [
     'verification_code_sent_to_email' => 'ચકાસણી કોડ આ ઈમેલ :email પર મોકલવામાં આવ્યો છે. કૃપા કરીને તમારું ઇનબોક્સ ચેક કરો.',
     'total_pass_count' => 'કુલ પાસ સંખ્યા',
     'total_passes' => 'કુલ પાસ',
+    'upload_photos' => 'ફોટો અપલોડ કરો',
 ];
 
 
