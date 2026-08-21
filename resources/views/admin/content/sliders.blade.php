@@ -12,44 +12,21 @@
             this.showEditModal = true;
         }
     }">
-        <!-- Header Actions & Search bar -->
-        <div
-            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm mb-4">
-            <form method="GET" action="{{ route('admin.content.sliders') }}"
-                class="flex items-center gap-2 flex-grow max-w-md w-full">
-                <div class="relative flex-grow">
-                    <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="{{ __('messages.search_sliders') }}"
-                        class="text-xs font-semibold pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 w-full transition-colors">
-                    @if(request()->filled('search'))
-                        <a href="{{ route('admin.content.sliders') }}"
-                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-sm"
-                            title="Clear search">
-                            &times;
-                        </a>
-                    @endif
-                </div>
-                <button type="submit"
-                    class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 font-bold text-xs text-slate-700 rounded-xl transition-colors shrink-0">
-                    {{ __('messages.search') }}
-                </button>
-            </form>
+        <!-- Header Actions -->
+        <div class="flex items-center justify-end gap-2 bg-white p-3 rounded-xl border border-slate-100 shadow-sm mb-4">
+            <a href="{{ route('admin.content.sliders.export', request()->all()) }}"
+                class="inline-flex items-center justify-center px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-all whitespace-nowrap">
+                📊 <span>{{ __('messages.export_excel') }}</span>
+            </a>
 
-            <div class="flex items-center gap-2 shrink-0">
-                <a href="{{ route('admin.content.sliders.export', request()->all()) }}"
-                    class="inline-flex items-center justify-center px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-all whitespace-nowrap">
-                    📊 <span>{{ __('messages.export_excel') }}</span>
-                </a>
-
-                <button @click="showAddModal = true"
-                    class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 font-bold text-xs text-white rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-95 whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    {{ __('messages.add_slider_banner') }}
-                </button>
-            </div>
+            <button @click="showAddModal = true"
+                class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 font-bold text-xs text-white rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-95 whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                {{ __('messages.add_slider_banner') }}
+            </button>
         </div>
 
         <!-- Cards Grid -->
