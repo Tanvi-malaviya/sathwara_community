@@ -109,6 +109,54 @@
             font-family: 'Manrope', sans-serif !important;
         }
 
+        /* Global Button Hover Highlight & Elevation */
+        button:not([disabled]),
+        input[type="submit"]:not([disabled]),
+        input[type="button"]:not([disabled]),
+        a[class*="bg-primary"],
+        a[class*="bg-slate-900"],
+        a[class*="bg-emerald"],
+        a[class*="bg-rose"],
+        a[class*="bg-indigo"],
+        button[class*="bg-primary"],
+        button[class*="bg-slate-900"],
+        button[class*="bg-emerald"],
+        button[class*="bg-rose"],
+        button[class*="bg-indigo"] {
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            cursor: pointer;
+        }
+
+        button:not([disabled]):hover,
+        input[type="submit"]:not([disabled]):hover,
+        input[type="button"]:not([disabled]):hover,
+        a[class*="bg-primary"]:hover,
+        a[class*="bg-slate-900"]:hover,
+        a[class*="bg-emerald"]:hover,
+        a[class*="bg-rose"]:hover,
+        a[class*="bg-indigo"]:hover,
+        button[class*="bg-primary"]:hover,
+        button[class*="bg-slate-900"]:hover,
+        button[class*="bg-emerald"]:hover,
+        button[class*="bg-rose"]:hover,
+        button[class*="bg-indigo"]:hover {
+            filter: brightness(1.05);
+        }
+
+        button:not([disabled]):active,
+        input[type="submit"]:not([disabled]):active,
+        input[type="button"]:not([disabled]):active,
+        a[class*="bg-primary"]:active,
+        a[class*="bg-slate-900"]:active,
+        a[class*="bg-emerald"]:active,
+        a[class*="bg-rose"]:active,
+        button[class*="bg-primary"]:active,
+        button[class*="bg-slate-900"]:active,
+        button[class*="bg-emerald"]:active,
+        button[class*="bg-rose"]:active {
+            transform: scale(0.98);
+        }
+
         /* Hide scrollbars utilities */
         .no-scrollbar::-webkit-scrollbar {
             display: none !important;
@@ -159,22 +207,75 @@
             background: #94a3b8;
         }
 
-        /* Balanced Admin Table Headers */
+        /* Crisp & Readable Admin Panel Typography */
+        html {
+            font-size: 16px;
+        }
+
+        /* Enhanced Admin Table Typography */
         table thead th,
         table thead tr th {
-            font-size: 11.5px !important;
-            font-weight: 700 !important;
-            color: #475569 !important;
-            /* slate-600 */
-            letter-spacing: 0.015em;
+            font-size: 12.5px !important;
+            font-weight: 800 !important;
+            color: #334155 !important;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            padding: 0.65rem 0.75rem !important;
+        }
+
+        table tbody td,
+        table tbody tr td {
+            font-size: 13.5px !important;
+            color: #1e293b !important;
+            padding: 0.65rem 0.75rem !important;
+        }
+
+        table tbody td h4,
+        table tbody td .font-extrabold,
+        table tbody td .font-black {
+            font-size: 13.5px !important;
+            font-weight: 800 !important;
         }
 
         .font-gujarati table thead th,
         .font-gujarati table thead tr th {
-            font-size: 12px !important;
+            font-size: 13px !important;
+            font-weight: 800 !important;
+            color: #1e293b !important;
+        }
+
+        .font-gujarati table tbody td {
+            font-size: 13.5px !important;
+        }
+
+        /* Sidebar Navigation text sizing */
+        aside a, aside button {
+            font-size: 13px !important;
+        }
+
+        /* Form Inputs & Controls */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="time"],
+        select,
+        textarea {
+            font-size: 13px !important;
+        }
+
+        /* Badges & Micro Text */
+        span[class*="text-[9px]"],
+        span[class*="text-[10px]"] {
+            font-size: 11px !important;
             font-weight: 700 !important;
-            color: #334155 !important;
-            /* slate-700 */
+        }
+
+        span[class*="text-xs"],
+        p[class*="text-xs"] {
+            font-size: 12.5px !important;
         }
     </style>
 </head>

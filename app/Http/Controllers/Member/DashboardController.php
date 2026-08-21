@@ -23,9 +23,28 @@ class DashboardController extends Controller
         $profile = $user->memberProfile;
         $family = $user->familyMembers;
         $familyCount = $family->count();
-        $registeredEvents = $user->registeredEvents()->where('date', '>=', now()->toDateString())->get();
         
-        $formattedMemberId = '#' . sprintf('%05d', $user->id);
+        // Active Published Events
+        $activeEvents = Event::where('status', 'published')
+            ->where(function($q) {
+                $q->whereNull('published_date')
+                  ->orWhere('published_date', '<=', now()->toDateString());
+            })
+            ->where('date', '>=', now()->toDateString())
+            ->orderBy('date', 'asc')
+            ->get();
+
+        // My Event Registrations (Passes)
+        $myRegistrations = \App\Models\EventRegistration::where('user_id', $user->id)
+            ->with('event')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalPersonsSum = $myRegistrations->sum(function($r) {
+            return (int) ($r->form_data['person_count'] ?? 1);
+        });
+        
+        $formattedMemberId = $user->member_code ?: ('SSAM' . sprintf('%04d', $user->id));
         $myBusinesses = \App\Models\Business::where('user_id', $user->id)
                         ->orWhere('member_id', (string)$user->id)
                         ->orWhere('member_id', $formattedMemberId)
@@ -34,7 +53,16 @@ class DashboardController extends Controller
                         ->latest()
                         ->get();
 
-        return view('member.dashboard', compact('user', 'profile', 'family', 'familyCount', 'registeredEvents', 'myBusinesses'));
+        return view('member.dashboard', compact(
+            'user', 
+            'profile', 
+            'family', 
+            'familyCount', 
+            'activeEvents', 
+            'myRegistrations', 
+            'totalPersonsSum',
+            'myBusinesses'
+        ));
     }
 
     /**

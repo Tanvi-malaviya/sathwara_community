@@ -86,8 +86,128 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
+        /* Global Button Hover Highlight & Elevation */
+        button:not([disabled]),
+        input[type="submit"]:not([disabled]),
+        input[type="button"]:not([disabled]),
+        a[class*="bg-primary"],
+        a[class*="bg-slate-900"],
+        a[class*="bg-emerald"],
+        a[class*="bg-rose"],
+        a[class*="bg-indigo"],
+        button[class*="bg-primary"],
+        button[class*="bg-slate-900"],
+        button[class*="bg-emerald"],
+        button[class*="bg-rose"],
+        button[class*="bg-indigo"] {
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            cursor: pointer;
+        }
+
+        button:not([disabled]):hover,
+        input[type="submit"]:not([disabled]):hover,
+        input[type="button"]:not([disabled]):hover,
+        a[class*="bg-primary"]:hover,
+        a[class*="bg-slate-900"]:hover,
+        a[class*="bg-emerald"]:hover,
+        a[class*="bg-rose"]:hover,
+        a[class*="bg-indigo"]:hover,
+        button[class*="bg-primary"]:hover,
+        button[class*="bg-slate-900"]:hover,
+        button[class*="bg-emerald"]:hover,
+        button[class*="bg-rose"]:hover,
+        button[class*="bg-indigo"]:hover {
+            filter: brightness(1.05);
+        }
+
+        button:not([disabled]):active,
+        input[type="submit"]:not([disabled]):active,
+        input[type="button"]:not([disabled]):active,
+        a[class*="bg-primary"]:active,
+        a[class*="bg-slate-900"]:active,
+        a[class*="bg-emerald"]:active,
+        a[class*="bg-rose"]:active,
+        button[class*="bg-primary"]:active,
+        button[class*="bg-slate-900"]:active,
+        button[class*="bg-emerald"]:active,
+        button[class*="bg-rose"]:active {
+            transform: scale(0.98);
+        }
+
         [x-cloak] {
             display: none !important;
+        }
+
+        /* Member Panel Typography Scaling */
+        html {
+            font-size: 16px;
+        }
+
+        /* Enhanced Member Table Typography */
+        table thead th,
+        table thead tr th {
+            font-size: 12.5px !important;
+            font-weight: 800 !important;
+            color: #334155 !important;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            padding: 0.65rem 0.75rem !important;
+        }
+
+        table tbody td,
+        table tbody tr td {
+            font-size: 13.5px !important;
+            color: #1e293b !important;
+            padding: 0.65rem 0.75rem !important;
+        }
+
+        table tbody td h4,
+        table tbody td .font-extrabold,
+        table tbody td .font-black {
+            font-size: 13.5px !important;
+            font-weight: 800 !important;
+        }
+
+        .font-gujarati table thead th,
+        .font-gujarati table thead tr th {
+            font-size: 13px !important;
+            font-weight: 800 !important;
+            color: #1e293b !important;
+        }
+
+        .font-gujarati table tbody td {
+            font-size: 13.5px !important;
+        }
+
+        /* Sidebar Navigation text sizing */
+        aside a,
+        aside button {
+            font-size: 13px !important;
+        }
+
+        /* Form Inputs & Controls */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="time"],
+        select,
+        textarea {
+            font-size: 13px !important;
+        }
+
+        /* Badges & Micro Text */
+        span[class*="text-[9px]"],
+        span[class*="text-[10px]"] {
+            font-size: 11px !important;
+            font-weight: 700 !important;
+        }
+
+        span[class*="text-xs"],
+        p[class*="text-xs"] {
+            font-size: 12.5px !important;
         }
 
         /* Hide scrollbars utilities */
@@ -125,44 +245,30 @@
     <aside
         class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 flex flex-col shrink-0 transition-transform duration-300 transform md:translate-x-0 md:static md:h-screen md:sticky md:top-0 overflow-hidden"
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-        <!-- Sidebar Header -->
-        <div class="h-16 flex items-center justify-between px-5 border-b border-slate-50">
-            <a href="{{ route('home') }}" class="flex items-center space-x-2.5">
-                @if(App\Models\Setting::get('website_logo'))
-                    <img class="w-7 h-7 rounded-lg object-contain bg-white p-0.5 shadow-sm"
-                        src="{{ asset('storage/' . App\Models\Setting::get('website_logo')) }}" alt="Logo">
-                @else
-                    <div
-                        class="w-7 h-7 rounded-lg bg-gradient-to-tr from-primary-500 to-secondary-500 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
-                        S
-                    </div>
-                @endif
-                <span class="font-extrabold text-sm text-slate-900">{{ __('messages.member_portal') }}</span>
-            </a>
+        <!-- Sidebar User Card (Top Header) -->
+        <div class="h-16 px-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3 min-w-0 overflow-hidden">
+                @php
+                    $sidebarProfile = auth()->user()->memberProfile;
+                    $sidebarHasPhoto = ($sidebarProfile && !empty($sidebarProfile->photo_path) && !str_contains($sidebarProfile->photo_path, 'unsplash.com') && $sidebarProfile->photo_path !== 'NOT_SPECIFIED' && $sidebarProfile->photo_path !== 'N/A');
+                    $sidebarPhoto = $sidebarHasPhoto ? (str_starts_with($sidebarProfile->photo_path, 'http') ? $sidebarProfile->photo_path : asset('storage/' . $sidebarProfile->photo_path)) : asset('logo.png');
+                @endphp
+                <img class="w-9 h-9 rounded-full object-cover shadow-xs bg-slate-100 p-0.5 border border-slate-200 shrink-0"
+                    src="{{ $sidebarPhoto }}" alt="User avatar">
+                <div class="min-w-0 flex-1 overflow-hidden">
+                    <h4 class="text-[15px] font-bold text-slate-800 leading-tight truncate">
+                        {{ \Illuminate\Support\Facades\Lang::has('messages.' . auth()->user()->name) ? __('messages.' . auth()->user()->name) : auth()->user()->name }}
+                    </h4>
+
+                </div>
+            </div>
             <!-- Mobile Close Button -->
             <button @click="sidebarOpen = false"
-                class="md:hidden text-slate-400 hover:text-slate-600 focus:outline-none">
+                class="md:hidden text-slate-400 hover:text-slate-600 focus:outline-none shrink-0 ml-2">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-        </div>
-
-        <!-- Sidebar User Card -->
-        <div class="px-5 py-3.5 border-b border-slate-50 flex items-center space-x-3">
-            <img class="w-9 h-9 rounded-full object-cover shadow-sm bg-slate-100"
-                src="{{ auth()->user()->memberProfile && auth()->user()->memberProfile->photo_path ? (str_starts_with(auth()->user()->memberProfile->photo_path, 'http') ? auth()->user()->memberProfile->photo_path : asset('storage/' . auth()->user()->memberProfile->photo_path)) : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100' }}"
-                alt="User avatar">
-            <div>
-                <h4 class="text-xs font-bold text-slate-900 leading-tight">
-                    {{ \Illuminate\Support\Facades\Lang::has('messages.' . auth()->user()->name) ? __('messages.' . auth()->user()->name) : auth()->user()->name }}
-                </h4>
-                <div class="flex items-center space-x-1.5 mt-0.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    <span
-                        class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.approved_member') }}</span>
-                </div>
-            </div>
         </div>
 
         <!-- Sidebar Navigation -->

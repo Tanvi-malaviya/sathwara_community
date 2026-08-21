@@ -25,7 +25,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             <!-- Mission Card -->
-            <div class="bg-slate-50/80 rounded-2xl p-6 border border-slate-200/60 space-y-3 hover:bg-white hover:border-primary-200 hover:shadow-md transition-all duration-300">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-3 hover:border-primary-300 hover:shadow-md transition-all duration-300">
                 <div class="w-9 h-9 rounded-xl bg-primary-100/80 text-primary-600 flex items-center justify-center font-bold text-base">
                     🎯
                 </div>
@@ -41,7 +41,7 @@
             </div>
 
             <!-- Vision Card -->
-            <div class="bg-slate-50/80 rounded-2xl p-6 border border-slate-200/60 space-y-3 hover:bg-white hover:border-amber-200 hover:shadow-md transition-all duration-300">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-3 hover:border-amber-300 hover:shadow-md transition-all duration-300">
                 <div class="w-9 h-9 rounded-xl bg-amber-100/80 text-amber-600 flex items-center justify-center font-bold text-base">
                     🌟
                 </div>
@@ -57,7 +57,7 @@
             </div>
 
             <!-- Objectives Card -->
-            <div class="bg-slate-50/80 rounded-2xl p-6 border border-slate-200/60 space-y-3 hover:bg-white hover:border-emerald-200 hover:shadow-md transition-all duration-300">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-3 hover:border-emerald-300 hover:shadow-md transition-all duration-300">
                 <div class="w-9 h-9 rounded-xl bg-emerald-100/80 text-emerald-600 flex items-center justify-center font-bold text-base">
                     📌
                 </div>

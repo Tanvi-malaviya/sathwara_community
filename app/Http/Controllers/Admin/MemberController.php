@@ -22,6 +22,7 @@ class MemberController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('member_code', 'like', "%{$search}%")
                   ->orWhereHas('memberProfile', function($sub) use ($search) {
                       $sub->where('phone', 'like', "%{$search}%")
                           ->orWhere('city', 'like', "%{$search}%");
@@ -345,7 +346,7 @@ class MemberController extends Controller
                 $statusKey = strtolower($member->status ?? '');
 
                 fputcsv($file, [
-                    $member->id,
+                    $member->member_code ?: $member->formatted_member_id,
                     $member->name,
                     $member->email,
                     __('messages.' . $statusKey) != 'messages.' . $statusKey ? __('messages.' . $statusKey) : ucfirst($member->status),
@@ -375,8 +376,11 @@ class MemberController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('member_code', 'like', "%{$search}%");
+            });
         }
 
         if ($request->filled('status')) {

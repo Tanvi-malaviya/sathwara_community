@@ -1787,7 +1787,7 @@
                                     </a>
                                 @endif
                                 <button type="submit"
-                                    class="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-md hover:shadow-lg transition-all transform active:scale-95 flex items-center gap-2 uppercase tracking-wider cursor-pointer">
+                                    class="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all transform active:scale-95 flex items-center gap-2 uppercase tracking-wider cursor-pointer">
                                     <span>{{ __('messages.submit_registration') }}</span>
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"
                                         viewBox="0 0 24 24">
@@ -2026,8 +2026,8 @@
                                                 class="shrink-0 border border-slate-900 rounded-xs bg-slate-50 relative flex items-center justify-center shadow-2xs">
                                                 <template x-if="getPhotoUrl(selectedRegistration.form_data)">
                                                     <img :src="getPhotoUrl(selectedRegistration.form_data)"
-                                                        style="width: 100%; height: 100%; object-fit: cover; display: block;"
-                                                        class="w-full h-full object-cover">
+                                                        style="width: 100%; height: 100%; object-fit: contain; display: block;"
+                                                        class="w-full h-full object-contain bg-white">
                                                 </template>
                                                 <template x-if="!getPhotoUrl(selectedRegistration.form_data)">
                                                     <div class="text-center p-1 text-slate-400">

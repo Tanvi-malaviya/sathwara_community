@@ -419,7 +419,7 @@
                                                 </span>
                                             </div>
 
-                                            <form method="POST" action="{{ route('events.register', $event->id) }}" class="space-y-3">
+                                            <form method="POST" action="{{ route('member.events.register', $event->id) }}" class="space-y-3">
                                                 @csrf
                                                 <div x-data="{ count: {{ $registration->form_data['person_count'] ?? 1 }} }" class="space-y-1.5">
                                                     <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
@@ -464,7 +464,7 @@
                                                 Capacity Full ❌
                                             </div>
                                         @else
-                                            <form method="POST" action="{{ route('events.register', $event->id) }}" class="space-y-3">
+                                            <form method="POST" action="{{ route('member.events.register', $event->id) }}" class="space-y-3">
                                                 @csrf
                                                 <div x-data="{ count: 1 }" class="space-y-1.5">
                                                     <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
@@ -496,13 +496,14 @@
                                                     <span>{{ __('messages.direct_register_now') }}</span> &rarr;
                                                 </button>
                                             </form>
-                                                  @endif
+                                        @endif
+                                    @endif
                                 @else
                                     @if(($event->event_type ?? 'normal') === 'yuva_melo')
                                         <div class="space-y-3">
                                             <!-- Fill Yuva Form Button -->
                                             <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                class="w-full flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs font-black rounded-xl shadow-md hover:shadow-lg transition-all text-center gap-1.5">
+                                                class="w-full flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs font-black rounded-xl shadow-xs transition-all text-center gap-1.5">
                                                 <span>⚡ Fill Yuva Melo Form</span>
                                                 <span>&rarr;</span>
                                             </a>
@@ -513,7 +514,7 @@
                                                         <span class="text-slate-500 font-bold">🎟️ Attendee Pass:</span>
                                                         <span class="text-slate-900 font-black">₹{{ number_format($event->pass_fee, 0) }}</span>
                                                     </div>
-                                                    <form method="POST" action="{{ route('events.register', $event->id) }}" class="space-y-2">
+                                                    <form method="POST" action="{{ route('member.events.register', $event->id) }}" class="space-y-2">
                                                         @csrf
                                                         <input type="hidden" name="person_count" value="1">
                                                         <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all text-center cursor-pointer">

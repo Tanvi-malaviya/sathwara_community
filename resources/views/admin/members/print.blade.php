@@ -64,7 +64,7 @@
         <tbody>
             @foreach($members as $m)
                 <tr>
-                    <td>#{{ sprintf('%05d', $m->id) }}</td>
+                    <td>{{ $m->member_code ?: $m->formatted_member_id }}</td>
                     <td><strong>{{ $m->name }}</strong></td>
                     <td>{{ $m->email }}</td>
                     <td>{{ $m->memberProfile->phone ?? 'N/A' }}</td>

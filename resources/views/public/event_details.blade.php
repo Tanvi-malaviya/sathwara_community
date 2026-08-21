@@ -258,7 +258,7 @@
 
                             <div class="pt-1 flex items-center">
                                 <a href="{{ route('events.public_register_form', $event->id) }}"
-                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer">
+                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-xs transition-all cursor-pointer">
                                     <span>⚡ {{ __('messages.fill_yuva_form') ?? 'Fill Yuva Melo Registration Form' }}</span>
                                     <span>&rarr;</span>
                                 </a>
@@ -267,11 +267,11 @@
                     @endif
                 </div>
 
-                <!-- Right: Registration Widget (5 cols) -->
-                <div class="lg:col-span-5 lg:sticky lg:top-24">
-                    <div class="bg-slate-50 rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-md space-y-6">
-                        <h3 class="text-lg font-extrabold text-slate-950 border-b border-slate-200 pb-4 flex items-center justify-between gap-2 flex-wrap">
-                            <span>
+                <!-- Right: Registration Widget (5 cols - Fixed/Sticky on Scroll) -->
+                <div class="lg:col-span-5 lg:sticky self-start z-20" style="position: -webkit-sticky; position: sticky; top: 6rem;">
+                    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs space-y-3.5">
+                        <div class="border-b border-slate-100 pb-2.5 flex items-center justify-between gap-2 flex-wrap">
+                            <h3 class="text-sm font-black text-slate-900">
                                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                     {{ __('messages.inam_vitaran_registration') }}
                                 @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
@@ -279,8 +279,8 @@
                                 @else
                                     {{ __('messages.event_registration') }}
                                 @endif
-                            </span>
-                            <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-2xs {{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? 'text-amber-800 bg-amber-100 border border-amber-300' : (($event->event_type ?? 'normal') === 'yuva_melo' ? 'text-purple-800 bg-purple-100 border border-purple-300' : 'text-primary-700 bg-primary-50 border border-primary-200') }}">
+                            </h3>
+                            <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider {{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? 'text-amber-800 bg-amber-50 border border-amber-200' : (($event->event_type ?? 'normal') === 'yuva_melo' ? 'text-purple-800 bg-purple-50 border border-purple-200' : 'text-primary-700 bg-primary-50 border border-primary-200') }}">
                                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                     🏆 {{ __('messages.inam_vitaran') }}
                                 @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
@@ -289,60 +289,61 @@
                                     🎟️ {{ __('messages.general_event') }}
                                 @endif
                             </span>
-                        </h3>
+                        </div>
 
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                             @if($event->date < now()->toDateString())
                                 <!-- Finished Event -->
-                                <div class="p-4 rounded-2xl bg-slate-100 border border-slate-200 text-slate-500 text-xs font-bold text-center">
+                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-xs font-bold text-center">
                                     {{ __('messages.event_concluded') }}
                                 </div>
                             @elseif($event->status === 'cancelled')
                                 <!-- Cancelled Event -->
-                                <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold text-center">
+                                <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold text-center">
                                     {{ __('messages.event_cancelled') }}
                                 </div>
                             @else
                                 <!-- Active Event Registration check for all event types -->
                                 <div x-data="{ showPassModal: false, showViewPassesModal: false, count: 1, passFee: {{ (float)($event->pass_fee ?? 0) }} }"
-                                     @close-all-modals.window="showPassModal = false; showViewPassesModal = false">
+                                     @close-all-modals.window="showPassModal = false; showViewPassesModal = false"
+                                     class="space-y-3">
                                     @if(auth()->guest())
-                                        <div class="space-y-4">
+                                        <div class="space-y-3">
                                             @if(($event->pass_fee ?? 0) > 0)
-                                                <div class="bg-primary-50/90 border border-primary-200/80 rounded-xl p-3 flex items-center justify-between">
+                                                <div class="bg-primary-50/70 border border-primary-100 rounded-xl p-2.5 flex items-center justify-between">
                                                     <span class="text-xs font-bold text-primary-800">🎟️ {{ __('messages.pass_fee_per_person') }}:</span>
                                                     <span class="text-sm font-black text-primary-700">₹{{ number_format($event->pass_fee) }}</span>
                                                 </div>
                                             @endif
-                                            <p class="text-xs text-slate-500 text-center">{{ __('messages.please_login_to_register') }}</p>
+                                            <p class="text-[11px] text-slate-500 text-center">{{ __('messages.please_login_to_register') }}</p>
                                             <a href="{{ route('login') }}"
-                                                class="w-full flex items-center justify-center px-4 py-3.5 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white text-xs font-bold rounded-2xl shadow-sm transition-colors text-center cursor-pointer">
+                                                class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition-colors text-center cursor-pointer">
                                                 {{ __('messages.login_to_register') }}
                                             </a>
                                         </div>
                                     @elseif(auth()->check() && auth()->user()->hasRole('Administrator'))
-                                        <div class="p-4 rounded-2xl bg-slate-100 text-slate-500 text-xs font-bold text-center">
+                                        <div class="p-3 rounded-xl bg-slate-50 text-slate-500 text-xs font-bold text-center border border-slate-200">
                                             {{ __('messages.administrator_account') }}
                                         </div>
                                     @elseif(auth()->check() && auth()->user()->status !== 'approved')
-                                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-amber-800 text-xs font-bold text-center leading-relaxed">
+                                        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold text-center leading-relaxed">
                                             {!! __('messages.account_status_currently', ['status' => '<strong>'.e(auth()->user()->status).'</strong>']) !!} {{ __('messages.register_once_approved') }}
                                         </div>
                                     @else
                                         <!-- Normal, Inam Vitaran and Yuva Melo Attendee Passes -->
-                                        <div class="space-y-4">
+                                        <div class="space-y-3">
                                             @if(($event->pass_fee ?? 0) > 0)
-                                                <div class="bg-primary-50/90 border border-primary-200/80 rounded-2xl p-3.5 flex items-center justify-between shadow-2xs">
+                                                <div class="bg-primary-50/70 border border-primary-100 rounded-xl p-2.5 flex items-center justify-between">
                                                     <div>
                                                         <span class="text-xs font-black text-primary-900 block">🎟️ {{ __('messages.pass_fee_per_person') }}</span>
-                                                        <span class="text-[10px] text-slate-500 font-semibold">{{ __('messages.per_person_pass_fee') }}</span>
+                                                        <span class="text-[10px] text-slate-500 font-medium">{{ __('messages.per_person_pass_fee') }}</span>
                                                     </div>
-                                                    <span class="text-base font-black text-primary-700">₹{{ number_format($event->pass_fee) }}</span>
+                                                    <span class="text-sm font-black text-primary-700">₹{{ number_format($event->pass_fee) }}</span>
                                                 </div>
                                             @else
-                                                <div class="bg-emerald-50/90 border border-emerald-200/80 rounded-2xl p-3 flex items-center justify-between">
+                                                <div class="bg-emerald-50/70 border border-emerald-100 rounded-xl p-2.5 flex items-center justify-between">
                                                     <span class="text-xs font-bold text-emerald-800">🎟️ {{ __('messages.registration_fee') }}:</span>
-                                                    <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-100 px-2 py-0.5 rounded-lg">{{ __('messages.free_entry') }}</span>
+                                                    <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-100 px-2 py-0.5 rounded-md">{{ __('messages.free_entry') }}</span>
                                                 </div>
                                             @endif
 
@@ -358,40 +359,29 @@
                                                     $logoUrl = App\Models\Setting::get('website_logo') ? asset('storage/' . App\Models\Setting::get('website_logo')) : asset('logo.png');
                                                 @endphp
 
-                                                <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1.5 shadow-2xs">
-                                                    <span class="flex items-center gap-1.5 text-emerald-900 font-black text-sm">
-                                                        <span>✅ {{ __('messages.registered_status') }}</span>
-                                                    </span>
-                                                    <span class="text-xs text-emerald-700 font-semibold">
-                                                        {{ __('messages.attending_persons_count', ['count' => $regPersons]) }}
-                                                    </span>
-                                                    @if(($event->pass_fee ?? 0) > 0)
-                                                        <span class="text-[10px] px-2.5 py-0.5 rounded-full uppercase font-black bg-emerald-200/80 text-emerald-900 border border-emerald-300">
-                                                            💳 {{ strtoupper($registration->payment_status ?? 'unpaid') }} (₹{{ number_format($registration->payment_amount ?? ($event->pass_fee * $regPersons)) }})
-                                                        </span>
-                                                    @endif
+                                                <!-- Action Buttons Side-by-Side -->
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                                    <!-- View My Passes Button -->
+                                                    <button type="button" 
+                                                            @click="showViewPassesModal = true"
+                                                            class="w-full flex items-center justify-center px-3 py-2 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-[11px] font-extrabold rounded-xl shadow-xs transition-all text-center cursor-pointer gap-1">
+                                                        <span>🎟️ {{ __('messages.view_my_passes', ['count' => $regPersons]) }}</span>
+                                                        <span>👁️</span>
+                                                    </button>
+
+                                                    <!-- Purchase More Passes Button -->
+                                                    <button type="button" 
+                                                            @click="count = 1; showPassModal = true;"
+                                                            class="w-full flex items-center justify-center px-3 py-2 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-[11px] font-extrabold rounded-xl shadow-xs transition-all text-center cursor-pointer gap-1">
+                                                        <span>➕ {{ __('messages.purchase_more_passes') }}</span>
+                                                        <span>&rarr;</span>
+                                                    </button>
                                                 </div>
-
-                                                <!-- View My Passes Button -->
-                                                <button type="button" 
-                                                        @click="showViewPassesModal = true"
-                                                        class="w-full flex items-center justify-center px-4 py-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs font-extrabold rounded-2xl shadow-md hover:shadow-lg transition-all text-center cursor-pointer gap-2">
-                                                    <span>🎟️ {{ __('messages.view_my_passes', ['count' => $regPersons]) }}</span>
-                                                    <span>👁️</span>
-                                                </button>
-
-                                                <!-- Purchase More Passes Button -->
-                                                <button type="button" 
-                                                        @click="count = 1; showPassModal = true;"
-                                                        class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-extrabold rounded-2xl shadow-sm hover:shadow-md transition-all text-center cursor-pointer gap-2">
-                                                    <span>➕ {{ __('messages.purchase_more_passes') }}</span>
-                                                    <span>&rarr;</span>
-                                                </button>
                                             @else
                                                 <!-- Purchase Pass Button -->
                                                 <button type="button" 
                                                         @click="count = 1; showPassModal = true;"
-                                                        class="w-full flex items-center justify-center px-4 py-3.5 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-extrabold rounded-2xl shadow-md hover:shadow-lg transition-all text-center cursor-pointer gap-2">
+                                                        class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-extrabold rounded-xl shadow-xs transition-all text-center cursor-pointer gap-1.5">
                                                     <span>🎟️ {{ __('messages.purchase_pass') }}</span>
                                                     <span>&rarr;</span>
                                                 </button>

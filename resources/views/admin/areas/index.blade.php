@@ -18,35 +18,30 @@
         editUrl: ''
     }" class="space-y-4">
 
-        <!-- Header & Actions -->
+        <!-- Toolbar & Actions -->
         <div
-            class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-            <div>
-                <h3 class="text-sm font-extrabold text-slate-800">{{ __('messages.community_area_directory') }}</h3>
-                <p class="text-xs text-slate-400 mt-0.5">{{ __('messages.manage_areas_desc') }}</p>
-            </div>
+            class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
+            <!-- Search Form -->
+            <form method="GET" action="{{ route('admin.areas.index') }}" class="flex items-center gap-2 w-full sm:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="{{ __('messages.search_area_placeholder') }}"
+                        class="h-9 w-full text-xs font-semibold pl-3 pr-8 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">
+                    @if(request()->filled('search'))
+                        <a href="{{ route('admin.areas.index') }}"
+                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-sm"
+                            title="Clear search">
+                            &times;
+                        </a>
+                    @endif
+                </div>
+                <button type="submit"
+                    class="h-9 px-3.5 bg-slate-100 hover:bg-slate-200 font-bold text-xs text-slate-700 rounded-xl transition-colors shrink-0">
+                    {{ __('messages.search') }}
+                </button>
+            </form>
 
-            <div class="flex flex-wrap items-center gap-3">
-                <!-- Search Form -->
-                <form method="GET" action="{{ route('admin.areas.index') }}" class="flex items-center gap-2">
-                    <div class="relative">
-                        <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="{{ __('messages.search_area_placeholder') }}"
-                            class="text-xs font-semibold pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 w-48 sm:w-64 transition-colors">
-                        @if(request()->filled('search'))
-                            <a href="{{ route('admin.areas.index') }}"
-                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-sm"
-                                title="Clear search">
-                                &times;
-                            </a>
-                        @endif
-                    </div>
-                    <button type="submit"
-                        class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 font-bold text-xs text-slate-700 rounded-xl transition-colors shrink-0">
-                        {{ __('messages.search') }}
-                    </button>
-                </form>
-
+            <div class="flex flex-wrap items-center gap-2 justify-end w-full sm:w-auto">
                 <a href="{{ route('admin.areas.export', request()->all()) }}"
                     class="inline-flex items-center px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-colors shrink-0">
                     📊 <span>{{ __('messages.export_excel') }}</span>
@@ -55,11 +50,11 @@
                 <!-- Add Area Button -->
                 @if($canAddArea)
                     <button type="button" @click="addOpen = true"
-                        class="inline-flex items-center px-3.5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors shrink-0">
+                        class="inline-flex items-center px-3.5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-transform hover:-translate-y-0.5 shrink-0">
                         <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        {{ __('messages.add_area') }}
+                        <span>{{ __('messages.add_new_area') }}</span>
                     </button>
                 @endif
             </div>

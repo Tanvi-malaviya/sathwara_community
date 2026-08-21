@@ -26,12 +26,19 @@
                     <div class="relative flex-1 min-w-[240px]">
                         <input type="text" name="search" value="{{ request('search') }}"
                             placeholder="{{ __('messages.search_placeholder') }}"
-                            class="h-9 w-full text-xs font-semibold pl-9 pr-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                            class="h-9 w-full text-xs font-semibold pl-9 pr-8 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
                         <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
+                        @if(request()->filled('search'))
+                            <a href="{{ route('admin.members.index', request()->except('search')) }}"
+                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-sm"
+                                title="Clear search">
+                                &times;
+                            </a>
+                        @endif
                     </div>
 
                     <!-- Filter Status Tabs in Same Line -->
@@ -99,7 +106,11 @@
                 <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                     @forelse($members as $m)
                         <tr class="hover:bg-slate-50/50">
-                            <td class="py-2.5 px-4 text-slate-400">#{{ sprintf('%05d', $m->id) }}</td>
+                            <td class="py-2.5 px-4 font-mono font-bold text-slate-800">
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-800 rounded-md border border-slate-200 text-xs">
+                                    {{ $m->member_code ?: $m->formatted_member_id }}
+                                </span>
+                            </td>
                             <td class="py-2.5 px-4">
                                 <div class="min-w-0">
                                     <span class="text-slate-900 font-bold block">{{ $m->name }}</span>

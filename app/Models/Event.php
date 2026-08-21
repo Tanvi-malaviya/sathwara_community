@@ -67,6 +67,31 @@ class Event extends Model
         });
     }
 
+    public function getTotalPassesCountAttribute(): int
+    {
+        $passRegistrations = $this->relationLoaded('registrations') 
+            ? $this->registrations 
+            : $this->passes;
+
+        return (int) $passRegistrations->filter(function ($r) {
+            if ($r->registration_type === 'pass') {
+                return true;
+            }
+            if (!empty($r->pass_number)) {
+                return true;
+            }
+            if ($r->registration_type === 'inam_vitran' || $r->registration_type === 'yuva_melo' || !empty($r->inam_number) || !empty($r->yuva_melo_number)) {
+                return false;
+            }
+            return empty($r->form_data['student_name']) 
+                && empty($r->form_data['surname']) 
+                && empty($r->form_data['qualification']) 
+                && empty($r->form_data['birth_date']);
+        })->sum(function ($r) {
+            return max(1, (int)($r->form_data['person_count'] ?? 1));
+        });
+    }
+
     public function getLastPassNoAttribute(): int
     {
         return (int)$this->registrations()->whereNotNull('pass_number')->max('pass_number');

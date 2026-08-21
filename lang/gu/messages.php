@@ -20,6 +20,7 @@ return [
     'mobile_number' => 'મોબાઇલ નંબર',
     'search_members' => 'નામ, ફોન, એરિયા અથવા શહેર દ્વારા શોધો...',
     'total_members' => 'કુલ સભ્યો',
+    'total_businesses' => 'કુલ બિઝનેસ',
     'all_areas' => 'તમામ એરિયા',
     'no_members_found' => 'કોઈ સભ્યો મળ્યા નથી.',
     'account_settings' => 'એકાઉન્ટ સેટિંગ્સ',
@@ -156,7 +157,8 @@ return [
     'new_award_claim' => 'નવી એવોર્ડ અરજી',
     'member_portal' => 'સભ્ય પોર્ટલ',
     'approved_member' => 'મંજૂર થયેલ સભ્ય',
-    'register_event' => 'કાર્યક્રમ નોંધણી',
+    'register_event' => 'ઇવેન્ટ લિસ્ટ',
+    'event_list' => 'ઇવેન્ટ લિસ્ટ',
     'membership_card' => 'સભ્યપદ કાર્ડ',
     'welcome_back' => 'ફરી સ્વાગત છે, :name!',
     'profile_approved_desc' => 'તમારી પ્રોફાઇલ સથવારા સમુદાય ડેટાબેઝમાં મંજૂર અને સક્રિય છે.',
@@ -1316,6 +1318,8 @@ return [
     'add_family_tree_desc' => 'તમારું વિઝ્યુઅલ ફેમિલી ટ્રી બનાવવા માટે તમારા જીવનસાથી, બાળકો અને કુટુંબના સભ્યો ઉમેરો.',
     'please_correct_errors' => 'કૃપા કરીને નીચેની ભૂલો સુધારો:',
     'verification_code_sent_to_email' => 'ચકાસણી કોડ આ ઈમેલ :email પર મોકલવામાં આવ્યો છે. કૃપા કરીને તમારું ઇનબોક્સ ચેક કરો.',
+    'total_pass_count' => 'કુલ પાસ સંખ્યા',
+    'total_passes' => 'કુલ પાસ',
 ];
 
 

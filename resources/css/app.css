@@ -186,3 +186,52 @@ form label {
   /* Darker slate-600 */
   opacity: 1 !important;
 }
+
+/* ================= GLOBAL INTERACTIVE BUTTON HIGHLIGHT & LIFT ================= */
+button:not([disabled]),
+input[type="submit"]:not([disabled]),
+input[type="button"]:not([disabled]),
+a[class*="bg-primary"],
+a[class*="bg-slate-900"],
+a[class*="bg-emerald"],
+a[class*="bg-rose"],
+a[class*="bg-indigo"],
+button[class*="bg-primary"],
+button[class*="bg-slate-900"],
+button[class*="bg-emerald"],
+button[class*="bg-rose"],
+button[class*="bg-indigo"] {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer;
+}
+
+button:not([disabled]):hover,
+input[type="submit"]:not([disabled]):hover,
+input[type="button"]:not([disabled]):hover,
+a[class*="bg-primary"]:hover,
+a[class*="bg-slate-900"]:hover,
+a[class*="bg-emerald"]:hover,
+a[class*="bg-rose"]:hover,
+a[class*="bg-indigo"]:hover,
+button[class*="bg-primary"]:hover,
+button[class*="bg-slate-900"]:hover,
+button[class*="bg-emerald"]:hover,
+button[class*="bg-rose"]:hover,
+button[class*="bg-indigo"]:hover {
+  filter: brightness(1.05);
+}
+
+/* Active Press Effect */
+button:not([disabled]):active,
+input[type="submit"]:not([disabled]):active,
+input[type="button"]:not([disabled]):active,
+a[class*="bg-primary"]:active,
+a[class*="bg-slate-900"]:active,
+a[class*="bg-emerald"]:active,
+a[class*="bg-rose"]:active,
+button[class*="bg-primary"]:active,
+button[class*="bg-slate-900"]:active,
+button[class*="bg-emerald"]:active,
+button[class*="bg-rose"]:active {
+  transform: scale(0.98);
+}
