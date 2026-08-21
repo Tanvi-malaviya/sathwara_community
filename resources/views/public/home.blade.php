@@ -215,9 +215,10 @@
                     <template
                         x-if="slides[activeSlide] && slides[activeSlide].button_text && slides[activeSlide].button_text.trim() !== ''">
                         <a :href="slides[activeSlide].button_link || '#'"
-                            class="px-3.5 py-1.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-500 text-white font-extrabold text-[11px] sm:text-sm rounded-full shadow-lg border border-white/20 backdrop-blur-md transition-all duration-300 flex items-center gap-1.5 sm:gap-2 shrink-0 active:scale-95">
-                            <span x-text="slides[activeSlide].button_text"></span>
-                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5"
+                            style="color: #ffffff !important;"
+                            class="px-3.5 py-1.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-500 !text-white font-extrabold text-[11px] sm:text-sm rounded-full shadow-lg border border-white/20 backdrop-blur-md transition-all duration-300 flex items-center gap-1.5 sm:gap-2 shrink-0 active:scale-95">
+                            <span x-text="slides[activeSlide].button_text" style="color: #ffffff !important;"></span>
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" style="color: #ffffff !important; stroke: #ffffff !important;" fill="none" stroke="currentColor" stroke-width="2.5"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
