@@ -67,7 +67,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            <strong>Sathwara Community Portal</strong><br>
+            <strong>Satwara Community Portal</strong><br>
             This is an automated notification email. Please do not reply to this address.
         </div>
     </div>

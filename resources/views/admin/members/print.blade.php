@@ -46,7 +46,7 @@
 </head>
 <body onload="window.print()">
  
-    <h2>Sathwara Community Social Portal</h2>
+    <h2>Satwara Community Social Portal</h2>
     <h4>Member Registration Directory — Generated: {{ date('d-M-Y h:i A') }}</h4>
  
     <table>

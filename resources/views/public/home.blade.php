@@ -265,10 +265,10 @@
                     <div
                         class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white text-xs font-bold border border-white/15 mx-auto">
                         <span class="w-2.5 h-2.5 rounded-full bg-primary-500"></span>
-                        <span class="uppercase tracking-widest text-[11px]">{{ App\Models\Setting::get('website_name', 'Sathwara Community Portal') }}</span>
+                        <span class="uppercase tracking-widest text-[11px]">{{ App\Models\Setting::get('website_name', 'Satwara Community Portal') }}</span>
                     </div>
                     <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight">
-                        {{ __('messages.welcome') }} - {{ App\Models\Setting::get('website_name', 'Sathwara Community') }}
+                        {{ __('messages.welcome') }} - {{ App\Models\Setting::get('website_name', 'Satwara Community') }}
                     </h1>
                     <p class="text-slate-300 text-base sm:text-xl max-w-2xl mx-auto leading-relaxed">
                         {{ __('messages.home_fallback_desc') }}
@@ -443,7 +443,7 @@
                                         📍 {{ $event->venue }}
                                     </span>
                                 </div>
-                                @if(!empty($event->registration_end_date))
+                                @if(!empty($event->registration_end_date) && ($event->event_type ?? 'normal') !== 'normal')
                                     <span
                                         class="text-[9px] font-extrabold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 whitespace-nowrap">
                                         ⏳ {{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
@@ -600,7 +600,7 @@
                                 class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex items-end p-5 transition-opacity duration-300">
                                 <div class="w-full space-y-2">
                                     <p class="text-sm sm:text-base font-extrabold text-white leading-snug drop-shadow-md truncate">
-                                        {{ $item->caption ?: 'Sathwara Community Photo' }}
+                                        {{ $item->caption ?: 'Satwara Community Photo' }}
                                     </p>
 
                                     <!-- High-Visibility Badge -->

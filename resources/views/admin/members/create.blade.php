@@ -74,7 +74,7 @@
 
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.last_name_label') }} <span class="text-rose-500">*</span></label>
-                    <input type="text" name="last_name" value="{{ old('last_name') }}" required placeholder="Sathwara" 
+                    <input type="text" name="last_name" value="{{ old('last_name') }}" required placeholder="Satwara" 
                            class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 

@@ -3,7 +3,7 @@
 @section('content')
 {{-- @include('partials.page_header', [
     'title' => 'Membership Registration',
-    'subtitle' => 'Join the Sathwara Social Community Network',
+    'subtitle' => 'Join the Satwara Social Community Network',
     'breadcrumb' => 'Member Registration'
 ]) --}}
 
@@ -647,7 +647,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 "key": razorpayKey || "rzp_test_key",
                 "amount": feeAmountPaise,
                 "currency": "INR",
-                "name": "{{ config('app.name', 'Sathwara Community') }}",
+                "name": "{{ config('app.name', 'Satwara Community') }}",
                 "description": "Membership Registration Fee",
                 "handler": function (response) {
                     paymentIdInput.value = response.razorpay_payment_id;

@@ -24,8 +24,8 @@
                     </div>
                     <div class="min-w-0">
                         <span class="text-xs font-black text-slate-400 uppercase tracking-widest block">{{ __('messages.office_address') }}</span>
-                        <h4 class="text-base font-black text-slate-900 break-words" title="{{ App\Models\Setting::get('website_name', 'Sathwara Community') }}">
-                            {{ App\Models\Setting::get('website_name', 'Sathwara Community') }}
+                        <h4 class="text-base font-black text-slate-900 break-words" title="{{ App\Models\Setting::get('website_name', 'Satwara Community') }}">
+                            {{ App\Models\Setting::get('website_name', 'Satwara Community') }}
                         </h4>
                     </div>
                 </div>
@@ -64,8 +64,8 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <span class="text-xs font-black text-slate-400 uppercase tracking-widest block">{{ __('messages.email_address') }}</span>
-                        <a href="mailto:{{ App\Models\Setting::get('contact_email', 'info@sathwaracommunity.org') }}" class="text-sm sm:text-base font-black text-slate-900 hover:text-primary-600 transition-colors break-all block" title="{{ App\Models\Setting::get('contact_email', 'info@sathwaracommunity.org') }}">
-                            {{ App\Models\Setting::get('contact_email', 'info@sathwaracommunity.org') }}
+                        <a href="mailto:{{ App\Models\Setting::get('contact_email', 'info@satwaracommunity.org') }}" class="text-sm sm:text-base font-black text-slate-900 hover:text-primary-600 transition-colors break-all block" title="{{ App\Models\Setting::get('contact_email', 'info@satwaracommunity.org') }}">
+                            {{ App\Models\Setting::get('contact_email', 'info@satwaracommunity.org') }}
                         </a>
                     </div>
                 </div>

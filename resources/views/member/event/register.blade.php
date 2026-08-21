@@ -555,7 +555,7 @@
 '<html>' +
 '<head>' +
 '    <meta charset="utf-8">' +
-'    <title>Candidate Biodata - Sathwara Yuva Melo</title>' +
+'    <title>Candidate Biodata - Satwara Yuva Melo</title>' +
 '    <script src="https://cdn.tailwindcss.com"><\/script>' +
 '    <style>' +
 '        * { box-sizing: border-box; margin: 0; padding: 0; }' +
@@ -1405,7 +1405,7 @@
                                         <div class="space-y-1">
                                             <label class="text-[11px] font-bold text-slate-700">Father's Gyanti (Gnati)</label>
                                             <input type="text" name="father_gyanti" value="{{ old('father_gyanti') }}"
-                                                placeholder="e.g. Sathwara / Patel"
+                                                placeholder="e.g. Satwara / Patel"
                                                 class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                                         </div>
                                         --}}
@@ -1466,7 +1466,7 @@
                                         <div class="space-y-1">
                                             <label class="text-[11px] font-bold text-slate-700">Mother's Gyanti (Gnati)</label>
                                             <input type="text" name="mother_gyanti" value="{{ old('mother_gyanti') }}"
-                                                placeholder="e.g. Sathwara / Patel"
+                                                placeholder="e.g. Satwara / Patel"
                                                 class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-primary-500 outline-none">
                                         </div>
                                         --}}
@@ -2519,7 +2519,7 @@ document.addEventListener('DOMContentLoaded', function () {
             "key": razorpayKey || "rzp_test_key",
             "amount": totalAmountPaise,
             "currency": "INR",
-            "name": "{{ config('app.name', 'Sathwara Community') }}",
+            "name": "{{ config('app.name', 'Satwara Community') }}",
             "description": "Yuva Melo Registration Form Fee - {{ addslashes($event->title) }}",
             "handler": function (response) {
                 if (paymentIdInput) {
