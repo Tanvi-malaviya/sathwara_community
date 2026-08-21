@@ -8,38 +8,48 @@
 ])
 
 <!-- Content -->
-<section class="py-6 bg-slate-50/60">
+<section class="py-8 bg-slate-50/60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Left Main Content Column -->
             <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white rounded-xl border border-slate-200/60 p-6 sm:p-8 shadow-sm">
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
                     @if($update->image_path)
-                        <div class="relative w-full max-h-[420px] rounded-2xl overflow-hidden mb-6 bg-slate-100 border border-slate-100 shadow-xs">
-                            <img class="w-full h-full object-cover" 
-                                 src="{{ str_starts_with($update->image_path, 'http') ? $update->image_path : asset('storage/' . $update->image_path) }}" 
+                        @php
+                            $imgSrc = str_starts_with($update->image_path, 'http') ? $update->image_path : asset('storage/' . $update->image_path);
+                        @endphp
+                        <div class="relative w-full h-72 sm:h-96 md:h-[420px] rounded-2xl overflow-hidden mb-6 bg-slate-950 border border-slate-200/80 shadow-md flex items-center justify-center p-2">
+                            <!-- Blurred Background Image -->
+                            <img class="absolute inset-0 w-full h-full object-cover pointer-events-none" 
+                                 src="{{ $imgSrc }}" 
                                  alt=""
+                                 style="filter: blur(18px) brightness(0.45); transform: scale(1.15);">
+
+                            <!-- Sharp Full Foreground Image -->
+                            <img class="relative max-h-full max-w-full object-contain mx-auto rounded-xl drop-shadow-2xl z-1" 
+                                 src="{{ $imgSrc }}" 
+                                 alt="{{ $update->title }}"
                                  onerror="this.style.display='none'">
                         </div>
                     @endif
 
                     <div class="flex items-center gap-2 mb-4">
-                        <span class="text-[10px] font-extrabold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                        <span class="text-xs font-black text-primary-700 bg-primary-50 px-3 py-1.5 rounded-xl uppercase tracking-wider border border-primary-100 shadow-2xs">
                             📅 {{ __('messages.published') }}: {{ date('M d, Y', strtotime($update->publish_date)) }}
                         </span>
-                        <span class="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                        <span class="text-xs font-black text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-2xs">
                             📌 {{ __('messages.announcement') }}
                         </span>
                     </div>
 
-                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight mb-4">{{ $update->title }}</h2>
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-tight mb-5">{{ $update->title }}</h1>
 
-                    <div class="text-sm sm:text-base text-slate-600 leading-relaxed space-y-4 break-words">
-                        {!! nl2br(e($update->description)) !!}
+                    <div class="text-base sm:text-lg text-slate-700 leading-relaxed space-y-4 break-words prose max-w-none">
+                        {!! $update->description !!}
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center">
-                        <a href="{{ route('updates') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">
+                        <a href="{{ route('updates') }}" class="inline-flex items-center gap-2 text-sm font-extrabold text-slate-600 hover:text-primary-600 transition-colors">
                             &larr; {{ __('messages.back_to_announcements') }}
                         </a>
                     </div>

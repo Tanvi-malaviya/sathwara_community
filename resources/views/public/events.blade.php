@@ -7,13 +7,27 @@
     'breadcrumb' => __('messages.events')
 ])
 
+<style>
+    /* Events Page Typography Enhancements */
+    .events-page-container h3 {
+        font-size: 1.15rem !important; /* ~18.5px */
+        font-weight: 800 !important;
+        line-height: 1.35 !important;
+    }
+    .events-page-container p {
+        font-size: 14px !important;
+        line-height: 1.65 !important;
+        color: #475569 !important;
+    }
+</style>
+
 <!-- Events Grid -->
-<section class="py-5 bg-transparent">
+<section class="py-8 bg-transparent events-page-container">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             @forelse($events as $event)
-                <a href="{{ route('event.details', $event->id) }}" class="group bg-white rounded-3xl overflow-hidden border border-slate-200/60 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block cursor-pointer">
-                    <div class="relative h-44 w-full overflow-hidden shrink-0 bg-white">
+                <a href="{{ route('event.details', $event->id) }}" class="group bg-white rounded-3xl overflow-hidden border border-slate-200/80 flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block cursor-pointer">
+                    <div class="relative h-48 w-full overflow-hidden shrink-0 bg-white">
                         {{-- Always-visible Red Background + Calendar Icon (base layer) --}}
                         <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 16px 12px; background: linear-gradient(135deg, #dc2626 0%, #e11d48 60%, #be123c 100%);">
                             {{-- Dot grid texture --}}
@@ -21,22 +35,22 @@
 
                             {{-- Calendar card --}}
                             <div style="position:relative; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                                <div style="width:60px; height:64px; border-radius:12px; background:#fff; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 6px 20px rgba(0,0,0,0.28), 0 0 0 2px rgba(255,255,255,0.35);">
+                                <div style="width:68px; height:72px; border-radius:14px; background:#fff; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 6px 20px rgba(0,0,0,0.28), 0 0 0 2px rgba(255,255,255,0.35);">
                                     <div style="background: linear-gradient(90deg, #dc2626, #e11d48); padding: 5px 0; text-align:center;">
-                                        <span style="font-size:11px; font-weight:900; color:#fff; letter-spacing:0.15em; text-transform:uppercase; display:block; line-height:1;">
+                                        <span style="font-size:12px; font-weight:900; color:#fff; letter-spacing:0.15em; text-transform:uppercase; display:block; line-height:1;">
                                             {{ date('M', strtotime($event->date)) }}
                                         </span>
                                     </div>
                                     <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4px 0;">
-                                        <span style="font-size:26px; font-weight:900; color:#1e293b; line-height:1;">
+                                        <span style="font-size:28px; font-weight:900; color:#1e293b; line-height:1;">
                                             {{ date('d', strtotime($event->date)) }}
                                         </span>
-                                        <span style="font-size:8px; font-weight:700; color:#94a3b8; margin-top:1px; line-height:1;">
+                                        <span style="font-size:9px; font-weight:700; color:#94a3b8; margin-top:1px; line-height:1;">
                                             {{ date('Y', strtotime($event->date)) }}
                                         </span>
                                     </div>
                                 </div>
-                                <span style="font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:#fff; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); padding:2px 10px; border-radius:999px;">{{ __('messages.community_event') }}</span>
+                                <span style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:#fff; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); padding:3px 12px; border-radius:999px;">{{ __('messages.community_event') }}</span>
                             </div>
                         </div>
 
@@ -50,47 +64,49 @@
                         @endif
 
                         {{-- Date Badge (Top-Left overlay) --}}
-                        <div class="absolute top-3 left-3 z-10">
-                            <span class="text-[9px] font-extrabold text-white bg-slate-900/80 backdrop-blur-md px-2 py-1 rounded-lg uppercase tracking-wider shadow-sm">
-                                {{ date('M d, Y', strtotime($event->date)) }}
+                        <div class="absolute top-3.5 left-3.5 z-10">
+                            <span class="text-xs font-black text-white px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-lg flex items-center gap-1.5"
+                                style="background-color: #0f172a !important; color: #ffffff !important; box-shadow: 0 4px 12px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.25);">
+                                <span>📅</span>
+                                <span>{{ date('M d, Y', strtotime($event->date)) }}</span>
                             </span>
                         </div>
 
                         {{-- Status & Type Badges (Top-Right overlay) --}}
-                        <div class="absolute top-3 right-3 z-10 flex flex-col items-end gap-1">
+                        <div class="absolute top-3.5 right-3.5 z-10 flex flex-col items-end gap-1.5">
                             @if($event->date < now()->toDateString())
-                                <span class="text-[8px] font-black text-slate-700 bg-slate-100/90 backdrop-blur-sm px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">{{ __('messages.passed') }}</span>
+                                <span class="text-xs font-black text-white bg-slate-600 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">{{ __('messages.passed') }}</span>
                             @else
-                                <span class="text-[8px] font-black text-emerald-700 bg-emerald-50/90 backdrop-blur-sm px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">{{ __('messages.upcoming') }}</span>
+                                <span class="text-xs font-black text-white bg-emerald-600 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">{{ __('messages.upcoming') }}</span>
                             @endif
 
                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                                <span class="text-[8px] font-black text-amber-800 bg-amber-50/95 backdrop-blur-sm border border-amber-200 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">🏆 {{ __('messages.inam') }}</span>
+                                <span class="text-xs font-black text-white bg-amber-500 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">🏆 {{ __('messages.inam') }}</span>
                             @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                <span class="text-[8px] font-black text-purple-800 bg-purple-50/95 backdrop-blur-sm border border-purple-200 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">⚡ {{ __('messages.yuva') }}</span>
+                                <span class="text-xs font-black text-white bg-purple-600 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">⚡ {{ __('messages.yuva') }}</span>
                             @endif
                         </div>
                     </div>
                     
-                    <div class="p-5 flex-grow flex flex-col justify-between space-y-3">
-                        <div class="space-y-1.5">
-                            <h3 class="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1" title="{{ $event->title }}">{{ $event->title }}</h3>
+                    <div class="p-6 flex-grow flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1" title="{{ $event->title }}">{{ $event->title }}</h3>
                             @php
                                 $cleanDesc = preg_replace('/<span class="ql-ui"[^>]*>.*?<\/span>/i', '', $event->description);
                                 $cleanDesc = strip_tags(str_replace(['<br>', '</p>', '</li>', '</div>'], ' ', $cleanDesc));
                                 $cleanDesc = trim(preg_replace('/\s+/', ' ', $cleanDesc));
                             @endphp
-                            <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed break-words">
-                                {{ \Illuminate\Support\Str::limit($cleanDesc, 100, '...') }}
+                            <p class="text-sm text-slate-600 line-clamp-2 leading-relaxed break-words">
+                                {{ \Illuminate\Support\Str::limit($cleanDesc, 110, '...') }}
                             </p>
                         </div>
 
-                        <div class="flex justify-between items-center pt-3 border-t border-slate-100 min-w-0 gap-2 flex-wrap">
+                        <div class="flex justify-between items-center pt-3.5 border-t border-slate-100 min-w-0 gap-2 flex-wrap">
                             <div class="min-w-0 flex-1">
-                                <span class="text-[10px] font-bold text-slate-400 truncate block" title="{{ $event->venue }}">📍 {{ $event->venue }}</span>
+                                <span class="text-xs sm:text-sm font-bold text-slate-500 truncate block" title="{{ $event->venue }}">📍 {{ $event->venue }}</span>
                             </div>
                             @if(!empty($event->registration_end_date))
-                                <span class="text-[9px] font-extrabold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 whitespace-nowrap">
+                                <span class="text-xs font-extrabold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100 whitespace-nowrap">
                                     ⏳ {{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
                                 </span>
                             @endif
@@ -99,13 +115,13 @@
                 </a>
             @empty
                 <div class="col-span-3 text-center py-20 text-slate-400">
-                    {{ __('messages.no_events_scheduled') }}
+                    <p class="text-base font-bold">{{ __('messages.no_events_scheduled') }}</p>
                 </div>
             @endforelse
         </div>
 
         <!-- Pagination -->
-        <div class="mt-6">
+        <div class="mt-8">
             {{ $events->links() }}
         </div>
     </div>

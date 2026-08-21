@@ -218,9 +218,7 @@
                         <div class="space-y-1.5">
                             <div class="flex items-center justify-between text-xs font-bold text-slate-500 flex-wrap gap-1">
                                 <span>📅 {{ date('d-M-Y', strtotime($event->date)) }}</span>
-                                @if(!empty($event->registration_end_date))
-                                    <span class="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[11px] font-black">⏳ {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
-                                @else
+                                @if(!empty($event->time))
                                     <span class="text-slate-400">🕒 {{ date('h:i A', strtotime($event->time)) }}</span>
                                 @endif
                             </div>
@@ -258,13 +256,13 @@
 
                                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                     <a href="{{ route('member.events.register_form', $event->id) }}"
-                                       class="inline-flex items-center px-2.5 py-1 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-[11px] font-extrabold rounded-lg transition-all gap-1 shadow-2xs">
-                                        🏆 {{ $isGu ? 'ઈનામ' : 'Inam' }}
+                                       class="inline-flex items-center px-3 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-extrabold rounded-lg transition-all gap-1 shadow-2xs">
+                                        📝 {{ $isGu ? 'ફોર્મ ભરો' : 'Fill Form' }}
                                     </a>
                                 @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
                                     <a href="{{ route('member.events.register_form', $event->id) }}"
-                                       class="inline-flex items-center px-2.5 py-1 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-[11px] font-extrabold rounded-lg transition-all gap-1 shadow-2xs">
-                                        ⚡ {{ $isGu ? 'યુવા મેળો' : 'Yuva Melo' }}
+                                       class="inline-flex items-center px-3 py-1.5 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs font-extrabold rounded-lg transition-all gap-1 shadow-2xs">
+                                        📝 {{ $isGu ? 'ફોર્મ ભરો' : 'Fill Form' }}
                                     </a>
                                 @endif
                             </div>

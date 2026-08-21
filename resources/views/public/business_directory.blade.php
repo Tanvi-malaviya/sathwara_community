@@ -62,9 +62,9 @@
 
             <!-- Businesses Grid (Compact Vertical Cards Grid) -->
             <div class="lg:col-span-3 space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     @forelse($businesses as $biz)
-                        <div class="group bg-white border border-slate-200/70 rounded-2xl p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-3">
+                        <div class="group bg-white border border-slate-200/80 rounded-2xl p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-3">
                             <div>
                                 <!-- Top Row: Logo + Category Badge (Zero Overlapping) -->
                                 <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
@@ -72,14 +72,14 @@
                                          src="{{ str_starts_with($biz->logo_path, 'http') ? $biz->logo_path : asset('storage/' . $biz->logo_path) }}" 
                                          alt="{{ $biz->business_name }}">
                                     
-                                    <div class="flex flex-col items-end gap-1.5 shrink-0">
-                                        <span class="text-[10.5px] font-black text-primary-700 bg-primary-50 border border-primary-100/80 px-2.5 py-0.5 rounded-md uppercase tracking-wider">
+                                    <div class="flex flex-col items-end gap-1 shrink-0">
+                                        <span class="text-[11px] font-extrabold text-primary-700 bg-primary-50 border border-primary-100 px-2.5 py-0.5 rounded-md uppercase tracking-wider">
                                             {{ $biz->category?->name ?? __('messages.general') }}
                                         </span>
                                         @if($biz->membership_status === 'active')
-                                            <span class="text-[10.5px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100/80 px-2.5 py-0.5 rounded-md uppercase tracking-wider">{{ __('messages.active') }}</span>
+                                            <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md uppercase tracking-wider">{{ __('messages.active') }}</span>
                                         @else
-                                            <span class="text-[10.5px] font-black text-rose-700 bg-rose-50 border border-rose-100/80 px-2.5 py-0.5 rounded-md uppercase tracking-wider">{{ __('messages.expired') }}</span>
+                                            <span class="text-[10px] font-black text-rose-700 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-md uppercase tracking-wider">{{ __('messages.expired') }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -88,15 +88,15 @@
                                 <div class="pt-3 space-y-2">
                                     <div>
                                         <a href="{{ route('business.details', $biz->id) }}" class="block">
-                                            <h3 class="text-sm sm:text-base font-black text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1" title="{{ $biz->business_name }}">
+                                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1" title="{{ $biz->business_name }}">
                                                 {{ $biz->business_name }}
                                             </h3>
                                         </a>
                                         <p class="text-xs text-slate-500 font-semibold truncate mt-1">
                                             {{ __('messages.owner') }}: <span class="text-slate-800 font-bold">{{ $biz->owner_name }}</span>
-                                            @if($biz->member_id)
+                                            {{-- @if($biz->member_id)
                                                 <span class="mx-1 text-slate-300">•</span> {{ __('messages.member_id') }}: <span class="text-slate-800 font-bold">{{ $biz->member_id }}</span>
-                                            @endif
+                                            @endif --}}
                                         </p>
                                         @if($biz->approved_at)
                                             <p class="text-[11px] text-slate-400 font-semibold mt-1">
@@ -107,7 +107,7 @@
                                         @endif
                                     </div>
 
-                                    <p class="text-xs sm:text-[13px] text-slate-600 line-clamp-2 leading-relaxed min-h-[36px]">
+                                    <p class="text-xs sm:text-sm text-slate-600 line-clamp-2 leading-relaxed min-h-[36px]">
                                         {{ $biz->description ?? __('messages.no_business_description') }}
                                     </p>
 

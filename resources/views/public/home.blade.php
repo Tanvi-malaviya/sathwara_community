@@ -45,6 +45,128 @@
                 max-height: 680px;
             }
         }
+
+        /* =============================================
+           HOME PAGE — FONT SIZE UPGRADES
+           ============================================= */
+
+        /* Section label (e.g. "AGENDA", "UPCOMING EVENTS") */
+        .home-section-label {
+            font-size: 13px !important;
+        }
+
+        /* Section h2 headings */
+        section h2 {
+            font-size: 1.75rem !important; /* 28px */
+            line-height: 1.2 !important;
+        }
+        @media (min-width: 640px) {
+            section h2 {
+                font-size: 2.1rem !important; /* ~34px */
+            }
+        }
+
+        /* Card / item h3 titles */
+        section h3 {
+            font-size: 15px !important;
+            line-height: 1.4 !important;
+        }
+
+        /* Body / description paragraphs */
+        section p {
+            font-size: 13.5px !important;
+            line-height: 1.7 !important;
+        }
+
+        /* Tiny badge-like spans (was text-[9px], text-[10px], text-[11px]) */
+        section span[style*="font-size:10px"],
+        section span[style*="font-size:8px"],
+        section span[style*="font-size:9px"] {
+            font-size: 12px !important;
+        }
+
+        /* Inline meta / venue / date small text */
+        section .text-\[10px\],
+        section .text-\[11px\],
+        section .text-\[9px\],
+        section .text-\[8px\] {
+            font-size: 12px !important;
+        }
+
+        /* text-xs in sections */
+        section .text-xs {
+            font-size: 13px !important;
+        }
+
+        /* text-sm in sections */
+        section .text-sm {
+            font-size: 14.5px !important;
+        }
+
+        /* text-base in sections */
+        section .text-base {
+            font-size: 16px !important;
+        }
+
+        /* Gallery caption text */
+        section p.text-sm,
+        section p.text-base {
+            font-size: 15px !important;
+        }
+
+        /* "View all" / action links */
+        section a.text-xs {
+            font-size: 13px !important;
+        }
+
+        /* Section label spans (sm:text-base) */
+        section span.text-sm,
+        section span.text-base {
+            font-size: 13.5px !important;
+        }
+
+        /* ==============================================
+           UPCOMING EVENTS & LATEST UPDATES — Font Boost
+           ============================================== */
+
+        /* Card h3 titles — bigger & bolder */
+        section h3 {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+            line-height: 1.4 !important;
+            color: #0f172a !important;
+        }
+
+        /* Card description paragraph */
+        section p.line-clamp-2,
+        section .text-\[11px\] {
+            font-size: 13.5px !important;
+            color: #475569 !important;
+        }
+
+        /* Venue / meta info */
+        section span.text-\[10px\],
+        section span.text-\[9px\],
+        section span.text-\[8px\] {
+            font-size: 12.5px !important;
+        }
+
+        /* Date badge, last-date badge */
+        section span.text-\[9px\].font-extrabold,
+        section span.text-\[8px\].font-black,
+        section span.text-rose-600 {
+            font-size: 12px !important;
+        }
+
+        /* "Read full post" link */
+        section a.text-\[10px\] {
+            font-size: 13px !important;
+        }
+
+        /* Update date meta badge */
+        section span.text-\[9px\].font-extrabold.text-primary-700 {
+            font-size: 12px !important;
+        }
     </style>
 
     <!-- Edge-to-Edge Full Screen Hero Slider Section -->
@@ -63,17 +185,25 @@
             <div class="hero-slider-container relative w-full overflow-hidden bg-slate-950">
 
                 @foreach($sliders as $idx => $slide)
+                    @php $slideImgUrl = str_starts_with($slide->image_path, 'http') ? $slide->image_path : asset('storage/' . $slide->image_path); @endphp
                     <div x-show="activeSlide === {{ $idx }}" x-transition:enter="transition ease-out duration-700 transform"
                         x-transition:enter-start="opacity-0 scale-105" x-transition:enter-end="opacity-100 scale-100"
                         x-transition:leave="transition ease-in duration-500 transform absolute inset-0"
                         x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                         class="absolute inset-0 w-full h-full flex items-center">
 
-                        <!-- Slide Full Screen Edge-to-Edge Image (No blur, full screen only image) -->
-                        <img src="{{ str_starts_with($slide->image_path, 'http') ? $slide->image_path : asset('storage/' . $slide->image_path) }}"
+                        <!-- Blurred Background Image (same image, scaled + blurred) -->
+                        <img src="{{ $slideImgUrl }}"
+                            alt=""
+                            aria-hidden="true"
+                            class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                            style="object-fit: cover; object-position: center; filter: blur(18px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                        <!-- Main Slide Image (full, object-contain, on top) -->
+                        <img src="{{ $slideImgUrl }}"
                             alt="{{ $slide->title ?? 'Banner Slide' }}"
-                            class="w-full h-full object-cover object-center transition-transform duration-1000 scale-100"
-                            style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                            class="relative w-full h-full transition-transform duration-1000 scale-100"
+                            style="object-fit: contain; object-position: center; z-index: 1;">
 
                     </div>
                 @endforeach
@@ -209,9 +339,9 @@
                     </h2>
                 </div>
                 <a href="{{ route('events') }}"
-                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-primary-500 text-slate-700 hover:text-white border border-slate-200 hover:border-primary-500 text-xs font-bold transition-all shadow-xs hover:shadow-md shrink-0 group">
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-50 hover:bg-primary-600 text-primary-600 hover:text-white border border-primary-200 hover:border-primary-600 text-xs sm:text-sm font-bold transition-all duration-200 shadow-xs hover:shadow-md shrink-0 group">
                     <span>{{ __('messages.view_all_events') }}</span>
-                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-primary-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
@@ -267,21 +397,22 @@
                             @endif
 
                             {{-- Date Badge (Top-Left overlay) --}}
-                            <div class="absolute top-3 left-3 z-10">
-                                <span
-                                    class="text-[9px] font-extrabold text-white bg-slate-900/80 backdrop-blur-md px-2 py-1 rounded-lg uppercase tracking-wider shadow-sm">
-                                    {{ date('d M, Y', strtotime($event->date)) }}
+                            <div class="absolute top-3.5 left-3.5 z-10">
+                                <span class="text-xs font-black text-white px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-lg flex items-center gap-1.5"
+                                    style="background-color: #0f172a !important; color: #ffffff !important; box-shadow: 0 4px 12px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.25);">
+                                    <span>📅</span>
+                                    <span>{{ date('d M, Y', strtotime($event->date)) }}</span>
                                 </span>
                             </div>
 
                             {{-- Status Badge (Top-Right overlay) --}}
-                            <div class="absolute top-3 right-3 z-10">
+                            <div class="absolute top-3.5 right-3.5 z-10">
                                 @if($event->date < now()->toDateString())
                                     <span
-                                        class="text-[8px] font-black text-slate-700 bg-slate-100/90 backdrop-blur-sm px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">{{ __('messages.passed') }}</span>
+                                        class="text-xs font-black text-white bg-slate-600 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">{{ __('messages.passed') }}</span>
                                 @else
                                     <span
-                                        class="text-[8px] font-black text-emerald-700 bg-emerald-50/90 backdrop-blur-sm px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">{{ __('messages.upcoming') }}</span>
+                                        class="text-xs font-black text-white bg-emerald-600 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">{{ __('messages.upcoming') }}</span>
                                 @endif
                             </div>
                         </div>
@@ -342,9 +473,9 @@
                     </h2>
                 </div>
                   <a href="{{ route('updates') }}"
-                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-primary-500 text-slate-700 hover:text-white border border-slate-200 hover:border-primary-500 text-xs font-bold transition-all shadow-xs hover:shadow-md shrink-0 group">
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-50 hover:bg-primary-600 text-primary-600 hover:text-white border border-primary-200 hover:border-primary-600 text-xs sm:text-sm font-bold transition-all duration-200 shadow-xs hover:shadow-md shrink-0 group">
                     <span>{{ __('messages.all_announcements') }}</span>
-                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-primary-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
@@ -426,9 +557,9 @@
                     </h2>
                 </div>
                 <a href="{{ route('gallery') }}"
-                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-primary-500 text-slate-700 hover:text-white border border-slate-200 hover:border-primary-500 text-xs font-bold transition-all shadow-xs hover:shadow-md shrink-0 group">
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-50 hover:bg-primary-600 text-primary-600 hover:text-white border border-primary-200 hover:border-primary-600 text-xs sm:text-sm font-bold transition-all duration-200 shadow-xs hover:shadow-md shrink-0 group">
                     <span>{{ __('messages.view_full_gallery') }}</span>
-                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-primary-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
@@ -468,12 +599,12 @@
 
                                     <!-- High-Visibility Badge -->
                                     <div
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 group-hover:bg-primary-600 backdrop-blur-md border border-white/30 text-white text-[11px] font-bold shadow-xs transition-colors duration-300">
+                                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900/85 group-hover:bg-primary-600 backdrop-blur-md border border-white/30 text-white text-xs font-bold shadow-md transition-colors duration-300">
                                         <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                                         </svg>
-                                        <span>{{ __('messages.click_to_enlarge') }}</span>
+                                        <span class="text-white">{{ __('messages.click_to_enlarge') }}</span>
                                     </div>
                                 </div>
                             </div>

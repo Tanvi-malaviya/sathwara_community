@@ -18,7 +18,7 @@
                         <div class="flex flex-col items-center text-center group max-w-[190px]">
                             <!-- Photo Container with Floating Designation Badge -->
                             <div class="relative inline-flex flex-col items-center justify-center p-0.5">
-                                <img class="w-32 md:w-36 h-auto max-h-44 object-contain rounded-xl drop-shadow-xs transition-transform duration-300 group-hover:scale-105" 
+                                <img class="w-32 md:w-36 h-40 md:h-44 object-cover rounded-xl drop-shadow-xs transition-transform duration-300 group-hover:scale-105" 
                                      src="{{ str_starts_with($member->photo_path, 'http') ? $member->photo_path : asset('storage/' . $member->photo_path) }}" 
                                      alt="{{ $member->localized_name }}"
                                      onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($member->localized_name ?: 'Member') }}&background=fef2f2&color=dc2626&size=256&bold=true';">
@@ -31,7 +31,7 @@
 
                             <!-- Name Below Photo -->
                             <div class="mt-4 space-y-0.5">
-                                <h3 class="text-xs md:text-sm font-black text-slate-900 leading-snug font-gujarati group-hover:text-primary-600 transition-colors">
+                                <h3 class="text-sm md:text-base font-black text-slate-900 leading-snug font-gujarati group-hover:text-primary-600 transition-colors">
                                     {{ $member->localized_name }}
                                 </h3>
                             </div>
@@ -46,7 +46,7 @@
                             <div class="flex flex-col items-center text-center group max-w-[170px]">
                                 <!-- Photo Container with Floating Designation Badge -->
                                 <div class="relative inline-flex flex-col items-center justify-center p-0.5">
-                                    <img class="w-28 md:w-32 h-auto max-h-40 object-contain rounded-xl drop-shadow-xs transition-transform duration-300 group-hover:scale-105" 
+                                    <img class="w-28 md:w-32 h-36 md:h-40 object-cover rounded-xl drop-shadow-xs transition-transform duration-300 group-hover:scale-105" 
                                          src="{{ str_starts_with($member->photo_path, 'http') ? $member->photo_path : asset('storage/' . $member->photo_path) }}" 
                                          alt="{{ $member->localized_name }}"
                                          onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($member->localized_name ?: 'Member') }}&background=fef2f2&color=dc2626&size=256&bold=true';">

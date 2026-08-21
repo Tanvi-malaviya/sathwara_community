@@ -13,6 +13,7 @@
     <div x-data="{ 
         addOpen: false, 
         editOpen: false, 
+        importOpen: false,
         editName: '',
         editPincode: '',
         editUrl: ''
@@ -46,6 +47,14 @@
                     class="inline-flex items-center px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-colors shrink-0">
                     📊 <span>{{ __('messages.export_excel') }}</span>
                 </a>
+
+                <!-- Import Area Button -->
+                @if($canAddArea)
+                    <button type="button" @click="importOpen = true"
+                        class="inline-flex items-center px-3.5 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs rounded-xl border border-sky-200/60 shadow-xs transition-colors shrink-0 cursor-pointer">
+                        📥 <span>{{ __('messages.import_excel') }}</span>
+                    </button>
+                @endif
 
                 <!-- Add Area Button -->
                 @if($canAddArea)
@@ -239,6 +248,66 @@
                             <button type="submit"
                                 class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors">
                                 {{ __('messages.save_changes') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
+
+        <!-- Import Areas Modal -->
+        <template x-teleport="body">
+            <div x-show="importOpen"
+                class="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/40 backdrop-blur-xs"
+                x-transition x-cloak>
+                <div class="bg-white rounded-xl max-w-sm sm:max-w-md w-full p-4 sm:p-5 border border-slate-100 shadow-xl space-y-3"
+                    @click.away="importOpen = false">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">📥</span>
+                            <h3 class="text-xs sm:text-sm font-black text-slate-900">{{ __('messages.import_areas_csv') }}</h3>
+                        </div>
+                        <button type="button" @click="importOpen = false" class="text-slate-400 hover:text-slate-600 transition-colors p-1 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Instructions & Sample File Download -->
+                    <div class="p-2.5 bg-slate-50 border border-slate-200/70 rounded-lg space-y-1.5">
+                        <p class="text-[11px] font-semibold text-slate-600 leading-snug">
+                            {{ __('messages.import_area_help') }}
+                        </p>
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-200/50 flex-wrap gap-1">
+                            <span class="text-[10px] font-bold text-slate-400">Area Name, Pincode</span>
+                            <a href="{{ route('admin.areas.sample_csv') }}" 
+                               class="inline-flex items-center gap-1 text-[10px] font-black text-primary-600 hover:text-primary-700 bg-white border border-primary-200 px-2 py-0.5 rounded-md shadow-2xs hover:bg-primary-50 transition-colors">
+                                <span>📄 {{ __('messages.download_sample_template') }}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.areas.import') }}" enctype="multipart/form-data" class="space-y-3">
+                        @csrf
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
+                                {{ __('messages.choose_csv_file') }} <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="file" name="csv_file" required accept=".csv,.txt"
+                                class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 transition-colors cursor-pointer">
+                            <span class="text-[9.5px] font-medium text-slate-400 block">.csv, .txt (Max: 5MB)</span>
+                        </div>
+
+                        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
+                            <button type="button" @click="importOpen = false"
+                                class="px-3 py-1.5 border border-slate-200 text-slate-700 font-bold text-xs rounded-lg hover:bg-slate-50 transition-colors cursor-pointer">
+                                {{ __('messages.cancel') }}
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-1.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-lg shadow-2xs transition-colors inline-flex items-center gap-1 cursor-pointer">
+                                <span>📥 {{ __('messages.upload_and_import') }}</span>
                             </button>
                         </div>
                     </form>

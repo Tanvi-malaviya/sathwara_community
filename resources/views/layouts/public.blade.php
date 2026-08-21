@@ -21,13 +21,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Hind+Vadodara:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Styles / Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
+        /* ============================================================
+           TYPOGRAPHY SYSTEM — Sathwara Community Website
+           English  : Plus Jakarta Sans
+           Gujarati : Hind Vadodara + Noto Sans Gujarati fallback
+           ============================================================ */
+
         html {
             font-size: 16px;
         }
@@ -40,27 +46,150 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Enhanced Public Website Typography */
-        nav a {
-            font-size: 13.5px !important;
+        /* --- Font Families --- */
+        .font-sans,
+        html:not(.font-gujarati) body,
+        html:not(.font-gujarati) p,
+        html:not(.font-gujarati) span,
+        html:not(.font-gujarati) div,
+        html:not(.font-gujarati) a,
+        html:not(.font-gujarati) button,
+        html:not(.font-gujarati) input,
+        html:not(.font-gujarati) select,
+        html:not(.font-gujarati) textarea,
+        html:not(.font-gujarati) label,
+        html:not(.font-gujarati) h1,
+        html:not(.font-gujarati) h2,
+        html:not(.font-gujarati) h3,
+        html:not(.font-gujarati) h4,
+        html:not(.font-gujarati) h5,
+        html:not(.font-gujarati) h6 {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
-        .font-gujarati {
+        .font-gujarati,
+        .font-gujarati body,
+        .font-gujarati p,
+        .font-gujarati span,
+        .font-gujarati div,
+        .font-gujarati a,
+        .font-gujarati button,
+        .font-gujarati input,
+        .font-gujarati select,
+        .font-gujarati textarea,
+        .font-gujarati label,
+        .font-gujarati h1,
+        .font-gujarati h2,
+        .font-gujarati h3,
+        .font-gujarati h4,
+        .font-gujarati h5,
+        .font-gujarati h6 {
             font-family: 'Hind Vadodara', 'Noto Sans Gujarati', sans-serif !important;
             letter-spacing: 0.01em;
         }
 
-        .font-sans {
-            font-family: 'Manrope', sans-serif !important;
+        /* --- Base Body Text : weight 500 --- */
+        body {
+            font-weight: 500;
+            color: #1e293b;
+            line-height: 1.65;
         }
 
-        /* Table Typography */
+        p, li, td, dd, dt, blockquote {
+            font-weight: 500 !important;
+        }
+
+        /* --- Suppress thin weights globally (300 / 400 → 500) --- */
+        [class*="font-thin"],
+        [class*="font-extralight"],
+        [class*="font-light"] {
+            font-weight: 500 !important;
+        }
+
+        [class*="font-normal"]:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(button):not(a):not(nav *) {
+            font-weight: 500 !important;
+        }
+
+        /* --- Navigation : weight 600 --- */
+        nav a,
+        header nav a,
+        header a,
+        .navbar a {
+            font-weight: 600 !important;
+            font-size: 15px !important;
+        }
+
+        /* --- Global Description / Body Paragraph Color --- */
+        p,
+        .text-slate-600,
+        .text-slate-500 {
+            color: #475569;
+        }
+
+        /* Enforce bright white for all white text elements */
+        .text-white,
+        [class*="text-white"],
+        section .text-white,
+        p.text-white,
+        span.text-white,
+        h1.text-white,
+        h2.text-white,
+        h3.text-white,
+        h4.text-white {
+            color: #ffffff !important;
+        }
+
+        /* --- Buttons : weight 600 & proper colors --- */
+        button,
+        a[class*="bg-primary"],
+        a[class*="bg-slate-900"],
+        a[class*="bg-emerald"],
+        a[class*="bg-rose"],
+        a[class*="bg-indigo"],
+        input[type="submit"],
+        input[type="button"],
+        [class*="btn"] {
+            font-weight: 700 !important;
+        }
+
+        /* --- Labels & UI Controls : weight 600 --- */
+        label,
+        [class*="badge"],
+        [class*="tag"],
+        th {
+            font-weight: 600 !important;
+        }
+
+        /* --- Card Titles / h4 h5 h6 : weight 600–700 --- */
+        h4, h5, h6,
+        [class*="card"] h4,
+        [class*="card"] h5 {
+            font-weight: 700 !important;
+        }
+
+        /* --- Section Headings h3 : weight 700 --- */
+        h3 {
+            font-weight: 700 !important;
+        }
+
+        /* --- Page Headings h2 : weight 700 --- */
+        h2 {
+            font-weight: 700 !important;
+        }
+
+        /* --- Hero / Primary Heading h1 : weight 800 --- */
+        h1 {
+            font-weight: 800 !important;
+            line-height: 1.15;
+        }
+
+        /* --- Table Typography --- */
         table thead th,
         table thead tr th {
             font-size: 12.5px !important;
-            font-weight: 800 !important;
+            font-weight: 700 !important;
             color: #334155 !important;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.04em;
             text-transform: uppercase;
             padding: 0.65rem 0.75rem !important;
         }
@@ -68,11 +197,12 @@
         table tbody td,
         table tbody tr td {
             font-size: 13.5px !important;
+            font-weight: 500 !important;
             color: #1e293b !important;
             padding: 0.65rem 0.75rem !important;
         }
 
-        /* Form Inputs & Controls */
+        /* --- Form Inputs & Controls --- */
         input[type="text"],
         input[type="email"],
         input[type="password"],
@@ -83,9 +213,10 @@
         select,
         textarea {
             font-size: 13.5px !important;
+            font-weight: 500 !important;
         }
 
-        /* Badges & Micro Text */
+        /* --- Badges & Micro Text --- */
         span[class*="text-[9px]"],
         span[class*="text-[10px]"] {
             font-size: 11px !important;
@@ -96,9 +227,10 @@
         p[class*="text-xs"],
         a[class*="text-xs"] {
             font-size: 12.5px !important;
+            font-weight: 600 !important;
         }
 
-        /* Global Button Hover Highlight & Elevation */
+        /* --- Global Button Hover & Elevation --- */
         button:not([disabled]),
         input[type="submit"]:not([disabled]),
         input[type="button"]:not([disabled]),
@@ -184,23 +316,23 @@
                 <!-- Desktop Navigation Links -->
                 <nav class="hidden lg:flex items-center space-x-1 xl:space-x-1.5 font-sans shrink-0">
                     <a href="{{ route('home') }}"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('home') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-sm xl:text-[15px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('home') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
                         {{ __('messages.home') }}
                     </a>
                     <a href="{{ route('events') }}"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('events') || Route::is('event.details') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-sm xl:text-[15px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('events') || Route::is('event.details') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
                         {{ __('messages.events') }}
                     </a>
                     <a href="{{ route('updates') }}"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('updates') || Route::is('update.details') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-sm xl:text-[15px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('updates') || Route::is('update.details') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
                         {{ __('messages.updates') }}
                     </a>
                     <a href="{{ route('gallery') }}"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('gallery') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-sm xl:text-[15px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('gallery') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
                         {{ __('messages.gallery') }}
                     </a>
                     <a href="{{ route('business.directory') }}"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('business.directory') || Route::is('business.details') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                        class="px-2.5 xl:px-3 py-1.5 rounded-xl text-sm xl:text-[15px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('business.directory') || Route::is('business.details') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
                         {{ __('messages.business_directory') }}
                     </a>
 
@@ -208,7 +340,7 @@
                     <div class="relative" x-data="{ openAbout: false }" @mouseenter="openAbout = true"
                         @mouseleave="openAbout = false">
                         <button @click="openAbout = !openAbout"
-                            class="inline-flex items-center gap-1 px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-[13px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('about') || Route::is('management_desk') || Route::is('contact') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
+                            class="inline-flex items-center gap-1 px-2.5 xl:px-3 py-1.5 rounded-xl text-sm xl:text-[15px] font-bold whitespace-nowrap transition-all duration-200 {{ Route::is('about') || Route::is('management_desk') || Route::is('contact') ? 'bg-primary-50 text-primary-500 shadow-xs ring-1 ring-primary-500/20' : 'text-slate-600 hover:text-primary-500 hover:bg-slate-50/80' }}">
                             <span>
                                 @if(Route::is('management_desk'))
                                     {{ __('messages.management_desk') }}
@@ -236,7 +368,7 @@
                             x-cloak>
 
                             <a href="{{ route('about') }}"
-                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs xl:text-[13px] font-bold transition-all duration-150 {{ Route::is('about') ? 'bg-primary-50 text-primary-600' : 'text-slate-700 hover:bg-slate-50 hover:text-primary-500' }}">
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm xl:text-[15px] font-bold transition-all duration-150 {{ Route::is('about') ? 'bg-primary-50 text-primary-600' : 'text-slate-700 hover:bg-slate-50 hover:text-primary-500' }}">
                                 <svg class="w-4 h-4 text-primary-500 shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -246,7 +378,7 @@
                             </a>
 
                             <a href="{{ route('management_desk') }}"
-                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs xl:text-[13px] font-bold transition-all duration-150 {{ Route::is('management_desk') ? 'bg-primary-50 text-primary-600' : 'text-slate-700 hover:bg-slate-50 hover:text-primary-500' }}">
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm xl:text-[15px] font-bold transition-all duration-150 {{ Route::is('management_desk') ? 'bg-primary-50 text-primary-600' : 'text-slate-700 hover:bg-slate-50 hover:text-primary-500' }}">
                                 <svg class="w-4 h-4 text-primary-500 shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -256,7 +388,7 @@
                             </a>
 
                             <a href="{{ route('contact') }}"
-                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs xl:text-[13px] font-bold transition-all duration-150 {{ Route::is('contact') ? 'bg-primary-50 text-primary-600' : 'text-slate-700 hover:bg-slate-50 hover:text-primary-500' }}">
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm xl:text-[15px] font-bold transition-all duration-150 {{ Route::is('contact') ? 'bg-primary-50 text-primary-600' : 'text-slate-700 hover:bg-slate-50 hover:text-primary-500' }}">
                                 <svg class="w-4 h-4 text-primary-500 shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -654,9 +786,9 @@
                         <!-- Address -->
                         @if(App\Models\Setting::get('contact_address'))
                             <div
-                                class="group flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200/60 transition-all duration-200">
+                                class="group flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 border border-transparent hover:border-slate-200/60 transition-all duration-200">
                                 <div
-                                    class="w-7 h-7 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-200 shadow-2xs">
+                                    class="w-7 h-7 rounded-lg bg-primary-600 text-primary-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-200 shadow-2xs">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -676,7 +808,7 @@
                             <a href="tel:{{ App\Models\Setting::get('contact_phone') }}"
                                 class="group flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200/60 transition-all duration-200">
                                 <div
-                                    class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200 shadow-2xs">
+                                    class="w-7 h-7 rounded-lg bg-emerald-600 text-emerald-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200 shadow-2xs">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -694,7 +826,7 @@
                             <a href="mailto:{{ App\Models\Setting::get('contact_email') }}"
                                 class="group flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200/60 transition-all duration-200">
                                 <div
-                                    class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-rose-600 group-hover:text-white transition-colors duration-200 shadow-2xs">
+                                    class="w-7 h-7 rounded-lg bg-rose-600 text-rose-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-rose-600 group-hover:text-white transition-colors duration-200 shadow-2xs">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -720,10 +852,10 @@
 
                 <div class="flex items-center gap-2 flex-wrap">
                     @php
-                        $fbUrl = App\Models\Setting::get('social_facebook') ?: 'https://facebook.com';
-                        $twUrl = App\Models\Setting::get('social_twitter') ?: 'https://twitter.com';
-                        $igUrl = App\Models\Setting::get('social_instagram') ?: 'https://instagram.com';
-                        $ytUrl = App\Models\Setting::get('social_youtube') ?: 'https://youtube.com';
+                        $fbUrl = trim(App\Models\Setting::get('social_facebook', ''));
+                        $twUrl = trim(App\Models\Setting::get('social_twitter', ''));
+                        $igUrl = trim(App\Models\Setting::get('social_instagram', ''));
+                        $ytUrl = trim(App\Models\Setting::get('social_youtube', ''));
                     @endphp
 
                     @if($fbUrl)
