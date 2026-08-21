@@ -63,30 +63,32 @@
         }" class="space-y-4">
 
         <div
-            class="flex flex-col xl:flex-row xl:items-center justify-between bg-white p-3.5 sm:p-4 rounded-xl border border-slate-100 shadow-sm gap-3">
-            <div>
-                <h2 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
-                    👨‍👩‍👧‍👦 {{ __('messages.family_members') }}
-                </h2>
-                <p class="text-xs text-slate-500 mt-0.5">{{ __('messages.family_manage_desc') }}</p>
+            class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white p-3.5 sm:p-4 rounded-xl border border-slate-100 shadow-sm gap-3">
+            
+            <!-- Full Width Search bar -->
+            <div class="relative flex-1 min-w-0">
+                <!-- <div class="absolute inset-y-0 left-5 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div> -->
+                <input type="text" x-model="search" placeholder="{{ __('messages.search_family') }}"
+                    class="w-full text-xs font-semibold pl-3 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors placeholder:text-slate-400">
+                <button type="button" x-show="search" @click="search = ''"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-base leading-none"
+                    title="Clear search">
+                    &times;
+                </button>
             </div>
-            <div class="flex flex-wrap items-center gap-2 shrink-0 w-full xl:w-auto">
-                <!-- Search bar -->
-                <div class="relative flex-1 sm:flex-initial">
-                    <input type="text" x-model="search" placeholder="{{ __('messages.search_family') }}"
-                        class="text-xs font-semibold pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 w-full sm:w-48 transition-colors">
-                    <button type="button" x-show="search" @click="search = ''"
-                        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-sm"
-                        title="Clear search">
-                        &times;
-                    </button>
-                </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2 shrink-0">
                 <button @click="showTreeModal = true"
-                    class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer flex-1 sm:flex-initial">
+                    class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap">
                     <span>🌳</span> {{ __('messages.view_family_tree') }}
                 </button>
                 <button @click="showAddModal = true"
-                    class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors cursor-pointer flex-1 sm:flex-initial text-center">
+                    class="px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm transition-colors cursor-pointer text-center whitespace-nowrap">
                     + {{ __('messages.add_family_member') }}
                 </button>
             </div>
@@ -643,246 +645,249 @@
         </template>
 
         <!-- FAMILY TREE PREVIEW MODAL -->
-        <div x-show="showTreeModal" x-cloak
-            class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
-            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <template x-teleport="body">
+            <div x-show="showTreeModal" x-cloak
+                class="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 min-h-screen w-screen"
+                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
 
-            <div class="bg-white border border-slate-200 text-slate-800 rounded-3xl max-w-5xl w-full p-4 sm:p-5 shadow-2xl space-y-4 relative max-h-[92vh] flex flex-col"
-                @click.away="showTreeModal = false">
+                <div class="bg-white border border-slate-200 text-slate-800 rounded-3xl max-w-5xl w-full p-4 sm:p-6 shadow-2xl space-y-4 relative max-h-[92vh] flex flex-col my-auto mx-auto"
+                    @click.away="showTreeModal = false">
 
-                <!-- Modal Header -->
-                <div class="flex justify-between items-center border-b border-slate-100 pb-3 shrink-0">
-                    <div class="flex items-center space-x-2.5">
-                        <div
-                            class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 font-black flex items-center justify-center text-base border border-emerald-100">
-                            🌳
+                    <!-- Modal Header -->
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3.5 shrink-0">
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 font-black flex items-center justify-center text-lg border border-emerald-100 shadow-2xs">
+                                🌳
+                            </div>
+                            <div>
+                                <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                                    {{ __('messages.family_tree_title') }}</h3>
+                                <p class="text-xs text-slate-500 font-medium">{{ __('messages.family_tree_subtitle') }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-sm sm:text-base font-black text-slate-900 tracking-wide">
-                                {{ __('messages.family_tree_title') }}</h3>
-                            <p class="text-[10px] text-slate-400">{{ __('messages.family_tree_subtitle') }}</p>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="window.print()"
+                                class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                                <span>🖨️</span> {{ __('messages.print_family_tree') ?? 'Print Family Tree' }}
+                            </button>
+                            <button @click="showTreeModal = false"
+                                class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-xs font-bold transition cursor-pointer">
+                                ✕
+                            </button>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="window.print()"
-                            class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg border border-slate-200 transition flex items-center gap-1 cursor-pointer">
-                            <span>🖨️</span> {{ __('messages.print_membership_card') ?? 'Print' }}
-                        </button>
-                        <button @click="showTreeModal = false"
-                            class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-xs font-bold transition cursor-pointer">
-                            ✕
-                        </button>
-                    </div>
-                </div>
 
-                @php
-                    $wives = $family->filter(fn($m) => in_array($m->relationship, ['Wife', 'Spouse', 'પત્ની']));
-                    $husbands = $family->filter(fn($m) => in_array($m->relationship, ['Husband', 'Spouse', 'પતિ']));
-                    $spouses = $wives->concat($husbands);
-                    $sons = $family->filter(fn($m) => in_array($m->relationship, ['Son', 'Son (દીકરો)', 'દીકરો']));
-                    $daughters = $family->filter(fn($m) => in_array($m->relationship, ['Daughter', 'Daughter (દીકરી)', 'દીકરી']));
-                    $children = $sons->concat($daughters);
-                    $inlaws = $family->filter(fn($m) => in_array($m->relationship, ['Daughter-in-law', 'Son-in-law', 'વહુ', 'જમાઈ']));
-                    $grandchildren = $family->filter(fn($m) => in_array($m->relationship, ["Grandson (Son's Son)", "Granddaughter (Son's Daughter)", "Grandson (Daughter's Son)", "Granddaughter (Daughter's Daughter)", 'પૌત્ર', 'પૌત્રી', 'દોહિત્ર', 'દોહિત્રી']));
-                    $others = $family->reject(
-                        fn($m) =>
-                        in_array($m->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ', 'Son', 'Daughter', 'Son (દીકરો)', 'Daughter (દીકરી)', 'દીકરો', 'દીકરી', 'Daughter-in-law', 'Son-in-law', 'વહુ', 'જમાઈ', "Grandson (Son's Son)", "Granddaughter (Son's Daughter)", "Grandson (Daughter's Son)", "Granddaughter (Daughter's Daughter)", 'પૌત્ર', 'પૌત્રી', 'દોહિત્ર', 'દોહિત્રી'])
-                    );
-                @endphp
+                    @php
+                        $wives = $family->filter(fn($m) => in_array($m->relationship, ['Wife', 'Spouse', 'પત્ની']));
+                        $husbands = $family->filter(fn($m) => in_array($m->relationship, ['Husband', 'Spouse', 'પતિ']));
+                        $spouses = $wives->concat($husbands);
+                        $sons = $family->filter(fn($m) => in_array($m->relationship, ['Son', 'Son (દીકરો)', 'દીકરો']));
+                        $daughters = $family->filter(fn($m) => in_array($m->relationship, ['Daughter', 'Daughter (દીકરી)', 'દીકરી']));
+                        $children = $sons->concat($daughters);
+                        $inlaws = $family->filter(fn($m) => in_array($m->relationship, ['Daughter-in-law', 'Son-in-law', 'વહુ', 'જમાઈ']));
+                        $grandchildren = $family->filter(fn($m) => in_array($m->relationship, ["Grandson (Son's Son)", "Granddaughter (Son's Daughter)", "Grandson (Daughter's Son)", "Granddaughter (Daughter's Daughter)", 'પૌત્ર', 'પૌત્રી', 'દોહિત્ર', 'દોહિત્રી']));
+                        $others = $family->reject(
+                            fn($m) =>
+                            in_array($m->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'પતિ', 'Son', 'Daughter', 'Son (દીકરો)', 'Daughter (દીકરી)', 'દીકરો', 'દીકરી', 'Daughter-in-law', 'Son-in-law', 'વહુ', 'જમાઈ', "Grandson (Son's Son)", "Granddaughter (Son's Daughter)", "Grandson (Daughter's Son)", "Granddaughter (Daughter's Daughter)", 'પૌત્ર', 'પૌત્રી', 'દોહિત્ર', 'દોહિત્રી'])
+                        );
+                    @endphp
 
-                <!-- SCROLLABLE CANVAS FOR CONNECTED TREE -->
-                <div class="overflow-x-auto overflow-y-auto flex-1 p-2 sm:p-4">
-                    <div class="w-full max-w-full flex flex-col items-center">
+                    <!-- SCROLLABLE CANVAS FOR CONNECTED TREE -->
+                    <div class="overflow-x-auto overflow-y-auto flex-1 p-3 sm:p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
+                        <div class="w-max min-w-full flex flex-col items-center py-2">
 
-                        <!-- PRIMARY MEMBER & SPOUSE -->
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center justify-center space-x-1.5 sm:space-x-2">
-                                <!-- Primary Member Card -->
-                                <div
-                                    class="bg-primary-50/90 border-2 border-primary-400 rounded-xl px-2.5 py-1.5 text-center shadow-sm min-w-[105px] max-w-[130px]">
-                                    <h4 class="text-xs font-black text-slate-900 truncate flex items-center justify-center gap-1"
-                                        title="{{ $user->name }}">
-                                        <span>👤</span> {{ $user->name }}
-                                    </h4>
-                                    <span
-                                        class="text-[8px] font-bold text-primary-700 bg-white px-1.5 py-0.5 rounded border border-primary-200 inline-block mt-0.5">
-                                        Member (#{{ sprintf('%05d', $user->id) }})
-                                    </span>
-                                </div>
-
-                                @foreach($spouses as $spouse)
-                                    <!-- Marriage Line Connection -->
-                                    <div class="flex items-center space-x-0.5 px-0.5">
-                                        <div style="width: 12px; height: 2px; background-color: #f43f5e;"></div>
-                                        <span class="text-[10px]">💖</span>
-                                        <div style="width: 12px; height: 2px; background-color: #f43f5e;"></div>
-                                    </div>
-
-                                    <!-- Spouse Card -->
+                            <!-- PRIMARY MEMBER & SPOUSE -->
+                            <div class="flex flex-col items-center">
+                                <div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                                    <!-- Primary Member Card -->
                                     <div
-                                        class="bg-rose-50/80 border border-rose-300 rounded-xl px-2.5 py-1.5 text-center shadow-sm min-w-[105px] max-w-[130px]">
-                                        <h4 class="text-xs font-bold text-slate-900 truncate flex items-center justify-center gap-1"
-                                            title="{{ $spouse->name }}">
-                                            <span>{{ in_array($spouse->relationship, ['Husband', 'Spouse', 'पति']) && $spouse->gender != 'Female' ? '👨‍💼' : '👩' }}</span>
-                                            {{ $spouse->name }}
+                                        class="bg-primary-50/90 border-2 border-primary-400 rounded-2xl px-3.5 py-2 text-center shadow-sm min-w-[130px] sm:min-w-[155px] max-w-[200px]">
+                                        <h4 class="text-xs sm:text-sm font-black text-slate-900 leading-snug break-words flex items-center justify-center gap-1.5"
+                                            title="{{ $user->name }}">
+                                            <span>👤</span> {{ $user->name }}
                                         </h4>
                                         <span
-                                            class="text-[8px] font-bold text-rose-700 bg-white px-1.5 py-0.5 rounded border border-rose-200 inline-block mt-0.5">
-                                            {{ $spouse->relationship }}
+                                            class="text-[9px] font-bold text-primary-700 bg-white px-2 py-0.5 rounded-md border border-primary-200 inline-block mt-1 shadow-2xs">
+                                            Member (#{{ sprintf('%05d', $user->id) }})
                                         </span>
                                     </div>
-                                @endforeach
+
+                                    @foreach($spouses as $spouse)
+                                        <!-- Marriage Line Connection -->
+                                        <div class="flex items-center space-x-1 px-1">
+                                            <div style="width: 14px; height: 2.5px; background-color: #f43f5e;"></div>
+                                            <span class="text-xs">💖</span>
+                                            <div style="width: 14px; height: 2.5px; background-color: #f43f5e;"></div>
+                                        </div>
+
+                                        <!-- Spouse Card -->
+                                        <div
+                                            class="bg-rose-50/90 border-2 border-rose-300 rounded-2xl px-3.5 py-2 text-center shadow-sm min-w-[130px] sm:min-w-[155px] max-w-[200px]">
+                                            <h4 class="text-xs sm:text-sm font-bold text-slate-900 leading-snug break-words flex items-center justify-center gap-1.5"
+                                                title="{{ $spouse->name }}">
+                                                <span>{{ in_array($spouse->relationship, ['Husband', 'Spouse', 'પતિ']) && $spouse->gender != 'Female' ? '👨‍💼' : '👩' }}</span>
+                                                {{ $spouse->name }}
+                                            </h4>
+                                            <span
+                                                class="text-[9px] font-bold text-rose-700 bg-white px-2 py-0.5 rounded-md border border-rose-200 inline-block mt-1 shadow-2xs">
+                                                {{ $spouse->relationship }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- CHILDREN (HORIZONTAL BRANCHING TREE WITH DIRECT DEPENDENTS) -->
-                        @if($children->count() > 0)
-                            <div class="flex flex-col items-center w-full relative">
-                                <!-- Vertical Stem from Primary Member touching Children Branch Line -->
-                                <div style="width: 2.5px; height: 16px; background-color: #64748b;"></div>
+                            <!-- CHILDREN (HORIZONTAL BRANCHING TREE WITH DIRECT DEPENDENTS) -->
+                            @if($children->count() > 0)
+                                <div class="flex flex-col items-center w-full relative mt-1">
+                                    <!-- Vertical Stem from Primary Member touching Children Branch Line -->
+                                    <div style="width: 2.5px; height: 18px; background-color: #64748b;"></div>
 
-                                <div class="flex justify-center items-start w-full relative">
-                                    @foreach($children as $child)
-                                        @php
-                                            $childDependents = $family->filter(fn($m) => $m->parent_id == $child->id);
-                                        @endphp
-                                        <div class="flex flex-col items-center relative px-1 sm:px-1.5">
-                                            <!-- Bold Horizontal Connector Segment across Children -->
-                                            @if($children->count() > 1)
-                                                @if(!$loop->first)
-                                                    <div class="absolute top-0 left-0 w-1/2"
-                                                        style="height: 2.5px; background-color: #64748b;"></div>
+                                    <div class="flex justify-center items-start w-full relative">
+                                        @foreach($children as $child)
+                                            @php
+                                                $childDependents = $family->filter(fn($m) => $m->parent_id == $child->id);
+                                            @endphp
+                                            <div class="flex flex-col items-center relative px-2 sm:px-3">
+                                                <!-- Bold Horizontal Connector Segment across Children -->
+                                                @if($children->count() > 1)
+                                                    @if(!$loop->first)
+                                                        <div class="absolute top-0 left-0 w-1/2"
+                                                            style="height: 2.5px; background-color: #64748b;"></div>
+                                                    @endif
+                                                    @if(!$loop->last)
+                                                        <div class="absolute top-0 right-0 w-1/2"
+                                                            style="height: 2.5px; background-color: #64748b;"></div>
+                                                    @endif
                                                 @endif
-                                                @if(!$loop->last)
-                                                    <div class="absolute top-0 right-0 w-1/2"
-                                                        style="height: 2.5px; background-color: #64748b;"></div>
-                                                @endif
-                                            @endif
 
-                                            <!-- Vertical Stem to Child Card -->
-                                            <div class="z-10" style="width: 2.5px; height: 14px; background-color: #64748b;"></div>
+                                                <!-- Vertical Stem to Child Card -->
+                                                <div class="z-10" style="width: 2.5px; height: 14px; background-color: #64748b;"></div>
 
-                                            <div
-                                                class="bg-indigo-50/70 border border-indigo-300 rounded-xl px-2.5 py-1.5 text-center shadow-sm min-w-[95px] max-w-[125px] z-10">
-                                                <h5 class="text-xs font-bold text-slate-900 truncate flex items-center justify-center gap-1"
-                                                    title="{{ $child->name }}">
-                                                    <span>{{ $child->gender == 'Female' ? '👧' : '👦' }}</span> {{ $child->name }}
-                                                </h5>
-                                                <span
-                                                    class="text-[8px] font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded border border-indigo-200 inline-block mt-0.5">
-                                                    {{ $child->relationship }}
-                                                </span>
-                                                @if($child->dob)
-                                                    <p class="text-[8px] text-slate-500 mt-1 border-t border-indigo-100/80 pt-0.5">DOB:
-                                                        {{ date('d-M-Y', strtotime($child->dob)) }}</p>
-                                                @endif
-                                            </div>
-
-                                            <!-- Render Dependents Directly Under Their Specified Parent -->
-                                            @if($childDependents->count() > 0)
-                                                <div class="flex flex-col items-center w-full relative">
-                                                    <div style="width: 2.5px; height: 16px; background-color: #64748b;"></div>
-
-                                                    <div class="flex justify-center items-start relative w-full">
-                                                        @foreach($childDependents as $dep)
-                                                            <div class="flex flex-col items-center relative px-1">
-                                                                @if($childDependents->count() > 1)
-                                                                    @if(!$loop->first)
-                                                                        <div class="absolute top-0 left-0 w-1/2"
-                                                                            style="height: 2.5px; background-color: #64748b;"></div>
-                                                                    @endif
-                                                                    @if(!$loop->last)
-                                                                        <div class="absolute top-0 right-0 w-1/2"
-                                                                            style="height: 2.5px; background-color: #64748b;"></div>
-                                                                    @endif
-                                                                @endif
-                                                                <div class="z-10"
-                                                                    style="width: 2.5px; height: 12px; background-color: #64748b;"></div>
-
-                                                                <div
-                                                                    class="bg-amber-50/80 border border-amber-300 rounded-xl px-2 py-1 text-center shadow-sm min-w-[90px] max-w-[115px] z-10">
-                                                                    <h6 class="text-[10px] font-bold text-slate-900 truncate flex items-center justify-center gap-1"
-                                                                        title="{{ $dep->name }}">
-                                                                        <span>🌟</span> {{ $dep->name }}
-                                                                    </h6>
-                                                                    <span
-                                                                        class="text-[8px] font-bold text-amber-800 bg-white px-1 py-0.5 rounded border border-amber-200 inline-block mt-0.5">
-                                                                        {{ $dep->relationship }}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
+                                                <div
+                                                    class="bg-indigo-50/80 border-2 border-indigo-300 rounded-2xl px-3 py-2 text-center shadow-sm min-w-[125px] sm:min-w-[145px] max-w-[185px] z-10">
+                                                    <h5 class="text-xs font-bold text-slate-900 leading-snug break-words flex items-center justify-center gap-1.5"
+                                                        title="{{ $child->name }}">
+                                                        <span>{{ $child->gender == 'Female' ? '👧' : '👦' }}</span> {{ $child->name }}
+                                                    </h5>
+                                                    <span
+                                                        class="text-[9px] font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-md border border-indigo-200 inline-block mt-1 shadow-2xs">
+                                                        {{ $child->relationship }}
+                                                    </span>
+                                                    @if($child->dob)
+                                                        <p class="text-[9px] font-medium text-slate-500 mt-1 border-t border-indigo-100/80 pt-1">
+                                                            DOB: {{ date('d-M-Y', strtotime($child->dob)) }}
+                                                        </p>
+                                                    @endif
                                                 </div>
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
 
-                        <!-- UNASSIGNED GRANDCHILDREN & IN-LAWS (If parent_id is not set) -->
-                        @php
-                            $unassignedGrandchildren = $inlaws->concat($grandchildren)->filter(fn($m) => !$m->parent_id);
-                        @endphp
+                                                <!-- Render Dependents Directly Under Their Specified Parent -->
+                                                @if($childDependents->count() > 0)
+                                                    <div class="flex flex-col items-center w-full relative mt-1">
+                                                        <div style="width: 2.5px; height: 16px; background-color: #64748b;"></div>
 
-                        @if($unassignedGrandchildren->count() > 0)
-                            <div class="flex flex-col items-center w-full relative">
-                                <div style="width: 2.5px; height: 16px; background-color: #64748b;"></div>
+                                                        <div class="flex justify-center items-start relative w-full">
+                                                            @foreach($childDependents as $dep)
+                                                                <div class="flex flex-col items-center relative px-1.5 sm:px-2">
+                                                                    @if($childDependents->count() > 1)
+                                                                        @if(!$loop->first)
+                                                                            <div class="absolute top-0 left-0 w-1/2"
+                                                                                style="height: 2.5px; background-color: #64748b;"></div>
+                                                                        @endif
+                                                                        @if(!$loop->last)
+                                                                            <div class="absolute top-0 right-0 w-1/2"
+                                                                                style="height: 2.5px; background-color: #64748b;"></div>
+                                                                        @endif
+                                                                    @endif
+                                                                    <div class="z-10"
+                                                                        style="width: 2.5px; height: 12px; background-color: #64748b;"></div>
 
-                                <div class="flex justify-center items-start relative w-full">
-                                    @foreach($unassignedGrandchildren as $gc)
-                                        <div class="flex flex-col items-center relative px-1 sm:px-1.5">
-                                            @if($unassignedGrandchildren->count() > 1)
-                                                @if(!$loop->first)
-                                                    <div class="absolute top-0 left-0 w-1/2"
-                                                        style="height: 2.5px; background-color: #64748b;"></div>
+                                                                    <div
+                                                                        class="bg-amber-50/80 border border-amber-300 rounded-xl px-2.5 py-1.5 text-center shadow-sm min-w-[115px] sm:min-w-[135px] max-w-[170px] z-10">
+                                                                        <h6 class="text-[11px] font-bold text-slate-900 leading-snug break-words flex items-center justify-center gap-1"
+                                                                            title="{{ $dep->name }}">
+                                                                            <span>🌟</span> {{ $dep->name }}
+                                                                        </h6>
+                                                                        <span
+                                                                            class="text-[8px] font-bold text-amber-800 bg-white px-1.5 py-0.5 rounded border border-amber-200 inline-block mt-0.5">
+                                                                            {{ $dep->relationship }}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
                                                 @endif
-                                                @if(!$loop->last)
-                                                    <div class="absolute top-0 right-0 w-1/2"
-                                                        style="height: 2.5px; background-color: #64748b;"></div>
-                                                @endif
-                                            @endif
-
-                                            <div class="z-10" style="width: 2.5px; height: 12px; background-color: #64748b;"></div>
-
-                                            <div
-                                                class="bg-amber-50/70 border border-amber-300 rounded-xl px-2 py-1 text-center shadow-sm min-w-[90px] max-w-[115px] z-10">
-                                                <h6 class="text-[10px] font-bold text-slate-900 truncate flex items-center justify-center gap-1"
-                                                    title="{{ $gc->name }}">
-                                                    <span>🌟</span> {{ $gc->name }}
-                                                </h6>
-                                                <span
-                                                    class="text-[8px] font-bold text-amber-800 bg-white px-1 py-0.5 rounded border border-amber-200 inline-block mt-0.5">
-                                                    {{ $gc->relationship }}
-                                                </span>
                                             </div>
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
 
-                        <!-- OTHER EXTENDED MEMBERS -->
-                        @if($others->count() > 0)
-                            <div class="border-t border-slate-100 pt-2 mt-2 w-full flex flex-col items-center">
-                                <div class="flex flex-wrap justify-center gap-1.5">
-                                    @foreach($others as $ot)
-                                        <span
-                                            class="text-[9px] font-semibold text-slate-700 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200">
-                                            {{ $ot->name }} ({{ $ot->relationship }})
-                                        </span>
-                                    @endforeach
+                            <!-- UNASSIGNED GRANDCHILDREN & IN-LAWS (If parent_id is not set) -->
+                            @php
+                                $unassignedGrandchildren = $inlaws->concat($grandchildren)->filter(fn($m) => !$m->parent_id);
+                            @endphp
+
+                            @if($unassignedGrandchildren->count() > 0)
+                                <div class="flex flex-col items-center w-full relative mt-1">
+                                    <div style="width: 2.5px; height: 16px; background-color: #64748b;"></div>
+
+                                    <div class="flex justify-center items-start relative w-full">
+                                        @foreach($unassignedGrandchildren as $gc)
+                                            <div class="flex flex-col items-center relative px-1.5 sm:px-2">
+                                                @if($unassignedGrandchildren->count() > 1)
+                                                    @if(!$loop->first)
+                                                        <div class="absolute top-0 left-0 w-1/2"
+                                                            style="height: 2.5px; background-color: #64748b;"></div>
+                                                    @endif
+                                                    @if(!$loop->last)
+                                                        <div class="absolute top-0 right-0 w-1/2"
+                                                            style="height: 2.5px; background-color: #64748b;"></div>
+                                                    @endif
+                                                @endif
+
+                                                <div class="z-10" style="width: 2.5px; height: 12px; background-color: #64748b;"></div>
+
+                                                <div
+                                                    class="bg-amber-50/80 border border-amber-300 rounded-xl px-2.5 py-1.5 text-center shadow-sm min-w-[115px] sm:min-w-[135px] max-w-[170px] z-10">
+                                                    <h6 class="text-[11px] font-bold text-slate-900 leading-snug break-words flex items-center justify-center gap-1"
+                                                        title="{{ $gc->name }}">
+                                                        <span>🌟</span> {{ $gc->name }}
+                                                    </h6>
+                                                    <span
+                                                        class="text-[8px] font-bold text-amber-800 bg-white px-1.5 py-0.5 rounded border border-amber-200 inline-block mt-0.5">
+                                                        {{ $gc->relationship }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
 
+                            <!-- OTHER EXTENDED MEMBERS -->
+                            @if($others->count() > 0)
+                                <div class="border-t border-slate-200 pt-3 mt-3 w-full flex flex-col items-center">
+                                    <div class="flex flex-wrap justify-center gap-2">
+                                        @foreach($others as $ot)
+                                            <span
+                                                class="text-[10px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                                                {{ $ot->name }} ({{ $ot->relationship }})
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </template>
 
     </div>
 @endsection
