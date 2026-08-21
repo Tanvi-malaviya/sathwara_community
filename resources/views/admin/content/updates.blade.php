@@ -99,10 +99,9 @@
                                     <span class="truncate min-w-0">{{ $up->title }}</span>
                                 </div>
                             </td>
-                            <td class="py-2 px-3 text-slate-500 font-medium"
-                                style="max-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
-                                title="{{ $up->description }}">
-                                {{ $up->description }}
+                            <td class="py-2 px-3 text-slate-500 font-medium truncate"
+                                title="{{ strip_tags(html_entity_decode($up->description)) }}">
+                                {{ strip_tags(html_entity_decode($up->description)) }}
                             </td>
                             <td class="py-2 px-3 text-slate-400 font-medium truncate">
                                 {{ date('d-M-Y', strtotime($up->publish_date)) }}</td>

@@ -699,7 +699,7 @@ class ContentController extends Controller
                 fputcsv($file, [
                     $u->id,
                     $u->title ?? '',
-                    $u->description ?? '',
+                    strip_tags(html_entity_decode($u->description ?? '')),
                     $u->publish_date ?? '',
                     __('messages.' . $statusKey) != 'messages.' . $statusKey ? __('messages.' . $statusKey) : ucfirst($u->status ?? 'active'),
                     $u->created_at ? $u->created_at->format('Y-m-d H:i') : ''
