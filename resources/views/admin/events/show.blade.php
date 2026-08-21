@@ -44,7 +44,8 @@
                     <span>{{ __('messages.event_details') }}</span>
                 </button>
 
-                <!-- Tab 2: Submissions / Registrations -->
+                @if(($event->event_type ?? 'normal') !== 'normal')
+                <!-- Tab 2: Submissions / Registrations (Only for Inam Vitaran & Yuva Melo) -->
                 <button type="button" @click="mainTab = 'submissions'"
                     :class="mainTab === 'submissions' ? 'bg-primary-500 text-white shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold hover:bg-slate-100'"
                     class="px-3.5 py-2 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
@@ -53,6 +54,7 @@
                     <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black"
                         :class="mainTab === 'submissions' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">{{ $totalCount }}</span>
                 </button>
+                @endif
 
                 <!-- Tab 3: Gallery -->
                 <button type="button" @click="mainTab = 'gallery'"
@@ -205,27 +207,29 @@
                             </span>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <!-- Passes Sequence -->
-                            <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70">
-                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">Passes</span>
+                        <div class="grid {{ ($event->event_type ?? 'normal') === 'normal' ? 'grid-cols-1' : 'grid-cols-2' }} gap-2.5 text-center">
+                            <!-- Passes Sequence (Always shown) -->
+                            <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70 flex flex-col justify-center items-center">
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">{{ $isGu ? 'કુલ પાસ' : 'Total Passes' }}</span>
                                 <span class="text-base font-black text-emerald-400 block">{{ $stats['total_passes'] ?? 0 }}</span>
-                                <span class="text-[9px] text-slate-400 font-mono">Last #{{ sprintf('%03d', $stats['last_pass_no'] ?? 0) }}</span>
+                                <!-- <span class="text-[9px] text-slate-400 font-mono">Last #{{ sprintf('%03d', $stats['last_pass_no'] ?? 0) }}</span> -->
                             </div>
 
+                            @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                             <!-- Inam Forms Sequence -->
-                            <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70">
-                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">Inam Forms</span>
+                            <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70 flex flex-col justify-center items-center">
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">{{ $isGu ? 'ઇનામ ફોર્મ' : 'Inam Forms' }}</span>
                                 <span class="text-base font-black text-amber-400 block">{{ $stats['total_inam_forms'] ?? 0 }}</span>
-                                <span class="text-[9px] text-slate-400 font-mono">Last #{{ sprintf('%03d', $stats['last_inam_no'] ?? 0) }}</span>
+                                <!-- <span class="text-[9px] text-slate-400 font-mono">Last #{{ sprintf('%03d', $stats['last_inam_no'] ?? 0) }}</span> -->
                             </div>
-
+                            @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
                             <!-- Yuva Melo Sequence -->
-                            <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70">
-                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">Yuva Melo</span>
-                                <span class="text-base font-black text-purple-400 block">{{ $stats['total_yuva_forms'] ?? 0 }}</span>
-                                <span class="text-[9px] text-slate-400 font-mono">Last #{{ sprintf('%03d', $stats['last_yuva_melo_no'] ?? 0) }}</span>
+                            <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70 flex flex-col justify-center items-center">
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">{{ $isGu ? 'યુવા મેળો ફોર્મ' : 'Yuva Melo Forms' }}</span>
+                                <span class="text-lg font-black text-purple-400 block">{{ $stats['total_yuva_forms'] ?? 0 }}</span>
+                                <!-- <span class="text-[9px] text-slate-400 font-mono">Last #{{ sprintf('%03d', $stats['last_yuva_melo_no'] ?? 0) }}</span> -->
                             </div>
+                            @endif
                         </div>
                     </div>
 
@@ -370,7 +374,7 @@
                     </div>
 
                     @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                        <a href="{{ route('admin.events.inam_submissions.export', $event->id) }}"
+                        <a :href="'{{ route('admin.events.inam_submissions.export', $event->id) }}' + '?top=' + topRankFilter + '&standard=' + encodeURIComponent(selectedStandard) + '&search=' + encodeURIComponent(search)"
                             class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-colors shrink-0 inline-flex items-center gap-1 whitespace-nowrap">
                             📊 <span>{{ $isGu ? ' એક્સેલ એક્સપોર્ટ' : 'Export  Excel' }}</span>
                         </a>
@@ -881,12 +885,12 @@
                                 <div class="border-2 border-slate-900 p-2.5 bg-white">
                                     <div class="flex gap-3 items-start">
                                         <!-- Left Photo Box (Fixed Passport Size) -->
-                                        <div style="width: 110px; height: 140px; min-width: 110px; max-width: 110px; min-height: 140px; max-height: 140px; overflow: hidden;"
+                                        <div style="width: 110px; height: 140px; min-width: 110px; max-width: 110px; min-height: 140px; max-height: 140px; overflow: hidden; flex-shrink: 0;"
                                             class="shrink-0 border border-slate-900 rounded-xs bg-slate-50 relative flex items-center justify-center shadow-2xs">
                                             <template x-if="getPhotoUrl(selectedRegistration.form_data)">
                                                 <img :src="getPhotoUrl(selectedRegistration.form_data)"
-                                                    style="width: 100%; height: 100%; object-fit: cover; display: block;"
-                                                    class="w-full h-full object-cover">
+                                                    style="width: 100%; height: 100%; object-fit: contain; display: block;"
+                                                    class="w-full h-full object-contain bg-white">
                                             </template>
                                             <template x-if="!getPhotoUrl(selectedRegistration.form_data)">
                                                 <div class="text-center p-1 text-slate-400">

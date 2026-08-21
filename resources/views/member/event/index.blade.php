@@ -200,15 +200,15 @@
 
                         <div class="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 flex-wrap">
                             @if($event->date < now()->toDateString())
-                                <span class="text-[8px] font-extrabold text-slate-500 bg-white/95 backdrop-blur-sm border border-slate-200 px-1.5 py-0.2 rounded-full uppercase tracking-wider">{{ __('messages.passed') }}</span>
+                                <span class="text-[10px] sm:text-[11px] font-black text-slate-600 bg-white/95 backdrop-blur-sm border border-slate-200 px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-xs">{{ __('messages.passed') }}</span>
                             @else
-                                <span class="text-[8px] font-extrabold text-emerald-600 bg-white/95 backdrop-blur-sm border border-emerald-100 px-1.5 py-0.2 rounded-full uppercase tracking-wider">{{ __('messages.upcoming') }}</span>
+                                <span class="text-[10px] sm:text-[11px] font-black text-emerald-700 bg-white/95 backdrop-blur-sm border border-emerald-200 px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-xs">{{ __('messages.upcoming') }}</span>
                             @endif
 
                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                                <span class="text-[8px] font-extrabold text-amber-700 bg-amber-50/95 backdrop-blur-sm border border-amber-200 px-1.5 py-0.2 rounded-full uppercase tracking-wider">🏆 {{ __('messages.inam_vitaran') }}</span>
+                                <span class="text-[10px] sm:text-[11px] font-black text-amber-800 bg-amber-50/95 backdrop-blur-sm border border-amber-300 px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-xs">🏆 {{ __('messages.inam_vitaran') }}</span>
                             @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                <span class="text-[8px] font-extrabold text-purple-700 bg-purple-50/95 backdrop-blur-sm border border-purple-200 px-1.5 py-0.2 rounded-full uppercase tracking-wider">⚡ {{ __('messages.yuva_melo') }}</span>
+                                <span class="text-[10px] sm:text-[11px] font-black text-purple-800 bg-purple-50/95 backdrop-blur-sm border border-purple-300 px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-xs">⚡ {{ __('messages.yuva_melo') }}</span>
                             @endif
                         </div>
                     </a>
@@ -216,17 +216,17 @@
                     <!-- Event Details -->
                     <div class="p-3.5 flex-grow flex flex-col justify-between space-y-3">
                         <div class="space-y-1.5">
-                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 flex-wrap gap-1">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-500 flex-wrap gap-1">
                                 <span>📅 {{ date('d-M-Y', strtotime($event->date)) }}</span>
                                 @if(!empty($event->registration_end_date))
-                                    <span class="text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-md border border-rose-200/70 text-[10px] font-extrabold">⏳ {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
+                                    <span class="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[11px] font-black">⏳ {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
                                 @else
                                     <span class="text-slate-400">🕒 {{ date('h:i A', strtotime($event->time)) }}</span>
                                 @endif
                             </div>
                             
                             <a href="{{ route('event.details', $event->id) }}" class="block">
-                                <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 line-clamp-1 hover:text-primary-600 transition-colors">{{ $event->title }}</h3>
+                                <h3 class="text-sm sm:text-base font-black text-slate-900 line-clamp-1 hover:text-primary-600 transition-colors">{{ $event->title }}</h3>
                             </a>
                             @php
                                 $cleanDesc = preg_replace('/<span class="ql-ui"[^>]*>.*?<\/span>/i', '', $event->description);
@@ -234,7 +234,7 @@
                                 $cleanDesc = trim(preg_replace('/\s+/', ' ', $cleanDesc));
                             @endphp
                             <a href="{{ route('event.details', $event->id) }}" class="block">
-                                <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed break-words">
+                                <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed break-words">
                                     {{ \Illuminate\Support\Str::limit($cleanDesc, 80, '...') }}
                                 </p>
                             </a>
@@ -246,13 +246,13 @@
                                 <!-- Registration Status Badge -->
                                 <div>
                                     @if($isRegistered)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200/80 rounded-lg uppercase">
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-300 rounded-lg uppercase tracking-wide">
                                             ✓ {{ __('messages.registered') }} ({{ $pCount }})
                                         </span>
                                     @elseif(($event->event_type ?? 'normal') === 'normal' || !($event->has_registration_form || $event->registration_option))
-                                        <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded-lg uppercase">{{ __('messages.open_entry') }}</span>
+                                        <span class="inline-flex items-center px-3 py-1 text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg uppercase tracking-wide">{{ __('messages.open_entry') }}</span>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded-lg uppercase">{{ __('messages.not_registered') }}</span>
+                                        <span class="inline-flex items-center px-3 py-1 text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg uppercase tracking-wide">{{ __('messages.not_registered') }}</span>
                                     @endif
                                 </div>
 
@@ -331,11 +331,16 @@
                              data-mandal="Satwara Gyati Mandal Ahm."
                              :data-date="(activeEvent?.date || '') + (activeEvent?.time ? ' | ⏰ ' + activeEvent?.time : '')"
                              :data-venue="activeEvent?.venue || ''"
+                             :data-attendee="activeAttendee || ''"
+                             :data-member-code="activeMemberId || ''"
                              data-logo="{{ $logoUrl }}">
                             <!-- Top Bar -->
                             <div class="bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-[11px] font-black uppercase tracking-wider">
-                                <span>Sathwara Community Entry Pass</span>
-                                <span class="text-primary-400">Entry Pass</span>
+                                <span class="flex items-center gap-1.5 truncate">
+                                    <span x-text="activeAttendee"></span>
+                                    <span class="text-primary-400 font-mono" x-show="activeMemberId" x-text="'(' + activeMemberId + ')'"></span>
+                                </span>
+                                <span class="text-amber-400 shrink-0">Entry Pass</span>
                             </div>
 
                             <!-- Pass Core (Sketch Layout) -->
@@ -412,6 +417,9 @@ function _renderMemberPassHtmlCard(passData) {
     const date = passData.date || '';
     const passNo = passData.passNo || '001';
     const venue = passData.venue || '';
+    const attendee = passData.attendee || '';
+    const memberCode = passData.memberCode || '';
+    const topNameWithCode = attendee ? (attendee + (memberCode ? ' (' + memberCode + ')' : '')) : 'SATHWARA COMMUNITY ENTRY PASS';
 
     return `
     <div style="border: 2px solid #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 22px; page-break-inside: avoid; background: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-sizing: border-box;">
@@ -419,7 +427,7 @@ function _renderMemberPassHtmlCard(passData) {
         <table style="width: 100%; border-collapse: collapse; background-color: #0f172a; color: #ffffff;">
             <tr>
                 <td style="padding: 7px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-align: left; color: #ffffff;">
-                    SATHWARA COMMUNITY ENTRY PASS
+                    ${topNameWithCode}
                 </td>
                 <td style="padding: 7px 16px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-align: right; color: #f59e0b;">
                     ENTRY PASS
@@ -479,10 +487,35 @@ function _openMemberPassesWindow(cardsHtml, title) {
     <meta charset="utf-8">
     <title>${title}</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #ffffff; padding: 24px; color: #0f172a; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+            color-adjust: exact !important; 
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #ffffff; 
+            padding: 24px; 
+            color: #0f172a; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+            color-adjust: exact !important; 
+        }
         @media print {
-            body { padding: 0; }
+            body { 
+                padding: 0; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                color-adjust: exact !important; 
+            }
+            * {
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                color-adjust: exact !important; 
+            }
             @page { margin: 15mm; size: auto; }
         }
     </style>
@@ -507,6 +540,8 @@ function downloadAllPassesMember() {
             mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
             date: card.dataset.date || '',
             venue: card.dataset.venue || '',
+            attendee: card.dataset.attendee || '',
+            memberCode: card.dataset.memberCode || '',
             logo: card.dataset.logo || card.querySelector('img')?.src || ''
         };
         html += _renderMemberPassHtmlCard(data);
@@ -523,6 +558,8 @@ function downloadSinglePassMember(cardId) {
         mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
         date: card.dataset.date || '',
         venue: card.dataset.venue || '',
+        attendee: card.dataset.attendee || '',
+        memberCode: card.dataset.memberCode || '',
         logo: card.dataset.logo || card.querySelector('img')?.src || ''
     };
     _openMemberPassesWindow(_renderMemberPassHtmlCard(data), 'Event Entry Pass - ' + data.passNo);

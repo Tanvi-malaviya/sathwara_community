@@ -20,6 +20,7 @@ return [
     'mobile_number' => 'Mobile Number',
     'search_members' => 'Search by name, phone, area or city...',
     'total_members' => 'Total Members',
+    'total_businesses' => 'Total Businesses',
     'all_areas' => 'All Areas',
     'no_members_found' => 'No members found.',
     'account_settings' => 'Account Settings',
@@ -156,7 +157,8 @@ return [
     'new_award_claim' => 'New Award Claim',
     'member_portal' => 'Member Portal',
     'approved_member' => 'Approved Member',
-    'register_event' => 'Register Event',
+    'register_event' => 'Event List',
+    'event_list' => 'Event List',
     'membership_card' => 'Membership Card',
     'welcome_back' => 'Welcome , :name!',
     'profile_approved_desc' => 'Your profile is approved and active in the Sathwara Community Database.',
@@ -497,7 +499,7 @@ return [
     'search_area_placeholder' => 'Search area or pincode...',
 
     // Event Registrations translation keys
-    'event_registrations' => 'Event Registrations',
+    'event_registrations' => 'pass Registrations',
     'back_to_events' => 'Back to Events',
     'all_registrations' => 'All Registrations',
     'member_name' => 'Member Name',
@@ -1315,7 +1317,7 @@ return [
     'no_family_added' => 'No family members added yet',
     'add_family_tree_desc' => 'Add your spouse, children, and family members to build your visual Family Tree.',
     'please_correct_errors' => 'Please correct the following errors:',
-    'verification_code_sent_to_email' => 'A verification code was sent to :email. Please check your inbox (including spam folder).',
+    'verification_code_sent_to_email' => 'A verification code has been sent to :email. Please check your inbox (including spam folder).',
+    'total_pass_count' => 'Total Pass Count',
+    'total_passes' => 'Total Passes',
 ];
-
-

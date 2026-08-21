@@ -1,6 +1,17 @@
 @extends('layouts.member')
  
 @section('page_title', __('messages.membership_card'))
+
+@php
+    $logoSetting = \App\Models\Setting::get('website_logo');
+    $logoUrl = $logoSetting ? asset('storage/' . $logoSetting) : asset('logo.png');
+    $hasRealPhoto = (!empty($profile->photo_path) && $profile->photo_path !== 'NOT_SPECIFIED' && $profile->photo_path !== 'N/A');
+    $userPhoto = $hasRealPhoto 
+        ? (str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path)) 
+        : $logoUrl;
+    $memberCode = $user->member_code ?: $user->formatted_member_id;
+    $bloodGroup = (!empty($profile->blood_group) && !in_array($profile->blood_group, ['NOT_SPECIFIED', 'N/A', '-'])) ? $profile->blood_group : '-';
+@endphp
  
 @section('content')
 <style>
@@ -27,7 +38,7 @@
     <!-- Utility Buttons -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 no-print">
         <p class="text-xs text-slate-500">{{ __('messages.membership_card_preview_desc') }}</p>
-        <button onclick="window.print()" class="inline-flex items-center justify-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors shrink-0">
+        <button onclick="window.print()" class="inline-flex items-center justify-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors shrink-0 cursor-pointer">
             🖨️ {{ __('messages.print_membership_card') }}
         </button>
     </div>
@@ -52,34 +63,46 @@
  
         <!-- Card Body -->
         <div class="flex gap-6 items-center flex-grow py-4">
-            <!-- User Photo -->
-            <img class="w-24 h-28 rounded-xl object-cover bg-slate-800 border border-white/10 shadow-inner shrink-0" 
-                 src="{{ $profile->photo_path ? (str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path)) : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100' }}" 
-                 alt="User avatar">
+            <!-- User Photo / Community Logo Fallback -->
+            @php
+                $hasValidPhoto = (!empty($profile->photo_path) && !str_contains($profile->photo_path, 'unsplash.com') && $profile->photo_path !== 'NOT_SPECIFIED' && $profile->photo_path !== 'N/A');
+                $photoUrl = $hasValidPhoto ? (str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path)) : asset('logo.png');
+            @endphp
+            @if($hasValidPhoto)
+                <img class="w-24 h-28 rounded-xl object-cover bg-slate-800 border border-white/10 shadow-inner shrink-0" 
+                     src="{{ $photoUrl }}" 
+                     alt="{{ $profile->first_name }}">
+            @else
+                <div class="w-24 h-28 rounded-xl bg-slate-800/90 border border-white/10 shadow-inner shrink-0 flex items-center justify-center p-3">
+                    <img class="w-16 h-16 object-contain filter drop-shadow-md" 
+                         src="{{ asset('logo.png') }}" 
+                         alt="Community Logo">
+                </div>
+            @endif
  
             <!-- Information list -->
-            <div class="space-y-2 text-[10px] font-semibold text-slate-300 min-w-0">
+            <div class="space-y-2 text-[10px] font-semibold text-slate-300 min-w-0 flex-1">
                 <div>
                     <h3 class="text-sm font-black text-white truncate leading-tight">{{ $profile->first_name }} {{ $profile->last_name }}</h3>
-                    <p class="text-[9px] text-primary-400 mt-0.5 font-bold">{{ __('messages.member_id') }}: #{{ sprintf('%05d', $user->id) }}</p>
+                    <p class="text-[9px] text-primary-400 mt-0.5 font-bold font-mono">{{ __('messages.member_id') }}: {{ $memberCode }}</p>
                 </div>
  
                 <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-1">
                     <div>
                         <span class="text-[8px] text-slate-500 uppercase block tracking-wider">{{ __('messages.birth_date') }}</span>
-                        <span class="text-white">{{ date('d M, Y', strtotime($profile->dob)) }}</span>
+                        <span class="text-white">{{ (!empty($profile->dob) && $profile->dob !== '1970-01-01') ? date('d M, Y', strtotime($profile->dob)) : '-' }}</span>
                     </div>
                     <div>
                         <span class="text-[8px] text-slate-500 uppercase block tracking-wider">{{ __('messages.blood_group') }}</span>
-                        <span class="text-white">{{ $profile->blood_group ?? 'O+ve' }}</span>
+                        <span class="text-white font-bold">{{ $bloodGroup }}</span>
                     </div>
                     <div>
                         <span class="text-[8px] text-slate-500 uppercase block tracking-wider">{{ __('messages.contact_phone') }}</span>
-                        <span class="text-white">{{ $profile->phone }}</span>
+                        <span class="text-white">{{ $profile->phone ?: '-' }}</span>
                     </div>
                     <div>
                         <span class="text-[8px] text-slate-500 uppercase block tracking-wider">{{ __('messages.city_location') }}</span>
-                        <span class="text-white">{{ $profile->city }}</span>
+                        <span class="text-white truncate block">{{ $profile->city ?: '-' }}</span>
                     </div>
                 </div>
             </div>

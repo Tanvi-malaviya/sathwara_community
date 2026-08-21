@@ -318,4 +318,76 @@ class EventSequenceNumberingTest extends TestCase
         $this->assertEquals('inam_vitran', $reg->registration_type);
         $this->assertEquals(1, $reg->form_data['registration_no']);
     }
+
+    public function test_inam_submissions_export_with_top_filter_and_exact_columns(): void
+    {
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Administrator', 'guard_name' => 'web']);
+        $admin = $this->makeApprovedUser();
+        $admin->assignRole('Administrator');
+
+        $event = $this->makeEvent([
+            'title' => 'Inam Vitran Annual Event',
+            'event_type' => 'inam_vitaran',
+            'has_registration_form' => true,
+        ]);
+
+        // Create 6 student registrations for '10th Standard'
+        for ($i = 1; $i <= 6; $i++) {
+            EventRegistration::create([
+                'event_id' => $event->id,
+                'registration_type' => 'inam_vitran',
+                'inam_number' => $i,
+                'form_data' => [
+                    'student_name' => "Student $i",
+                    'father_name' => "Father $i",
+                    'schoolStandard' => '10th Standard',
+                    'total_marks' => '500',
+                    'received_marks' => (400 + ($i * 10)),
+                    'percentage' => (80 + $i * 2), // 82%, 84%, ..., 92%
+                    'contact_number' => "987654321$i",
+                    'marksheet_url' => "marksheets/sample$i.pdf",
+                ],
+            ]);
+        }
+
+        // Test Top 3 export
+        $responseTop3 = $this->actingAs($admin)
+            ->get(route('admin.events.inam_submissions.export', ['id' => $event->id, 'top' => 'top3']));
+
+        $responseTop3->assertStatus(200);
+        $contentTop3 = $responseTop3->streamedContent();
+
+        $lines = explode("\n", trim($contentTop3));
+        
+        // 1 Header line + 3 Data lines = 4 lines
+        $this->assertCount(4, $lines);
+
+        // Check headers
+        $this->assertStringContainsString('Student Name', $lines[0]);
+        $this->assertStringContainsString('Parent Name', $lines[0]);
+        $this->assertStringContainsString('Total Marks', $lines[0]);
+        $this->assertStringContainsString('Obtained Marks', $lines[0]);
+        $this->assertStringContainsString('Percentage', $lines[0]);
+        $this->assertStringContainsString('Standard', $lines[0]);
+        $this->assertStringContainsString('Rank', $lines[0]);
+        $this->assertStringContainsString('Contact No', $lines[0]);
+        $this->assertStringContainsString('Marksheet URL', $lines[0]);
+        $this->assertStringContainsString('Member Code', $lines[0]);
+        $this->assertStringContainsString('Submission Date', $lines[0]);
+
+        // Check ranks: Rank 1 should be highest score (Student 6 with 92%)
+        $this->assertStringContainsString('Student 6', $lines[1]);
+        $this->assertStringContainsString('Rank 1', $lines[1]);
+        $this->assertStringContainsString('Rank 2', $lines[2]);
+        $this->assertStringContainsString('Rank 3', $lines[3]);
+
+        // Test Top 5 export
+        $responseTop5 = $this->actingAs($admin)
+            ->get(route('admin.events.inam_submissions.export', ['id' => $event->id, 'top' => 'top5']));
+
+        $responseTop5->assertStatus(200);
+        $contentTop5 = $responseTop5->streamedContent();
+        $lines5 = explode("\n", trim($contentTop5));
+        $this->assertCount(6, $lines5); // 1 Header + 5 data rows
+    }
 }

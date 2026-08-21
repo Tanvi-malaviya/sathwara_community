@@ -57,7 +57,7 @@
                     <th class="py-2.5 px-2">{{ __('messages.event_type') }}</th>
                     <th class="py-2.5 px-2">{{ __('messages.venue') }}</th>
                     <th class="py-2.5 px-2">{{ __('messages.date') }}</th>
-                    <th class="py-2.5 px-2">{{ __('messages.participants') }}</th>
+                    <th class="py-2.5 px-2">{{ __('messages.total_pass_count') }}</th>
                     <th class="py-2.5 px-2">{{ __('messages.status') }}</th>
                     <th class="py-2.5 px-2 text-right">{{ __('messages.actions') }}</th>
                 </tr>
@@ -110,19 +110,13 @@
                         </td>
                         <td class="py-2 px-2 whitespace-nowrap text-[11px]">
                             @php
-                                $passCount = ($e->event_type === 'inam_vitaran') 
-                                    ? ($e->registrations ? $e->registrations->filter(fn($r) => empty($r->form_data['student_name']))->count() : 0)
-                                    : (($e->event_type === 'yuva_melo')
-                                        ? ($e->registrations ? $e->registrations->filter(fn($r) => empty($r->form_data['surname']) && empty($r->form_data['qualification']) && empty($r->form_data['birth_date']))->count() : 0)
-                                        : ($e->registrations ? $e->registrations->count() : 0));
+                                $passCount = $e->total_passes_count;
                             @endphp
-                            @if($e->has_registration_form || $e->registration_option || ($e->event_type ?? 'normal') === 'normal')
-                                <a href="{{ route('admin.events.registrations', $e->id) }}" class="text-primary-600 font-bold hover:underline inline-flex items-center gap-1">
-                                    <span>{{ $passCount }} {{ __('messages.registered') }}</span>
-                                </a>
-                            @else
-                                <span class="text-slate-400 font-medium">{{ __('messages.open_entry') }}</span>
-                            @endif
+                            <a href="{{ route('admin.events.registrations', $e->id) }}" class="inline-flex items-center gap-1 group" title="{{ __('messages.view_details') }}">
+                                <span class="px-2.5 py-0.5 rounded-md font-bold {{ $passCount > 0 ? 'bg-primary-50 text-primary-700 border border-primary-200/80 group-hover:bg-primary-100' : 'bg-slate-100 text-slate-600 border border-slate-200 group-hover:bg-slate-200' }} transition-colors">
+                                    🎫 {{ $passCount }} {{ __('messages.passes') }}
+                                </span>
+                            </a>
                         </td>
                         <td class="py-2 px-2 whitespace-nowrap">
                             @if($e->status == 'published' && $e->published_date && $e->published_date->toDateString() > now()->toDateString())

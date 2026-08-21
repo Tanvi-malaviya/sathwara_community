@@ -201,7 +201,7 @@
 
                 <!-- Submit Button -->
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
-                    <button type="submit" id="submitMemberBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 font-extrabold text-xs sm:text-sm text-white uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md hover:shadow-lg cursor-pointer">
+                    <button type="submit" id="submitMemberBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 font-extrabold text-xs sm:text-sm text-white uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-xs cursor-pointer">
                         <span>{{ __('messages.pay_and_register_member', ['amount' => number_format($signupFee ?? 1000)]) }}</span> &rarr;
                     </button>
                 </div>

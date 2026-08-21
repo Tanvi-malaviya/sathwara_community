@@ -33,14 +33,18 @@
                 <!-- User Info -->
                 <div class="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div class="relative group shrink-0">
-                        <img class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover bg-slate-50 border-2 border-primary-200 shadow-xs" 
-                             src="{{ $profile && $profile->photo_path ? (str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path)) : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100' }}" 
+                        @php
+                            $hasProfilePhoto = ($profile && !empty($profile->photo_path) && !str_contains($profile->photo_path, 'unsplash.com') && $profile->photo_path !== 'NOT_SPECIFIED' && $profile->photo_path !== 'N/A');
+                            $profilePhotoUrl = $hasProfilePhoto ? (str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path)) : asset('logo.png');
+                        @endphp
+                        <img class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover bg-slate-50 border-2 border-primary-200 shadow-xs p-1" 
+                             src="{{ $profilePhotoUrl }}" 
                              alt="Profile Photo">
                     </div>
                     <div class="space-y-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="px-2.5 py-0.5 rounded-md bg-primary-50 text-primary-700 border border-primary-100 text-[10px] font-black uppercase tracking-wider">MEMBER ACCOUNT</span>
-                            <span class="text-xs font-black text-slate-500">#{{ sprintf('%05d', $user->id) }}</span>
+                            <span class="text-xs font-black text-slate-700 font-mono">{{ $user->member_code ?: $user->formatted_member_id }}</span>
                         </div>
                         <h2 class="text-base sm:text-lg font-black text-slate-900 leading-tight truncate">
                             {{ $profile->first_name ?? '' }} {{ $profile->middle_name ?? '' }} {{ $profile->last_name ?? '' }}

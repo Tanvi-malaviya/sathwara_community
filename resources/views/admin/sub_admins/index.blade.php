@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="space-y-4" x-data="{ 
+    search: '',
     showAddModal: {{ $errors->any() ? 'true' : 'false' }}, 
     showEditModal: false, 
     showEventsModal: false,
@@ -97,13 +98,17 @@
         }
     }
 }">
-    <!-- Top Action Bar -->
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-100 shadow-xs">
-        <div class="space-y-0.5">
-            <h2 class="text-sm font-black text-slate-900 flex items-center gap-2">
-                <span>🛡️</span> {{ __('messages.sub_admin_management_controls') }}
-            </h2>
-            <p class="text-xs text-slate-500 font-semibold">{{ __('messages.grant_module_permissions_sub_admins') }}</p>
+    <!-- Top Action Bar (Search Filter & Add Button) -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-xl border border-slate-100 shadow-xs">
+        <div class="relative w-full sm:w-72">
+            <input type="text" x-model="search" placeholder="{{ __('messages.search_placeholder') ?? 'Search sub-admins...' }}" 
+                   class="h-9 w-full text-xs font-semibold pl-9 pr-8 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <button type="button" x-show="search" @click="search = ''" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-sm" title="Clear search">
+                &times;
+            </button>
         </div>
 
         <button type="button" @click="showAddModal = true" 
@@ -125,7 +130,7 @@
             </thead>
             <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                 @forelse($subAdmins as $admin)
-                    <tr class="hover:bg-slate-50/60 transition-colors">
+                    <tr x-show="!search || '{{ strtolower(addslashes($admin->name . ' ' . $admin->email . ' ' . ($admin->memberProfile?->phone ?? '')) . ' ' . $admin->permissions->pluck('name')->implode(' ')) }}'.includes(search.toLowerCase().trim())" class="hover:bg-slate-50/60 transition-colors">
                         <td class="py-3 px-4 text-slate-900 font-bold">
                             <div class="flex items-center space-x-3">
                                 <div class="w-9 h-9 rounded-xl bg-slate-900 text-white font-black flex items-center justify-center text-xs shrink-0 shadow-2xs">

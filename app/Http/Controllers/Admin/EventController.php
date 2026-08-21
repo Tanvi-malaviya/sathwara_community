@@ -56,7 +56,7 @@ class EventController extends Controller
         // Calculate event summary statistics
         $stats = [
             'total_registrations' => $allRegistrations->count(),
-            'total_passes' => $allRegistrations->filter(fn($r) => empty($r->form_data['student_name']) && empty($r->form_data['surname']) && empty($r->form_data['qualification']) && empty($r->form_data['birth_date']) && empty($r->form_data['first_name']))->count(),
+            'total_passes' => $event->total_passes_count,
             'total_inam_forms' => $allRegistrations->filter(fn($r) => !empty($r->form_data['student_name']))->count(),
             'total_yuva_forms' => $allRegistrations->filter(fn($r) => !empty($r->form_data['surname']) || !empty($r->form_data['first_name']) || !empty($r->form_data['qualification']))->count(),
             'last_pass_no' => (int)($allRegistrations->whereNotNull('pass_number')->max('pass_number') ?? 0),
@@ -608,12 +608,16 @@ class EventController extends Controller
     /**
      * Export Inam Vitaran Student Submissions CSV
      */
-    public function exportInamSubmissionsCsv($id)
+    public function exportInamSubmissionsCsv(Request $request, $id)
     {
         $event = Event::findOrFail($id);
         $allRegistrations = EventRegistration::where('event_id', $event->id)
             ->with(['user.memberProfile'])
             ->get();
+
+        $topFilter = $request->query('top', 'all');
+        $standardFilter = $request->query('standard', 'all');
+        $search = trim((string)$request->query('search', ''));
 
         $registrations = $allRegistrations->filter(function($r) {
             return !empty($r->form_data['student_name']);
@@ -641,6 +645,25 @@ class EventController extends Controller
             return $r;
         });
 
+        // Filter by standard if selected
+        if (!empty($standardFilter) && $standardFilter !== 'all') {
+            $processed = $processed->filter(fn($r) => $r->std_name === $standardFilter);
+        }
+
+        // Filter by search query if present
+        if (!empty($search)) {
+            $s = mb_strtolower($search);
+            $processed = $processed->filter(function($r) use ($s) {
+                $fd = $r->form_data ?? [];
+                $name = mb_strtolower($fd['student_name'] ?? ($r->user->name ?? ''));
+                $father = mb_strtolower($fd['father_name'] ?? ($fd['parent_name'] ?? ''));
+                $school = mb_strtolower($fd['school_college'] ?? '');
+                $phone = mb_strtolower($fd['mobile_no'] ?? $fd['mobile'] ?? ($r->user->memberProfile->phone ?? ''));
+                $inamNo = (string)($r->inam_number ?? '');
+                return str_contains($name, $s) || str_contains($father, $s) || str_contains($school, $s) || str_contains($phone, $s) || str_contains($inamNo, $s);
+            });
+        }
+
         // Group by standard & sort by percentage descending
         $grouped = $processed->groupBy('std_name')->sortBy(function($students, $key) {
             if (preg_match('/(\d+)/', $key, $m)) {
@@ -652,53 +675,72 @@ class EventController extends Controller
         $sortedRows = collect();
         foreach ($grouped as $stdName => $studentsInStd) {
             $sortedStd = $studentsInStd->sortByDesc('calc_pct')->values();
+            
+            // Apply Top 3 or Top 5 limit per standard if requested
+            if ($topFilter === 'top3') {
+                $sortedStd = $sortedStd->take(3);
+            } elseif ($topFilter === 'top5') {
+                $sortedStd = $sortedStd->take(5);
+            }
+
             foreach ($sortedStd as $idx => $student) {
                 $student->std_rank = $idx + 1;
                 $sortedRows->push($student);
             }
         }
 
+        $filenameSuffix = ($topFilter === 'top3' ? '_top3' : ($topFilter === 'top5' ? '_top5' : ''));
         $headers = [
             "Content-type" => "text/csv; charset=UTF-8",
-            "Content-Disposition" => "attachment; filename=inam_submissions_event_" . $event->id . "_" . date('Y-m-d') . ".csv",
+            "Content-Disposition" => "attachment; filename=inam_submissions_event_" . $event->id . $filenameSuffix . "_" . date('Y-m-d') . ".csv",
             "Pragma" => "no-cache",
             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
             "Expires" => "0"
         ];
 
-        $callback = function () use ($sortedRows, $event) {
+        $callback = function () use ($sortedRows) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            fputcsv($file, ['ID', 'Event ID', 'Event Name', 'Inam No.', 'Standard', 'Rank in Std', 'Member ID', 'Member Code', 'Student Name', 'Parent Name', 'School/College', 'Total Marks', 'Obtained Marks', 'Percentage', 'Marksheet File URL', 'Contact Number', 'City', 'Status', 'Submission Date']);
-            foreach ($sortedRows as $r) {
+            fputcsv($file, [
+                'ID',
+                'Student Name',
+                'Parent Name',
+                'Total Marks',
+                'Obtained Marks',
+                'Percentage',
+                'Standard',
+                'Rank',
+                'Contact No',
+                'Marksheet URL',
+                'Member Code',
+                'Submission Date',
+            ]);
+
+            foreach ($sortedRows as $index => $r) {
                 $fd = $r->form_data ?? [];
-                $phone = $fd['mobile_no'] ?? $fd['mobile'] ?? $fd['contact_number'] ?? ($r->user->memberProfile->phone ?? '');
-                $city = $fd['city'] ?? $fd['native_place'] ?? $fd['area'] ?? ($r->user->memberProfile->city ?? '');
-                if (is_array($city)) {
-                    $city = implode(', ', array_filter($city, 'is_scalar'));
+                $phone = $fd['mobile_no'] ?? $fd['mobile'] ?? $fd['contact_number'] ?? ($r->user->memberProfile->phone ?? ($r->user->phone ?? ''));
+                $rawMarksheet = $fd['marksheet_url'] ?? $fd['marksheet'] ?? $fd['result_photo'] ?? $fd['result_url'] ?? '';
+                $marksheetUrl = '';
+                if (!empty($rawMarksheet)) {
+                    $marksheetUrl = str_starts_with($rawMarksheet, 'http') ? $rawMarksheet : asset('storage/' . $rawMarksheet);
                 }
-                $inamNo = $r->inam_number ? sprintf('%03d', $r->inam_number) : (isset($fd['registration_no']) && is_numeric($fd['registration_no']) ? sprintf('%03d', (int)$fd['registration_no']) : $r->id);
+                $memberCode = $r->user->member_code ?? ($r->user->memberProfile->member_code ?? ($fd['member_code'] ?? ($r->user ? '#' . sprintf('%05d', $r->user->id) : '')));
+                $submissionDate = $r->created_at ? $r->created_at->format('d-M-Y') : ($fd['submission_date'] ?? '');
+
                 fputcsv($file, [
-                    $r->id,
-                    $event->id,
-                    $event->title,
-                    $inamNo,
-                    $r->std_name,
-                    'Rank ' . ($r->std_rank ?? '-'),
-                    $r->user ? '#' . sprintf('%05d', $r->user->id) : ($fd['member_id'] ?? ''),
-                    $r->user->member_code ?? '',
+                    $index + 1, // ID starting from 1
                     $fd['student_name'] ?? ($r->user ? $r->user->name : ''),
-                    $fd['father_name'] ?? ($fd['parent_name'] ?? ($r->user ? $r->user->name : '')),
-                    $fd['school_college'] ?? '',
+                    $fd['father_name'] ?? ($fd['parent_name'] ?? ''),
                     $fd['total_marks'] ?? '',
-                    $fd['received_marks'] ?? '',
-                    !empty($fd['percentage']) ? (str_contains((string)$fd['percentage'], '%') ? $fd['percentage'] : $fd['percentage'] . '%') : ($r->calc_pct > 0 ? $r->calc_pct . '%' : ''),
-                    $fd['marksheet_url'] ?? '',
+                    $fd['received_marks'] ?? ($fd['obtained_marks'] ?? ''),
+                    $r->calc_pct > 0 ? $r->calc_pct . '%' : (!empty($fd['percentage']) ? (str_contains((string)$fd['percentage'], '%') ? $fd['percentage'] : $fd['percentage'] . '%') : ''),
+                    $r->std_name,
+                    'Rank ' . ($r->std_rank ?? ($index + 1)),
                     $phone,
-                    $city,
-                    ucfirst($r->status ?? 'approved'),
-                    $fd['submission_date'] ?? ($r->created_at ? $r->created_at->format('d-M-Y h:i A') : ''),
+                    $marksheetUrl,
+                    $memberCode,
+                    $submissionDate,
                 ]);
             }
 

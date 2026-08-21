@@ -30,7 +30,7 @@
                     <div>
                         <h3 class="text-base font-extrabold text-slate-900 leading-tight">{{ $member->name }}</h3>
                         <p class="text-[11px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">
-                            {{ __('messages.member_id_prefix') }}: #{{ sprintf('%05d', $member->id) }} &bull; {{ __('messages.registered_at') }}: {{ $member->created_at->format('d-M-Y') }}
+                            {{ __('messages.member_id_prefix') }}: {{ $member->member_code ?: $member->formatted_member_id }} &bull; {{ __('messages.registered_at') }}: {{ $member->created_at->format('d-M-Y') }}
                         </p>
                     </div>
 

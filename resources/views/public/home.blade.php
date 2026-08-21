@@ -85,7 +85,7 @@
                     <template
                         x-if="slides[activeSlide] && slides[activeSlide].button_text && slides[activeSlide].button_text.trim() !== ''">
                         <a :href="slides[activeSlide].button_link || '#'"
-                            class="px-3.5 py-1.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-500 text-white font-extrabold text-[11px] sm:text-sm rounded-full shadow-2xl border border-white/20 backdrop-blur-md transition-all duration-300 flex items-center gap-1.5 sm:gap-2 shrink-0 active:scale-95 hover:shadow-primary-500/30">
+                            class="px-3.5 py-1.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-500 text-white font-extrabold text-[11px] sm:text-sm rounded-full shadow-lg border border-white/20 backdrop-blur-md transition-all duration-300 flex items-center gap-1.5 sm:gap-2 shrink-0 active:scale-95">
                             <span x-text="slides[activeSlide].button_text"></span>
                             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5"
                                 viewBox="0 0 24 24">
@@ -172,7 +172,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @foreach($agendas as $index => $agenda)
                     <div
-                        class="p-6 rounded-2xl bg-slate-50/60 border border-slate-200/70 hover:border-slate-300 hover:bg-white hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-4">
+                        class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-slate-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-4">
                         <div class="space-y-3">
                             <div
                                 class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-lg font-bold border border-primary-100">
@@ -209,9 +209,9 @@
                     </h2>
                 </div>
                 <a href="{{ route('events') }}"
-                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-bold transition-all shadow-xs shrink-0">
+                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-primary-500 text-slate-700 hover:text-white border border-slate-200 hover:border-primary-500 text-xs font-bold transition-all shadow-xs hover:shadow-md shrink-0 group">
                     <span>{{ __('messages.view_all_events') }}</span>
-                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
@@ -341,52 +341,50 @@
                         {{ __('messages.community_bulletins') }}
                     </h2>
                 </div>
-                <a href="{{ route('updates') }}"
-                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-bold transition-all shadow-xs shrink-0">
+                  <a href="{{ route('updates') }}"
+                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-primary-500 text-slate-700 hover:text-white border border-slate-200 hover:border-primary-500 text-xs font-bold transition-all shadow-xs hover:shadow-md shrink-0 group">
                     <span>{{ __('messages.all_announcements') }}</span>
-                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                 </a>
             </div>
 
-            <!-- Updates Cards Grid -->
+            <!-- Updates Grid -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @forelse($latestUpdates as $update)
                     <div
-                        class="group bg-slate-50/70 rounded-2xl p-5 border border-slate-200/70 hover:bg-white hover:border-slate-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-3">
+                        class="group bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:border-slate-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-3">
 
                         <!-- Top Meta -->
                         <div class="flex items-center justify-between gap-2">
-                            <span class="text-[11px] font-bold text-slate-500">
-                                📌 {{ date('M d, Y', strtotime($update->publish_date)) }}
+                            <span class="text-[9px] font-extrabold text-primary-700 bg-primary-50 px-2 py-0.5 rounded uppercase tracking-wider">
+                                {{ date('M d, Y', strtotime($update->publish_date)) }}
                             </span>
                         </div>
 
-                        <!-- Body -->
+                        <!-- Content -->
                         <div class="space-y-1.5 flex-1">
-                            <h3
-                                class="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-2">
+                            <h3 class="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1" title="{{ $update->title }}">
                                 {{ $update->title }}
                             </h3>
-                            <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">
+                            <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed break-words">
                                 {{ $update->description }}
                             </p>
                         </div>
 
                         <!-- Footer Link -->
-                        <div class="pt-2 border-t border-slate-200/60">
+                        <div class="pt-2 border-t border-slate-100 flex justify-end">
                             <a href="{{ route('update.details', $update->id) }}"
-                                class="text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors">
-                                {{ __('messages.read_full_post') }} &rarr;
+                                class="text-[10px] font-bold text-primary-600 hover:text-primary-700 inline-flex items-center gap-1">
+                                <span>{{ __('messages.read_full_post') }}</span> &rarr;
                             </a>
                         </div>
                     </div>
                 @empty
-                    <div
-                        class="col-span-3 text-center py-10 bg-slate-50/70 rounded-2xl border border-slate-200/80 text-slate-500">
-                        <p class="text-xs font-bold">{{ __('messages.no_announcements') }}</p>
+                    <div class="col-span-3 text-center py-10 bg-white rounded-2xl border border-slate-200/80 text-slate-500">
+                        <p class="text-xs font-bold">{{ __('messages.no_updates_found') }}</p>
                     </div>
                 @endforelse
             </div>
@@ -428,9 +426,9 @@
                     </h2>
                 </div>
                 <a href="{{ route('gallery') }}"
-                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-bold transition-all shadow-xs shrink-0">
+                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-primary-500 text-slate-700 hover:text-white border border-slate-200 hover:border-primary-500 text-xs font-bold transition-all shadow-xs hover:shadow-md shrink-0 group">
                     <span>{{ __('messages.view_full_gallery') }}</span>
-                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>

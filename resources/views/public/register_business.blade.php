@@ -286,7 +286,7 @@
                     @endif
 
                     <div class="flex justify-end border-t border-slate-100 pt-3">
-                        <button type="submit" id="submitBusinessBtn" class="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 font-extrabold text-xs sm:text-sm text-white uppercase tracking-wider rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer">
+                        <button type="submit" id="submitBusinessBtn" class="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 font-extrabold text-xs sm:text-sm text-white uppercase tracking-wider rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer">
                             <span>{{ __('messages.pay_and_register_business', ['amount' => number_format($businessFee ?? 500)]) }}</span> &rarr;
                         </button>
                     </div>

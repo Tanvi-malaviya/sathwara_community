@@ -1,353 +1,432 @@
 @extends('layouts.member')
 
+@php
+    $isGu = (app()->getLocale() === 'gu');
+    $logoUrl = App\Models\Setting::get('website_logo') ? asset('storage/' . App\Models\Setting::get('website_logo')) : asset('logo.png');
+    $userName = auth()->user() ? auth()->user()->name : 'Member';
+    $memberCode = auth()->user() ? (auth()->user()->member_code ?: sprintf('#%05d', auth()->user()->id)) : '-';
+@endphp
+
 @section('page_title', __('messages.dashboard_overview'))
 
 @section('content')
-<div class="space-y-2">
-    <!-- Welcome Header card -->
-    {{-- <div class="bg-gradient-to-tr from-primary-500 to-secondary-500 rounded-xl p-8 text-white flex flex-col md:flex-row justify-between items-center gap-2 shadow-md">
-        <div class="space-y-2">
-            <h2 class="text-2xl md:text-3xl font-black">{{ __('messages.welcome_back', ['name' => $user->name]) }}</h2>
-            <p class="text-xs text-primary-100 font-medium">{{ __('messages.profile_approved_desc') }}</p>
-        </div>
-        <a href="{{ route('member.card') }}" class="px-5 py-3 bg-white text-primary-600 hover:bg-slate-50 font-bold text-xs rounded-xl shadow-md transition-transform hover:-translate-y-0.5 inline-flex items-center gap-1.5 shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
-            </svg>
-            <span>{{ __('messages.view_membership_card') }}</span>
-        </a>
-    </div> --}}
+<div class="space-y-3.5" x-data="{ 
+    showPassModal: false, 
+    activeEvent: null, 
+    activePasses: [],
+    activeAttendee: '{{ addslashes($userName) }}',
+    activeMemberId: '{{ $memberCode }}',
+    openPassModal(eventObj, passesList, attendeeName) {
+        this.activeEvent = eventObj;
+        this.activePasses = passesList;
+        this.activeAttendee = attendeeName || '{{ addslashes($userName) }}';
+        this.showPassModal = true;
+    }
+}">
+    
+    <!-- Welcome Header & Quick Stats Card (Compact) -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-xl p-3.5 sm:p-4 shadow-sm border border-slate-700/60 relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-28 h-28 bg-primary-500/10 rounded-full blur-xl pointer-events-none"></div>
+        
+        <div class="flex items-center justify-between gap-3 relative z-10">
+            <h2 class="text-base sm:text-lg font-black text-white leading-tight">
+                {{ $isGu ? 'નમસ્તે, ' . $user->name . '!' : 'Welcome, ' . $user->name . '!' }}
+            </h2>
 
-    <!-- Stats Grid -->
-    {{-- <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center space-x-4">
-            <span class="w-12 h-12 bg-primary-50 text-primary-500 rounded-xl flex items-center justify-center shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                </svg>
-            </span>
-            <div>
-                <span class="text-2xl font-black text-slate-900 leading-tight block">{{ $familyCount }}</span>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{{ __('messages.declared_family_members') }}</p>
-            </div>
-        </div>
-        <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center space-x-4">
-            <span class="w-12 h-12 bg-secondary-50 text-secondary-500 rounded-xl flex items-center justify-center shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                </svg>
-            </span>
-            <div>
-                <span class="text-2xl font-black text-slate-900 leading-tight block">{{ $registeredEvents->count() }}</span>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{{ __('messages.registered_meetings') }}</p>
-            </div>
-        </div>
-        <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex items-center space-x-4">
-            <span class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                </svg>
-            </span>
-            <div>
-                <span class="text-xl font-black text-emerald-600 leading-tight block uppercase tracking-wide">{{ $user->status === 'approved' ? 'Approved' : ucfirst($user->status) }}</span>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Membership Status</p>
-            </div>
-        </div>
-    </div> --}}
-
-    <!-- Details Columns -->
-    {{-- <div class="grid grid-cols-1 lg:grid-cols-3 gap-2">
-        <!-- Profile Sheet -->
-        <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm space-y-6 lg:col-span-2">
-            <div class="flex justify-between items-center border-b border-slate-50 pb-4">
-                <h3 class="text-sm font-extrabold text-slate-950">{{ __('messages.your_profile_sheet') }}</h3>
-                <a href="{{ route('member.profile.edit') }}" class="text-xs font-bold text-primary-500 hover:underline">{{ __('messages.edit_info') }}</a>
-            </div>
- 
-            @if($profile)
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs text-slate-700 leading-relaxed">
-                    <div>
-                        <h4 class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.gender_dob') }}</h4>
-                        <p class="font-bold text-slate-900 mt-1">{{ $profile->gender }} ({{ date('d-M-Y', strtotime($profile->dob)) }})</p>
-                    </div>
-                    <div>
-                        <h4 class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.blood_group') }}</h4>
-                        <p class="font-bold text-slate-900 mt-1">{{ $profile->blood_group ?? 'Not Specified' }}</p>
-                    </div>
-                    <div>
-                        <h4 class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.education_qualification') }}</h4>
-                        <p class="font-bold text-slate-900 mt-1">{{ $profile->education ?? 'Not Specified' }}</p>
-                    </div>
-                    <div>
-                        <h4 class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.occupation_details') }}</h4>
-                        <p class="font-bold text-slate-900 mt-1">{{ $profile->occupation ?? 'Not Specified' }}</p>
-                    </div>
-                    <div>
-                        <h4 class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.phone_whatsapp') }}</h4>
-                        <p class="font-bold text-slate-900 mt-1">{{ $profile->phone }} {{ $profile->whatsapp ? '(WA: '.$profile->whatsapp.')' : '' }}</p>
-                    </div>
-                    <div>
-                        <h4 class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.member_email_id') }}</h4>
-                        <p class="font-bold text-slate-900 mt-1">{{ $user->email ?? auth()->user()->email }}</p>
-                    </div>
-                    @if($profile->father_member_id)
-                    <div>
-                        <h4 class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.father_member_id') }}</h4>
-                        <p class="font-bold text-slate-900 mt-1">
-                            {{ $profile->father_member_id }}
-                            @if($profile->father_user)
-                                <span class="text-xs text-emerald-600 font-semibold block sm:inline">({{ $profile->father_user->name }})</span>
-                            @endif
-                        </p>
-                    </div>
-                    @endif
-                    <div>
-                        <h4 class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">{{ __('messages.full_address') }}</h4>
-                        <p class="font-bold text-slate-900 mt-1">{{ $profile->address }}, {{ $profile->city }} - {{ $profile->pincode }}</p>
-                    </div>
-                </div>
-            @else
-                <div class="text-center py-6 text-xs text-slate-400">
-                    {{ __('messages.no_profile_details') }}
-                </div>
-            @endif
+            <!-- Quick Action: Membership Card -->
+            <a href="{{ route('member.card') }}" 
+               class="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0">
+                <span>🪪</span>
+                <span>{{ $isGu ? 'મેમ્બરશિપ કાર્ડ જુઓ' : 'View Membership Card' }}</span>
+            </a>
         </div>
 
-        <!-- Upcoming Registered Events -->
-        <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm space-y-6">
-            <h3 class="text-sm font-extrabold text-slate-950 border-b border-slate-50 pb-4">{{ __('messages.registered_events') }}</h3>
-            <div class="space-y-4">
-                @forelse($registeredEvents as $event)
-                    <div class="flex items-start space-x-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-12h12c.621 0 1.125.504 1.125 1.125V17c0 .621-.504 1.125-1.125 1.125h-12A1.125 1.125 0 013 17V7c0-.621.504-1.125 1.125-1.125zm.621 3.75a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm0 4.5a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0z" />
-                        </svg>
-                        <div class="min-w-0 space-y-1">
-                            <h4 class="text-xs font-bold text-slate-900 truncate">{{ $event->title }}</h4>
-                            <p class="text-[10px] text-slate-400 font-semibold">{{ date('d M, Y', strtotime($event->date)) }} @ {{ $event->time }}</p>
-                            <p class="text-[10px] text-slate-500 truncate flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25s-7.5-4.108-7.5-11.25a7.5 7.5 0 1115 0z" />
-                                </svg>
-                                <span>{{ $event->venue }}</span>
-                            </p>
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-center py-12 text-xs text-slate-400 leading-relaxed">
-                        {{ __('messages.no_upcoming_events') }}<br>
-                        <a href="{{ route('events') }}" class="text-primary-500 font-bold hover:underline inline-flex items-center gap-1 mt-2">
-                            <span>{{ __('messages.register_for_active_events') }}</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                            </svg>
-                        </a>
-                    </div>
-                @endforelse
+        <!-- Quick Summary Mini Strip -->
+        <div class="grid grid-cols-3 gap-2 pt-2.5 mt-2.5 border-t border-slate-700/60">
+            <div class="bg-slate-800/70 rounded-lg p-2 border border-slate-700/50">
+                <span class="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">{{ $isGu ? 'સક્રિય કાર્યક્રમો' : 'Active Events' }}</span>
+                <span class="text-sm sm:text-base font-black text-white block mt-0.5">{{ $activeEvents->count() }}</span>
+            </div>
+            <div class="bg-slate-800/70 rounded-lg p-2 border border-slate-700/50">
+                <span class="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">{{ $isGu ? 'મારા બુક કરેલ પાસ' : 'My Booked Passes' }}</span>
+                <span class="text-sm sm:text-base font-black text-emerald-400 block mt-0.5">{{ $totalPersonsSum }} {{ $isGu ? 'વ્યક્તિઓ' : 'Persons' }}</span>
+            </div>
+            <div class="bg-slate-800/70 rounded-lg p-2 border border-slate-700/50">
+                <span class="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">{{ $isGu ? 'પરિવારના સભ્યો' : 'Family Members' }}</span>
+                <span class="text-sm sm:text-base font-black text-primary-300 block mt-0.5">{{ $familyCount }}</span>
             </div>
         </div>
-    </div> --}}
+    </div>
 
-    <!-- Family Tree Section -->
-    <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-50 pb-4">
-            <div class="flex items-center space-x-2.5">
-                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 font-black flex items-center justify-center text-base border border-emerald-100">
-                    🌳
-                </div>
-                <div>
-                    <h3 class="text-sm sm:text-base font-black text-slate-900">{{ __('messages.family_tree_title') }}</h3>
-                    <p class="text-xs text-slate-400 font-medium">{{ __('messages.family_tree_subtitle') }}</p>
-                </div>
-            </div>
-            {{-- <a href="{{ route('member.family.index') }}" class="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs rounded-xl border border-emerald-200/60 transition-all inline-flex items-center gap-1.5 shrink-0">
-                <span>+ {{ __('messages.add_family_member') }}</span>
-            </a> --}}
-        </div>
+    <!-- ================= ACTIVE EVENTS CARDS (Compact) ================= -->
+    <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-3 sm:p-3.5 space-y-3">
+        @if($activeEvents->count() > 0)
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                @foreach($activeEvents as $event)
+                    @php
+                        $alreadyRegistered = $myRegistrations->where('event_id', $event->id)->first();
+                        $eventTypeBadge = match($event->event_type ?? 'normal') {
+                            'inam_vitaran' => ['bg' => 'bg-amber-50 text-amber-700 border-amber-200', 'label' => ($isGu ? '🎓 ઇનામ વિતરણ' : 'Inam Vitran')],
+                            'yuva_melo' => ['bg' => 'bg-purple-50 text-purple-700 border-purple-200', 'label' => ($isGu ? '⚡ યુવા મેળો' : 'Yuva Melo')],
+                            default => ['bg' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'label' => ($isGu ? '🎉 સામાન્ય કાર્યક્રમ' : 'General Event')],
+                        };
 
-        @if(isset($family) && $family->count() > 0)
-            @php
-                $wives = $family->filter(fn($m) => in_array($m->relationship, ['Wife', 'Spouse', 'પત્ની']));
-                $husbands = $family->filter(fn($m) => in_array($m->relationship, ['Husband', 'Spouse', 'पति']));
-                $spouses = $wives->concat($husbands);
-                $sons = $family->filter(fn($m) => in_array($m->relationship, ['Son', 'Son (દીકરો)', 'દીકરો']));
-                $daughters = $family->filter(fn($m) => in_array($m->relationship, ['Daughter', 'Daughter (દીકરી)', 'દીકરી']));
-                $children = $sons->concat($daughters);
-                $inlaws = $family->filter(fn($m) => in_array($m->relationship, ['Daughter-in-law', 'Son-in-law', 'વહુ', 'જમાઈ']));
-                $grandchildren = $family->filter(fn($m) => in_array($m->relationship, ["Grandson (Son's Son)", "Granddaughter (Son's Daughter)", "Grandson (Daughter's Son)", "Granddaughter (Daughter's Daughter)", 'પૌત્ર', 'પૌત્રી', 'દોહિત્ર', 'દોહિત્રી']));
-                $others = $family->reject(fn($m) => 
-                    in_array($m->relationship, ['Wife', 'Husband', 'Spouse', 'પત્ની', 'पति', 'Son', 'Daughter', 'Son (દીકરો)', 'Daughter (દીકરી)', 'દીકરો', 'દીકરી', 'Daughter-in-law', 'Son-in-law', 'વહુ', 'જમાઈ', "Grandson (Son's Son)", "Granddaughter (Son's Daughter)", "Grandson (Daughter's Son)", "Granddaughter (Daughter's Daughter)", 'પૌત્ર', 'પૌત્રી', 'દોહિત્ર', 'દોહિત્રી'])
-                );
-            @endphp
-
-            <div class="overflow-x-auto p-4 bg-slate-50/60 rounded-2xl border border-slate-100/90">
-                <div class="w-full min-w-[320px] flex flex-col items-center">
-                    
-                    <!-- PRIMARY MEMBER & SPOUSE -->
-                    <div class="flex flex-col items-center">
-                        <div class="flex items-center justify-center space-x-2">
-                            <!-- Primary Member Card -->
-                            <div class="bg-primary-50/90 border-2 border-primary-400 rounded-xl px-3 py-2 text-center shadow-xs min-w-[110px] max-w-[140px]">
-                                <h4 class="text-xs font-black text-slate-900 truncate flex items-center justify-center gap-1" title="{{ $user->name }}">
-                                    <span>👤</span> {{ $user->name }}
-                                </h4>
-                                <span class="text-[8px] font-bold text-primary-700 bg-white px-1.5 py-0.5 rounded border border-primary-200 inline-block mt-0.5">
-                                    {{ __('messages.head') }} (#{{ sprintf('%05d', $user->id) }})
+                        $regPasses = [];
+                        if ($alreadyRegistered) {
+                            $pCount = (int)($alreadyRegistered->form_data['person_count'] ?? 1);
+                            $basePassNo = (int)($alreadyRegistered->pass_number ?: ($alreadyRegistered->form_data['registration_no'] ?? $alreadyRegistered->id));
+                            for ($i = 0; $i < $pCount; $i++) {
+                                $regPasses[] = sprintf('%03d', $basePassNo + $i);
+                            }
+                        }
+                    @endphp
+                    <div class="bg-white rounded-xl border border-slate-200/90 p-3 shadow-2xs hover:shadow-xs hover:border-primary-400 transition-all flex flex-col justify-between space-y-2.5 group">
+                        
+                        <div class="space-y-2">
+                            <!-- Event Header -->
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="px-2.5 py-1 rounded-md text-[10.5px] font-black uppercase tracking-wider border {{ $eventTypeBadge['bg'] }}">
+                                    {{ $eventTypeBadge['label'] }}
                                 </span>
                             </div>
 
-                            @foreach($spouses as $spouse)
-                                <!-- Marriage Line Connection -->
-                                <div class="flex items-center space-x-0.5 px-0.5">
-                                    <div style="width: 12px; height: 2px; background-color: #f43f5e;"></div>
-                                    <span class="text-[10px]">💖</span>
-                                    <div style="width: 12px; height: 2px; background-color: #f43f5e;"></div>
-                                </div>
+                            <h4 class="text-sm font-black text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1" title="{{ $event->title }}">
+                                {{ $event->title }}
+                            </h4>
 
-                                <!-- Spouse Card -->
-                                <div class="bg-rose-50/80 border border-rose-300 rounded-xl px-3 py-2 text-center shadow-xs min-w-[110px] max-w-[140px]">
-                                    <h4 class="text-xs font-bold text-slate-900 truncate flex items-center justify-center gap-1" title="{{ $spouse->name }}">
-                                        <span>{{ in_array($spouse->relationship, ['Husband', 'Spouse', 'पति']) && $spouse->gender != 'Female' ? '👨‍💼' : '👩' }}</span> {{ $spouse->name }}
-                                    </h4>
-                                    <span class="text-[8px] font-bold text-rose-700 bg-white px-1.5 py-0.5 rounded border border-rose-200 inline-block mt-0.5">
-                                        {{ $spouse->relationship }}
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- CHILDREN BRANCH -->
-                    @if($children->count() > 0)
-                    <div class="flex flex-col items-center w-full relative">
-                        <div style="width: 2.5px; height: 16px; background-color: #64748b;"></div>
-
-                        <div class="flex justify-center items-start w-full relative">
-                            @foreach($children as $child)
-                                @php
-                                    $childDependents = $family->filter(fn($m) => $m->parent_id == $child->id);
-                                @endphp
-                                <div class="flex flex-col items-center relative px-2">
-                                    @if($children->count() > 1)
-                                        @if(!$loop->first)
-                                            <div class="absolute top-0 left-0 w-1/2" style="height: 2.5px; background-color: #64748b;"></div>
-                                        @endif
-                                        @if(!$loop->last)
-                                            <div class="absolute top-0 right-0 w-1/2" style="height: 2.5px; background-color: #64748b;"></div>
-                                        @endif
-                                    @endif
-
-                                    <div class="z-10" style="width: 2.5px; height: 14px; background-color: #64748b;"></div>
-
-                                    <div class="bg-indigo-50/70 border border-indigo-300 rounded-xl px-2.5 py-1.5 text-center shadow-xs min-w-[100px] max-w-[130px] z-10">
-                                        <h5 class="text-xs font-bold text-slate-900 truncate flex items-center justify-center gap-1" title="{{ $child->name }}">
-                                            <span>{{ $child->gender == 'Female' ? '👧' : '👦' }}</span> {{ $child->name }}
-                                        </h5>
-                                        <span class="text-[8px] font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded border border-indigo-200 inline-block mt-0.5">
-                                            {{ $child->relationship }}
-                                        </span>
-                                    </div>
-
-                                    @if($childDependents->count() > 0)
-                                        <div class="flex flex-col items-center w-full relative">
-                                            <div style="width: 2.5px; height: 16px; background-color: #64748b;"></div>
-
-                                            <div class="flex justify-center items-start relative w-full">
-                                                @foreach($childDependents as $dep)
-                                                    <div class="flex flex-col items-center relative px-1">
-                                                        @if($childDependents->count() > 1)
-                                                            @if(!$loop->first)
-                                                                <div class="absolute top-0 left-0 w-1/2" style="height: 2.5px; background-color: #64748b;"></div>
-                                                            @endif
-                                                            @if(!$loop->last)
-                                                                <div class="absolute top-0 right-0 w-1/2" style="height: 2.5px; background-color: #64748b;"></div>
-                                                            @endif
-                                                        @endif
-                                                        <div class="z-10" style="width: 2.5px; height: 12px; background-color: #64748b;"></div>
-
-                                                        <div class="bg-amber-50/80 border border-amber-300 rounded-xl px-2 py-1 text-center shadow-xs min-w-[90px] max-w-[115px] z-10">
-                                                            <h6 class="text-[10px] font-bold text-slate-900 truncate flex items-center justify-center gap-1" title="{{ $dep->name }}">
-                                                                <span>🌟</span> {{ $dep->name }}
-                                                            </h6>
-                                                            <span class="text-[8px] font-bold text-amber-800 bg-white px-1 py-0.5 rounded border border-amber-200 inline-block mt-0.5">
-                                                                {{ $dep->relationship }}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
+                            <!-- Date & Venue -->
+                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 space-y-1 text-xs text-slate-700">
+                                <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                                    <span>📅</span>
+                                    <span>{{ date('d M, Y', strtotime($event->date)) }}</span>
+                                    @if($event->time)
+                                        <span class="text-slate-400 font-normal">({{ date('h:i A', strtotime($event->time)) }})</span>
                                     @endif
                                 </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-
-                    <!-- UNASSIGNED DEPENDENTS -->
-                    @php
-                        $unassignedGrandchildren = $inlaws->concat($grandchildren)->filter(fn($m) => !$m->parent_id);
-                    @endphp
-
-                    @if($unassignedGrandchildren->count() > 0)
-                    <div class="flex flex-col items-center w-full relative">
-                        <div style="width: 2.5px; height: 16px; background-color: #64748b;"></div>
-
-                        <div class="flex justify-center items-start relative w-full">
-                            @foreach($unassignedGrandchildren as $gc)
-                                <div class="flex flex-col items-center relative px-1 sm:px-1.5">
-                                    @if($unassignedGrandchildren->count() > 1)
-                                        @if(!$loop->first)
-                                            <div class="absolute top-0 left-0 w-1/2" style="height: 2.5px; background-color: #64748b;"></div>
-                                        @endif
-                                        @if(!$loop->last)
-                                            <div class="absolute top-0 right-0 w-1/2" style="height: 2.5px; background-color: #64748b;"></div>
-                                        @endif
-                                    @endif
-
-                                    <div class="z-10" style="width: 2.5px; height: 12px; background-color: #64748b;"></div>
-
-                                    <div class="bg-amber-50/70 border border-amber-300 rounded-xl px-2 py-1 text-center shadow-xs min-w-[90px] max-w-[115px] z-10">
-                                        <h6 class="text-[10px] font-bold text-slate-900 truncate flex items-center justify-center gap-1" title="{{ $gc->name }}">
-                                            <span>🌟</span> {{ $gc->name }}
-                                        </h6>
-                                        <span class="text-[8px] font-bold text-amber-800 bg-white px-1 py-0.5 rounded border border-amber-200 inline-block mt-0.5">
-                                            {{ $gc->relationship }}
-                                        </span>
-                                    </div>
+                                <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium truncate" title="{{ $event->venue }}">
+                                    <span>📍</span>
+                                    <span class="truncate">{{ $event->venue ?: ($isGu ? 'સ્થળ જાહેર થશે' : 'Venue TBA') }}</span>
                                 </div>
-                            @endforeach
+                            </div>
                         </div>
-                    </div>
-                    @endif
 
-                    <!-- OTHER EXTENDED MEMBERS -->
-                    @if($others->count() > 0)
-                    <div class="border-t border-slate-100 pt-2 mt-2 w-full flex flex-col items-center">
-                        <div class="flex flex-wrap justify-center gap-1.5">
-                            @foreach($others as $ot)
-                                <span class="text-[9px] font-semibold text-slate-700 bg-white px-2 py-0.5 rounded-lg border border-slate-200 shadow-xs">
-                                    {{ $ot->name }} ({{ $ot->relationship }})
+                        <!-- Booking Action Button -->
+                        <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <div>
+                                <span class="text-[9.5px] font-extrabold text-slate-400 uppercase block tracking-wider">{{ $isGu ? 'પાસ ફી' : 'Pass Fee' }}</span>
+                                <span class="text-xs font-black {{ $event->pass_fee > 0 ? 'text-primary-600' : 'text-emerald-600' }}">
+                                    {{ $event->pass_fee > 0 ? '₹' . number_format($event->pass_fee, 0) : ($isGu ? 'મફત પ્રવેશ' : 'Free Entry') }}
                                 </span>
-                            @endforeach
+                            </div>
+
+                            @if($alreadyRegistered)
+                                <button type="button" 
+                                        @click="openPassModal({{ json_encode(['title' => $event->title, 'date' => date('d-M-Y', strtotime($event->date)), 'time' => $event->time ? date('h:i A', strtotime($event->time)) : '', 'venue' => $event->venue]) }}, {{ json_encode($regPasses) }}, '{{ addslashes($userName) }}')"
+                                        class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0">
+                                    <span>🎫 {{ $isGu ? 'પાસ જુઓ (' . count($regPasses) . ')' : 'View Pass (' . count($regPasses) . ')' }}</span>
+                                    <span>&rarr;</span>
+                                </button>
+                            @else
+                                <a href="{{ route('member.events.register_form', $event->id) }}" 
+                                   class="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0">
+                                    <span>🎫 {{ $isGu ? 'પાસ બુક કરો' : 'Book Pass' }}</span>
+                                    <span>&rarr;</span>
+                                </a>
+                            @endif
                         </div>
                     </div>
-                    @endif
-                </div>
+                @endforeach
             </div>
         @else
-            <div class="p-8 text-center bg-slate-50/60 rounded-xl border border-slate-100 space-y-3">
-                <span class="text-3xl">👨‍👩‍👧‍👦</span>
-                <div class="space-y-1">
-                    <h4 class="text-xs font-bold text-slate-800">{{ __('messages.no_family_added') }}</h4>
-                    <p class="text-[11px] text-slate-400">{{ __('messages.add_family_tree_desc') }}</p>
-                </div>
-                <a href="{{ route('member.family.index') }}" class="inline-block px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-all">
-                    + {{ __('messages.add_family_member') }}
-                </a>
+            <!-- Empty State for Active Events -->
+            <div class="text-center py-8 bg-slate-50/70 rounded-lg border border-slate-100 p-4 space-y-1.5">
+                <span class="text-2xl block">📅</span>
+                <h4 class="text-xs font-black text-slate-800">
+                    {{ $isGu ? 'હાલમાં કોઈ સક્રિય કાર્યક્રમ ઉપલબ્ધ નથી' : 'No active events currently scheduled' }}
+                </h4>
+                <p class="text-[10px] text-slate-400 font-medium">
+                    {{ $isGu ? 'નવા કાર્યક્રમો જાહેર થતાં જ અહીં દેખાશે.' : 'Upcoming community events will appear here once announced.' }}
+                </p>
             </div>
         @endif
     </div>
+
+    <!-- ================= VIEW PASSES MODAL (TELEPORTED TO BODY) ================= -->
+    <template x-teleport="body">
+        <div x-show="showPassModal" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md"
+             x-transition
+             x-cloak>
+            <div @click.away="showPassModal = false" 
+                 class="bg-white rounded-3xl border border-slate-100 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative">
+                
+                <!-- Modal Header -->
+                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-primary-600/30 border border-primary-500/40 text-primary-400 flex items-center justify-center text-lg">
+                            🎟️
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-extrabold flex items-center gap-2">
+                                <span>{{ $isGu ? 'ઇવેન્ટ પ્રવેશ પાસ' : 'Event Entry Passes' }}</span>
+                                <span class="text-[10px] bg-primary-500 text-white font-black px-2 py-0.5 rounded-full" x-text="activePasses.length + ' Passes'"></span>
+                            </h3>
+                            <p class="text-[11px] text-slate-400 font-medium truncate max-w-[280px] sm:max-w-md" x-text="activeEvent?.title"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="downloadAllPassesMember()" 
+                                class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer">
+                            ⬇️ Download All PDF
+                        </button>
+                        <button type="button" @click="showPassModal = false" 
+                                class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs font-bold cursor-pointer">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Scrollable Content containing all passes -->
+                <div class="p-4 sm:p-6 overflow-y-auto space-y-6 bg-slate-50 flex-1">
+                    <template x-for="(pNo, idx) in activePasses" :key="idx">
+                        <div class="bg-white rounded-2xl border-2 border-slate-900 shadow-sm overflow-hidden text-slate-900 print-pass-member-item" 
+                             :id="'dashboard-pass-card-' + idx"
+                             :data-pass-no="pNo"
+                             :data-event-title="activeEvent?.title || ''"
+                             data-mandal="Satwara Gyati Mandal Ahm."
+                             :data-date="(activeEvent?.date || '') + (activeEvent?.time ? ' | ⏰ ' + activeEvent?.time : '')"
+                             :data-venue="activeEvent?.venue || ''"
+                             :data-attendee="activeAttendee || ''"
+                             :data-member-code="activeMemberId || ''"
+                             data-logo="{{ $logoUrl }}">
+                            <!-- Top Bar -->
+                            <div class="bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-[11px] font-black uppercase tracking-wider">
+                                <span class="flex items-center gap-1.5 truncate">
+                                    <span x-text="activeAttendee"></span>
+                                    <span class="text-primary-400 font-mono" x-show="activeMemberId" x-text="'(' + activeMemberId + ')'"></span>
+                                </span>
+                                <span class="text-amber-400 shrink-0">Entry Pass</span>
+                            </div>
+
+                            <!-- Pass Core (Sketch Layout) -->
+                            <div class="p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
+                                <!-- Left: Circular Logo -->
+                                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                                    <img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover" onerror="this.src='/logo.png'">
+                                </div>
+
+                                <!-- Middle Details: Mandal, Event Name, Date, Attendee -->
+                                <div class="flex-1 space-y-1.5 text-center sm:text-left">
+                                    <div class="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-tight">
+                                        Satwara Gyati Mandal Ahm.
+                                    </div>
+                                    <div class="text-base sm:text-lg font-black text-rose-600 leading-tight" x-text="activeEvent?.title">
+                                    </div>
+                                    <div class="text-xs font-bold text-slate-700 flex items-center justify-center sm:justify-start gap-1">
+                                        <span>📅 {{ $isGu ? 'તારીખ:' : 'Date:' }}</span>
+                                        <span x-text="activeEvent?.date"></span>
+                                        <span x-show="activeEvent?.time" class="text-slate-400">|</span>
+                                        <span x-show="activeEvent?.time" x-text="'⏰ ' + activeEvent?.time"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Right: Dedicated Pass No. Box -->
+                                <div class="shrink-0 flex flex-col items-center sm:items-end justify-between self-stretch pt-2 sm:pt-0">
+                                    <div class="border-2 border-slate-900 rounded-xl px-4 py-2 bg-slate-50 text-center shadow-xs">
+                                        <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">Pass No.</span>
+                                        <span class="text-xl font-black text-slate-900 block mt-0.5 tracking-widest" x-text="pNo"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Location Strip -->
+                            <div class="border-t-2 border-dashed border-slate-200 bg-slate-50/80 px-4 py-2.5 text-xs font-bold text-slate-700 flex items-center justify-between gap-1.5">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="text-rose-500">📍</span>
+                                    <span><strong>{{ $isGu ? 'સ્થળ / સરનામું:' : 'Location / Venue:' }}</strong> <span x-text="activeEvent?.venue"></span></span>
+                                </span>
+                                <button type="button" :data-card-id="'dashboard-pass-card-' + idx"
+                                        onclick="downloadSinglePassMember(this.dataset.cardId)"
+                                        class="flex items-center gap-1 px-2.5 py-1 bg-slate-900 hover:bg-slate-700 text-white text-[10px] font-extrabold rounded-lg transition-colors cursor-pointer">
+                                    ⬇️ Download
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-3 bg-white border-t border-slate-100 flex items-center justify-between shrink-0">
+                    <span class="text-[11px] text-slate-400 font-medium">💡 {{ $isGu ? 'કૃપા કરીને કાર્યક્રમ સ્થળે પ્રવેશ વખતે આ પાસ દર્શાવો.' : 'Please present this pass at the event entrance.' }}</span>
+                    <button type="button" @click="showPassModal = false" 
+                            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                        {{ $isGu ? 'બંધ કરો' : 'Close' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
 </div>
 @endsection
+
+@push('scripts')
+<script>
+/* ===== MEMBER DASHBOARD PASS PDF DOWNLOAD ===== */
+
+function _renderMemberPassHtmlCard(passData) {
+    const logoSrc = passData.logo || '/logo.png';
+    const mandal = passData.mandal || 'Satwara Gyati Mandal Ahm.';
+    const title = passData.title || '';
+    const date = passData.date || '';
+    const passNo = passData.passNo || '001';
+    const venue = passData.venue || '';
+    const attendee = passData.attendee || '';
+    const memberCode = passData.memberCode || '';
+    const topNameWithCode = attendee ? (attendee + (memberCode ? ' (' + memberCode + ')' : '')) : 'SATHWARA COMMUNITY ENTRY PASS';
+
+    return `
+    <div style="border: 2px solid #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 22px; page-break-inside: avoid; background: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-sizing: border-box;">
+        <!-- Top Bar -->
+        <table style="width: 100%; border-collapse: collapse; background-color: #0f172a; color: #ffffff;">
+            <tr>
+                <td style="padding: 7px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-align: left; color: #ffffff;">
+                    ${topNameWithCode}
+                </td>
+                <td style="padding: 7px 16px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-align: right; color: #f59e0b;">
+                    ENTRY PASS
+                </td>
+            </tr>
+        </table>
+
+        <!-- Main Body -->
+        <table style="width: 100%; border-collapse: collapse; background-color: #ffffff;">
+            <tr>
+                <!-- Circular Logo -->
+                <td style="width: 90px; vertical-align: middle; padding: 14px 0 14px 16px; text-align: center;">
+                    <div style="width: 76px; height: 76px; border-radius: 50%; border: 2px solid #cbd5e1; background-color: #f8fafc; overflow: hidden; display: inline-block;">
+                        <img src="${logoSrc}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">
+                    </div>
+                </td>
+
+                <!-- Details (Mandal, Title, Date) -->
+                <td style="vertical-align: middle; padding: 14px 16px; text-align: left;">
+                    <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.2px; color: #0f172a; margin-bottom: 4px;">
+                        ${mandal}
+                    </div>
+                    <div style="font-size: 16px; font-weight: 900; color: #e11d48; line-height: 1.25; margin-bottom: 6px;">
+                        ${title}
+                    </div>
+                    <div style="font-size: 12px; font-weight: 700; color: #334155;">
+                        📅 ${date}
+                    </div>
+                </td>
+
+                <!-- Pass No Box -->
+                <td style="width: 110px; vertical-align: middle; padding: 14px 16px 14px 0; text-align: right;">
+                    <div style="display: inline-block; border: 2px solid #0f172a; border-radius: 10px; background-color: #f8fafc; padding: 8px 14px; text-align: center; min-width: 85px; box-sizing: border-box;">
+                        <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b;">PASS NO.</div>
+                        <div style="font-size: 22px; font-weight: 900; letter-spacing: 4px; color: #0f172a; margin-top: 2px;">${passNo}</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Bottom Location Strip -->
+        <div style="border-top: 2px dashed #e2e8f0; background-color: #f8fafc; padding: 9px 16px; font-size: 11px; font-weight: 700; color: #334155;">
+            📍 <strong>Location / Venue:</strong> ${venue}
+        </div>
+    </div>`;
+}
+
+function _openMemberPassesWindow(cardsHtml, title) {
+    const w = window.open('', '_blank', 'width=880,height=750');
+    if (!w) {
+        alert('Please allow pop-ups for this website to download passes.');
+        return;
+    }
+    w.document.write(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>${title}</title>
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+            color-adjust: exact !important; 
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #ffffff; 
+            padding: 24px; 
+            color: #0f172a; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+            color-adjust: exact !important; 
+        }
+        @media print {
+            body { 
+                padding: 0; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                color-adjust: exact !important; 
+            }
+            * {
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                color-adjust: exact !important; 
+            }
+            @page { margin: 15mm; size: auto; }
+        }
+    </style>
+</head>
+<body>
+    ${cardsHtml}
+</body>
+</html>`);
+    w.document.close();
+    w.focus();
+    setTimeout(() => { w.print(); }, 500);
+}
+
+function downloadAllPassesMember() {
+    const cards = document.querySelectorAll('.print-pass-member-item');
+    if (!cards.length) return;
+    let html = '';
+    cards.forEach(card => {
+        const data = {
+            passNo: card.dataset.passNo || card.querySelector('.text-xl')?.innerText.trim() || '001',
+            title: card.dataset.eventTitle || '',
+            mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
+            date: card.dataset.date || '',
+            venue: card.dataset.venue || '',
+            attendee: card.dataset.attendee || '',
+            memberCode: card.dataset.memberCode || '',
+            logo: card.dataset.logo || card.querySelector('img')?.src || ''
+        };
+        html += _renderMemberPassHtmlCard(data);
+    });
+    _openMemberPassesWindow(html, 'Event Entry Passes');
+}
+
+function downloadSinglePassMember(cardId) {
+    const card = document.getElementById(cardId);
+    if (!card) { console.error('Pass card not found:', cardId); return; }
+    const data = {
+        passNo: card.dataset.passNo || card.querySelector('.text-xl')?.innerText.trim() || '001',
+        title: card.dataset.eventTitle || '',
+        mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
+        date: card.dataset.date || '',
+        venue: card.dataset.venue || '',
+        attendee: card.dataset.attendee || '',
+        memberCode: card.dataset.memberCode || '',
+        logo: card.dataset.logo || card.querySelector('img')?.src || ''
+    };
+    _openMemberPassesWindow(_renderMemberPassHtmlCard(data), 'Event Entry Pass - ' + data.passNo);
+}
+</script>
+@endpush

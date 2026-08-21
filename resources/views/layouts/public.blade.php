@@ -28,6 +28,23 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
+        html {
+            font-size: 16px;
+        }
+
+        html,
+        body {
+            max-width: 100vw;
+            overflow-x: clip;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Enhanced Public Website Typography */
+        nav a {
+            font-size: 13.5px !important;
+        }
+
         .font-gujarati {
             font-family: 'Hind Vadodara', 'Noto Sans Gujarati', sans-serif !important;
             letter-spacing: 0.01em;
@@ -37,17 +54,101 @@
             font-family: 'Manrope', sans-serif !important;
         }
 
-        html,
-        body {
-            max-width: 100vw;
-            overflow-x: hidden !important;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+        /* Table Typography */
+        table thead th,
+        table thead tr th {
+            font-size: 12.5px !important;
+            font-weight: 800 !important;
+            color: #334155 !important;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            padding: 0.65rem 0.75rem !important;
+        }
+
+        table tbody td,
+        table tbody tr td {
+            font-size: 13.5px !important;
+            color: #1e293b !important;
+            padding: 0.65rem 0.75rem !important;
+        }
+
+        /* Form Inputs & Controls */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="time"],
+        select,
+        textarea {
+            font-size: 13.5px !important;
+        }
+
+        /* Badges & Micro Text */
+        span[class*="text-[9px]"],
+        span[class*="text-[10px]"] {
+            font-size: 11px !important;
+            font-weight: 700 !important;
+        }
+
+        span[class*="text-xs"],
+        p[class*="text-xs"],
+        a[class*="text-xs"] {
+            font-size: 12.5px !important;
+        }
+
+        /* Global Button Hover Highlight & Elevation */
+        button:not([disabled]),
+        input[type="submit"]:not([disabled]),
+        input[type="button"]:not([disabled]),
+        a[class*="bg-primary"],
+        a[class*="bg-slate-900"],
+        a[class*="bg-emerald"],
+        a[class*="bg-rose"],
+        a[class*="bg-indigo"],
+        button[class*="bg-primary"],
+        button[class*="bg-slate-900"],
+        button[class*="bg-emerald"],
+        button[class*="bg-rose"],
+        button[class*="bg-indigo"] {
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            cursor: pointer;
+        }
+
+        button:not([disabled]):hover,
+        input[type="submit"]:not([disabled]):hover,
+        input[type="button"]:not([disabled]):hover,
+        a[class*="bg-primary"]:hover,
+        a[class*="bg-slate-900"]:hover,
+        a[class*="bg-emerald"]:hover,
+        a[class*="bg-rose"]:hover,
+        a[class*="bg-indigo"]:hover,
+        button[class*="bg-primary"]:hover,
+        button[class*="bg-slate-900"]:hover,
+        button[class*="bg-emerald"]:hover,
+        button[class*="bg-rose"]:hover,
+        button[class*="bg-indigo"]:hover {
+            filter: brightness(1.05);
+        }
+
+        button:not([disabled]):active,
+        input[type="submit"]:not([disabled]):active,
+        input[type="button"]:not([disabled]):active,
+        a[class*="bg-primary"]:active,
+        a[class*="bg-slate-900"]:active,
+        a[class*="bg-emerald"]:active,
+        a[class*="bg-rose"]:active,
+        button[class*="bg-primary"]:active,
+        button[class*="bg-slate-900"]:active,
+        button[class*="bg-emerald"]:active,
+        button[class*="bg-rose"]:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
 
-<body class="text-slate-800 antialiased min-h-screen flex flex-col overflow-x-hidden max-w-full relative">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col overflow-x-clip max-w-full relative">
     <!-- Soft Decorative Background Gradients -->
     <div class="fixed inset-0 bg-slate-50 z-0 overflow-hidden pointer-events-none">
         <div class="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl opacity-30"

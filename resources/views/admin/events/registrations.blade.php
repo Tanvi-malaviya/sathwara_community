@@ -10,7 +10,7 @@
     $paidCount = $registrations->where('payment_status', 'paid')->count();
 @endphp
 
-@section('page_title', $isGu ? 'ઇવેન્ટ રજીસ્ટ્રેશન યાદી - ' . $event->title : 'Event Registrations - ' . $event->title)
+@section('page_title', $isGu ? 'ઇવેન્ટ રજીસ્ટ્રેશન યાદી - ' . $event->title : 'Pass Registrations - ' . $event->title)
 
 @section('content')
 <div class="space-y-4" x-data="{ showDetailsModal: false, selectedRegistration: {}, search: '' }">
@@ -18,9 +18,9 @@
     <div class="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5">
         <!-- Badges & Counters -->
         <div class="flex items-center gap-2 flex-wrap">
-            <a href="{{ route('admin.events.show', $event->id) }}" 
+            <a href="{{ route('admin.events.index') }}" 
                class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl border border-slate-200 transition-colors inline-flex items-center gap-1.5 shrink-0 shadow-2xs" 
-               title="{{ $isGu ? 'ઇવેન્ટ વિગત પર પાછા જાઓ' : __('messages.back') }}">
+               title="{{ $isGu ? 'ઇવેન્ટ્સ લિસ્ટ પર પાછા જાઓ' : __('messages.back') }}">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -112,70 +112,46 @@
                 ];
             @endphp
             <div x-show="!search || 
-                         '{{ $passNoFormatted }}'.includes(search.trim()) ||
-                         '{{ (int)$passNoFormatted }}' === search.trim() ||
                          '{{ addslashes(strtolower($userName)) }}'.includes(search.toLowerCase()) || 
                          '{{ addslashes(strtolower($memberCode)) }}'.includes(search.toLowerCase()) || 
                          '{{ addslashes(strtolower($userEmail ?? '')) }}'.includes(search.toLowerCase()) || 
                          '{{ addslashes(strtolower($userPhone ?? '')) }}'.includes(search.toLowerCase()) || 
                          '{{ addslashes(strtolower($userCity ?? '')) }}'.includes(search.toLowerCase())" 
-                 class="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-2xs hover:shadow-md hover:border-primary-400 transition-all space-y-2.5 relative group flex flex-col justify-between">
+                 class="bg-white border border-slate-200/90 rounded-xl p-3 shadow-2xs hover:shadow-sm hover:border-primary-400 transition-all space-y-2 relative group flex flex-col justify-between">
                 
-                <div class="space-y-2.5">
-                    <!-- Participant Name & Details -->
-                    <div>
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="px-2 py-0.5 bg-primary-50 text-primary-700 border border-primary-200/70 rounded-md font-mono font-black text-[10px]">
-                                Pass #{{ $passNoFormatted }}
-                            </span>
-                            <span class="text-[9px] font-bold text-slate-400">{{ $reg->created_at->format('d-M-Y') }}</span>
-                        </div>
-                        <h4 class="text-xs font-black text-slate-900 truncate group-hover:text-primary-600 transition-colors mt-1">
+                <div class="space-y-2">
+                    <!-- Participant Name & Date Header -->
+                    <div class="flex items-center justify-between gap-1.5 border-b border-slate-100 pb-1.5">
+                        <h4 class="text-xs font-black text-slate-900 truncate group-hover:text-primary-600 transition-colors" title="{{ $userName }}">
                             {{ $userName }}
                         </h4>
+                        <span class="text-[10px] font-bold text-slate-400 shrink-0 whitespace-nowrap">
+                            {{ $reg->created_at->format('d-M-Y') }}
+                        </span>
                     </div>
 
                     <!-- Mobile & Email Contact Pill -->
-                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 space-y-1 text-[10px]">
-                        <div class="flex items-center gap-1.5 font-black text-slate-800">
+                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-100/80 space-y-0.5 text-[10px]">
+                        <div class="flex items-center gap-1.5 font-bold text-slate-800">
                             <span>📞</span>
-                            <span>{{ $userPhone ?: '-' }}</span>
+                            <a href="tel:{{ $userPhone }}" class="hover:text-primary-600 transition-colors">{{ $userPhone ?: '-' }}</a>
                         </div>
                         @if(!empty($userEmail))
-                            <div class="flex items-center gap-1.5 text-[9px] text-slate-500 font-semibold truncate" title="{{ $userEmail }}">
+                            <div class="flex items-center gap-1.5 text-[9px] text-slate-500 font-medium truncate" title="{{ $userEmail }}">
                                 <span>✉️</span>
-                                <span>{{ $userEmail }}</span>
+                                <span class="truncate">{{ $userEmail }}</span>
                             </div>
                         @endif
                     </div>
 
-                    <!-- Persons Count & Pass Fee Info -->
-                    <div class="grid grid-cols-2 gap-1.5 text-[10px]">
-                        <!-- Ketla Person Attending -->
-                        <div class="bg-primary-50/90 p-2 rounded-xl border border-primary-100 col-span-2 flex items-center justify-between">
-                            <span class="text-[9px] font-black text-primary-800 uppercase tracking-wider">
-                                {{ $isGu ? '👥 હાજર વ્યક્તિઓની સંખ્યા:' : '👥 Attending Persons:' }}
-                            </span>
-                            <span class="font-black text-primary-700 text-xs px-2 py-0.5 bg-white rounded-lg border border-primary-200 shadow-2xs">
-                                {{ $personCount }} {{ $isGu ? 'વ્યક્તિ' : ($personCount > 1 ? 'Persons' : 'Person') }}
-                            </span>
-                        </div>
-
-                        @if($event->pass_fee > 0)
-                            <div class="col-span-2 p-2 rounded-xl border flex items-center justify-between {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'bg-emerald-50/90 border-emerald-200' : 'bg-rose-50 border-rose-200' }}">
-                                <div>
-                                    <span class="text-[8px] font-extrabold uppercase block tracking-wider {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'text-emerald-700' : 'text-rose-600' }}">
-                                        💳 {{ $isGu ? 'પાસ ફી' : 'Pass Fee' }}
-                                    </span>
-                                    <span class="font-black text-xs {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'text-emerald-800' : 'text-rose-700' }}">
-                                        ₹{{ number_format($reg->payment_amount ?? $event->pass_fee, 0) }}
-                                    </span>
-                                </div>
-                                <span class="text-[8px] font-extrabold px-2 py-0.5 rounded-md uppercase {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-700' }}">
-                                    {{ ($reg->payment_status ?? 'unpaid') === 'paid' ? ($isGu ? 'ચૂકવેલ' : 'PAID') : ($isGu ? 'બાકી' : 'UNPAID') }}
-                                </span>
-                            </div>
-                        @endif
+                    <!-- Persons Attending Pill -->
+                    <div class="bg-primary-50/80 px-2.5 py-1.5 rounded-lg border border-primary-100 flex items-center justify-between text-[10px]">
+                        <span class="text-[10px] font-bold text-primary-800">
+                            👥 {{ $isGu ? 'હાજર વ્યક્તિઓ:' : 'Attending Persons:' }}
+                        </span>
+                        <span class="font-black text-primary-700 text-xs px-2 py-0.5 bg-white rounded-md border border-primary-200/80 shadow-2xs">
+                            {{ $personCount }} {{ $isGu ? 'વ્યક્તિ' : ($personCount > 1 ? 'Persons' : 'Person') }}
+                        </span>
                     </div>
                 </div>
             </div>

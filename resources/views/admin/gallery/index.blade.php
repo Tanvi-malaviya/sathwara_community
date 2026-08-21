@@ -9,31 +9,43 @@
         $canAddGallery = $user->hasRole('Administrator') || $userPerms->contains('gallery_manage') || $userPerms->contains('gallery_add');
         $canDeleteGallery = $user->hasRole('Administrator') || $userPerms->contains('gallery_manage') || $userPerms->contains('gallery_delete');
     @endphp
-    <div x-data="{ showAddModal: @json($errors->any()) }">
+    <div x-data="{ showAddModal: @json($errors->any()), search: '' }">
         <!-- Header Actions & Search bar -->
-        <!-- Header Actions -->
-        <div class="flex justify-end items-center gap-2 bg-white p-3 rounded-xl border border-slate-100 shadow-sm mb-4">
-            <a href="{{ route('admin.gallery.export', request()->all()) }}"
-                class="inline-flex items-center justify-center px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-all shrink-0 whitespace-nowrap">
-                📊 <span>{{ __('messages.export_excel') }}</span>
-            </a>
-
-            @if($canAddGallery)
-                <button @click="showAddModal = true"
-                    class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 font-bold text-xs text-white rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-95 shrink-0 whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    {{ __('messages.add_photo') }}
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-xs mb-4">
+            <div class="relative w-full sm:w-72">
+                <input type="text" x-model="search" placeholder="{{ __('messages.search_placeholder') ?? 'Search photos...' }}" 
+                       class="h-9 w-full text-xs font-semibold pl-9 pr-8 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <button type="button" x-show="search" @click="search = ''" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-sm" title="Clear search">
+                    &times;
                 </button>
-            @endif
+            </div>
+
+            <div class="flex items-center gap-2 justify-end w-full sm:w-auto">
+                <a href="{{ route('admin.gallery.export', request()->all()) }}"
+                    class="inline-flex items-center justify-center px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-all shrink-0 whitespace-nowrap">
+                    📊 <span>{{ __('messages.export_excel') }}</span>
+                </a>
+
+                @if($canAddGallery)
+                    <button @click="showAddModal = true"
+                        class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 font-bold text-xs text-white rounded-xl shadow-xs transition-transform hover:-translate-y-0.5 shrink-0 whitespace-nowrap">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        {{ __('messages.add_photo') }}
+                    </button>
+                @endif
+            </div>
         </div>
 
         <!-- Photos Grid List -->
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             @forelse($photos as $photo)
-                <div
+                <div x-show="!search || '{{ strtolower(addslashes($photo->caption ?? '')) }}'.includes(search.toLowerCase().trim())"
                     class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
                     <div class="aspect-square w-full overflow-hidden bg-slate-50 relative">
                         <img class="w-full h-full object-cover"

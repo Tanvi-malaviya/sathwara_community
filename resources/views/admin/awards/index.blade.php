@@ -3,11 +3,7 @@
 @section('page_title', __('messages.student_award_applications'))
 
 @section('content')
-<div class="space-y-2">
-    <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-        <p class="text-xs text-slate-500">{{ __('messages.award_review_desc') }}</p>
-    </div>
-
+<div class="space-y-4">
     <!-- Search & Filters Toolbar -->
     <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">

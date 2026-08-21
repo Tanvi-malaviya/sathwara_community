@@ -62,37 +62,40 @@
 
         {{-- LISTINGS TAB --}}
         <div x-show="activeTab==='listings'" x-cloak class="space-y-3">
-            <!-- Single Integrated Toolbar Line -->
-            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <!-- Single Integrated Toolbar Line (All in 1 Row) -->
+            <div class="bg-white p-2.5 rounded-xl border border-slate-100 shadow-xs">
+                <div class="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5">
                     <form method="GET" action="{{ route('admin.businesses.index') }}"
-                        class="flex flex-wrap items-center gap-2 flex-grow">
+                        class="flex items-center gap-2 flex-grow min-w-0">
                         @if(request('status'))
                             <input type="hidden" name="status" value="{{ request('status') }}">
                         @endif
 
                         <!-- Search Input -->
-                        <div class="relative flex-1 min-w-[200px]">
+                        <div class="relative flex-1 min-w-0 max-w-sm">
                             <input type="text" name="search" value="{{ request('search') }}"
                                 placeholder="{{ __('messages.search_business_placeholder') }}"
-                                class="h-9 w-full text-xs font-semibold pl-9 pr-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
-                            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none"
+                                class="h-8.5 w-full text-xs font-semibold pl-8 pr-7 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
+                            @if(request()->filled('search'))
+                                <a href="{{ route('admin.businesses.index', request()->except('search')) }}" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-xs" title="Clear search">&times;</a>
+                            @endif
                         </div>
 
                         <!-- Search Button -->
                         <button type="submit"
-                            class="h-9 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors shrink-0 whitespace-nowrap">
+                            class="h-8.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg transition-colors shrink-0 whitespace-nowrap">
                             {{ __('messages.search') }}
                         </button>
 
                         <!-- Category Select Dropdown -->
-                        <div class="shrink-0">
+                        <div class="shrink-0 w-36 sm:w-44">
                             <select name="category_id" onchange="this.form.submit()"
-                                class="h-9 text-xs font-semibold px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                                class="h-8.5 w-full text-xs font-semibold px-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:outline-none transition-all truncate">
                                 <option value="">{{ __('messages.all_categories') }}</option>
                                 @foreach($categories as $cat)
                                     <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
@@ -102,34 +105,34 @@
                         </div>
                     </form>
 
-                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <div class="flex items-center gap-2 shrink-0 justify-end flex-nowrap overflow-x-auto">
                         <!-- Status Filter Tabs -->
                         <div
-                            class="flex items-center p-1 rounded-xl bg-slate-100/80 border border-slate-200/60 shrink-0 overflow-x-auto">
+                            class="flex items-center p-0.5 rounded-lg bg-slate-100/80 border border-slate-200/60 shrink-0 overflow-x-auto">
                             <a href="{{ route('admin.businesses.index', array_merge(request()->except(['status', 'page']))) }}"
-                                class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ empty(request('status')) ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
+                                class="px-2 py-1 rounded-md text-xs font-bold transition-all whitespace-nowrap {{ empty(request('status')) ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                                 {{ __('messages.all') }} ({{ $totalCount }})
                             </a>
 
                             <a href="{{ route('admin.businesses.index', array_merge(request()->except('page'), ['status' => 'pending'])) }}"
-                                class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'pending' ? 'bg-amber-500 text-white shadow-xs' : 'text-amber-700 hover:bg-amber-100/50' }}">
+                                class="px-2 py-1 rounded-md text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'pending' ? 'bg-amber-500 text-white shadow-xs' : 'text-amber-700 hover:bg-amber-100/50' }}">
                                 {{ __('messages.pending') }} ({{ $pendingCount }})
                             </a>
 
                             <a href="{{ route('admin.businesses.index', array_merge(request()->except('page'), ['status' => 'approved'])) }}"
-                                class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'approved' ? 'bg-emerald-600 text-white shadow-xs' : 'text-emerald-700 hover:bg-emerald-100/50' }}">
+                                class="px-2 py-1 rounded-md text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'approved' ? 'bg-emerald-600 text-white shadow-xs' : 'text-emerald-700 hover:bg-emerald-100/50' }}">
                                 {{ __('messages.approved') }} ({{ $approvedCount }})
                             </a>
 
                             <a href="{{ route('admin.businesses.index', array_merge(request()->except('page'), ['status' => 'rejected'])) }}"
-                                class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'rejected' ? 'bg-rose-600 text-white shadow-xs' : 'text-rose-700 hover:bg-rose-100/50' }}">
+                                class="px-2 py-1 rounded-md text-xs font-bold transition-all whitespace-nowrap {{ request('status') === 'rejected' ? 'bg-rose-600 text-white shadow-xs' : 'text-rose-700 hover:bg-rose-100/50' }}">
                                 {{ __('messages.rejected') }} ({{ $rejectedCount }})
                             </a>
                         </div>
 
                         <!-- Export CSV Button -->
                         <a href="{{ route('admin.businesses.export', request()->all()) }}"
-                            class="h-9 px-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-colors inline-flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap">
+                            class="h-8.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-lg border border-emerald-200/60 shadow-xs transition-colors inline-flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap">
                             📊 <span>{{ __('messages.export_excel') }}</span>
                         </a>
                     </div>
