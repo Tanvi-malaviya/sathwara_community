@@ -15,10 +15,23 @@
             
             <!-- Left Column: Profile Photo -->
             <div class="flex flex-col items-center shrink-0 w-full md:w-auto">
-                <div class="relative w-40 h-40 sm:w-40 sm:h-40 rounded-xl overflow-hidden bg-slate-50 border border-slate-200/80 shadow-xs group">
-                    <img class="w-full h-full object-cover" 
-                         src="{{ $member->memberProfile && $member->memberProfile->photo_path && $member->memberProfile->photo_path !== 'NOT_SPECIFIED' ? (str_starts_with($member->memberProfile->photo_path, 'http') ? $member->memberProfile->photo_path : asset('storage/' . $member->memberProfile->photo_path)) : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200' }}" 
-                         alt="{{ $member->name }}">
+                @php
+                    $profile = $member->memberProfile;
+                    $hasPhoto = ($profile && !empty($profile->photo_path) && !str_contains($profile->photo_path, 'unsplash.com') && $profile->photo_path !== 'NOT_SPECIFIED' && $profile->photo_path !== 'N/A');
+                @endphp
+                <div class="relative w-40 h-40 sm:w-40 sm:h-40 rounded-xl overflow-hidden bg-slate-50 border border-slate-200/80 shadow-xs flex items-center justify-center">
+                    @if($hasPhoto)
+                        <img class="w-full h-full object-cover" 
+                             src="{{ str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path) }}" 
+                             alt="{{ $member->name }}">
+                    @else
+                        <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100/80 text-slate-400 p-3 text-center">
+                            <svg class="w-12 h-12 text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">No Photo</span>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -28,14 +41,19 @@
                 <!-- Header: Member Name, Status Badge & Actions -->
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
                     <div>
-                        <h3 class="text-base font-extrabold text-slate-900 leading-tight">{{ $member->name }}</h3>
-                        <p class="text-[11px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">
-                            {{ __('messages.member_id_prefix') }}: {{ $member->member_code ?: $member->formatted_member_id }} &bull; {{ __('messages.registered_at') }}: {{ $member->created_at->format('d-M-Y') }}
+                        <h3 class="text-lg font-black text-slate-900 leading-tight">{{ $member->name }}</h3>
+                        <p class="text-[11px] text-slate-400 font-bold tracking-wider uppercase mt-1">
+                            {{ __('messages.registered_at') }}: {{ $member->created_at->format('d-M-Y') }}
                         </p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider {{ $member->status == 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($member->status == 'rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200') }}">
+                        <!-- Highlighted Member ID Badge on Right Corner -->
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-black bg-primary-50 text-primary-700 border border-primary-300 shadow-2xs tracking-wider">
+                            {{ $member->member_code ?: $member->formatted_member_id }}
+                        </span>
+
+                        <span class="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider {{ $member->status == 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($member->status == 'rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200') }}">
                             {{ __('messages.status_label') }}: 
                             @if($member->status == 'approved')
                                 {{ __('messages.approved') }}

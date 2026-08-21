@@ -1,6 +1,26 @@
 @extends('layouts.public')
 
 @section('content')
+    <style>
+        /* Event Details Page Font Enhancements */
+        .event-details-content .rich-text,
+        .event-details-content .rich-text p,
+        .event-details-content .rich-text li {
+            font-size: 15.5px !important;
+            line-height: 1.75 !important;
+            color: #334155 !important;
+        }
+        .event-details-content .rich-text h1,
+        .event-details-content .rich-text h2,
+        .event-details-content .rich-text h3 {
+            font-size: 1.35rem !important;
+            font-weight: 800 !important;
+            margin-top: 1.25rem !important;
+            margin-bottom: 0.5rem !important;
+            color: #0f172a !important;
+        }
+    </style>
+
     <!-- Event Header Banner (Top Hero Section) -->
     <section class="relative bg-slate-950 text-white overflow-hidden py-10 md:py-14">
         <!-- Ambient background lighting -->
@@ -11,11 +31,11 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 
                 <!-- Left Side Text & Details -->
-                <div class="{{ !empty($event->banner_path) ? 'lg:col-span-8' : 'lg:col-span-12' }} space-y-4">
+                <div class="{{ !empty($event->banner_path) ? 'lg:col-span-8' : 'lg:col-span-12' }} space-y-5">
                     <!-- Breadcrumbs -->
-                    <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
+                    <nav class="flex items-center gap-2 text-sm font-semibold text-slate-300">
                         <a href="{{ route('home') }}" class="hover:text-white transition-colors flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                             </svg>
                             <span>{{ __('messages.home') }}</span>
@@ -25,40 +45,48 @@
                             <span>{{ __('messages.events') }}</span>
                         </a>
                         <span class="text-slate-600">/</span>
-                        <span class="text-primary-400 font-bold truncate max-w-[200px]">{{ $event->title }}</span>
+                        <span class="text-primary-400 font-bold truncate max-w-[240px]">{{ $event->title }}</span>
                     </nav>
 
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold bg-primary-500/20 text-primary-300 border border-primary-500/30 uppercase tracking-wider">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <span class="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-black bg-primary-500/20 text-primary-300 border border-primary-500/30 uppercase tracking-wider">
                             {{ __('messages.community_gathering') }}
                         </span>
                         @if($event->date < now()->toDateString())
-                            <span class="text-[10px] font-extrabold text-slate-400 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700 uppercase tracking-wider">{{ __('messages.passed') }}</span>
+                            <span class="text-xs font-black text-slate-200 bg-slate-800 px-3.5 py-1 rounded-full border border-slate-700 uppercase tracking-wider shadow-xs">{{ __('messages.passed') }}</span>
                         @else
-                            <span class="text-[10px] font-extrabold text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-700/60 uppercase tracking-wider">{{ __('messages.upcoming') }}</span>
+                            <span class="text-xs font-black text-white bg-emerald-600 px-3.5 py-1 rounded-full border border-emerald-500 uppercase tracking-wider shadow-xs">{{ __('messages.upcoming') }}</span>
+                        @endif
+
+                        @if(($event->event_type ?? 'normal') === 'inam_vitaran')
+                            <span class="text-xs font-black text-white bg-amber-500 px-3.5 py-1 rounded-full border border-amber-400 uppercase tracking-wider shadow-xs">🏆 {{ __('messages.inam') }}</span>
+                        @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
+                            <span class="text-xs font-black text-white bg-purple-600 px-3.5 py-1 rounded-full border border-purple-500 uppercase tracking-wider shadow-xs">⚡ {{ __('messages.yuva') }}</span>
                         @endif
                     </div>
 
-                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white">
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
                         {{ $event->title }}
                     </h1>
 
                     <!-- Meta Details -->
-                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-200 font-semibold pt-1">
-                        <div class="inline-flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3.5 py-2 rounded-xl whitespace-nowrap shadow-xs">
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-slate-200 font-bold pt-1">
+                        <div class="inline-flex items-center gap-2 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl whitespace-nowrap shadow-xs">
                             <span>📅</span>
                             <span>{{ date('F d, Y', strtotime($event->date)) }}</span>
                         </div>
-                        <div class="inline-flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3.5 py-2 rounded-xl whitespace-nowrap shadow-xs">
-                            <span>⏰</span>
-                            <span>{{ date('h:i A', strtotime($event->time)) }}</span>
-                        </div>
-                        <div class="inline-flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3.5 py-2 rounded-xl shadow-xs">
+                        @if($event->time)
+                            <div class="inline-flex items-center gap-2 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl whitespace-nowrap shadow-xs">
+                                <span>⏰</span>
+                                <span>{{ date('h:i A', strtotime($event->time)) }}</span>
+                            </div>
+                        @endif
+                        <div class="inline-flex items-center gap-2 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl shadow-xs">
                             <span>📍</span>
                             <span class="truncate max-w-xs sm:max-w-md" title="{{ $event->venue }}">{{ $event->venue }}</span>
                         </div>
                         @if(!empty($event->registration_end_date))
-                            <div class="inline-flex items-center gap-2 text-rose-300 font-extrabold bg-rose-950/80 px-3.5 py-2 rounded-xl border border-rose-700/60 whitespace-nowrap shadow-xs">
+                            <div class="inline-flex items-center gap-2 text-rose-200 font-extrabold bg-rose-950 px-4 py-2.5 rounded-xl border border-rose-800 whitespace-nowrap shadow-xs">
                                 <span>⏳</span>
                                 <span>{{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
                             </div>
@@ -81,15 +109,15 @@
     </section>
 
     <!-- Event Content & Registration -->
-    <section class="py-12 md:py-16 bg-white">
+    <section class="py-12 md:py-16 bg-white event-details-content">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
                 
                 <!-- Left: Description / Gallery (7 cols) -->
                 <div class="lg:col-span-7 space-y-10">
                     <div class="space-y-4">
-                        <h2 class="text-xl font-extrabold text-slate-900">{{ __('messages.event_description') }}</h2>
-                        <div class="rich-text text-xs text-slate-600 leading-relaxed">
+                        <h2 class="text-2xl font-black text-slate-900">{{ __('messages.event_description') }}</h2>
+                        <div class="rich-text text-base text-slate-700 leading-relaxed">
                             {!! $event->description !!}
                         </div>
                     </div>
@@ -98,11 +126,11 @@
                     @if(!empty($event->map_embed_url))
                         <div class="space-y-4 pt-4 border-t border-slate-100">
                             <div class="flex items-center justify-between gap-2 flex-wrap">
-                                <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                                <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
                                     <span>📍 {{ __('messages.event_location_venue') }}</span>
                                 </h2>
                             </div>
-                            <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-52 sm:h-60 w-full bg-slate-50">
+                            <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-56 sm:h-64 w-full bg-slate-50">
                                 <iframe src="{{ $event->map_embed_url }}" class="w-full h-full border-0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                             </div>
                         </div>
@@ -111,7 +139,7 @@
                     <!-- Event Gallery -->
                     @if($gallery->count() > 0)
                         <div class="space-y-6">
-                            <h2 class="text-xl font-extrabold text-slate-900">{{ __('messages.event_gallery') }}</h2>
+                            <h2 class="text-2xl font-black text-slate-900">{{ __('messages.event_gallery') }}</h2>
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4"
                                  x-data="{ 
                                      lightbox: false, 
@@ -229,38 +257,37 @@
 
                     <!-- Yuva Melo Biodata Registration Card (Below Gallery) -->
                     @if(($event->event_type ?? 'normal') === 'yuva_melo')
-                        <div class="rounded-2xl sm:rounded-3xl p-5 sm:p-6 bg-gradient-to-r from-purple-50 via-indigo-50/50 to-white border border-purple-200 shadow-sm space-y-4">
+                        <div class="rounded-2xl sm:rounded-3xl p-6 bg-gradient-to-r from-purple-50 via-indigo-50/50 to-white border border-purple-200 shadow-sm space-y-4">
                             <div class="flex items-center justify-between gap-3 flex-wrap">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-11 h-11 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl font-black shadow-sm shrink-0">
+                                    <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-2xl font-black shadow-sm shrink-0">
                                         ⚡
                                     </div>
                                     <div>
-                                        <span class="text-[10px] font-extrabold text-purple-700 uppercase tracking-wider block">{{ __('messages.candidate_biodata_form') }}</span>
-                                        <h3 class="text-base sm:text-lg font-black text-slate-900 leading-tight">{{ __('messages.yuva_melo_registration') }}</h3>
+                                        <span class="text-xs font-extrabold text-purple-700 uppercase tracking-wider block">{{ __('messages.candidate_biodata_form') }}</span>
+                                        <h3 class="text-lg sm:text-xl font-black text-slate-900 leading-tight">{{ __('messages.yuva_melo_registration') }}</h3>
                                     </div>
                                 </div>
 
                                 <!-- Fee Pill -->
-                                <div class="bg-white border border-purple-200 px-3.5 py-1.5 rounded-xl flex items-center gap-2 shadow-2xs">
-                                    <span class="text-xs text-slate-500 font-bold">{{ __('messages.form_fee') }}:</span>
+                                <div class="bg-white border border-purple-200 px-4 py-2 rounded-xl flex items-center gap-2 shadow-2xs">
+                                    <span class="text-sm text-slate-600 font-bold">{{ __('messages.form_fee') }}:</span>
                                     @if(($event->form_fee ?? 0) > 0)
-                                        <span class="text-base font-black text-purple-700">₹{{ number_format($event->form_fee) }}</span>
+                                        <span class="text-lg font-black text-purple-700">₹{{ number_format($event->form_fee) }}</span>
                                     @else
-                                        <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">{{ __('messages.free') }}</span>
+                                        <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">{{ __('messages.free') }}</span>
                                     @endif
                                 </div>
                             </div>
 
-                            <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                            <p class="text-sm text-slate-600 leading-relaxed font-medium">
                                 {{ __('messages.yuva_melo_card_desc') }}
                             </p>
 
                             <div class="pt-1 flex items-center">
                                 <a href="{{ route('events.public_register_form', $event->id) }}"
-                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-xs transition-all cursor-pointer">
-                                    <span>⚡ {{ __('messages.fill_yuva_form') ?? 'Fill Yuva Melo Registration Form' }}</span>
-                                    <span>&rarr;</span>
+                                    class="inline-flex items-center justify-center px-6 py-3 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-sm font-extrabold rounded-xl shadow-xs transition-all cursor-pointer">
+                                    <span>{{ __('messages.fill_yuva_form') ?? 'Fill Yuva Melo Registration Form' }}</span>
                                 </a>
                             </div>
                         </div>
@@ -269,9 +296,9 @@
 
                 <!-- Right: Registration Widget (5 cols - Fixed/Sticky on Scroll) -->
                 <div class="lg:col-span-5 lg:sticky self-start z-20" style="position: -webkit-sticky; position: sticky; top: 6rem;">
-                    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs space-y-3.5">
-                        <div class="border-b border-slate-100 pb-2.5 flex items-center justify-between gap-2 flex-wrap">
-                            <h3 class="text-sm font-black text-slate-900">
+                    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-md space-y-4">
+                        <div class="border-b border-slate-100 pb-3 flex items-center justify-between gap-2 flex-wrap">
+                            <h3 class="text-base font-black text-slate-900">
                                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                     {{ __('messages.inam_vitaran_registration') }}
                                 @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
@@ -280,7 +307,7 @@
                                     {{ __('messages.event_registration') }}
                                 @endif
                             </h3>
-                            <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider {{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? 'text-amber-800 bg-amber-50 border border-amber-200' : (($event->event_type ?? 'normal') === 'yuva_melo' ? 'text-purple-800 bg-purple-50 border border-purple-200' : 'text-primary-700 bg-primary-50 border border-primary-200') }}">
+                            <span class="text-xs font-black px-3 py-1 rounded-lg uppercase tracking-wider {{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? 'text-amber-800 bg-amber-50 border border-amber-200' : (($event->event_type ?? 'normal') === 'yuva_melo' ? 'text-purple-800 bg-purple-50 border border-purple-200' : 'text-primary-700 bg-primary-50 border border-primary-200') }}">
                                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                     🏆 {{ __('messages.inam_vitaran') }}
                                 @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
@@ -291,59 +318,59 @@
                             </span>
                         </div>
 
-                        <div class="space-y-3">
+                        <div class="space-y-4">
                             @if($event->date < now()->toDateString())
                                 <!-- Finished Event -->
-                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-xs font-bold text-center">
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-600 text-sm font-bold text-center">
                                     {{ __('messages.event_concluded') }}
                                 </div>
                             @elseif($event->status === 'cancelled')
                                 <!-- Cancelled Event -->
-                                <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold text-center">
+                                <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-sm font-bold text-center">
                                     {{ __('messages.event_cancelled') }}
                                 </div>
                             @else
                                 <!-- Active Event Registration check for all event types -->
                                 <div x-data="{ showPassModal: false, showViewPassesModal: false, count: 1, passFee: {{ (float)($event->pass_fee ?? 0) }} }"
                                      @close-all-modals.window="showPassModal = false; showViewPassesModal = false"
-                                     class="space-y-3">
+                                     class="space-y-4">
                                     @if(auth()->guest())
-                                        <div class="space-y-3">
+                                        <div class="space-y-3.5">
                                             @if(($event->pass_fee ?? 0) > 0)
-                                                <div class="bg-primary-50/70 border border-primary-100 rounded-xl p-2.5 flex items-center justify-between">
-                                                    <span class="text-xs font-bold text-primary-800">🎟️ {{ __('messages.pass_fee_per_person') }}:</span>
-                                                    <span class="text-sm font-black text-primary-700">₹{{ number_format($event->pass_fee) }}</span>
+                                                <div class="bg-primary-50 border border-primary-200 rounded-2xl p-3.5 flex items-center justify-between">
+                                                    <span class="text-sm font-bold text-primary-900">{{ __('messages.pass_fee_per_person') }}:</span>
+                                                    <span class="text-base font-black text-primary-700">₹{{ number_format($event->pass_fee) }}</span>
                                                 </div>
                                             @endif
-                                            <p class="text-[11px] text-slate-500 text-center">{{ __('messages.please_login_to_register') }}</p>
+                                            <p class="text-xs text-slate-600 text-center font-medium">{{ __('messages.please_login_to_register') }}</p>
                                             <a href="{{ route('login') }}"
-                                                class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition-colors text-center cursor-pointer">
+                                                class="w-full flex items-center justify-center px-5 py-3.5 bg-primary-600 hover:bg-primary-500 active:scale-95 text-white text-sm font-extrabold rounded-xl shadow-md shadow-primary-500/20 transition-all text-center cursor-pointer">
                                                 {{ __('messages.login_to_register') }}
                                             </a>
                                         </div>
                                     @elseif(auth()->check() && auth()->user()->hasRole('Administrator'))
-                                        <div class="p-3 rounded-xl bg-slate-50 text-slate-500 text-xs font-bold text-center border border-slate-200">
+                                        <div class="p-4 rounded-2xl bg-slate-50 text-slate-600 text-sm font-bold text-center border border-slate-200">
                                             {{ __('messages.administrator_account') }}
                                         </div>
                                     @elseif(auth()->check() && auth()->user()->status !== 'approved')
-                                        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold text-center leading-relaxed">
+                                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-sm font-bold text-center leading-relaxed">
                                             {!! __('messages.account_status_currently', ['status' => '<strong>'.e(auth()->user()->status).'</strong>']) !!} {{ __('messages.register_once_approved') }}
                                         </div>
                                     @else
                                         <!-- Normal, Inam Vitaran and Yuva Melo Attendee Passes -->
-                                        <div class="space-y-3">
+                                        <div class="space-y-3.5">
                                             @if(($event->pass_fee ?? 0) > 0)
-                                                <div class="bg-primary-50/70 border border-primary-100 rounded-xl p-2.5 flex items-center justify-between">
+                                                <div class="bg-primary-50 border border-primary-200 rounded-2xl p-3.5 flex items-center justify-between">
                                                     <div>
-                                                        <span class="text-xs font-black text-primary-900 block">🎟️ {{ __('messages.pass_fee_per_person') }}</span>
-                                                        <span class="text-[10px] text-slate-500 font-medium">{{ __('messages.per_person_pass_fee') }}</span>
+                                                        <span class="text-sm font-black text-primary-900 block">{{ __('messages.pass_fee_per_person') }}</span>
+                                                        <span class="text-xs text-slate-500 font-medium">{{ __('messages.per_person_pass_fee') }}</span>
                                                     </div>
-                                                    <span class="text-sm font-black text-primary-700">₹{{ number_format($event->pass_fee) }}</span>
+                                                    <span class="text-base font-black text-primary-700">₹{{ number_format($event->pass_fee) }}</span>
                                                 </div>
                                             @else
-                                                <div class="bg-emerald-50/70 border border-emerald-100 rounded-xl p-2.5 flex items-center justify-between">
-                                                    <span class="text-xs font-bold text-emerald-800">🎟️ {{ __('messages.registration_fee') }}:</span>
-                                                    <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-100 px-2 py-0.5 rounded-md">{{ __('messages.free_entry') }}</span>
+                                                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between">
+                                                    <span class="text-sm font-bold text-emerald-900">{{ __('messages.registration_fee') }}:</span>
+                                                    <span class="text-xs font-black text-emerald-700 uppercase bg-emerald-100 px-3 py-1 rounded-lg">{{ __('messages.free_entry') }}</span>
                                                 </div>
                                             @endif
 
@@ -360,30 +387,27 @@
                                                 @endphp
 
                                                 <!-- Action Buttons Side-by-Side -->
-                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                                                     <!-- View My Passes Button -->
                                                     <button type="button" 
                                                             @click="showViewPassesModal = true"
-                                                            class="w-full flex items-center justify-center px-3 py-2 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-[11px] font-extrabold rounded-xl shadow-xs transition-all text-center cursor-pointer gap-1">
-                                                        <span>🎟️ {{ __('messages.view_my_passes', ['count' => $regPersons]) }}</span>
-                                                        <span>👁️</span>
+                                                            class="w-full flex items-center justify-center px-4 py-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-xs transition-all text-center cursor-pointer">
+                                                        <span>{{ __('messages.view_my_passes', ['count' => $regPersons]) }}</span>
                                                     </button>
 
                                                     <!-- Purchase More Passes Button -->
                                                     <button type="button" 
                                                             @click="count = 1; showPassModal = true;"
-                                                            class="w-full flex items-center justify-center px-3 py-2 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-[11px] font-extrabold rounded-xl shadow-xs transition-all text-center cursor-pointer gap-1">
-                                                        <span>➕ {{ __('messages.purchase_more_passes') }}</span>
-                                                        <span>&rarr;</span>
+                                                            class="w-full flex items-center justify-center px-4 py-3 bg-primary-600 hover:bg-primary-500 active:scale-95 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-md shadow-primary-500/20 transition-all text-center cursor-pointer">
+                                                        <span>{{ __('messages.purchase_more_passes') }}</span>
                                                     </button>
                                                 </div>
                                             @else
                                                 <!-- Purchase Pass Button -->
                                                 <button type="button" 
                                                         @click="count = 1; showPassModal = true;"
-                                                        class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-extrabold rounded-xl shadow-xs transition-all text-center cursor-pointer gap-1.5">
-                                                    <span>🎟️ {{ __('messages.purchase_pass') }}</span>
-                                                    <span>&rarr;</span>
+                                                        class="w-full flex items-center justify-center px-5 py-3.5 bg-primary-600 hover:bg-primary-500 active:scale-95 text-white text-sm font-extrabold rounded-xl shadow-md shadow-primary-500/20 transition-all text-center cursor-pointer">
+                                                    <span>{{ __('messages.purchase_pass') }}</span>
                                                 </button>
                                             @endif
                                         </div>

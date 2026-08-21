@@ -132,4 +132,138 @@ class AreaController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Download Sample CSV for Area Import
+     */
+    public function downloadSampleCsv()
+    {
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=areas_sample_template.csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, ['Area Name', 'Pincode']);
+            fputcsv($file, ['Bapunagar', '380024']);
+            fputcsv($file, ['Nikol', '382350']);
+            fputcsv($file, ['Satellite', '380015']);
+            fputcsv($file, ['Naroda', '382330']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Import Areas from CSV / Excel file
+     */
+    public function importCsv(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:5120',
+        ], [
+            'csv_file.required' => 'Please select a CSV file to upload.',
+            'csv_file.mimes'    => 'The file must be a valid CSV format (.csv).',
+            'csv_file.max'      => 'The file size must not exceed 5MB.',
+        ]);
+
+        $file = $request->file('csv_file');
+        $handle = fopen($file->getRealPath(), 'r');
+
+        if (!$handle) {
+            return redirect()->back()->with('error', 'Unable to read the uploaded CSV file.');
+        }
+
+        // Read first bytes to strip UTF-8 BOM if present
+        $bom = fread($handle, 3);
+        if ($bom !== "\xEF\xBB\xBF") {
+            rewind($handle);
+        }
+
+        $importedCount = 0;
+        $updatedCount = 0;
+        $skippedCount = 0;
+        $isFirstRow = true;
+        $nameColIndex = 0;
+        $pincodeColIndex = 1;
+
+        while (($row = fgetcsv($handle, 1000, ",")) !== false) {
+            // If comma delimiter yielded 1 element with semicolons, try splitting by semicolon
+            if (count($row) === 1 && str_contains($row[0], ';')) {
+                $row = str_getcsv($row[0], ';');
+            }
+
+            // Skip empty rows
+            if (empty($row) || (count($row) === 1 && trim($row[0]) === '')) {
+                continue;
+            }
+
+            // Detect and skip header row
+            if ($isFirstRow) {
+                $isFirstRow = false;
+                $firstCell = mb_strtolower(trim($row[0] ?? ''));
+                
+                // If header row has column headers like 'area_name', 'name', 'વિસ્તાર', etc.
+                if (str_contains($firstCell, 'name') || str_contains($firstCell, 'area') || str_contains($firstCell, 'વિસ્તાર') || str_contains($firstCell, 'id')) {
+                    // Check if ID column exists at index 0 and Name at index 1
+                    if ($firstCell === 'id' && isset($row[1])) {
+                        $nameColIndex = 1;
+                        $pincodeColIndex = 2;
+                    }
+                    continue; // Skip header
+                }
+            }
+
+            $areaName = trim($row[$nameColIndex] ?? '');
+            $pincode = trim($row[$pincodeColIndex] ?? '');
+
+            // Clean up pincode 'N/A' or empty
+            if (in_array(strtoupper($pincode), ['N/A', 'NULL', '-'])) {
+                $pincode = null;
+            }
+
+            if (empty($areaName)) {
+                $skippedCount++;
+                continue;
+            }
+
+            // Find existing area (case-insensitive)
+            $existingArea = Area::whereRaw('LOWER(name) = ?', [mb_strtolower($areaName)])->first();
+
+            if ($existingArea) {
+                // If existing area has no pincode and new pincode is provided, update it
+                if (!empty($pincode) && empty($existingArea->pincode)) {
+                    $existingArea->update(['pincode' => substr($pincode, 0, 10)]);
+                    $updatedCount++;
+                } else {
+                    $skippedCount++;
+                }
+            } else {
+                // Create new Area
+                Area::create([
+                    'name'    => $areaName,
+                    'pincode' => !empty($pincode) ? substr($pincode, 0, 10) : null,
+                ]);
+                $importedCount++;
+            }
+        }
+
+        fclose($handle);
+
+        $message = "Import completed: {$importedCount} new area(s) added.";
+        if ($updatedCount > 0) {
+            $message .= " {$updatedCount} area(s) updated.";
+        }
+        if ($skippedCount > 0) {
+            $message .= " {$skippedCount} existing/empty row(s) skipped.";
+        }
+
+        return redirect()->route('admin.areas.index')->with('success', $message);
+    }
 }

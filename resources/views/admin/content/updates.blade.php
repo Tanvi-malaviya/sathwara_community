@@ -17,6 +17,15 @@
         openEdit(updateItem) {
             this.editUpdate = updateItem;
             this.showEditModal = true;
+            this.$nextTick(() => {
+                if (window.editQuill) {
+                    window.editQuill.root.innerHTML = updateItem.description || '';
+                    var descInput = document.querySelector('#edit_quill_desc');
+                    if (descInput) {
+                        descInput.value = updateItem.description || '';
+                    }
+                }
+            });
         }
     }">
         <!-- Header Actions & Search bar -->
@@ -152,23 +161,21 @@
         <!-- Pagination -->
         <div class="mt-4">
             {{ $updates->links() }}
-        </div>
-
-        <!-- ============ ADD MODAL ============ -->
+        </div        <!-- ============ ADD MODAL ============ -->
         <template x-teleport="body">
             <div x-show="showAddModal"
                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
                 x-cloak>
                 <div @click.away="showAddModal = false"
-                    class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
+                    class="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xl max-w-xl w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
                     <button @click="showAddModal = false"
-                        class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                        class="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
-                    <h3 class="text-xs font-bold text-slate-900 pr-6 font-display">
+                    <h3 class="text-sm font-bold text-slate-900 pr-6 font-display">
                         {{ __('messages.new_announcement_bulletin') }}</h3>
                     <form method="POST" action="{{ route('admin.content.updates.store') }}" enctype="multipart/form-data"
                         class="space-y-3">
@@ -188,11 +195,24 @@
                             <input type="text" name="title" value="{{ old('title') }}" required
                                 class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
                         </div>
-                        <div class="space-y-0.5">
-                            <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.publish_date') }}</label>
-                            <input type="date" name="publish_date" value="{{ old('publish_date', date('Y-m-d')) }}" required
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="space-y-0.5">
+                                <label
+                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.publish_date') }}</label>
+                                <input type="date" name="publish_date" value="{{ old('publish_date', date('Y-m-d')) }}" required
+                                    class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                            </div>
+                            <div class="space-y-0.5">
+                                <label
+                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
+                                <select name="status" required
+                                    class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                                    <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>
+                                        {{ __('messages.published') }}</option>
+                                    <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                         <div class="space-y-0.5">
                             <label
@@ -200,22 +220,15 @@
                             <input type="file" name="image"
                                 class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
                         </div>
-                        <div class="space-y-0.5">
-                            <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
-                            <select name="status" required
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
-                                <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>
-                                    {{ __('messages.published') }}</option>
-                                <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="space-y-0.5">
+                        <div class="space-y-1">
                             <label
                                 class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.announcement_content') }}</label>
-                            <textarea name="description" rows="3" required
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">{{ old('description') }}</textarea>
+                            <input type="hidden" name="description" id="add_quill_desc" value="{{ old('description') }}">
+                            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-xs bg-white">
+                                <div id="add_quill_editor" class="bg-white min-h-[160px] text-xs font-medium">
+                                    {!! old('description') !!}
+                                </div>
+                            </div>
                         </div>
                         <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
                             <button type="button" @click="showAddModal = false"
@@ -234,15 +247,15 @@
                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
                 x-cloak>
                 <div @click.away="showEditModal = false"
-                    class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
+                    class="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xl max-w-xl w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
                     <button @click="showEditModal = false"
-                        class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                        class="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
-                    <h3 class="text-xs font-bold text-slate-900 pr-6 font-display">
+                    <h3 class="text-sm font-bold text-slate-900 pr-6 font-display">
                         {{ __('messages.edit_announcement_bulletin') }}</h3>
                     <form method="POST" :action="editUpdate.update_url" enctype="multipart/form-data" class="space-y-3">
                         @csrf
@@ -262,11 +275,24 @@
                             <input type="text" name="title" :value="editUpdate.title" required
                                 class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
                         </div>
-                        <div class="space-y-0.5">
-                            <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.publish_date') }}</label>
-                            <input type="date" name="publish_date" :value="editUpdate.publish_date" required
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="space-y-0.5">
+                                <label
+                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.publish_date') }}</label>
+                                <input type="date" name="publish_date" :value="editUpdate.publish_date" required
+                                    class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                            </div>
+                            <div class="space-y-0.5">
+                                <label
+                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
+                                <select name="status" required
+                                    class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
+                                    <option value="published" :selected="editUpdate.status === 'published'">
+                                        {{ __('messages.published') }}</option>
+                                    <option value="draft" :selected="editUpdate.status === 'draft'">{{ __('messages.draft') }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                         <div class="space-y-0.5">
                             <label
@@ -274,22 +300,13 @@
                             <input type="file" name="image"
                                 class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
                         </div>
-                        <div class="space-y-0.5">
-                            <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.status') }}</label>
-                            <select name="status" required
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
-                                <option value="published" :selected="editUpdate.status === 'published'">
-                                    {{ __('messages.published') }}</option>
-                                <option value="draft" :selected="editUpdate.status === 'draft'">{{ __('messages.draft') }}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="space-y-0.5">
+                        <div class="space-y-1">
                             <label
                                 class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.announcement_content') }}</label>
-                            <textarea name="description" rows="3" required x-text="editUpdate.description"
-                                class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400"></textarea>
+                            <input type="hidden" name="description" id="edit_quill_desc">
+                            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-xs bg-white">
+                                <div id="edit_quill_editor" class="bg-white min-h-[160px] text-xs font-medium"></div>
+                            </div>
                         </div>
                         <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
                             <button type="button" @click="showEditModal = false"
@@ -302,4 +319,68 @@
             </div>
         </template>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Init Add Quill Editor
+            var addEditorEl = document.querySelector('#add_quill_editor');
+            var addDescInput = document.querySelector('#add_quill_desc');
+            if (addEditorEl && addDescInput && typeof Quill !== 'undefined') {
+                window.addQuill = new Quill('#add_quill_editor', {
+                    theme: 'snow',
+                    placeholder: '{{ __('messages.announcement_content') }}...',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            ['link', 'clean']
+                        ]
+                    }
+                });
+                window.addQuill.on('text-change', function() {
+                    var html = window.addQuill.root.innerHTML;
+                    addDescInput.value = (html === '<p><br></p>') ? '' : html;
+                });
+                var addForm = addEditorEl.closest('form');
+                if (addForm) {
+                    addForm.addEventListener('submit', function() {
+                        var html = window.addQuill.root.innerHTML;
+                        addDescInput.value = (html === '<p><br></p>') ? '' : html;
+                    });
+                }
+            }
+
+            // Init Edit Quill Editor
+            var editEditorEl = document.querySelector('#edit_quill_editor');
+            var editDescInput = document.querySelector('#edit_quill_desc');
+            if (editEditorEl && editDescInput && typeof Quill !== 'undefined') {
+                window.editQuill = new Quill('#edit_quill_editor', {
+                    theme: 'snow',
+                    placeholder: '{{ __('messages.announcement_content') }}...',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            ['link', 'clean']
+                        ]
+                    }
+                });
+                window.editQuill.on('text-change', function() {
+                    var html = window.editQuill.root.innerHTML;
+                    editDescInput.value = (html === '<p><br></p>') ? '' : html;
+                });
+                var editForm = editEditorEl.closest('form');
+                if (editForm) {
+                    editForm.addEventListener('submit', function() {
+                        var html = window.editQuill.root.innerHTML;
+                        editDescInput.value = (html === '<p><br></p>') ? '' : html;
+                    });
+                }
+            }
+        });
+    </script>
 @endsection

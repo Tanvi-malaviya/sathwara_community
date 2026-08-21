@@ -139,6 +139,8 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
     Route::middleware(['permission_check:areas_manage'])->group(function() {
         Route::get('/areas', [AdminArea::class, 'index'])->name('areas.index');
         Route::get('/areas/export', [AdminArea::class, 'exportCsv'])->name('areas.export');
+        Route::get('/areas/sample-csv', [AdminArea::class, 'downloadSampleCsv'])->name('areas.sample_csv');
+        Route::post('/areas/import', [AdminArea::class, 'importCsv'])->name('areas.import');
         Route::post('/areas', [AdminArea::class, 'store'])->name('areas.store');
         Route::put('/areas/{id}', [AdminArea::class, 'update'])->name('areas.update');
         Route::delete('/areas/{id}', [AdminArea::class, 'destroy'])->name('areas.destroy');
