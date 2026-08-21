@@ -23,6 +23,8 @@ return [
     'total_businesses' => 'Total Businesses',
     'all_areas' => 'All Areas',
     'no_members_found' => 'No members found.',
+    'try_adjusting_search' => 'Try adjusting your search or filter to find what you are looking for.',
+    'clear' => 'Clear Search',
     'account_settings' => 'Account Settings',
     'award_form' => 'Award Form',
     'logout' => 'Logout',
