@@ -23,6 +23,8 @@ return [
     'total_businesses' => 'કુલ બિઝનેસ',
     'all_areas' => 'તમામ એરિયા',
     'no_members_found' => 'કોઈ સભ્યો મળ્યા નથી.',
+    'try_adjusting_search' => 'તમારી શોધ અથવા ફિલ્ટર બદલીને ફરી પ્રયાસ કરો.',
+    'clear' => 'શોધ સાફ કરો',
     'account_settings' => 'એકાઉન્ટ સેટિંગ્સ',
     'award_form' => 'ઇનામ વિતરણ ફોર્મ',
     'logout' => 'લોગઆઉટ',

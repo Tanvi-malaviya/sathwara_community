@@ -15,9 +15,9 @@
                            value="{{ request('search') }}" 
                            placeholder="{{ __('messages.search_members') }}"
                            class="h-9 w-full pl-8.5 pr-8 text-xs font-semibold rounded-lg bg-slate-50 border border-slate-200 focus:bg-white focus:border-primary-500 focus:outline-none transition-all placeholder-slate-400">
-                    <svg class="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- <svg class="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    </svg> -->
                     @if(request('search') || request('area_id'))
                         <a href="{{ route('member.directory') }}" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 text-sm font-bold" title="Clear Filters">&times;</a>
                     @endif
@@ -143,14 +143,13 @@
         </div>
     @else
         <div class="bg-white rounded-xl p-8 border border-slate-100 text-center space-y-2">
-            <span class="text-3xl block">🔍</span>
             <h3 class="text-xs font-black text-slate-800">{{ __('messages.no_members_found') }}</h3>
             <p class="text-[11px] text-slate-500 font-medium max-w-sm mx-auto">
-                {{ __('messages.try_adjusting_search') ?? 'Try adjusting your search query.' }}
+                {{ __('messages.try_adjusting_search') }}
             </p>
             @if(request('search'))
                 <a href="{{ route('member.directory') }}" class="inline-block px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg transition-colors">
-                    {{ __('messages.clear') ?? 'Clear Search' }}
+                    {{ __('messages.clear') }}
                 </a>
             @endif
         </div>
