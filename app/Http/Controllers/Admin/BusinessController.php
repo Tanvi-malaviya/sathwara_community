@@ -35,7 +35,7 @@ class BusinessController extends Controller
             $query->where('status', $request->status);
         }
 
-        $businesses = $query->orderBy('created_at', 'desc')->paginate(15);
+        $businesses = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
         $categories = BusinessCategory::withCount('businesses')->orderBy('name')->get();
 
         $pendingCount = Business::where('status', 'pending')->count();
@@ -276,7 +276,7 @@ class BusinessController extends Controller
      */
     public function categories()
     {
-        $categories = BusinessCategory::withCount('businesses')->orderBy('name')->paginate(10);
+        $categories = BusinessCategory::withCount('businesses')->orderBy('name')->paginate(10)->withQueryString();
         return view('admin.businesses.categories', compact('categories'));
     }
 

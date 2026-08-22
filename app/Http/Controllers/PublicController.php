@@ -609,7 +609,7 @@ class PublicController extends Controller
             }
         }
 
-        $businesses = $query->orderBy('created_at', 'desc')->paginate(9);
+        $businesses = $query->orderBy('created_at', 'desc')->paginate(9)->withQueryString();
 
         return view('public.business_directory', compact('businesses', 'categories'));
     }

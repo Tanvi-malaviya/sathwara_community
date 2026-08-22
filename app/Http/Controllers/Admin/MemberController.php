@@ -15,18 +15,21 @@ class MemberController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::role('Member')->with('memberProfile');
+        $query = User::role('Member')->with(['memberProfile.area']);
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('member_code', 'like', "%{$search}%")
-                  ->orWhereHas('memberProfile', function($sub) use ($search) {
-                      $sub->where('phone', 'like', "%{$search}%")
-                          ->orWhere('city', 'like', "%{$search}%");
-                  });
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('member_code', 'like', "%{$search}%")
+                    ->orWhereHas('memberProfile', function ($sub) use ($search) {
+                        $sub->where('phone', 'like', "%{$search}%")
+                            ->orWhere('city', 'like', "%{$search}%")
+                            ->orWhereHas('area', function ($areaSub) use ($search) {
+                                $areaSub->where('name', 'like', "%{$search}%");
+                            });
+                    });
             });
         }
 
@@ -36,13 +39,13 @@ class MemberController extends Controller
 
         if ($request->filled('city')) {
             $city = $request->city;
-            $query->whereHas('memberProfile', function($q) use ($city) {
+            $query->whereHas('memberProfile', function ($q) use ($city) {
                 $q->where('city', 'like', "%{$city}%");
             });
         }
 
-        $members = $query->orderBy('created_at', 'desc')->paginate(15);
-        
+        $members = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+
         // Get status counts for filter tabs
         $pendingCount = User::role('Member')->where('status', 'pending')->count();
         $approvedCount = User::role('Member')->where('status', 'approved')->count();
@@ -60,7 +63,8 @@ class MemberController extends Controller
      */
     public function create()
     {
-        return view('admin.members.create');
+        $areas = \App\Models\Area::orderBy('name')->get();
+        return view('admin.members.create', compact('areas'));
     }
 
     /**
@@ -72,16 +76,18 @@ class MemberController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'status' => 'required|in:pending,approved,rejected',
+            'account_status' => 'nullable|in:open,close',
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'gender' => 'required|in:Male,Female,Other',
-            'dob' => 'required|date|before:today',
+            'dob' => 'required|date|before_or_equal:today',
             'phone' => 'required|digits:10',
             'whatsapp' => 'nullable|digits:10',
+            'area_id' => 'nullable|exists:areas,id',
             'city' => 'required|string|max:100',
             'state' => 'required|string|max:100',
-            'pincode' => 'required|string|max:10',
+            'pincode' => 'nullable|string|max:10',
             'address' => 'required|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
@@ -94,6 +100,7 @@ class MemberController extends Controller
             'email' => $request->email,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
             'status' => $request->status,
+            'account_status' => $request->account_status ?? 'open',
         ]);
 
         // Assign Member Role
@@ -102,6 +109,14 @@ class MemberController extends Controller
         $photoPath = 'NOT_SPECIFIED';
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('profile_photos', 'public');
+        }
+
+        $pincode = $request->pincode;
+        if ($request->filled('area_id')) {
+            $selectedArea = \App\Models\Area::find($request->area_id);
+            if ($selectedArea && $selectedArea->pincode) {
+                $pincode = $selectedArea->pincode;
+            }
         }
 
         // Create Member Profile
@@ -115,9 +130,10 @@ class MemberController extends Controller
             'phone' => $request->phone,
             'whatsapp' => $request->phone,
             'address' => $request->address,
+            'area_id' => $request->area_id,
             'city' => $request->city,
             'state' => $request->state,
-            'pincode' => $request->pincode,
+            'pincode' => $pincode,
             'photo_path' => $photoPath,
             'aadhaar_number' => 'NOT_SPECIFIED',
             'aadhaar_path' => 'NOT_SPECIFIED',
@@ -131,7 +147,7 @@ class MemberController extends Controller
      */
     public function show($id)
     {
-        $member = User::role('Member')->with(['memberProfile', 'familyMembers'])->findOrFail($id);
+        $member = User::role('Member')->with(['memberProfile.area', 'familyMembers'])->findOrFail($id);
         return view('admin.members.show', compact('member'));
     }
 
@@ -140,8 +156,9 @@ class MemberController extends Controller
      */
     public function edit($id)
     {
-        $member = User::role('Member')->with('memberProfile')->findOrFail($id);
-        return view('admin.members.edit', compact('member'));
+        $member = User::role('Member')->with(['memberProfile.area'])->findOrFail($id);
+        $areas = \App\Models\Area::orderBy('name')->get();
+        return view('admin.members.edit', compact('member', 'areas'));
     }
 
     /**
@@ -155,16 +172,18 @@ class MemberController extends Controller
         $request->validate([
             'email' => 'required|email|unique:users,email,' . $member->id,
             'status' => 'required|in:pending,approved,rejected',
+            'account_status' => 'required|in:open,close',
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'gender' => 'required|in:Male,Female,Other',
-            'dob' => 'required|date|before:today',
+            'dob' => 'required|date|before_or_equal:today',
             'phone' => 'required|digits:10',
             'whatsapp' => 'nullable|digits:10',
+            'area_id' => 'nullable|exists:areas,id',
             'city' => 'required|string|max:100',
             'state' => 'required|string|max:100',
-            'pincode' => 'required|string|max:10',
+            'pincode' => 'nullable|string|max:10',
             'address' => 'required|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
@@ -175,7 +194,16 @@ class MemberController extends Controller
             'name' => $fullName,
             'email' => $request->email,
             'status' => $request->status,
+            'account_status' => $request->account_status,
         ]);
+
+        $pincode = $request->pincode ?: ($profile ? $profile->pincode : null);
+        if ($request->filled('area_id')) {
+            $selectedArea = \App\Models\Area::find($request->area_id);
+            if ($selectedArea && $selectedArea->pincode) {
+                $pincode = $selectedArea->pincode;
+            }
+        }
 
         if ($profile) {
             $updateData = [
@@ -188,9 +216,10 @@ class MemberController extends Controller
                 'phone' => $request->phone,
                 'whatsapp' => $request->phone,
                 'address' => $request->address,
+                'area_id' => $request->area_id,
                 'city' => $request->city,
                 'state' => $request->state,
-                'pincode' => $request->pincode,
+                'pincode' => $pincode,
             ];
 
             if ($request->hasFile('photo')) {
@@ -218,9 +247,10 @@ class MemberController extends Controller
                 'phone' => $request->phone,
                 'whatsapp' => $request->phone,
                 'address' => $request->address,
+                'area_id' => $request->area_id,
                 'city' => $request->city,
                 'state' => $request->state,
-                'pincode' => $request->pincode,
+                'pincode' => $pincode,
                 'photo_path' => $photoPath,
                 'aadhaar_number' => 'NOT_SPECIFIED',
                 'aadhaar_path' => 'NOT_SPECIFIED',
@@ -282,6 +312,23 @@ class MemberController extends Controller
     }
 
     /**
+     * Toggle Account Status (Open / Close)
+     */
+    public function toggleAccountStatus($id)
+    {
+        $this->checkEditPermission();
+
+        $member = User::role('Member')->findOrFail($id);
+        $newStatus = ($member->account_status === 'close') ? 'open' : 'close';
+        $member->update([
+            'account_status' => $newStatus,
+        ]);
+
+        $message = ($newStatus === 'open') ? 'Member account opened successfully.' : 'Member account closed successfully.';
+        return redirect()->back()->with('success', $message);
+    }
+
+    /**
      * Soft Delete Member
      */
     public function destroy($id)
@@ -298,20 +345,20 @@ class MemberController extends Controller
     public function exportCsv(Request $request)
     {
         $headers = [
-            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=members_export_" . date('Y-m-d') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
 
         $query = User::role('Member')->with(['memberProfile', 'familyMembers']);
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -319,13 +366,13 @@ class MemberController extends Controller
             $query->where('status', $request->status);
         }
 
-        $members = $query->get();
+        $members = $query->orderBy('id', 'desc')->get();
 
-        $callback = function() use($members) {
+        $callback = function () use ($members) {
             $file = fopen('php://output', 'w');
-            
+
             // Add UTF-8 BOM for Excel to display Noto Sans Gujarati text correctly
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             fputcsv($file, [
                 __('messages.csv_id'),
@@ -378,10 +425,10 @@ class MemberController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('member_code', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('member_code', 'like', "%{$search}%");
             });
         }
 

@@ -61,8 +61,8 @@ class RegistrationController extends Controller
 
         // Save OTP to session explicitly
         session([
-            'reg_otp_email'   => $email,
-            'reg_otp_code'    => $otp,
+            'reg_otp_email' => $email,
+            'reg_otp_code' => $otp,
             'reg_otp_expires' => now()->addMinutes(10),
         ]);
         session()->save(); // Explicit save for AJAX/database sessions
@@ -102,12 +102,12 @@ class RegistrationController extends Controller
             ], 422);
         }
 
-        $sessionEmail   = session('reg_otp_email');
-        $sessionOtp     = session('reg_otp_code');
+        $sessionEmail = session('reg_otp_email');
+        $sessionOtp = session('reg_otp_code');
         $sessionExpires = session('reg_otp_expires');
 
         $inputEmail = strtolower(trim($request->email));
-        $inputOtp   = trim($request->otp);
+        $inputOtp = trim($request->otp);
 
         // Debug log — always log to help diagnose session issues
         Log::info("OTP Verify attempt | Session ID: " . session()->getId() .
@@ -136,7 +136,7 @@ class RegistrationController extends Controller
             ], 400);
         }
 
-        if ($inputOtp !== (string)$sessionOtp) {
+        if ($inputOtp !== (string) $sessionOtp) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.otp_invalid'),
@@ -202,6 +202,7 @@ class RegistrationController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'status' => 'pending',
+            'account_status' => 'open',
             'payment_id' => $paymentId,
             'payment_status' => $paymentStatus,
             'payment_amount' => $signupFee,
@@ -274,10 +275,10 @@ class RegistrationController extends Controller
             $user = auth()->user();
             $formattedMemberId = '#' . sprintf('%05d', $user->id);
             $existingBusiness = Business::where('user_id', $user->id)
-                                ->orWhere('member_id', (string)$user->id)
-                                ->orWhere('member_id', $formattedMemberId)
-                                ->orWhere('member_id', '#' . $user->id)
-                                ->first();
+                ->orWhere('member_id', (string) $user->id)
+                ->orWhere('member_id', $formattedMemberId)
+                ->orWhere('member_id', '#' . $user->id)
+                ->first();
         }
 
         return view('public.register_business', compact('categories', 'areas', 'existingBusiness', 'businessFee', 'razorpayKeyId'));
@@ -329,11 +330,11 @@ class RegistrationController extends Controller
             if ($numericId > 0) {
                 $memberUser = User::find($numericId);
             }
-            
+
             if (!$memberUser) {
                 $profile = MemberProfile::where('id', $numericId)
-                            ->orWhere('phone', $rawMemberId)
-                            ->first();
+                    ->orWhere('phone', $rawMemberId)
+                    ->first();
                 if ($profile) {
                     $memberUser = $profile->user;
                 }
@@ -356,10 +357,10 @@ class RegistrationController extends Controller
         if ($userId) {
             $formattedMemberId = '#' . sprintf('%05d', $userId);
             $existingBusiness = Business::where('user_id', $userId)
-                                ->orWhere('member_id', (string)$userId)
-                                ->orWhere('member_id', $formattedMemberId)
-                                ->orWhere('member_id', '#' . $userId)
-                                ->first();
+                ->orWhere('member_id', (string) $userId)
+                ->orWhere('member_id', $formattedMemberId)
+                ->orWhere('member_id', '#' . $userId)
+                ->first();
 
             if ($existingBusiness) {
                 return back()->withInput()->withErrors([
@@ -437,8 +438,8 @@ class RegistrationController extends Controller
 
         if (!$memberUser) {
             $profile = MemberProfile::where('id', $numericId)
-                        ->orWhere('phone', $memberId)
-                        ->first();
+                ->orWhere('phone', $memberId)
+                ->first();
             if ($profile) {
                 $memberUser = $profile->user;
             }
@@ -450,10 +451,10 @@ class RegistrationController extends Controller
 
             // Check if member already registered a business
             $existingBusiness = Business::where('user_id', $memberUser->id)
-                                ->orWhere('member_id', $memberId)
-                                ->orWhere('member_id', (string)$memberUser->id)
-                                ->orWhere('member_id', $formattedMemberId)
-                                ->first();
+                ->orWhere('member_id', $memberId)
+                ->orWhere('member_id', (string) $memberUser->id)
+                ->orWhere('member_id', $formattedMemberId)
+                ->first();
 
             if ($existingBusiness) {
                 return response()->json([
