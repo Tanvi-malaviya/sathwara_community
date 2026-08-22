@@ -23,7 +23,7 @@ class EnsureUserIsApproved
                 return $next($request);
             }
 
-            if ($user->status !== 'approved') {
+            if ($user->status !== 'approved' || $user->account_status === 'close') {
                 if (!$request->is('account-status') && !$request->is('logout') && !$request->routeIs('logout')) {
                     return redirect()->route('account.status');
                 }

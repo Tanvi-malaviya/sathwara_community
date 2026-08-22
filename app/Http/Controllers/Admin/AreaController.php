@@ -23,7 +23,7 @@ class AreaController extends Controller
             });
         }
 
-        $areas = $query->orderBy('name')->paginate(15);
+        $areas = $query->orderBy('name')->paginate(15)->withQueryString();
         $totalAreas = Area::count();
 
         return view('admin.areas.index', compact('areas', 'totalAreas'));

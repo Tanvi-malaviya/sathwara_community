@@ -43,7 +43,14 @@
                 {{ $user->created_at->format('d M, Y') }}</p>
         </div>
 
-        @if($user->status === 'pending')
+        @if($user->account_status === 'close')
+            <div
+                class="p-5 rounded-2xl bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold leading-relaxed space-y-3">
+                <span class="text-2xl block">🔒</span>
+                <h3 class="font-extrabold text-sm">Account Closed</h3>
+                <p>તમારું મેમ્બર એકાઉન્ટ હાલમાં બંધ (Closed) કરેલ છે. વધુ માહિતી માટે એડમિનિસ્ટ્રેટરનો સંપર્ક કરો.</p>
+            </div>
+        @elseif($user->status === 'pending')
             <div
                 class="p-5 rounded-2xl bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold leading-relaxed space-y-3">
                 <span class="text-2xl block">⏳</span>

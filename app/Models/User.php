@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'status',
+        'account_status',
         'rejection_reason',
         'member_code',
         'payment_id',

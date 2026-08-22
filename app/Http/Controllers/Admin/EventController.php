@@ -290,7 +290,7 @@ class EventController extends Controller
     public function gallery($id)
     {
         $event = Event::findOrFail($id);
-        $photos = Gallery::where('event_id', $event->id)->orderBy('display_order')->paginate(15);
+        $photos = Gallery::where('event_id', $event->id)->orderBy('display_order')->paginate(15)->withQueryString();
         return view('admin.events.gallery', compact('event', 'photos'));
     }
 

@@ -88,30 +88,33 @@
             </div>
         </div>
 
-        <!-- Table Grid -->
-        <div class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm">
-            <table class="w-full text-left border-collapse">
+        <!-- Table Grid Container with Horizontal Scroll -->
+        <div class="bg-white border border-slate-100 rounded-xl overflow-x-auto shadow-sm">
+            <table class="w-full min-w-[950px] text-left border-collapse">
                 <thead>
                     <tr
                         class="bg-slate-50 text-xs font-black uppercase text-slate-700 tracking-wider border-b border-slate-200">
-                        <th class="py-2.5 px-4">{{ __('messages.member_id') }}</th>
-                        <th class="py-2.5 px-4">{{ __('messages.name') }}</th>
-                        <th class="py-2.5 px-4">{{ __('messages.phone') }}</th>
-                        <th class="py-2.5 px-4">{{ __('messages.city') }}</th>
-                        <th class="py-2.5 px-4">{{ __('messages.registration_date') }}</th>
-                        <th class="py-2.5 px-4">{{ __('messages.status') }}</th>
-                        <th class="py-2.5 px-4 text-right">{{ __('messages.actions') }}</th>
+                        <th class="py-2.5 px-4 whitespace-nowrap">{{ __('messages.member_id') }}</th>
+                        <th class="py-2.5 px-4 whitespace-nowrap">{{ __('messages.name') }}</th>
+                        <th class="py-2.5 px-4 whitespace-nowrap">{{ __('messages.phone') }}</th>
+                        <th class="py-2.5 px-4 whitespace-nowrap">{{ __('messages.area') }}</th>
+                        <th class="py-2.5 px-4 whitespace-nowrap">{{ __('messages.city') }}</th>
+                        <th class="py-2.5 px-4 whitespace-nowrap">{{ __('messages.registration_date') }}</th>
+                        <th class="py-2.5 px-4 whitespace-nowrap">{{ __('messages.status') }}</th>
+                        <th class="py-2.5 px-4 whitespace-nowrap">Account</th>
+                        <th class="py-2.5 px-4 text-right whitespace-nowrap">{{ __('messages.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                     @forelse($members as $m)
                         <tr class="hover:bg-slate-50/50">
-                            <td class="py-2.5 px-4 font-mono font-bold text-slate-800">
-                                <span class="px-2 py-0.5 bg-slate-100 text-slate-800 rounded-md border border-slate-200 text-xs">
+                            <td class="py-2.5 px-4 font-mono font-bold text-slate-800 whitespace-nowrap">
+                                <span
+                                    class="px-2 py-0.5 bg-slate-100 text-slate-800 rounded-md border border-slate-200 text-xs">
                                     {{ $m->member_code ?: $m->formatted_member_id }}
                                 </span>
                             </td>
-                            <td class="py-2.5 px-4">
+                            <td class="py-2.5 px-4 min-w-[160px]">
                                 <div class="min-w-0">
                                     <span class="text-slate-900 font-bold block">{{ $m->display_name }}</span>
                                     @if($m->email)
@@ -119,9 +122,16 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="py-2.5 px-4">{{ $m->memberProfile->phone ?? __('messages.not_set') }}</td>
-                            <td class="py-2.5 px-4">{{ $m->memberProfile->city ?? __('messages.not_set') }}</td>
-                            <td class="py-2.5 px-4 text-slate-400 font-medium">{{ $m->created_at->format('d-M-Y') }}</td>
+                            <td class="py-2.5 px-4 whitespace-nowrap">{{ $m->memberProfile->phone ?? __('messages.not_set') }}</td>
+                            <td class="py-2.5 px-4 whitespace-nowrap">
+                                @if($m->memberProfile && $m->memberProfile->area)
+                                    <span class="font-semibold text-slate-800">{{ $m->memberProfile->area->name }}</span>
+                                @else
+                                    <span class="text-slate-400 font-normal">-</span>
+                                @endif
+                            </td>
+                            <td class="py-2.5 px-4 whitespace-nowrap">{{ $m->memberProfile->city ?? __('messages.not_set') }}</td>
+                            <td class="py-2.5 px-4 text-slate-400 font-medium whitespace-nowrap">{{ $m->created_at->format('d-M-Y') }}</td>
                             <td class="py-2.5 px-4 whitespace-nowrap">
                                 @if($m->status == 'approved')
                                     <span
@@ -134,12 +144,47 @@
                                         class="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg font-bold text-[10px] uppercase whitespace-nowrap">{{ __('messages.pending') }}</span>
                                 @endif
                             </td>
-                            <td class="py-2.5 px-4 text-right">
+                            <td class="py-2.5 px-4 whitespace-nowrap">
+                                @if($m->account_status == 'close')
+                                    <span class="inline-flex items-center px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-md font-bold text-[10px] uppercase whitespace-nowrap">
+                                        Close
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md font-bold text-[10px] uppercase whitespace-nowrap">
+                                        Open
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="py-2.5 px-4 text-right whitespace-nowrap">
                                 <div class="flex justify-end items-center space-x-2">
                                     <div class="flex items-center gap-2">
                                         @if($canEditMember)
+                                            <!-- Toggle Account Status (Open / Close) -->
+                                            <form method="POST" action="{{ route('admin.members.toggle_account_status', $m->id) }}" class="inline">
+                                                @csrf
+                                                @if($m->account_status == 'close')
+                                                    <button type="submit"
+                                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                                                        title="Open Account (એકાઉન્ટ ચાલુ કરો)">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </button>
+                                                @else
+                                                    <button type="submit"
+                                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
+                                                        title="Close Account (એકાઉન્ટ બંધ કરો)">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                        </svg>
+                                                    </button>
+                                                @endif
+                                            </form>
+
+                                            <!-- Approve / Reject -->
                                             @if($m->status == 'pending' || $m->status == 'rejected')
-                                                <form method="POST" action="{{ route('admin.members.approve', $m->id) }}" class="inline">
+                                                <form method="POST" action="{{ route('admin.members.approve', $m->id) }}"
+                                                    class="inline">
                                                     @csrf
                                                     <button type="submit"
                                                         class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
@@ -191,9 +236,9 @@
                                         <!-- Delete -->
                                         @if($canDeleteMember)
                                             <button type="button" @click="$dispatch('confirm-delete', {
-                                                    action: '{{ route('admin.members.destroy', $m->id) }}',
-                                                    message: '{{ __('messages.delete_confirm_member', ['name' => $m->name]) }}'
-                                                })"
+                                                                                action: '{{ route('admin.members.destroy', $m->id) }}',
+                                                                                message: '{{ __('messages.delete_confirm_member', ['name' => $m->name]) }}'
+                                                                            })"
                                                 class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
                                                 title="{{ __('messages.delete') }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
@@ -209,7 +254,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-12 text-center text-slate-400">
+                            <td colspan="9" class="py-12 text-center text-slate-400">
                                 {{ __('messages.no_members_found') }}
                             </td>
                         </tr>
@@ -225,21 +270,30 @@
 
         <!-- Reject Member Modal -->
         <div x-data="{ open: false, action: '', name: '' }"
-             @open-reject-modal.window="open = true; action = $event.detail.action; name = $event.detail.name">
+            @open-reject-modal.window="open = true; action = $event.detail.action; name = $event.detail.name">
             <template x-teleport="body">
-                <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" x-transition x-cloak>
-                    <div @click.away="open = false" class="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xl max-w-md w-full space-y-4 relative">
+                <div x-show="open"
+                    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+                    x-transition x-cloak>
+                    <div @click.away="open = false"
+                        class="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xl max-w-md w-full space-y-4 relative">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                             <h3 class="text-sm font-black text-rose-600">Reject Member Application</h3>
-                            <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+                            <button type="button" @click="open = false"
+                                class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
                         </div>
                         <form method="POST" :action="action" class="space-y-3">
                             @csrf
-                            <p class="text-xs text-slate-600 font-semibold">Please specify the reason for rejecting <strong x-text="name" class="text-slate-900"></strong>:</p>
-                            <textarea name="rejection_reason" required rows="3" placeholder="e.g. Incomplete address or incorrect details..." class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 outline-none"></textarea>
+                            <p class="text-xs text-slate-600 font-semibold">Please specify the reason for rejecting <strong
+                                    x-text="name" class="text-slate-900"></strong>:</p>
+                            <textarea name="rejection_reason" required rows="3"
+                                placeholder="e.g. Incomplete address or incorrect details..."
+                                class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-rose-500 outline-none"></textarea>
                             <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                                <button type="button" @click="open = false" class="px-4 py-2 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl">Cancel</button>
-                                <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs">Reject Member</button>
+                                <button type="button" @click="open = false"
+                                    class="px-4 py-2 border border-slate-200 text-slate-600 font-bold text-xs rounded-xl">Cancel</button>
+                                <button type="submit"
+                                    class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs">{{ __('messages.reject') }}</button>
                             </div>
                         </form>
                     </div>

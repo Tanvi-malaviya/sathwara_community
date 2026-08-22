@@ -28,7 +28,7 @@ class AwardController extends Controller
             $query->where('status', $request->status);
         }
 
-        $applications = $query->orderBy('created_at', 'desc')->paginate(15);
+        $applications = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
         return view('admin.awards.index', compact('applications'));
     }

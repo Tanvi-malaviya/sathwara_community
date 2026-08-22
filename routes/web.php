@@ -132,6 +132,7 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
         Route::post('/members/{id}/update', [AdminMember::class, 'update'])->name('members.update');
         Route::post('/members/{id}/approve', [AdminMember::class, 'approve'])->name('members.approve');
         Route::post('/members/{id}/reject', [AdminMember::class, 'reject'])->name('members.reject');
+        Route::post('/members/{id}/toggle-account-status', [AdminMember::class, 'toggleAccountStatus'])->name('members.toggle_account_status');
         Route::delete('/members/{id}', [AdminMember::class, 'destroy'])->name('members.destroy');
     });
 
