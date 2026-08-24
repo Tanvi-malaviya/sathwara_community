@@ -36,6 +36,37 @@ class SubAdminController extends Controller
     }
 
     /**
+     * Resolve translated label for any permission (Full Module or Action level)
+     */
+    public static function getPermissionLabel(string $permName): string
+    {
+        $available = self::getAvailablePermissions();
+        if (isset($available[$permName])) {
+            return $available[$permName];
+        }
+
+        $transKey = 'messages.perm_' . $permName;
+        $translated = __($transKey);
+        if ($translated !== $transKey) {
+            return $translated;
+        }
+
+        // Event specific permissions: event_view_1, event_edit_1
+        if (preg_match('/^event_(view|edit|manage|create|delete)_(\d+)$/', $permName, $m)) {
+            $action = $m[1];
+            $actionLabel = match($action) {
+                'view'   => __('messages.view'),
+                'edit'   => __('messages.edit'),
+                'delete' => __('messages.delete'),
+                default  => ucfirst($action)
+            };
+            return __('messages.events') . " #{$m[2]}: {$actionLabel}";
+        }
+
+        return ucwords(str_replace('_', ' ', $permName));
+    }
+
+    /**
      * List all Sub-Admins
      */
     public function index(Request $request)

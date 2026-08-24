@@ -147,9 +147,22 @@
                         </td>
                         <td class="py-3 px-4">
                             <div class="flex flex-wrap gap-1">
-                                @forelse($admin->permissions as $perm)
+                                @php
+                                    $allAdminPerms = $admin->permissions->pluck('name')->toArray();
+                                    // When a full module permission (e.g. events_manage) is active, hide its redundant individual action pills (events_view, etc.)
+                                    $filteredPerms = collect($allAdminPerms)->filter(function($p) use ($allAdminPerms) {
+                                        $modules = ['members', 'areas', 'businesses', 'events', 'gallery', 'sliders', 'agendas', 'desk', 'about', 'timelines', 'announcements', 'settings'];
+                                        foreach ($modules as $mod) {
+                                            if (in_array($mod . '_manage', $allAdminPerms) && in_array($p, [$mod . '_view', $mod . '_add', $mod . '_edit', $mod . '_delete'])) {
+                                                return false;
+                                            }
+                                        }
+                                        return true;
+                                    });
+                                @endphp
+                                @forelse($filteredPerms as $permName)
                                     <span class="text-[9px] font-extrabold text-primary-700 bg-primary-50 border border-primary-100 px-2 py-0.5 rounded-md">
-                                        {{ $availablePermissions[$perm->name] ?? $perm->name }}
+                                        {{ \App\Http\Controllers\Admin\SubAdminController::getPermissionLabel($permName) }}
                                     </span>
                                 @empty
                                     <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">{{ __('messages.no_permissions_assigned') }}</span>
