@@ -146,7 +146,13 @@
                                 <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">
                                     {{ __('messages.dob') }}</h5>
                                 <p class="font-bold text-slate-900 text-xs">
-                                    {{ date('d-M-Y', strtotime($member->memberProfile->dob)) }}</p>
+                                    {{ (!empty($member->memberProfile->dob) && $member->memberProfile->dob !== '0000-00-00' && $member->memberProfile->dob !== '1970-01-01') ? date('d-M-Y', strtotime($member->memberProfile->dob)) : __('messages.not_declared') }}</p>
+                            </div>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">
+                                    {{ __('messages.email') }}</h5>
+                                <p class="font-bold text-slate-900 text-xs">
+                                    {{ $member->email ?: '-' }}</p>
                             </div>
                             <div>
                                 <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">

@@ -42,14 +42,12 @@ for r in range(2, ws.max_row + 1):
 
     # Clean / validate email
     clean_email = email.lower().strip() if email else ''
-    if not clean_email or '@' not in clean_email or clean_email in seen_emails or '.' not in clean_email.split('@')[-1]:
-        clean_email = f"{member_code.lower().replace('_', '')}@sathwaracommunity.org"
-        idx = 1
-        while clean_email in seen_emails:
-            clean_email = f"{member_code.lower().replace('_', '')}_{idx}@sathwaracommunity.org"
-            idx += 1
-
-    seen_emails.add(clean_email)
+    if not clean_email or '@' not in clean_email or '.' not in clean_email.split('@')[-1]:
+        clean_email = ''
+    elif clean_email in seen_emails:
+        clean_email = ''
+    else:
+        seen_emails.add(clean_email)
 
     records.append({
         'member_code': member_code,
@@ -194,7 +192,7 @@ class MemberImportSeeder extends Seeder
                 $surname = trim($item['surname']);
                 $firstName = trim($item['first_name']);
                 $middleName = trim($item['middle_name']);
-                $email = strtolower(trim($item['email']));
+                $email = !empty($item['email']) ? strtolower(trim($item['email'])) : null;
                 $phone = trim($item['phone']);
                 $rawArea = trim($item['area']);
                 $address = trim($item['address']);
@@ -256,23 +254,15 @@ class MemberImportSeeder extends Seeder
                 $user = User::where('member_code', $memberCode)->first();
 
                 // Prevent email collision with existing users
-                $conflict = User::where('email', $email)->where(function($q) use ($user) {
-                    if ($user) {
-                        $q->where('id', '!=', $user->id);
-                    }
-                })->exists();
-
-                if ($conflict) {
-                    $cleanCode = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $memberCode));
-                    $email = $cleanCode . '@sathwaracommunity.org';
-                    $ec = 1;
-                    while (User::where('email', $email)->where(function($q) use ($user) {
+                if ($email) {
+                    $conflict = User::where('email', $email)->where(function($q) use ($user) {
                         if ($user) {
                             $q->where('id', '!=', $user->id);
                         }
-                    })->exists()) {
-                        $email = $cleanCode . "_{$ec}@sathwaracommunity.org";
-                        $ec++;
+                    })->exists();
+
+                    if ($conflict) {
+                        $email = null;
                     }
                 }
 

@@ -26,10 +26,16 @@
                         1. {{ __('messages.account_credentials_status') }}
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="space-y-1 sm:col-span-2">
-                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.email_address_login') }}
-                                <span class="text-rose-500">*</span></label>
-                            <input type="email" name="email" value="{{ old('email') }}" required
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.member_id') }} / Member Code <span class="text-slate-400 font-normal">(Auto)</span></label>
+                            <input type="text" name="member_code" value="{{ old('member_code') }}"
+                                placeholder="e.g. SSAM0123"
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 font-mono uppercase">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.email_address_login') }}</label>
+                            <input type="email" name="email" value="{{ old('email') }}"
                                 placeholder="member@community.com"
                                 class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         </div>
@@ -128,9 +134,8 @@
                         </div>
 
                         <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.date_of_birth_label') }}
-                                <span class="text-rose-500">*</span></label>
-                            <input type="date" name="dob" value="{{ old('dob') }}" required max="{{ date('Y-m-d') }}"
+                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.date_of_birth_label') }}</label>
+                            <input type="date" name="dob" value="{{ old('dob') }}" max="{{ date('Y-m-d') }}"
                                 class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         </div>
 

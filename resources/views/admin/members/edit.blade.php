@@ -26,11 +26,17 @@
                         class="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-3 pb-1.5 border-b border-slate-100">
                         1. {{ __('messages.account_credentials_status') }}
                     </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.email_address_login') }}
-                                <span class="text-rose-500">*</span></label>
-                            <input type="email" name="email" value="{{ old('email', $member->email) }}" required
+                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.member_id') }} / Member Code</label>
+                            <input type="text" name="member_code" value="{{ old('member_code', $member->member_code) }}"
+                                placeholder="e.g. SSAM0015"
+                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 font-mono uppercase">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.email_address_login') }}</label>
+                            <input type="email" name="email" value="{{ old('email', $member->email) }}"
                                 placeholder="member@community.com"
                                 class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         </div>
@@ -129,11 +135,10 @@
                         </div>
 
                         <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.date_of_birth_label') }}
-                                <span class="text-rose-500">*</span></label>
+                            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.date_of_birth_label') }}</label>
                             <input type="date" name="dob"
                                 value="{{ old('dob', ($profile && $profile->dob && $profile->dob !== '0000-00-00') ? \Carbon\Carbon::parse($profile->dob)->format('Y-m-d') : '') }}"
-                                required max="{{ date('Y-m-d') }}"
+                                max="{{ date('Y-m-d') }}"
                                 class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         </div>
 

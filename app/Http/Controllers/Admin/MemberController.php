@@ -18,18 +18,45 @@ class MemberController extends Controller
         $query = User::role('Member')->with(['memberProfile.area']);
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $search = trim($request->search);
+            $words = array_values(array_filter(preg_split('/\s+/', $search)));
+
+            $query->where(function ($q) use ($search, $words) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('member_code', 'like', "%{$search}%")
                     ->orWhereHas('memberProfile', function ($sub) use ($search) {
                         $sub->where('phone', 'like', "%{$search}%")
+                            ->orWhere('first_name', 'like', "%{$search}%")
+                            ->orWhere('middle_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
                             ->orWhere('city', 'like', "%{$search}%")
                             ->orWhereHas('area', function ($areaSub) use ($search) {
                                 $areaSub->where('name', 'like', "%{$search}%");
                             });
                     });
+
+                if (count($words) > 1) {
+                    $q->orWhere(function ($multiQ) use ($words) {
+                        foreach ($words as $word) {
+                            $multiQ->where(function ($wordQ) use ($word) {
+                                $wordQ->where('name', 'like', "%{$word}%")
+                                    ->orWhere('member_code', 'like', "%{$word}%")
+                                    ->orWhere('email', 'like', "%{$word}%")
+                                    ->orWhereHas('memberProfile', function ($mp) use ($word) {
+                                        $mp->where('first_name', 'like', "%{$word}%")
+                                            ->orWhere('middle_name', 'like', "%{$word}%")
+                                            ->orWhere('last_name', 'like', "%{$word}%")
+                                            ->orWhere('phone', 'like', "%{$word}%")
+                                            ->orWhere('city', 'like', "%{$word}%")
+                                            ->orWhereHas('area', function ($aSub) use ($word) {
+                                                $aSub->where('name', 'like', "%{$word}%");
+                                            });
+                                    });
+                            });
+                        }
+                    });
+                }
             });
         }
 
@@ -73,7 +100,8 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:users,email',
+            'member_code' => 'nullable|string|max:50|unique:users,member_code',
+            'email' => 'nullable|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'status' => 'required|in:pending,approved,rejected',
             'account_status' => 'nullable|in:open,close',
@@ -81,7 +109,7 @@ class MemberController extends Controller
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'gender' => 'required|in:Male,Female,Other',
-            'dob' => 'required|date|before_or_equal:today',
+            'dob' => 'nullable|date|before_or_equal:today',
             'phone' => 'required|digits:10',
             'whatsapp' => 'nullable|digits:10',
             'area_id' => 'nullable|exists:areas,id',
@@ -93,15 +121,22 @@ class MemberController extends Controller
         ]);
 
         $fullName = trim(preg_replace('/\s+/', ' ', implode(' ', array_filter([$request->first_name, $request->middle_name, $request->last_name]))));
+        $memberCode = $request->filled('member_code') ? strtoupper(trim($request->member_code)) : null;
 
         // Create User
         $user = User::create([
             'name' => $fullName,
             'email' => $request->email,
+            'member_code' => $memberCode,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
             'status' => $request->status,
             'account_status' => $request->account_status ?? 'open',
         ]);
+
+        if (empty($user->member_code)) {
+            $user->member_code = 'SSAM' . sprintf('%04d', $user->id);
+            $user->save();
+        }
 
         // Assign Member Role
         $user->assignRole('Member');
@@ -170,14 +205,15 @@ class MemberController extends Controller
         $profile = $member->memberProfile;
 
         $request->validate([
-            'email' => 'required|email|unique:users,email,' . $member->id,
+            'member_code' => 'nullable|string|max:50|unique:users,member_code,' . $member->id,
+            'email' => 'nullable|email|unique:users,email,' . $member->id,
             'status' => 'required|in:pending,approved,rejected',
             'account_status' => 'required|in:open,close',
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'gender' => 'required|in:Male,Female,Other',
-            'dob' => 'required|date|before_or_equal:today',
+            'dob' => 'nullable|date|before_or_equal:today',
             'phone' => 'required|digits:10',
             'whatsapp' => 'nullable|digits:10',
             'area_id' => 'nullable|exists:areas,id',
@@ -193,6 +229,7 @@ class MemberController extends Controller
         $member->update([
             'name' => $fullName,
             'email' => $request->email,
+            'member_code' => $request->filled('member_code') ? strtoupper(trim($request->member_code)) : $member->member_code,
             'status' => $request->status,
             'account_status' => $request->account_status,
         ]);
@@ -355,10 +392,45 @@ class MemberController extends Controller
         $query = User::role('Member')->with(['memberProfile', 'familyMembers']);
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $search = trim($request->search);
+            $words = array_values(array_filter(preg_split('/\s+/', $search)));
+
+            $query->where(function ($q) use ($search, $words) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('member_code', 'like', "%{$search}%")
+                    ->orWhereHas('memberProfile', function ($sub) use ($search) {
+                        $sub->where('phone', 'like', "%{$search}%")
+                            ->orWhere('first_name', 'like', "%{$search}%")
+                            ->orWhere('middle_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('city', 'like', "%{$search}%")
+                            ->orWhereHas('area', function ($areaSub) use ($search) {
+                                $areaSub->where('name', 'like', "%{$search}%");
+                            });
+                    });
+
+                if (count($words) > 1) {
+                    $q->orWhere(function ($multiQ) use ($words) {
+                        foreach ($words as $word) {
+                            $multiQ->where(function ($wordQ) use ($word) {
+                                $wordQ->where('name', 'like', "%{$word}%")
+                                    ->orWhere('member_code', 'like', "%{$word}%")
+                                    ->orWhere('email', 'like', "%{$word}%")
+                                    ->orWhereHas('memberProfile', function ($mp) use ($word) {
+                                        $mp->where('first_name', 'like', "%{$word}%")
+                                            ->orWhere('middle_name', 'like', "%{$word}%")
+                                            ->orWhere('last_name', 'like', "%{$word}%")
+                                            ->orWhere('phone', 'like', "%{$word}%")
+                                            ->orWhere('city', 'like', "%{$word}%")
+                                            ->orWhereHas('area', function ($aSub) use ($word) {
+                                                $aSub->where('name', 'like', "%{$word}%");
+                                            });
+                                    });
+                            });
+                        }
+                    });
+                }
             });
         }
 
@@ -424,11 +496,45 @@ class MemberController extends Controller
         $query = User::role('Member')->with('memberProfile');
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $search = trim($request->search);
+            $words = array_values(array_filter(preg_split('/\s+/', $search)));
+
+            $query->where(function ($q) use ($search, $words) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('member_code', 'like', "%{$search}%");
+                    ->orWhere('member_code', 'like', "%{$search}%")
+                    ->orWhereHas('memberProfile', function ($sub) use ($search) {
+                        $sub->where('phone', 'like', "%{$search}%")
+                            ->orWhere('first_name', 'like', "%{$search}%")
+                            ->orWhere('middle_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('city', 'like', "%{$search}%")
+                            ->orWhereHas('area', function ($areaSub) use ($search) {
+                                $areaSub->where('name', 'like', "%{$search}%");
+                            });
+                    });
+
+                if (count($words) > 1) {
+                    $q->orWhere(function ($multiQ) use ($words) {
+                        foreach ($words as $word) {
+                            $multiQ->where(function ($wordQ) use ($word) {
+                                $wordQ->where('name', 'like', "%{$word}%")
+                                    ->orWhere('member_code', 'like', "%{$word}%")
+                                    ->orWhere('email', 'like', "%{$word}%")
+                                    ->orWhereHas('memberProfile', function ($mp) use ($word) {
+                                        $mp->where('first_name', 'like', "%{$word}%")
+                                            ->orWhere('middle_name', 'like', "%{$word}%")
+                                            ->orWhere('last_name', 'like', "%{$word}%")
+                                            ->orWhere('phone', 'like', "%{$word}%")
+                                            ->orWhere('city', 'like', "%{$word}%")
+                                            ->orWhereHas('area', function ($aSub) use ($word) {
+                                                $aSub->where('name', 'like', "%{$word}%");
+                                            });
+                                    });
+                            });
+                        }
+                    });
+                }
             });
         }
 
