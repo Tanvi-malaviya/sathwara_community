@@ -90,7 +90,11 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
-        if ($user->status === 'approved' || $user->hasRole('Administrator')) {
+        if ($user->hasRole('Administrator') || $user->hasRole('Sub Admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->status === 'approved' && $user->account_status !== 'close') {
             return redirect()->route('member.dashboard');
         }
 
