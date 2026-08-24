@@ -163,57 +163,6 @@
                             <td class="py-2.5 px-4 text-right whitespace-nowrap">
                                 <div class="flex justify-end items-center space-x-2">
                                     <div class="flex items-center gap-2">
-                                        @if($canEditMember)
-                                            <!-- Toggle Account Status (Open / Close) -->
-                                            <form method="POST" action="{{ route('admin.members.toggle_account_status', $m->id) }}" class="inline">
-                                                @csrf
-                                                @if($m->account_status == 'close')
-                                                    <button type="submit"
-                                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                                                        title="Open Account (એકાઉન્ટ ચાલુ કરો)">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </button>
-                                                @else
-                                                    <button type="submit"
-                                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
-                                                        title="Close Account (એકાઉન્ટ બંધ કરો)">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                                        </svg>
-                                                    </button>
-                                                @endif
-                                            </form>
-
-                                            <!-- Approve / Reject -->
-                                            @if($m->status == 'pending' || $m->status == 'rejected')
-                                                <form method="POST" action="{{ route('admin.members.approve', $m->id) }}"
-                                                    class="inline">
-                                                    @csrf
-                                                    <button type="submit"
-                                                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                                                        title="{{ __('messages.approve') }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            @endif
-                                            @if($m->status == 'pending' || $m->status == 'approved')
-                                                <button type="button"
-                                                    @click="$dispatch('open-reject-modal', { action: '{{ route('admin.members.reject', $m->id) }}', name: '{{ addslashes($m->name) }}' })"
-                                                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
-                                                    title="{{ __('messages.reject') }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
-                                            @endif
-                                        @endif
-
                                         <!-- Edit -->
                                         @if($canEditMember)
                                             <a href="{{ route('admin.members.edit', $m->id) }}"
