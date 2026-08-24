@@ -130,8 +130,8 @@
 
                     <!-- Date of Birth -->
                     <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-700 block">{{ __('messages.dob') }} <span class="text-rose-500">*</span></label>
-                        <input type="date" name="dob" value="{{ old('dob', $profile->dob ?? '') }}" required
+                        <label class="text-xs font-bold text-slate-700 block">{{ __('messages.dob') }}</label>
+                        <input type="date" name="dob" value="{{ old('dob', $profile->dob ?? '') }}"
                                class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 

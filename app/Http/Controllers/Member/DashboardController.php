@@ -126,7 +126,7 @@ class DashboardController extends Controller
             'last_name' => 'required|string|max:255',
             'father_member_id' => 'nullable|string|max:50',
             'gender' => 'required|in:Male,Female,Other',
-            'dob' => 'required|date|before:today',
+            'dob' => 'nullable|date|before:today',
             'blood_group' => 'nullable|string|max:10',
             'education' => 'nullable|string|max:255',
             'occupation' => 'nullable|string|max:255',
@@ -352,8 +352,11 @@ class DashboardController extends Controller
 
         if ($request->filled('search')) {
             $search = trim($request->search);
-            $query->where(function ($q) use ($search) {
+            $words = array_values(array_filter(preg_split('/\s+/', $search)));
+
+            $query->where(function ($q) use ($search, $words) {
                 $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('member_code', 'like', "%{$search}%")
                     ->orWhereHas('memberProfile', function ($sub) use ($search) {
                         $sub->where('first_name', 'like', "%{$search}%")
                             ->orWhere('middle_name', 'like', "%{$search}%")
@@ -367,6 +370,28 @@ class DashboardController extends Controller
                                   ->orWhere('pincode', 'like', "%{$search}%");
                             });
                     });
+
+                if (count($words) > 1) {
+                    $q->orWhere(function ($multiQ) use ($words) {
+                        foreach ($words as $word) {
+                            $multiQ->where(function ($wordQ) use ($word) {
+                                $wordQ->where('name', 'like', "%{$word}%")
+                                    ->orWhere('member_code', 'like', "%{$word}%")
+                                    ->orWhereHas('memberProfile', function ($mp) use ($word) {
+                                        $mp->where('first_name', 'like', "%{$word}%")
+                                            ->orWhere('middle_name', 'like', "%{$word}%")
+                                            ->orWhere('last_name', 'like', "%{$word}%")
+                                            ->orWhere('phone', 'like', "%{$word}%")
+                                            ->orWhere('city', 'like', "%{$word}%")
+                                            ->orWhereHas('area', function ($aSub) use ($word) {
+                                                $aSub->where('name', 'like', "%{$word}%")
+                                                     ->orWhere('pincode', 'like', "%{$word}%");
+                                            });
+                                    });
+                            });
+                        }
+                    });
+                }
             });
         }
 
