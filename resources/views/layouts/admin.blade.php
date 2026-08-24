@@ -573,7 +573,8 @@
 
                 <span class="text-xs font-bold bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg">
                     {{ __('messages.administrator') }}:
-                    {{ auth()->user()->display_name }}
+                    <!-- {{ auth()->user()->display_name }} -->
+                    {{ auth()->user()->hasRole('Administrator') ? 'Admin' : auth()->user()->display_name }}
                 </span>
             </div>
         </header>
