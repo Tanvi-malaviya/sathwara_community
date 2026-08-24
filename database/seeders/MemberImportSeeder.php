@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\MemberProfile;
 use App\Models\Area;
+use App\Models\Business;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -12643,16 +12644,90 @@ Opp. Himalaya Mall, Drive-in Gurukul road, Memnagar, Ahmedabad.
     ],
 ];
 
-        // Preload areas map (lowercase name => Area model)
-        $areas = Area::all();
-        $areaMap = [];
-        foreach ($areas as $a) {
-            $areaMap[strtolower(trim($a->name))] = $a;
-        }
+        // Canonical area aliases mapping for deduplication
+        $areaAliases = [
+            'naroda road'   => 'Naroda',
+            'naroda'        => 'Naroda',
+            'new naroda'    => 'Nava Naroda',
+            'nava naroda'   => 'Nava Naroda',
+            'navanaroda'    => 'Nava Naroda',
+            'newnaroda'     => 'Nava Naroda',
+            'taltej'        => 'Thaltej',
+            'thaltej'       => 'Thaltej',
+            'vasana'        => 'Vasna',
+            'vasna'         => 'Vasna',
+            'niranaynagar'  => 'Nirnaynagar',
+            'nirnaynagar'   => 'Nirnaynagar',
+            'sahibag'       => 'Shahibaug',
+            'shahibaug'     => 'Shahibaug',
+            'satelite'      => 'Satellite',
+            'satellite'     => 'Satellite',
+            'wadj'          => 'Vadaj',
+            'vadaj'         => 'Vadaj',
+        ];
+
+        // Canonical pincodes
+        $canonicalPincodes = [
+            'naroda'       => '382330',
+            'nava naroda'  => '382330',
+            'thaltej'      => '380059',
+            'vasna'        => '380007',
+            'nirnaynagar'  => '382481',
+            'shahibaug'    => '380004',
+            'satellite'    => '380015',
+            'bapunagar'    => '380024',
+            'nikol'        => '382350',
+            'vastral'      => '382418',
+            'ranip'        => '382480',
+            'chandlodia'   => '382481',
+        ];
 
         DB::beginTransaction();
 
         try {
+            // 1. Ensure canonical primary areas exist
+            $canonicalAreaModels = [];
+            foreach (array_unique(array_values($areaAliases)) as $canonicalName) {
+                $cKey = strtolower($canonicalName);
+                $existing = Area::whereRaw('LOWER(name) = ?', [$cKey])->first();
+                $pin = $canonicalPincodes[$cKey] ?? null;
+                if (!$existing) {
+                    $existing = Area::create([
+                        'name'    => $canonicalName,
+                        'pincode' => $pin,
+                    ]);
+                } elseif ($pin && empty($existing->pincode)) {
+                    $existing->update(['pincode' => $pin]);
+                }
+                $canonicalAreaModels[$cKey] = $existing;
+            }
+
+            // 2. Merge duplicate areas and delete duplicate entries
+            foreach ($areaAliases as $aliasName => $targetCanonicalName) {
+                if (strtolower($aliasName) === strtolower($targetCanonicalName)) {
+                    continue;
+                }
+                $targetArea = $canonicalAreaModels[strtolower($targetCanonicalName)] ?? null;
+                if (!$targetArea) continue;
+
+                $dupAreas = Area::whereRaw('LOWER(name) = ?', [strtolower($aliasName)])
+                    ->where('id', '!=', $targetArea->id)
+                    ->get();
+
+                foreach ($dupAreas as $da) {
+                    MemberProfile::where('area_id', $da->id)->update(['area_id' => $targetArea->id]);
+                    Business::where('area_id', $da->id)->update(['area_id' => $targetArea->id]);
+                    $da->delete();
+                }
+            }
+
+            // 3. Preload all active areas
+            $allAreas = Area::all();
+            $areaMap = [];
+            foreach ($allAreas as $a) {
+                $areaMap[strtolower(trim($a->name))] = $a;
+            }
+
             $count = 0;
             $importedUserIds = [];
 
@@ -12666,34 +12741,51 @@ Opp. Himalaya Mall, Drive-in Gurukul road, Memnagar, Ahmedabad.
                 $rawArea = trim($item['area']);
                 $address = trim($item['address']);
 
-                // Construct full name (Surname First Middle)
+                // Full Name
                 $nameParts = array_filter([$surname, $firstName, $middleName]);
                 $fullName = implode(' ', $nameParts);
                 if (empty($fullName)) {
                     $fullName = $memberCode ?: 'Community Member';
                 }
 
+                // Resolve Area Name through Alias Mapping
+                $resolvedAreaName = $rawArea;
+                $lowRaw = strtolower($rawArea);
+                if (isset($areaAliases[$lowRaw])) {
+                    $resolvedAreaName = $areaAliases[$lowRaw];
+                }
+
+                // Specific address-level distinction for Naroda vs Nava Naroda
+                $lowAddr = strtolower($address);
+                if (str_contains($lowAddr, 'new naroda') || str_contains($lowAddr, 'nava naroda') || str_contains($lowAddr, 'નવા નરોડા')) {
+                    $resolvedAreaName = 'Nava Naroda';
+                } elseif (str_contains($lowAddr, 'naroda road') || str_contains($lowAddr, 'naroda') || str_contains($lowAddr, 'નરોડા')) {
+                    if (!str_contains($lowAddr, 'new naroda') && !str_contains($lowAddr, 'nava naroda')) {
+                        $resolvedAreaName = 'Naroda';
+                    }
+                }
+
                 // Resolve Area ID
                 $areaId = null;
                 $pincode = null;
 
-                if (!empty($rawArea)) {
-                    $lookupName = strtolower($rawArea);
+                if (!empty($resolvedAreaName)) {
+                    $lookupName = strtolower($resolvedAreaName);
                     if (isset($areaMap[$lookupName])) {
                         $areaId = $areaMap[$lookupName]->id;
                         $pincode = $areaMap[$lookupName]->pincode;
                     } else {
-                        // Create area if it doesn't exist
                         $newArea = Area::create([
-                            'name' => ucwords($rawArea),
-                            'pincode' => null,
+                            'name'    => ucwords($resolvedAreaName),
+                            'pincode' => $canonicalPincodes[$lookupName] ?? null,
                         ]);
                         $areaMap[$lookupName] = $newArea;
                         $areaId = $newArea->id;
+                        $pincode = $newArea->pincode;
                     }
                 }
 
-                // Extract pincode from address if not set from area
+                // Extract pincode from address if empty
                 $addressPincode = '380001';
                 if (preg_match('/\b(38\d{4})\b/', $address, $pm)) {
                     $addressPincode = $pm[1];
@@ -12705,7 +12797,7 @@ Opp. Himalaya Mall, Drive-in Gurukul road, Memnagar, Ahmedabad.
                 // Find user by member_code
                 $user = User::where('member_code', $memberCode)->first();
 
-                // Prevent email conflicts with any other existing user
+                // Prevent email collision with existing users
                 $conflict = User::where('email', $email)->where(function($q) use ($user) {
                     if ($user) {
                         $q->where('id', '!=', $user->id);
@@ -12728,21 +12820,21 @@ Opp. Himalaya Mall, Drive-in Gurukul road, Memnagar, Ahmedabad.
 
                 if (!$user) {
                     $user = User::create([
-                        'name' => $fullName,
-                        'email' => $email,
-                        'password' => $defaultPassword,
-                        'status' => 'approved',
+                        'name'           => $fullName,
+                        'email'          => $email,
+                        'password'       => $defaultPassword,
+                        'status'         => 'approved',
                         'account_status' => 'open',
-                        'member_code' => $memberCode,
+                        'member_code'    => $memberCode,
                     ]);
                     $user->assignRole($memberRole);
                 } else {
                     $user->update([
-                        'name' => $fullName,
-                        'email' => $email,
-                        'status' => 'approved',
+                        'name'           => $fullName,
+                        'email'          => $email,
+                        'status'         => 'approved',
                         'account_status' => $user->account_status ?: 'open',
-                        'member_code' => $memberCode,
+                        'member_code'    => $memberCode,
                     ]);
                     if (!$user->hasRole('Member') && !$user->hasRole('Administrator') && !$user->hasRole('Sub Admin')) {
                         $user->assignRole($memberRole);
@@ -12753,17 +12845,17 @@ Opp. Himalaya Mall, Drive-in Gurukul road, Memnagar, Ahmedabad.
                 MemberProfile::updateOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'first_name' => $firstName ?: $fullName,
+                        'first_name'  => $firstName ?: $fullName,
                         'middle_name' => $middleName,
-                        'last_name' => $surname,
-                        'gender' => 'Male',
-                        'phone' => $phone ?: 'N/A',
-                        'whatsapp' => $phone ?: 'N/A',
-                        'address' => $address ?: '',
-                        'area_id' => $areaId,
-                        'pincode' => $pincode ?: '380001',
-                        'city' => 'Ahmedabad',
-                        'state' => 'Gujarat',
+                        'last_name'   => $surname,
+                        'gender'      => 'Male',
+                        'phone'       => $phone ?: 'N/A',
+                        'whatsapp'    => $phone ?: 'N/A',
+                        'address'     => $address ?: '',
+                        'area_id'     => $areaId,
+                        'pincode'     => $pincode ?: '380001',
+                        'city'        => 'Ahmedabad',
+                        'state'       => 'Gujarat',
                     ]
                 );
 
@@ -12771,8 +12863,7 @@ Opp. Himalaya Mall, Drive-in Gurukul road, Memnagar, Ahmedabad.
                 $count++;
             }
 
-            // Remove dummy members who are NOT in the Excel dataset
-            // (Strictly protect Administrator and Sub Admin users from deletion!)
+            // Remove dummy members not in the dataset (keep Admin and Sub-Admin accounts safe)
             $dummyUsers = User::role('Member')
                 ->whereDoesntHave('roles', function($q) {
                     $q->whereIn('name', ['Administrator', 'Sub Admin']);
@@ -12792,7 +12883,7 @@ Opp. Himalaya Mall, Drive-in Gurukul road, Memnagar, Ahmedabad.
             DB::commit();
 
             if (isset($this->command)) {
-                $this->command->info("Member import completed! Successfully seeded {$count} members. Removed {$deletedCount} old dummy member(s).");
+                $this->command->info("Member import completed! Successfully seeded {$count} members. Cleaned duplicate areas.");
             }
         } catch (\Exception $e) {
             DB::rollBack();
