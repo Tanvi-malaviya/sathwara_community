@@ -18,8 +18,8 @@ class EnsureUserIsApproved
         if (auth()->check()) {
             $user = auth()->user();
             
-            // Check if user is Administrator or has approved status
-            if ($user->hasRole('Administrator')) {
+            // Check if user is Administrator or Sub Admin
+            if ($user->hasRole('Administrator') || $user->hasRole('Sub Admin')) {
                 return $next($request);
             }
 

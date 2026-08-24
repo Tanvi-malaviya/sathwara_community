@@ -44,7 +44,7 @@ class MemberController extends Controller
             });
         }
 
-        $members = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        $members = $query->orderByRaw("CAST(REGEXP_REPLACE(COALESCE(NULLIF(member_code, ''), id), '[^0-9]', '') AS UNSIGNED) DESC, id DESC")->paginate(15)->withQueryString();
 
         // Get status counts for filter tabs
         $pendingCount = User::role('Member')->where('status', 'pending')->count();
@@ -366,7 +366,7 @@ class MemberController extends Controller
             $query->where('status', $request->status);
         }
 
-        $members = $query->orderBy('id', 'desc')->get();
+        $members = $query->orderByRaw("CAST(REGEXP_REPLACE(COALESCE(NULLIF(member_code, ''), id), '[^0-9]', '') AS UNSIGNED) DESC, id DESC")->get();
 
         $callback = function () use ($members) {
             $file = fopen('php://output', 'w');

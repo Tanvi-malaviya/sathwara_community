@@ -109,10 +109,15 @@
                     @forelse($members as $m)
                         <tr class="hover:bg-slate-50/50">
                             <td class="py-2.5 px-4 font-mono font-bold text-slate-800 whitespace-nowrap">
-                                <span
-                                    class="px-2 py-0.5 bg-slate-100 text-slate-800 rounded-md border border-slate-200 text-xs">
-                                    {{ $m->member_code ?: $m->formatted_member_id }}
-                                </span>
+                                <a href="{{ route('admin.members.show', $m->id) }}"
+                                    class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 hover:bg-primary-50 text-slate-800 hover:text-primary-600 rounded-md border border-slate-200 hover:border-primary-200 text-xs transition-colors group"
+                                    title="{{ __('messages.view_details') }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400 group-hover:text-primary-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                    <span>{{ $m->member_code ?: $m->formatted_member_id }}</span>
+                                </a>
                             </td>
                             <td class="py-2.5 px-4 min-w-[160px]">
                                 <div class="min-w-0">
@@ -208,17 +213,6 @@
                                                 </button>
                                             @endif
                                         @endif
-                                        <!-- View -->
-                                        <a href="{{ route('admin.members.show', $m->id) }}"
-                                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                                            title="{{ __('messages.view_details') }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
-                                                <circle cx="12" cy="12" r="3" />
-                                            </svg>
-                                        </a>
 
                                         <!-- Edit -->
                                         @if($canEditMember)
