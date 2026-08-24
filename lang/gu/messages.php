@@ -1030,6 +1030,67 @@ return [
     'mod_announcements_news' => 'અપડેટ્સ',
     'mod_global_settings' => 'સિસ્ટમ સેટિંગ્સ',
 
+    // Granular Action Permissions
+    'perm_members_view' => 'સભ્યો: જુઓ',
+    'perm_members_add' => 'સભ્યો: ઉમેરો',
+    'perm_members_edit' => 'સભ્યો: ફેરફાર',
+    'perm_members_delete' => 'સભ્યો: કાઢી નાખો',
+
+    'perm_areas_view' => 'વિસ્તાર: જુઓ',
+    'perm_areas_add' => 'વિસ્તાર: ઉમેરો',
+    'perm_areas_edit' => 'વિસ્તાર: ફેરફાર',
+    'perm_areas_delete' => 'વિસ્તાર: કાઢી નાખો',
+
+    'perm_businesses_view' => 'વ્યવસાય: જુઓ',
+    'perm_businesses_add' => 'વ્યવસાય: ઉમેરો',
+    'perm_businesses_edit' => 'વ્યવસાય: ફેરફાર',
+    'perm_businesses_delete' => 'વ્યવસાય: કાઢી નાખો',
+
+    'perm_events_view' => 'ઈવેન્ટ્સ: જુઓ',
+    'perm_events_add' => 'ઈવેન્ટ્સ: ઉમેરો',
+    'perm_events_edit' => 'ઈવેન્ટ્સ: ફેરફાર',
+    'perm_events_delete' => 'ઈવેન્ટ્સ: કાઢી નાખો',
+
+    'perm_gallery_view' => 'ગેલેરી: જુઓ',
+    'perm_gallery_add' => 'ગેલેરી: ઉમેરો',
+    'perm_gallery_edit' => 'ગેલેરી: ફેરફાર',
+    'perm_gallery_delete' => 'ગેલેરી: કાઢી નાખો',
+
+    'perm_sliders_view' => 'સ્લાઇડર્સ: જુઓ',
+    'perm_sliders_add' => 'સ્લાઇડર્સ: ઉમેરો',
+    'perm_sliders_edit' => 'સ્લાઇડર્સ: ફેરફાર',
+    'perm_sliders_delete' => 'સ્લાઇડર્સ: કાઢી નાખો',
+
+    'perm_agendas_view' => 'એજન્ડા: જુઓ',
+    'perm_agendas_add' => 'એજન્ડા: ઉમેરો',
+    'perm_agendas_edit' => 'એજન્ડા: ફેરફાર',
+    'perm_agendas_delete' => 'એજન્ડા: કાઢી નાખો',
+
+    'perm_desk_view' => 'સંચાલન ડેસ્ક: જુઓ',
+    'perm_desk_add' => 'સંચાલન ડેસ્ક: ઉમેરો',
+    'perm_desk_edit' => 'સંચાલન ડેસ્ક: ફેરફાર',
+    'perm_desk_delete' => 'સંચાલન ડેસ્ક: કાઢી નાખો',
+
+    'perm_about_view' => 'અમારા વિશે: જુઓ',
+    'perm_about_add' => 'અમારા વિશે: ઉમેરો',
+    'perm_about_edit' => 'અમારા વિશે: ફેરફાર',
+    'perm_about_delete' => 'અમારા વિશે: કાઢી નાખો',
+
+    'perm_timelines_view' => 'ટાઇમલાઇન: જુઓ',
+    'perm_timelines_add' => 'ટાઇમલાઇન: ઉમેરો',
+    'perm_timelines_edit' => 'ટાઇમલાઇન: ફેરફાર',
+    'perm_timelines_delete' => 'ટાઇમલાઇન: કાઢી નાખો',
+
+    'perm_announcements_view' => 'અપડેટ્સ: જુઓ',
+    'perm_announcements_add' => 'અપડેટ્સ: ઉમેરો',
+    'perm_announcements_edit' => 'અપડેટ્સ: ફેરફાર',
+    'perm_announcements_delete' => 'અપડેટ્સ: કાઢી નાખો',
+
+    'perm_settings_view' => 'સેટિંગ્સ: જુઓ',
+    'perm_settings_add' => 'સેટિંગ્સ: ઉમેરો',
+    'perm_settings_edit' => 'સેટિંગ્સ: ફેરફાર',
+    'perm_settings_delete' => 'સેટિંગ્સ: કાઢી નાખો',
+
     'title_en' => 'શીર્ષક (અંગ્રેજી)',
     'title_gu' => 'શીર્ષક (ગુજરાતી)',
     'description_en' => 'વિગત (અંગ્રેજી)',

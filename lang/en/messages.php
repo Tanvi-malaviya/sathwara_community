@@ -1030,6 +1030,67 @@ return [
     'mod_announcements_news' => 'Updates',
     'mod_global_settings' => 'System Settings',
 
+    // Granular Action Permissions
+    'perm_members_view' => 'Members: View',
+    'perm_members_add' => 'Members: Add',
+    'perm_members_edit' => 'Members: Edit',
+    'perm_members_delete' => 'Members: Delete',
+
+    'perm_areas_view' => 'Area: View',
+    'perm_areas_add' => 'Area: Add',
+    'perm_areas_edit' => 'Area: Edit',
+    'perm_areas_delete' => 'Area: Delete',
+
+    'perm_businesses_view' => 'Businesses: View',
+    'perm_businesses_add' => 'Businesses: Add',
+    'perm_businesses_edit' => 'Businesses: Edit',
+    'perm_businesses_delete' => 'Businesses: Delete',
+
+    'perm_events_view' => 'Events: View',
+    'perm_events_add' => 'Events: Add',
+    'perm_events_edit' => 'Events: Edit',
+    'perm_events_delete' => 'Events: Delete',
+
+    'perm_gallery_view' => 'Gallery: View',
+    'perm_gallery_add' => 'Gallery: Add',
+    'perm_gallery_edit' => 'Gallery: Edit',
+    'perm_gallery_delete' => 'Gallery: Delete',
+
+    'perm_sliders_view' => 'Sliders: View',
+    'perm_sliders_add' => 'Sliders: Add',
+    'perm_sliders_edit' => 'Sliders: Edit',
+    'perm_sliders_delete' => 'Sliders: Delete',
+
+    'perm_agendas_view' => 'Agendas: View',
+    'perm_agendas_add' => 'Agendas: Add',
+    'perm_agendas_edit' => 'Agendas: Edit',
+    'perm_agendas_delete' => 'Agendas: Delete',
+
+    'perm_desk_view' => 'Desk: View',
+    'perm_desk_add' => 'Desk: Add',
+    'perm_desk_edit' => 'Desk: Edit',
+    'perm_desk_delete' => 'Desk: Delete',
+
+    'perm_about_view' => 'About Us: View',
+    'perm_about_add' => 'About Us: Add',
+    'perm_about_edit' => 'About Us: Edit',
+    'perm_about_delete' => 'About Us: Delete',
+
+    'perm_timelines_view' => 'Timeline: View',
+    'perm_timelines_add' => 'Timeline: Add',
+    'perm_timelines_edit' => 'Timeline: Edit',
+    'perm_timelines_delete' => 'Timeline: Delete',
+
+    'perm_announcements_view' => 'Updates: View',
+    'perm_announcements_add' => 'Updates: Add',
+    'perm_announcements_edit' => 'Updates: Edit',
+    'perm_announcements_delete' => 'Updates: Delete',
+
+    'perm_settings_view' => 'Settings: View',
+    'perm_settings_add' => 'Settings: Add',
+    'perm_settings_edit' => 'Settings: Edit',
+    'perm_settings_delete' => 'Settings: Delete',
+
     'title_en' => 'Title (English)',
     'title_gu' => 'Title (Gujarati)',
     'description_en' => 'Description (English)',
