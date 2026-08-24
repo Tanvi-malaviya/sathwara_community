@@ -331,6 +331,9 @@ class DatabaseSeeder extends Seeder
             'display_order' => 1
         ]);
 
+        // 13. Members Dataset Import
+        $this->call(MemberImportSeeder::class);
+
         Schema::enableForeignKeyConstraints();
     }
 }
