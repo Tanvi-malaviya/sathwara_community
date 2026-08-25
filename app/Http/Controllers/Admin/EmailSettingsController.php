@@ -22,8 +22,8 @@ class EmailSettingsController extends Controller
             'mail_username' => Setting::get('mail_username', env('MAIL_USERNAME', '')),
             'mail_password' => Setting::get('mail_password', env('MAIL_PASSWORD', '')),
             'mail_encryption' => Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls')),
-            'mail_from_address' => Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@sathwaracommunity.com')),
-            'mail_from_name' => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Sathwara Community Portal')),
+            'mail_from_address' => Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@satwaracommunity.com')),
+            'mail_from_name' => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Satwara Community Portal')),
         ];
 
         return view('admin.settings.email', compact('emailSettings'));
@@ -97,8 +97,8 @@ class EmailSettingsController extends Controller
             $username = Setting::get('mail_username', env('MAIL_USERNAME', ''));
             $password = Setting::get('mail_password', env('MAIL_PASSWORD', ''));
             $encryption = Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls'));
-            $fromAddress = Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@sathwaracommunity.com'));
-            $fromName = Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Sathwara Community Portal'));
+            $fromAddress = Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@satwaracommunity.com'));
+            $fromName = Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Satwara Community Portal'));
 
             config([
                 'mail.default' => $mailer,
@@ -115,7 +115,7 @@ class EmailSettingsController extends Controller
 
             Mail::raw("Hello! This is a test email sent from " . $fromName . " to verify your SMTP configuration settings. If you received this email, your email configuration is working perfectly!", function ($message) use ($recipient, $fromName, $fromAddress) {
                 $message->to($recipient)
-                    ->subject("Sathwara Community - SMTP Test Email");
+                    ->subject("Satwara Community - SMTP Test Email");
             });
 
             return redirect()->back()

@@ -135,13 +135,13 @@ class DatabaseSeeder extends Seeder
 
         // 4. Default Settings
         $settings = [
-            'website_name' => 'Sathwara Community Portal',
+            'website_name' => 'Satwara Community Portal',
             'website_logo' => '',
             'website_favicon' => '',
             'primary_color' => '#2563EB',
-            'seo_title' => 'Sathwara Community Management System',
-            'seo_description' => 'Welcome to the official portal of the Sathwara Community. Stay connected, register your business, view events, and manage membership details.',
-            'contact_address' => 'Sathwara Community Bhawan, near RTO, Ashram Road, Ahmedabad, Gujarat, 380009',
+            'seo_title' => 'Satwara Community Management System',
+            'seo_description' => 'Welcome to the official portal of the Satwara Community. Stay connected, register your business, view events, and manage membership details.',
+            'contact_address' => 'Satwara Community Bhawan, near RTO, Ashram Road, Ahmedabad, Gujarat, 380009',
             'contact_email' => 'info@sathwaracommunity.com',
             'contact_phone' => '+91 79 2345 6789',
             'contact_whatsapp' => '9876543210',
@@ -149,7 +149,7 @@ class DatabaseSeeder extends Seeder
             'social_facebook' => 'https://facebook.com',
             'social_twitter' => 'https://twitter.com',
             'social_instagram' => 'https://instagram.com',
-            'footer_text' => '© 2026 Sathwara Community. All rights reserved.',
+            'footer_text' => '© 2026 Satwara Community. All rights reserved.',
         ];
         foreach ($settings as $key => $val) {
             Setting::set($key, $val);
@@ -158,7 +158,7 @@ class DatabaseSeeder extends Seeder
         // 5. Sliders
         Slider::truncate();
         Slider::create([
-            'title' => 'Sathwara Community Unity & Growth',
+            'title' => 'Satwara Community Unity & Growth',
             'subtitle' => 'Connecting families, preserving traditions, and empowering local businesses.',
             'image_path' => 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1200',
             'button_text' => 'Join Membership',
@@ -208,7 +208,7 @@ class DatabaseSeeder extends Seeder
         ManagementDesk::create([
             'name' => 'Ramanbhai Sathwara',
             'designation' => 'President',
-            'message' => 'It is my extreme pleasure to serve the Sathwara Community. We strive to implement new platforms that keep us connected globally. Let\'s work together for our progress.',
+            'message' => 'It is my extreme pleasure to serve the Satwara Community. We strive to implement new platforms that keep us connected globally. Let\'s work together for our progress.',
             'photo_path' => 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=300',
             'display_order' => 1,
             'status' => true
@@ -284,7 +284,7 @@ class DatabaseSeeder extends Seeder
         $event2 = Event::create([
             'title' => 'Shikshan Sanman & Inam Vitaran 2026',
             'description' => '',
-            'venue' => 'Sathwara Community Hall, Ashram Road, Ahmedabad',
+            'venue' => 'Satwara Community Hall, Ashram Road, Ahmedabad',
             'date' => '2026-09-05',
             'time' => '17:00:00',
             'banner_path' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800',
