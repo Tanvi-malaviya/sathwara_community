@@ -681,8 +681,9 @@
                             </span>
                             @if(!empty($event->registration_end_date))
                                 <span
-                                    class="text-[9px] font-bold text-amber-700 bg-amber-100/90 px-2 py-0.5 rounded-full border border-amber-200/80 shrink-0">
-                                    {{ __('messages.last_date') }}: ⌛ {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
+                                    class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-700 bg-amber-100/90 px-2 py-0.5 rounded-full border border-amber-200/80 shrink-0">
+                                    <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>{{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
                                 </span>
                             @endif
                         </div>
@@ -756,29 +757,6 @@
                     </div>
 
 
-                </div>
-            @elseif(($event->event_type ?? 'normal') === 'inam_vitaran' && !($hasEventPass ?? false))
-                <!-- PASS REQUIRED WARNING CARD -->
-                <div class="bg-white rounded-2xl border border-amber-200/90 p-6 sm:p-8 text-center shadow-sm space-y-4 flex flex-col items-center justify-center relative overflow-hidden">
-                    <div class="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 text-3xl shadow-2xs">
-                        🎟️
-                    </div>
-                    <div class="max-w-md space-y-2">
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/90 text-amber-800 font-extrabold text-[10px] uppercase tracking-wider">
-                            <span>Event Pass Required</span>
-                        </div>
-                        <h3 class="text-base sm:text-lg font-black text-slate-900">Event registration pass is required</h3>
-                        <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                            To fill the prize distribution form, you must have an event pass / registration for this event. Please get the pass from the event page first.
-                        </p>
-                        <div class="pt-3">
-                            <a href="{{ route('event.details', $event->id) }}" 
-                               class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer">
-                                <span>🎟️ Purchase Event Pass</span>
-                                <span>&rarr;</span>
-                            </a>
-                        </div>
-                    </div>
                 </div>
             @else
                 <!-- MAIN FORM CARD CONTAINER -->
@@ -2014,7 +1992,7 @@
                                                 </template>
                                                 <template x-if="!getPhotoUrl(selectedRegistration.form_data)">
                                                     <div class="text-center p-1 text-slate-400">
-                                                        <span class="text-3xl block">👤</span>
+                                                        <svg class="w-8 h-8 mx-auto text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                                         <span class="text-[9px] font-bold" x-text="previewLang === 'en' ? 'No Photo' : 'ફોટો નથી'"></span>
                                                     </div>
                                                 </template>

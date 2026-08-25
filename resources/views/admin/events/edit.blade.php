@@ -140,7 +140,10 @@
                 <!-- Yuva Melo Registration Form Fee -->
                 <div class="space-y-0.5" x-show="eventType === 'yuva_melo'" x-transition>
                     <label class="text-[10px] font-bold text-purple-700 uppercase flex items-center justify-between">
-                        <span>⚡ {{ __('messages.form_fee') }}</span>
+                        <span class="inline-flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-purple-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span>{{ __('messages.form_fee') }}</span>
+                        </span>
                         <span class="text-[9px] text-purple-500 font-normal">({{ __('messages.youth_form_fee') }})</span>
                     </label>
                     <input type="number" name="form_fee" step="1" min="0" value="{{ old('form_fee', (int)($event->form_fee ?? 0)) }}" placeholder="0 for Free Form"

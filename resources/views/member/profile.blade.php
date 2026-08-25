@@ -72,8 +72,8 @@
                         <h2 class="text-base sm:text-lg font-black text-slate-900 leading-snug break-words">
                             {{ $user->display_name }}
                         </h2>
-                        <p class="text-xs text-slate-500 font-semibold flex items-center gap-1 truncate">
-                            <span>✉️</span>
+                        <p class="text-xs text-slate-500 font-semibold flex items-center gap-1.5 truncate">
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             <span class="truncate">{{ $user->email }}</span>
                         </p>
                     </div>
@@ -88,19 +88,18 @@
 
                     <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap">
                         <!-- Small thumbnail preview -->
-                        <div x-show="photoPreview" class="shrink-0" x-cloak>
-                            <img :src="photoPreview" class="w-10 h-10 rounded-xl object-cover border-2 border-primary-500 shadow-xs">
+                        <div class="relative w-11 h-11 rounded-lg border border-slate-200 bg-white overflow-hidden shrink-0 shadow-2xs">
+                            <img id="photoPreview" src="{{ $profilePhotoUrl }}" alt="Preview" class="w-full h-full object-cover">
                         </div>
 
-                        <label class="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all shrink-0 hover:-translate-y-0.5"
-                               style="background-color: #e11d48 !important; color: #ffffff !important;">
-                            <svg class="w-4 h-4" style="color: #ffffff !important;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span class="!text-white" style="color: #ffffff !important;">{{ __('messages.choose_file') ?? 'Choose Photo' }}</span>
-                            <input type="file" name="photo" accept="image/*" @change="onPhotoChange($event)" class="hidden">
-                        </label>
-                        <span class="text-xs text-slate-500 font-semibold truncate max-w-[140px] sm:max-w-[200px]" x-text="fileName || 'No file chosen'"></span>
+                        <!-- Upload Trigger -->
+                        <div class="flex-1 sm:flex-initial">
+                            <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-300 shadow-2xs transition-colors">
+                                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                <span>{{ __('messages.choose_photo') ?? 'Choose Photo' }}</span>
+                                <input type="file" name="photo" id="photoInput" accept="image/jpeg,image/png,image/webp" class="hidden" @change="onPhotoChange($event)">
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -112,7 +111,9 @@
             <!-- SECTION 1: PERSONAL & CONTACT DETAILS -->
             <div class="space-y-4">
                 <h3 class="text-sm sm:text-base font-black text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2.5">
-                    <span class="w-7 h-7 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm shrink-0">👤</span>
+                    <span class="w-7 h-7 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </span>
                     <span>{{ __('messages.personal_details_sec') }} & {{ __('messages.contact_details_sec') }}</span>
                 </h3>
 
@@ -149,21 +150,29 @@
                         <select name="blood_group"
                                class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                             <option value="">-- {{ __('messages.select_blood_group') }} --</option>
-                            <option value="A+" {{ old('blood_group', $profile->blood_group ?? '') == 'A+' ? 'selected' : '' }}>A+</option>
-                            <option value="A-" {{ old('blood_group', $profile->blood_group ?? '') == 'A-' ? 'selected' : '' }}>A-</option>
-                            <option value="B+" {{ old('blood_group', $profile->blood_group ?? '') == 'B+' ? 'selected' : '' }}>B+</option>
-                            <option value="B-" {{ old('blood_group', $profile->blood_group ?? '') == 'B-' ? 'selected' : '' }}>B-</option>
-                            <option value="AB+" {{ old('blood_group', $profile->blood_group ?? '') == 'AB+' ? 'selected' : '' }}>AB+</option>
-                            <option value="AB-" {{ old('blood_group', $profile->blood_group ?? '') == 'AB-' ? 'selected' : '' }}>AB-</option>
-                            <option value="O+" {{ old('blood_group', $profile->blood_group ?? '') == 'O+' ? 'selected' : '' }}>O+</option>
-                            <option value="O-" {{ old('blood_group', $profile->blood_group ?? '') == 'O-' ? 'selected' : '' }}>O-</option>
+                            @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $bg)
+                                <option value="{{ $bg }}" {{ old('blood_group', $profile->blood_group ?? '') == $bg ? 'selected' : '' }}>{{ $bg }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Marital Status -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700 block">{{ __('messages.marital_status') }}</label>
+                        <select name="marital_status"
+                                class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
+                            <option value="">-- {{ __('messages.select_marital_status') }} --</option>
+                            <option value="Single" {{ old('marital_status', $profile->marital_status ?? '') == 'Single' ? 'selected' : '' }}>{{ __('messages.single') }}</option>
+                            <option value="Married" {{ old('marital_status', $profile->marital_status ?? '') == 'Married' ? 'selected' : '' }}>{{ __('messages.married') }}</option>
+                            <option value="Widowed" {{ old('marital_status', $profile->marital_status ?? '') == 'Widowed' ? 'selected' : '' }}>{{ __('messages.widowed') }}</option>
+                            <option value="Divorced" {{ old('marital_status', $profile->marital_status ?? '') == 'Divorced' ? 'selected' : '' }}>{{ __('messages.divorced') }}</option>
                         </select>
                     </div>
 
                     <!-- Education -->
                     <div class="space-y-1.5">
                         <label class="text-xs font-bold text-slate-700 block">{{ __('messages.education') }}</label>
-                        <input type="text" name="education" value="{{ old('education', $profile->education ?? '') }}" placeholder="e.g. B.E. Computer"
+                        <input type="text" name="education" value="{{ old('education', $profile->education ?? '') }}" placeholder="e.g. B.Com, MBA, Graduate"
                                class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
@@ -197,7 +206,9 @@
             <!-- SECTION 2: ADDRESS & LOCATION DETAILS -->
             <div class="space-y-4 pt-2">
                 <h3 class="text-sm sm:text-base font-black text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2.5">
-                    <span class="w-7 h-7 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm shrink-0">📍</span>
+                    <span class="w-7 h-7 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </span>
                     <span>{{ __('messages.address_location_sec') }}</span>
                 </h3>
                 

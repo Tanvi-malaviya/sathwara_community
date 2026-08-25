@@ -38,11 +38,13 @@
 
                         @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                             <span
-                                class="text-[9px] font-extrabold text-amber-700 bg-amber-50/95 backdrop-blur-sm border border-amber-200 px-2.5 py-1 rounded-full uppercase tracking-wider">🏆
+                                class="inline-flex items-center gap-1 text-[9px] font-extrabold text-amber-700 bg-amber-50/95 backdrop-blur-sm border border-amber-200 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
                                 Inam Vitaran</span>
                         @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
                             <span
-                                class="text-[9px] font-extrabold text-purple-700 bg-purple-50/95 backdrop-blur-sm border border-purple-200 px-2.5 py-1 rounded-full uppercase tracking-wider">⚡
+                                class="inline-flex items-center gap-1 text-[9px] font-extrabold text-purple-700 bg-purple-50/95 backdrop-blur-sm border border-purple-200 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                <svg class="w-3 h-3 text-purple-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 Yuva Melo</span>
                         @endif
                     </div>
@@ -59,7 +61,7 @@
                         <div x-show="imageError || !'{{ $event->banner_path }}'"
                             class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-slate-900 flex flex-col items-center justify-center p-4"
                             x-cloak>
-                            <span class="text-4xl">📅</span>
+                            <svg class="w-10 h-10 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             <span
                                 class="text-[10px] font-extrabold uppercase tracking-widest text-primary-100 mt-2">Community
                                 Event</span>
@@ -73,15 +75,18 @@
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                     <span
-                                        class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/80 text-[10px] font-extrabold uppercase">🏆
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/80 text-[10px] font-extrabold uppercase">
+                                        <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
                                         Inam Vitaran</span>
                                 @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
                                     <span
-                                        class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200/80 text-[10px] font-extrabold uppercase">⚡
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200/80 text-[10px] font-extrabold uppercase">
+                                        <svg class="w-3 h-3 text-purple-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                         Yuva Melo</span>
                                 @else
                                     <span
-                                        class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200/80 text-[10px] font-extrabold uppercase">🎉
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200/80 text-[10px] font-extrabold uppercase">
+                                        <svg class="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                                         Normal Event</span>
                                 @endif
 
@@ -93,8 +98,9 @@
 
                                 @if(($event->pass_fee ?? 0) > 0)
                                     <span
-                                        class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-black uppercase">🎟️ ₹{{ number_format($event->pass_fee, 0) }}
-                                        Pass Fee</span>
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-black uppercase">
+                                        <svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                                        ₹{{ number_format($event->pass_fee, 0) }} Pass Fee</span>
                                 @else
                                     <span
                                         class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/80 text-[10px] font-black uppercase">Free
@@ -341,7 +347,7 @@
                                     <div x-show="galleryImages.length > 0"
                                         style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 10000000;"
                                         class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-white/20 text-white text-xs font-bold shadow-2xl backdrop-blur-md">
-                                        <span class="text-primary-400">🖼️</span>
+                                        <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         <span>
                                             <span class="text-white" x-text="lightboxIndex + 1"></span>
                                             <span class="text-white/40"> / </span>
@@ -413,7 +419,10 @@
                                     @if($registration)
                                         <div class="space-y-3">
                                             <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1">
-                                                <span class="flex items-center gap-1">✅ {{ __('messages.registered_status') }}</span>
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                    {{ __('messages.registered_status') }}
+                                                </span>
                                                 <span class="text-[10px] text-emerald-700 font-semibold">
                                                     {{ __('messages.attending_persons_count', ['count' => $registration->form_data['person_count'] ?? 1]) }}
                                                 </span>
@@ -460,8 +469,9 @@
                                         @endphp
 
                                         @if($isFull)
-                                            <div class="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 text-xs font-bold text-center">
-                                                Capacity Full ❌
+                                            <div class="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 text-xs font-bold text-center flex items-center justify-center gap-1">
+                                                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                <span>Capacity Full</span>
                                             </div>
                                         @else
                                             <form method="POST" action="{{ route('member.events.register', $event->id) }}" class="space-y-3">
@@ -504,21 +514,26 @@
                                             <!-- Fill Yuva Form Button -->
                                             <a href="{{ route('member.events.register_form', $event->id) }}"
                                                 class="w-full flex items-center justify-center px-4 py-3 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white text-xs font-black rounded-xl shadow-xs transition-all text-center gap-1.5">
-                                                <span>⚡ {{ __('messages.fill_yuva_form') ?? 'Fill Yuva Melo Form' }}</span>
+                                                <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                <span>{{ __('messages.fill_yuva_form') ?? 'Fill Yuva Melo Form' }}</span>
                                                 <span>&rarr;</span>
                                             </a>
 
                                             @if(($event->pass_fee ?? 0) > 0)
                                                 <div class="pt-2.5 border-t border-slate-100 space-y-2">
                                                     <div class="flex items-center justify-between text-[11px]">
-                                                        <span class="text-slate-500 font-bold">🎟️ Attendee Pass:</span>
+                                                        <span class="text-slate-500 font-bold inline-flex items-center gap-1">
+                                                            <svg class="w-3.5 h-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                                                            Attendee Pass:
+                                                        </span>
                                                         <span class="text-slate-900 font-black">₹{{ number_format($event->pass_fee, 0) }}</span>
                                                     </div>
                                                     <form method="POST" action="{{ route('member.events.register', $event->id) }}" class="space-y-2">
                                                         @csrf
                                                         <input type="hidden" name="person_count" value="1">
-                                                        <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all text-center cursor-pointer">
-                                                            🎟️ Book Attendee Pass &rarr;
+                                                        <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all text-center cursor-pointer inline-flex items-center justify-center gap-1.5">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                                                            <span>Book Attendee Pass &rarr;</span>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -527,12 +542,16 @@
                                     @elseif($registration)
                                         <div
                                             class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold text-center flex flex-col items-center justify-center gap-1">
-                                            <span class="flex items-center gap-1">Registered ✅</span>
+                                            <span class="flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                Registered
+                                            </span>
                                         </div>
                                         @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                             <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                class="w-full flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
-                                                🏆 Fill Inam Form &rarr;
+                                                class="w-full flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1.5">
+                                                <svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                                <span>Fill Inam Form &rarr;</span>
                                             </a>
                                         @else
                                             <a href="{{ route('member.events.register_form', $event->id) }}"
@@ -549,14 +568,16 @@
 
                                         @if($isFull)
                                             <div
-                                                class="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 text-xs font-bold text-center">
-                                                Capacity Full ❌
+                                                class="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 text-xs font-bold text-center flex items-center justify-center gap-1">
+                                                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                <span>Capacity Full</span>
                                             </div>
                                         @else
                                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                                                 <a href="{{ route('member.events.register_form', $event->id) }}"
-                                                    class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1">
-                                                    🏆 Fill Inam Form &rarr;
+                                                    class="w-full flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all duration-150 text-center gap-1.5">
+                                                    <svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                                    <span>Fill Inam Form &rarr;</span>
                                                 </a>
                                             @else
                                                 <a href="{{ route('member.events.register_form', $event->id) }}"

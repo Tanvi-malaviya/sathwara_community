@@ -65,13 +65,16 @@
                             : asset('storage/' . $profile->photo_path)) 
                         : null;
                     
-                    // Format address compactly
-                    $addressParts = [];
-                    if (!empty($profile->address)) $addressParts[] = $profile->address;
-                    if (!empty($profile->area->name)) $addressParts[] = $profile->area->name;
-                    if (!empty($profile->city)) $addressParts[] = $profile->city;
-                    if (!empty($profile->pincode)) $addressParts[] = $profile->pincode;
-                    $fullAddress = implode(', ', $addressParts);
+                    // Format address cleanly without duplication
+                    $fullAddress = trim($profile->address ?? '');
+                    if (empty($fullAddress)) {
+                        $fallbackParts = array_filter([
+                            $profile->area->name ?? null,
+                            $profile->city ?? null,
+                            $profile->pincode ?? null,
+                        ]);
+                        $fullAddress = implode(', ', $fallbackParts);
+                    }
                 @endphp
 
                 <div class="bg-white rounded-xl p-3.5 border border-slate-100 shadow-2xs space-y-3 hover:border-slate-300 hover:shadow-xs transition-all duration-200 flex flex-col justify-between group">
@@ -93,12 +96,14 @@
                                     {{ $member->formatted_member_id }}
                                 </span>
                                 @if(!empty($profile->area->name))
-                                    <span class="text-[10px] sm:text-[10.5px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md shrink-0" title="{{ $profile->area->name }}">
-                                        📍 {{ $profile->area->name }}
+                                    <span class="inline-flex items-center gap-1 text-[10px] sm:text-[10.5px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md shrink-0" title="{{ $profile->area->name }}">
+                                        <svg class="w-3 h-3 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        {{ $profile->area->name }}
                                     </span>
                                 @elseif(!empty($profile->city))
-                                    <span class="text-[10px] sm:text-[10.5px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md shrink-0" title="{{ $profile->city }}">
-                                        📍 {{ $profile->city }}
+                                    <span class="inline-flex items-center gap-1 text-[10px] sm:text-[10.5px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md shrink-0" title="{{ $profile->city }}">
+                                        <svg class="w-3 h-3 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        {{ $profile->city }}
                                     </span>
                                 @endif
                             </div>

@@ -67,7 +67,7 @@
                         <div class="absolute top-3.5 left-3.5 z-10">
                             <span class="text-xs font-black text-white px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-lg flex items-center gap-1.5"
                                 style="background-color: #0f172a !important; color: #ffffff !important; box-shadow: 0 4px 12px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.25);">
-                                <span>📅</span>
+                                <svg class="w-3.5 h-3.5 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 <span>{{ date('M d, Y', strtotime($event->date)) }}</span>
                             </span>
                         </div>
@@ -81,9 +81,15 @@
                             @endif
 
                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                                <span class="text-xs font-black text-white bg-amber-500 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">🏆 {{ __('messages.inam') }}</span>
+                                <span class="inline-flex items-center gap-1 text-xs font-black text-white bg-amber-500 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">
+                                    <svg class="w-3 h-3 text-amber-100 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                    <span>{{ __('messages.inam') }}</span>
+                                </span>
                             @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                <span class="text-xs font-black text-white bg-purple-600 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">⚡ {{ __('messages.yuva') }}</span>
+                                <span class="inline-flex items-center gap-1 text-xs font-black text-white bg-purple-600 px-3 py-1 rounded-xl uppercase tracking-wider shadow-md">
+                                    <svg class="w-3 h-3 text-purple-100 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    <span>{{ __('messages.yuva') }}</span>
+                                </span>
                             @endif
                         </div>
                     </div>
@@ -103,11 +109,15 @@
 
                         <div class="flex justify-between items-center pt-3.5 border-t border-slate-100 min-w-0 gap-2 flex-wrap">
                             <div class="min-w-0 flex-1">
-                                <span class="text-xs sm:text-sm font-bold text-slate-500 truncate block" title="{{ $event->venue }}">📍 {{ $event->venue }}</span>
+                                <span class="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-slate-500 truncate max-w-full" title="{{ $event->venue }}">
+                                    <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span class="truncate">{{ $event->venue }}</span>
+                                </span>
                             </div>
                             @if(!empty($event->registration_end_date) && ($event->event_type ?? 'normal') !== 'normal')
-                                <span class="text-xs font-extrabold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100 whitespace-nowrap">
-                                    ⏳ {{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
+                                <span class="inline-flex items-center gap-1 text-xs font-extrabold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100 whitespace-nowrap">
+                                    <svg class="w-3 h-3 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>{{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
                                 </span>
                             @endif
                         </div>

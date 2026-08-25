@@ -306,11 +306,16 @@
                         class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-slate-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-4">
                         <div class="space-y-3">
                             <div
-                                class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-lg font-bold border border-primary-100">
-                                @if($agenda->icon == 'users') 👥
-                                @elseif($agenda->icon == 'academic-cap') 🎓
-                                @elseif($agenda->icon == 'briefcase') 💼
-                                @else 📌 @endif
+                                class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold border border-primary-100">
+                                @if($agenda->icon == 'users')
+                                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                @elseif($agenda->icon == 'academic-cap')
+                                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/></svg>
+                                @elseif($agenda->icon == 'briefcase')
+                                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                @else
+                                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                                @endif
                             </div>
 
                             <h3 class="text-base font-bold text-slate-900">
@@ -340,53 +345,45 @@
                     </h2>
                 </div>
                 <a href="{{ route('events') }}"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 !text-white text-white font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm shrink-0 group">
-                    <span class="!text-white text-white">{{ __('messages.view_all_events') }}</span>
-                    <svg class="w-4 h-4 !text-white text-white group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    class="hidden sm:inline-flex items-center gap-2 text-xs font-extrabold text-primary-600 hover:text-primary-700 transition-colors">
+                    <span>{{ __('messages.view_all_events') }}</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                        </path>
                     </svg>
                 </a>
             </div>
 
             <!-- Event Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @forelse($upcomingEvents as $event)
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse(($events ?? $upcomingEvents) as $event)
                     <a href="{{ route('event.details', $event->id) }}"
-                        class="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col block cursor-pointer">
-
-                        <!-- Image -->
-                        <div class="relative h-44 w-full overflow-hidden shrink-0 bg-white">
+                        class="group flex flex-col bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-300 overflow-hidden cursor-pointer">
+                        <!-- Top Banner / Fallback Container -->
+                        <div class="relative h-48 w-full overflow-hidden shrink-0 bg-white border-b border-slate-100">
                             {{-- Always-visible Red Background + Calendar Icon (base layer) --}}
-                            <div
-                                style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 16px 12px; background: linear-gradient(135deg, #dc2626 0%, #e11d48 60%, #be123c 100%);">
-                                <div
-                                    style="position:absolute; inset:0; background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px); background-size: 14px 14px; pointer-events:none;">
-                                </div>
-                                <div
-                                    style="position:relative; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                                    <div
-                                        style="width:60px; height:64px; border-radius:12px; background:#fff; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 6px 20px rgba(0,0,0,0.28), 0 0 0 2px rgba(255,255,255,0.35);">
-                                        <div
-                                            style="background: linear-gradient(90deg, #dc2626, #e11d48); padding: 4px 0; text-align:center; flex-shrink:0;">
-                                            <span
-                                                style="font-size:10px; font-weight:900; color:#fff; letter-spacing:0.14em; text-transform:uppercase; display:block; line-height:1;">
+                            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 16px 12px; background: linear-gradient(135deg, #dc2626 0%, #e11d48 60%, #be123c 100%);">
+                                {{-- Dot grid texture --}}
+                                <div style="position:absolute; inset:0; background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px); background-size: 14px 14px; pointer-events:none;"></div>
+
+                                {{-- Calendar card --}}
+                                <div style="position:relative; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                                    <div style="width:68px; height:72px; border-radius:14px; background:#fff; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 6px 20px rgba(0,0,0,0.28), 0 0 0 2px rgba(255,255,255,0.35);">
+                                        <div style="background: linear-gradient(90deg, #dc2626, #e11d48); padding: 5px 0; text-align:center;">
+                                            <span style="font-size:12px; font-weight:900; color:#fff; letter-spacing:0.15em; text-transform:uppercase; display:block; line-height:1;">
                                                 {{ date('M', strtotime($event->date)) }}
                                             </span>
                                         </div>
-                                        <div
-                                            style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                                            <span style="font-size:22px; font-weight:900; color:#1e293b; line-height:1;">
+                                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4px 0;">
+                                            <span style="font-size:28px; font-weight:900; color:#1e293b; line-height:1;">
                                                 {{ date('d', strtotime($event->date)) }}
                                             </span>
-                                            <span
-                                                style="font-size:7px; font-weight:700; color:#94a3b8; margin-top:2px; line-height:1;">
+                                            <span style="font-size:9px; font-weight:700; color:#94a3b8; margin-top:1px; line-height:1;">
                                                 {{ date('Y', strtotime($event->date)) }}
                                             </span>
                                         </div>
                                     </div>
-                                    <span
-                                        style="font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#fff; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); padding:2px 8px; border-radius:999px; white-space:nowrap;">{{ __('messages.community_event') }}</span>
+                                    <span style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:#fff; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); padding:3px 12px; border-radius:999px;">{{ __('messages.community_event') }}</span>
                                 </div>
                             </div>
 
@@ -401,7 +398,7 @@
                             <div class="absolute top-3.5 left-3.5 z-10">
                                 <span class="text-xs font-black text-white px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-lg flex items-center gap-1.5"
                                     style="background-color: #0f172a !important; color: #ffffff !important; box-shadow: 0 4px 12px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.25);">
-                                    <span>📅</span>
+                                    <svg class="w-3.5 h-3.5 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                     <span>{{ date('d M, Y', strtotime($event->date)) }}</span>
                                 </span>
                             </div>
@@ -438,15 +435,17 @@
                             <div
                                 class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 min-w-0 flex-wrap">
                                 <div class="min-w-0 flex-1">
-                                    <span class="text-[10px] font-bold text-slate-400 truncate block"
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 truncate max-w-full"
                                         title="{{ $event->venue }}">
-                                        📍 {{ $event->venue }}
+                                        <svg class="w-3 h-3 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        <span class="truncate">{{ $event->venue }}</span>
                                     </span>
                                 </div>
                                 @if(!empty($event->registration_end_date) && ($event->event_type ?? 'normal') !== 'normal')
                                     <span
-                                        class="text-[9px] font-extrabold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 whitespace-nowrap">
-                                        ⏳ {{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}
+                                        class="inline-flex items-center gap-1 text-[9px] font-extrabold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 whitespace-nowrap">
+                                        <svg class="w-2.5 h-2.5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>{{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
                                     </span>
                                 @endif
                             </div>
@@ -678,9 +677,9 @@
                     <!-- Bottom Bar: Image Numbers Counter (Bottom Center) -->
                     <div x-show="currentGallery.length > 1"
                         style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 1000000;"
-                        class="text-white/90 bg-black/80 px-5 py-1.5 rounded-full text-xs font-bold tracking-widest border border-white/20 backdrop-blur-md shadow-2xl">
-                        <span class="text-primary-400">🖼️</span>
-                        <span x-text="lightboxIndex + 1"></span> / <span x-text="currentGallery.length"></span>
+                        class="text-white/90 bg-black/80 px-5 py-1.5 rounded-full text-xs font-bold tracking-widest border border-white/20 backdrop-blur-md shadow-2xl inline-flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span><span x-text="lightboxIndex + 1"></span> / <span x-text="currentGallery.length"></span></span>
                     </div>
 
                 </div>

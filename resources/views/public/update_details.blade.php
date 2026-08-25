@@ -33,12 +33,14 @@
                         </div>
                     @endif
 
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="text-xs font-black text-primary-700 bg-primary-50 px-3 py-1.5 rounded-xl uppercase tracking-wider border border-primary-100 shadow-2xs">
-                            📅 {{ __('messages.published') }}: {{ date('M d, Y', strtotime($update->publish_date)) }}
+                    <div class="flex items-center gap-2 mb-4 flex-wrap">
+                        <span class="inline-flex items-center gap-1.5 text-xs font-black text-primary-700 bg-primary-50 px-3 py-1.5 rounded-xl uppercase tracking-wider border border-primary-100 shadow-2xs">
+                            <svg class="w-3.5 h-3.5 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>{{ __('messages.published') }}: {{ date('M d, Y', strtotime($update->publish_date)) }}</span>
                         </span>
-                        <span class="text-xs font-black text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-2xs">
-                            📌 {{ __('messages.announcement') }}
+                        <span class="inline-flex items-center gap-1.5 text-xs font-black text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-2xs">
+                            <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                            <span>{{ __('messages.announcement') }}</span>
                         </span>
                     </div>
 
@@ -81,8 +83,8 @@
                                              src="{{ str_starts_with($recent->image_path, 'http') ? $recent->image_path : asset('storage/' . $recent->image_path) }}" 
                                              alt="{{ $recent->title }}">
                                     @else
-                                        <div class="w-12 h-12 rounded-lg bg-primary-50 flex items-center justify-center text-primary-500 text-sm shrink-0 border border-primary-100">
-                                            📢
+                                        <div class="w-12 h-12 rounded-lg bg-primary-50 flex items-center justify-center text-primary-500 shrink-0 border border-primary-100">
+                                            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
                                         </div>
                                     @endif
                                     <div class="min-w-0 flex-1">
@@ -112,11 +114,17 @@
                     
                     <div class="space-y-2">
                         <a href="{{ route('events') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold transition-all">
-                            <span>📅 {{ __('messages.community_events') }}</span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span>{{ __('messages.community_events') }}</span>
+                            </span>
                             <span>&rarr;</span>
                         </a>
                         <a href="{{ route('business.directory') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold transition-all">
-                            <span>💼 {{ __('messages.business_directory') }}</span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span>{{ __('messages.business_directory') }}</span>
+                            </span>
                             <span>&rarr;</span>
                         </a>
                     </div>

@@ -63,7 +63,10 @@
 
                     <!-- Card Footer -->
                     <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
-                        <span class="text-[11px] text-slate-400 font-medium">📅 {{ $b->created_at->format('d M Y') }}</span>
+                        <span class="text-[11px] text-slate-400 font-medium inline-flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            {{ $b->created_at->format('d M Y') }}
+                        </span>
                         <a href="{{ route('business.details', $b->id) }}" target="_blank" class="text-primary-600 font-black hover:text-primary-700 inline-flex items-center gap-1">
                             <span>{{ __('messages.details') }} ➔</span>
                         </a>
@@ -73,7 +76,9 @@
         </div>
     @else
         <div class="bg-white rounded-2xl p-10 border border-slate-100 text-center space-y-3 shadow-xs">
-            <span class="text-4xl block">🏢</span>
+            <div class="w-12 h-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mx-auto">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            </div>
             <h3 class="text-sm sm:text-base font-black text-slate-800">{{ __('messages.no_businesses_registered_yet') }}</h3>
             <p class="text-xs text-slate-500 max-w-sm mx-auto font-medium">{{ __('messages.no_businesses_registered_desc') }} (#{{ sprintf('%05d', auth()->user()->id) }}).</p>
             <a href="{{ route('register.business') }}" target="_blank" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all">

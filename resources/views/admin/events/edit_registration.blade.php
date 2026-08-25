@@ -53,8 +53,9 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <span class="px-3 py-1 rounded-xl text-xs font-black bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs">
-                ⚡ {{ $isGu ? 'યુવા મેળો ઉમેદવાર' : 'Yuva Melo Candidate' }}
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-black bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs">
+                <svg class="w-3.5 h-3.5 text-purple-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span>{{ $isGu ? 'યુવા મેળો ઉમેદવાર' : 'Yuva Melo Candidate' }}</span>
             </span>
         </div>
     </div>
@@ -68,7 +69,7 @@
         <!-- ========================================== -->
         <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
             <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center gap-2">
-                <span class="text-base">👤</span>
+                <svg class="w-4 h-4 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">
                     {{ $isGu ? '૧. ઉમેદવારની અંગત માહિતી' : '1. Personal Information' }}
                 </h3>
@@ -216,7 +217,7 @@
         <!-- ========================================== -->
         <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
             <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center gap-2">
-                <span class="text-base">🎓</span>
+                <svg class="w-4 h-4 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/></svg>
                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">
                     {{ $isGu ? '૨. શિક્ષણ અને વ્યવસાય' : '2. Education & Occupation' }}
                 </h3>
@@ -269,7 +270,7 @@
         <!-- ========================================== -->
         <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
             <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center gap-2">
-                <span class="text-base">👨‍👩‍👦</span>
+                <svg class="w-4 h-4 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">
                     {{ $isGu ? '૩. કુટુંબ અને માતા-પિતાની વિગત' : '3. Family & Parents Details' }}
                 </h3>
@@ -361,7 +362,7 @@
         <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
             <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
                 <div class="flex items-center gap-2">
-                    <span class="text-base">👫</span>
+                    <svg class="w-4 h-4 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">
                         {{ $isGu ? '૪. ભાઈ-બહેનની વિગત' : '4. Siblings Details' }}
                     </h3>
@@ -396,9 +397,9 @@
                                 </div>
                             </div>
                             <button type="button" @click="removeSibling(index)" 
-                                    class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0" 
+                                    class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0 cursor-pointer" 
                                     title="Delete Sibling">
-                                🗑️
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                         </div>
                     </template>
@@ -427,7 +428,7 @@
         <!-- ========================================== -->
         <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
             <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center gap-2">
-                <span class="text-base">🏡</span>
+                <svg class="w-4 h-4 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">
                     {{ $isGu ? '૫. મોસાળ પક્ષની વિગત' : '5. Mosal Details' }}
                 </h3>
@@ -470,9 +471,12 @@
         <!-- ========================================== -->
         <!-- SECTION 6: Property, Vehicle & Special Info -->
         <!-- ========================================== -->
+        <!-- ========================================== -->
+        <!-- SECTION 6: Property, Vehicle & Special Info -->
+        <!-- ========================================== -->
         <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
             <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center gap-2">
-                <span class="text-base">🏢</span>
+                <svg class="w-4 h-4 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">
                     {{ $isGu ? '૬. મિલકત અને વિશેષ માહિતી' : '6. Property, Disability & Other Info' }}
                 </h3>
@@ -569,7 +573,7 @@
         <!-- ========================================== -->
         <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
             <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center gap-2">
-                <span class="text-base">🖼️</span>
+                <svg class="w-4 h-4 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">
                     {{ $isGu ? '૭. ઉમેદવારના ફોટોગ્રાફ્સ અને દસ્તાવેજો' : '7. Candidate Photos & Documents' }}
                 </h3>
@@ -591,7 +595,7 @@
                             </div>
                         @else
                             <div class="text-center text-slate-300 p-3">
-                                <span class="text-3xl block">👤</span>
+                                <svg class="w-8 h-8 mx-auto text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                 <span class="text-[9px] font-bold text-slate-400">{{ $isGu ? 'ફોટો નથી' : 'No Photo' }}</span>
                             </div>
                         @endif
@@ -619,7 +623,7 @@
                             </div>
                         @else
                             <div class="text-center text-slate-300 p-3">
-                                <span class="text-3xl block">🤳</span>
+                                <svg class="w-8 h-8 mx-auto text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                 <span class="text-[9px] font-bold text-slate-400">{{ $isGu ? 'સેલ્ફી નથી' : 'No Selfie' }}</span>
                             </div>
                         @endif
@@ -647,7 +651,7 @@
                             </div>
                         @else
                             <div class="text-center text-slate-300 p-3">
-                                <span class="text-3xl block">📷</span>
+                                <svg class="w-8 h-8 mx-auto text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 <span class="text-[9px] font-bold text-slate-400">{{ $isGu ? 'ફોટો નથી' : 'No Photo' }}</span>
                             </div>
                         @endif
@@ -671,7 +675,7 @@
                     <div class="flex items-center justify-center bg-white rounded-xl border border-slate-200 p-2 min-h-[130px]">
                         @if(!empty($fd['aadhaar_photo_url']))
                             <div class="text-center p-2">
-                                <span class="text-3xl block mb-1">📄</span>
+                                <svg class="w-8 h-8 mx-auto text-primary-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 <a href="{{ $fd['aadhaar_photo_url'] }}" target="_blank" 
                                    class="inline-flex items-center gap-1 text-primary-600 hover:text-primary-800 font-extrabold text-[11px] underline">
                                     <span>{{ $isGu ? 'દસ્તાવેજ જુઓ ↗' : 'View Document ↗' }}</span>
@@ -679,7 +683,7 @@
                             </div>
                         @else
                             <div class="text-center text-slate-300 p-3">
-                                <span class="text-3xl block">📄</span>
+                                <svg class="w-8 h-8 mx-auto text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 <span class="text-[9px] font-bold text-slate-400">{{ $isGu ? 'અપલોડ નથી' : 'Not Uploaded' }}</span>
                             </div>
                         @endif
@@ -701,7 +705,7 @@
             </a>
             <button type="submit" 
                     class="px-8 py-2.5 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white font-black text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer">
-                <span>💾</span>
+                <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                 <span>{{ $isGu ? 'વિગત સેવ અને અપડેટ કરો' : 'Save & Update Candidate' }}</span>
             </button>
         </div>

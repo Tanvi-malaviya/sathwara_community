@@ -59,9 +59,15 @@
                         @endif
 
                         @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                            <span class="text-xs font-black text-white bg-amber-500 px-3.5 py-1 rounded-full border border-amber-400 uppercase tracking-wider shadow-xs">🏆 {{ __('messages.inam') }}</span>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-black text-white bg-amber-500 px-3.5 py-1 rounded-full border border-amber-400 uppercase tracking-wider shadow-xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                <span>{{ __('messages.inam') }}</span>
+                            </span>
                         @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                            <span class="text-xs font-black text-white bg-purple-600 px-3.5 py-1 rounded-full border border-purple-500 uppercase tracking-wider shadow-xs">⚡ {{ __('messages.yuva') }}</span>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-black text-white bg-purple-600 px-3.5 py-1 rounded-full border border-purple-500 uppercase tracking-wider shadow-xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                <span>{{ __('messages.yuva') }}</span>
+                            </span>
                         @endif
                     </div>
 
@@ -72,22 +78,22 @@
                     <!-- Meta Details -->
                     <div class="flex flex-wrap items-center gap-3 text-sm text-slate-200 font-bold pt-1">
                         <div class="inline-flex items-center gap-2 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl whitespace-nowrap shadow-xs">
-                            <span>📅</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             <span>{{ date('F d, Y', strtotime($event->date)) }}</span>
                         </div>
                         @if($event->time)
                             <div class="inline-flex items-center gap-2 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl whitespace-nowrap shadow-xs">
-                                <span>⏰</span>
+                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span>{{ date('h:i A', strtotime($event->time)) }}</span>
                             </div>
                         @endif
                         <div class="inline-flex items-center gap-2 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl shadow-xs">
-                            <span>📍</span>
+                            <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             <span class="truncate max-w-xs sm:max-w-md" title="{{ $event->venue }}">{{ $event->venue }}</span>
                         </div>
                         @if(!empty($event->registration_end_date) && ($event->event_type ?? 'normal') !== 'normal')
                             <div class="inline-flex items-center gap-2 text-rose-200 font-extrabold bg-rose-950 px-4 py-2.5 rounded-xl border border-rose-800 whitespace-nowrap shadow-xs">
-                                <span>⏳</span>
+                                <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span>{{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
                             </div>
                         @endif
@@ -127,7 +133,8 @@
                         <div class="space-y-4 pt-4 border-t border-slate-100">
                             <div class="flex items-center justify-between gap-2 flex-wrap">
                                 <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
-                                    <span>📍 {{ __('messages.event_location_venue') }}</span>
+                                    <svg class="w-5 h-5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span>{{ __('messages.event_location_venue') }}</span>
                                 </h2>
                             </div>
                             <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-56 sm:h-64 w-full bg-slate-50">
@@ -181,7 +188,10 @@
                                              src="{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}"
                                              alt="{{ $photo->caption }}">
                                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <span class="text-white text-xs font-bold">🔍 Zoom</span>
+                                            <span class="text-white text-xs font-bold inline-flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                                Zoom
+                                            </span>
                                         </div>
                                     </div>
                                 @endforeach
@@ -243,7 +253,7 @@
                                         <div x-show="galleryImages.length > 0" 
                                              style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 10000000;"
                                              class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-white/20 text-white text-xs font-bold shadow-2xl backdrop-blur-md">
-                                            <span class="text-primary-400">🖼️</span>
+                                            <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                             <span>
                                                 <span class="text-white" x-text="lightboxIndex + 1"></span>
                                                 <span class="text-white/40"> / </span>
@@ -261,7 +271,7 @@
                             <div class="flex items-center justify-between gap-3 flex-wrap">
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-2xl font-black shadow-sm shrink-0">
-                                        ⚡
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                     </div>
                                     <div>
                                         <span class="text-xs font-extrabold text-purple-700 uppercase tracking-wider block">{{ __('messages.candidate_biodata_form') }}</span>
@@ -307,13 +317,16 @@
                                     {{ __('messages.event_registration') }}
                                 @endif
                             </h3>
-                            <span class="text-xs font-black px-3 py-1 rounded-lg uppercase tracking-wider {{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? 'text-amber-800 bg-amber-50 border border-amber-200' : (($event->event_type ?? 'normal') === 'yuva_melo' ? 'text-purple-800 bg-purple-50 border border-purple-200' : 'text-primary-700 bg-primary-50 border border-primary-200') }}">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-lg uppercase tracking-wider {{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? 'text-amber-800 bg-amber-50 border border-amber-200' : (($event->event_type ?? 'normal') === 'yuva_melo' ? 'text-purple-800 bg-purple-50 border border-purple-200' : 'text-primary-700 bg-primary-50 border border-primary-200') }}">
                                 @if(($event->event_type ?? 'normal') === 'inam_vitaran')
-                                    🏆 {{ __('messages.inam_vitaran') }}
+                                    <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                    <span>{{ __('messages.inam_vitaran') }}</span>
                                 @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
-                                    ⚡ {{ __('messages.yuva_melo') }}
+                                    <svg class="w-3.5 h-3.5 text-purple-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    <span>{{ __('messages.yuva_melo') }}</span>
                                 @else
-                                    🎟️ {{ __('messages.general_event') }}
+                                    <svg class="w-3.5 h-3.5 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                                    <span>{{ __('messages.general_event') }}</span>
                                 @endif
                             </span>
                         </div>
@@ -425,8 +438,8 @@
                                                         <!-- Modal Header -->
                                                         <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
                                                             <div class="flex items-center gap-3">
-                                                                <div class="w-9 h-9 rounded-xl bg-primary-600/30 border border-primary-500/40 text-primary-400 flex items-center justify-center text-lg">
-                                                                    🎟️
+                                                                <div class="w-9 h-9 rounded-xl bg-primary-600/30 border border-primary-500/40 text-primary-400 flex items-center justify-center">
+                                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
                                                                 </div>
                                                                 <div>
                                                                     <h3 class="text-sm font-extrabold flex items-center gap-2">
@@ -439,11 +452,12 @@
                                                             <div class="flex items-center gap-2">
                                                                 <button type="button" onclick="downloadAllPasses()" 
                                                                         class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer">
-                                                                    ⬇️ {{ __('messages.download_all_pdf') }}
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                                    <span>{{ __('messages.download_all_pdf') }}</span>
                                                                 </button>
                                                                 <button type="button" @click="showViewPassesModal = false" 
                                                                         class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs font-bold cursor-pointer">
-                                                                    ✕
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -456,7 +470,7 @@
                                                                      data-pass-no="{{ $pNo }}"
                                                                      data-event-title="{{ $event->title }}"
                                                                      data-mandal="Satwara Gyati Mandal Ahm."
-                                                                     data-date="{{ date('d-M-Y', strtotime($event->date)) }}{{ $event->time ? ' | ⏰ ' . date('h:i A', strtotime($event->time)) : '' }}"
+                                                                     data-date="{{ date('d-M-Y', strtotime($event->date)) }}{{ $event->time ? ' | ' . date('h:i A', strtotime($event->time)) : '' }}"
                                                                      data-venue="{{ $event->venue }}"
                                                                      data-logo="{{ $logoUrl }}">
                                                                     <!-- Top Bar -->
@@ -481,11 +495,11 @@
                                                                                 {{ $event->title }}
                                                                             </div>
                                                                             <div class="text-xs font-bold text-slate-700 flex items-center justify-center sm:justify-start gap-1">
-                                                                                <span>📅 {{ __('messages.date') ?? 'Date' }}:</span>
+                                                                                <span>{{ __('messages.date') ?? 'Date' }}:</span>
                                                                                 <span>{{ date('d-M-Y', strtotime($event->date)) }}</span>
                                                                                 @if($event->time)
                                                                                     <span class="text-slate-400">|</span>
-                                                                                    <span>⏰ {{ date('h:i A', strtotime($event->time)) }}</span>
+                                                                                    <span>{{ date('h:i A', strtotime($event->time)) }}</span>
                                                                                 @endif
                                                                             </div>
 
@@ -503,12 +517,13 @@
                                                                     <!-- Bottom Location Strip -->
                                                                     <div class="border-t-2 border-dashed border-slate-200 bg-slate-50/80 px-4 py-2.5 text-xs font-bold text-slate-700 flex items-center justify-between gap-1.5">
                                                                         <span class="flex items-center gap-1.5">
-                                                                            <span class="text-rose-500">📍</span>
+                                                                            <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                                                             <span><strong>{{ __('messages.location') ?? 'Location' }}:</strong> {{ $event->venue }}</span>
                                                                         </span>
                                                                         <button type="button" onclick="downloadSinglePass('pass-card-{{ $idx }}')"
                                                                                 class="flex items-center gap-1 px-2.5 py-1 bg-slate-900 hover:bg-slate-700 text-white text-[10px] font-extrabold rounded-lg transition-colors cursor-pointer no-print">
-                                                                            ⬇️ {{ __('messages.download') }}
+                                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                                            <span>{{ __('messages.download') }}</span>
                                                                         </button>
                                                                     </div>
                                                                 </div>
@@ -517,11 +532,13 @@
 
                                                         <!-- Modal Footer -->
                                                         <div class="px-6 py-3 bg-white border-t border-slate-100 flex items-center justify-between shrink-0">
-                                                            <span class="text-[11px] text-slate-400 font-medium">💡 {{ __('messages.present_pass_at_entrance') }}</span>
+                                                            <span class="text-[11px] text-slate-400 font-medium inline-flex items-center gap-1">
+                                                                <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                                {{ __('messages.present_pass_at_entrance') }}</span>
                                                             <button type="button" @click="showViewPassesModal = false" 
                                                                     class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">
                                                                 {{ __('messages.close') ?? 'Close' }}
-                                                            </button>
+                                                             </button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -546,13 +563,14 @@
                                                     <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
                                                         <div>
                                                             <h3 class="text-sm font-extrabold flex items-center gap-2">
-                                                                <span>🎟️ {{ __('messages.purchase_event_pass') }}</span>
+                                                                <svg class="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                                                                <span>{{ __('messages.purchase_event_pass') }}</span>
                                                             </h3>
                                                             <p class="text-[11px] text-slate-400 font-medium mt-0.5 truncate max-w-[280px]">{{ $event->title }}</p>
                                                         </div>
                                                         <button type="button" @click="showPassModal = false" 
                                                                 class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs font-bold cursor-pointer">
-                                                            ✕
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                         </button>
                                                     </div>
 
@@ -564,7 +582,10 @@
 
                                                         <!-- Event Snippet -->
                                                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs">
-                                                            <span class="font-bold text-slate-700">📅 {{ date('d-M-Y', strtotime($event->date)) }}</span>
+                                                            <span class="font-bold text-slate-700 inline-flex items-center gap-1">
+                                                                <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                                {{ date('d-M-Y', strtotime($event->date)) }}
+                                                            </span>
                                                             @if(($event->pass_fee ?? 0) > 0)
                                                                 <span class="font-black text-primary-700 bg-primary-50 px-2.5 py-1 rounded-xl border border-primary-200 text-xs">₹{{ number_format($event->pass_fee) }} / {{ __('messages.pass') }}</span>
                                                             @else
@@ -747,8 +768,9 @@ function _renderPassHtmlCard(passData) {
                     <div style="font-size: 16px; font-weight: 900; color: #e11d48; line-height: 1.25; margin-bottom: 6px;">
                         ${title}
                     </div>
-                    <div style="font-size: 12px; font-weight: 700; color: #334155;">
-                        📅 ${date}
+                    <div style="font-size: 12px; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 4px;">
+                        <svg style="width: 14px; height: 14px; color: #e11d48; display: inline-block; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>${date}</span>
                     </div>
                 </td>
 
@@ -763,8 +785,9 @@ function _renderPassHtmlCard(passData) {
         </table>
 
         <!-- Bottom Location Strip -->
-        <div style="border-top: 2px dashed #e2e8f0; background-color: #f8fafc; padding: 9px 16px; font-size: 11px; font-weight: 700; color: #334155;">
-            📍 <strong>Location / Venue:</strong> ${venue}
+        <div style="border-top: 2px dashed #e2e8f0; background-color: #f8fafc; padding: 9px 16px; font-size: 11px; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 4px;">
+            <svg style="width: 14px; height: 14px; color: #e11d48; display: inline-block; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span><strong>Location / Venue:</strong> ${venue}</span>
         </div>
     </div>`;
 }

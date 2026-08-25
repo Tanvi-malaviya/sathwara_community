@@ -403,7 +403,7 @@ class DashboardController extends Controller
             });
         }
 
-        $members = $query->orderBy('name', 'asc')->paginate(16)->withQueryString();
+        $members = $query->orderBy('name', 'asc')->paginate(18)->withQueryString();
         $areas = \App\Models\Area::orderBy('name')->get();
 
         return view('member.directory', compact('members', 'areas'));
