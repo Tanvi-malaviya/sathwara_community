@@ -9,18 +9,18 @@
         $canEditMember = $user->hasRole('Administrator') || $userPerms->contains('members_manage') || $userPerms->contains('members_edit');
     @endphp
     <div class="space-y-5 max-w-6xl mx-auto" x-data="{ showRejectModal: false }">
-        <!-- Profile Details Card with Perfect Balance & Zero Empty Space -->
+        <!-- Profile Details Card -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
-            <div class="flex flex-col md:flex-row items-start gap-5 lg:gap-6">
+            <div class="flex flex-col sm:flex-row items-start gap-6">
 
-                <!-- Left Column: Profile Photo -->
-                <div class="flex flex-col items-center shrink-0 w-full md:w-auto">
+                <!-- Left Column: Profile Photo & Member Code -->
+                <div class="flex flex-col items-center shrink-0 w-44 mx-auto sm:mx-0">
                     @php
                         $profile = $member->memberProfile;
                         $hasPhoto = ($profile && !empty($profile->photo_path) && !str_contains($profile->photo_path, 'unsplash.com') && $profile->photo_path !== 'NOT_SPECIFIED' && $profile->photo_path !== 'N/A');
                     @endphp
                     <div
-                        class="relative w-40 h-40 sm:w-40 sm:h-40 rounded-xl overflow-hidden bg-slate-50 border border-slate-200/80 shadow-xs flex items-center justify-center">
+                        class="relative w-44 h-44 rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/80 shadow-xs flex items-center justify-center">
                         @if($hasPhoto)
                             <img class="w-full h-full object-cover"
                                 src="{{ str_starts_with($profile->photo_path, 'http') ? $profile->photo_path : asset('storage/' . $profile->photo_path) }}"
@@ -37,30 +37,32 @@
                             </div>
                         @endif
                     </div>
+
+                    <!-- Member Code below photo with proper spacing -->
+                    <div class="mt-4 sm:mt-5 w-full text-center">
+                        <span class="inline-flex items-center justify-center w-full px-3.5 py-2 rounded-xl text-xs font-black bg-slate-100/90 text-slate-800 border border-slate-200/90 tracking-widest uppercase shadow-2xs">
+                            {{ $member->member_code ?: $member->formatted_member_id }}
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Right Column: Member Header & Full Details -->
-                <div class="flex-1 w-full space-y-4">
+                <div class="flex-1 min-w-0 w-full space-y-4">
 
-                    <!-- Header: Member Name, Status Badge & Actions -->
-                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                        <div>
-                            <h3 class="text-lg font-black text-slate-900 leading-tight">{{ $member->display_name }}</h3>
+                    <!-- Header: Member Name & Status Badges on Top Right Corner -->
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-slate-100 pb-3">
+                        <div class="min-w-0">
+                            <h3 class="text-xl font-black text-slate-900 leading-tight truncate">{{ $member->display_name }}</h3>
                             <p class="text-[11px] text-slate-400 font-bold tracking-wider uppercase mt-1">
                                 {{ __('messages.registered_at') }}: {{ $member->created_at->format('d-M-Y') }}
                             </p>
                         </div>
 
+                        <!-- Top Right Corner: Status & Account Badges -->
                         <div class="flex flex-wrap items-center gap-2">
-                            <!-- Highlighted Member ID Badge on Right Corner -->
                             <span
-                                class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-black bg-primary-50 text-primary-700 border border-primary-300 shadow-2xs tracking-wider">
-                                {{ $member->member_code ?: $member->formatted_member_id }}
-                            </span>
-
-                            <span
-                                class="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider {{ $member->status == 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($member->status == 'rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200') }}">
-                                {{ __('messages.status_label') }}:
+                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider {{ $member->status == 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 ring-1 ring-emerald-500/20' : ($member->status == 'rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200 ring-1 ring-rose-500/20' : 'bg-amber-50 text-amber-700 border border-amber-200 ring-1 ring-amber-500/20') }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $member->status == 'approved' ? 'bg-emerald-500' : ($member->status == 'rejected' ? 'bg-rose-500' : 'bg-amber-500') }}"></span>
                                 @if($member->status == 'approved')
                                     {{ __('messages.approved') }}
                                 @elseif($member->status == 'rejected')
@@ -71,56 +73,60 @@
                             </span>
 
                             <span
-                                class="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider {{ $member->account_status == 'close' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}">
+                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider {{ $member->account_status == 'close' ? 'bg-rose-50 text-rose-700 border border-rose-200 ring-1 ring-rose-500/20' : 'bg-emerald-50 text-emerald-700 border border-emerald-200 ring-1 ring-emerald-500/20' }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $member->account_status == 'close' ? 'bg-rose-500' : 'bg-emerald-500' }}"></span>
                                 Account: {{ $member->account_status == 'close' ? 'Close' : 'Open' }}
                             </span>
-
-                            @if($canEditMember)
-                                <!-- Toggle Account Status Button -->
-                                <form method="POST" action="{{ route('admin.members.toggle_account_status', $member->id) }}" class="inline">
-                                    @csrf
-                                    @if($member->account_status == 'close')
-                                        <button type="submit"
-                                            class="inline-flex items-center px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs rounded-lg transition-all shadow-xs gap-1">
-                                            🔓 Open Account
-                                        </button>
-                                    @else
-                                        <button type="submit"
-                                            class="inline-flex items-center px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold text-xs rounded-lg transition-all shadow-xs gap-1">
-                                            🔒 Close Account
-                                        </button>
-                                    @endif
-                                </form>
-
-                                @if($member->status == 'pending' || $member->status == 'rejected')
-                                    <form method="POST" action="{{ route('admin.members.approve', $member->id) }}" class="inline">
-                                        @csrf
-                                        <button type="submit"
-                                            class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-lg transition-all shadow-xs gap-1">
-                                            ✓ {{ __('messages.approve') }}
-                                        </button>
-                                    </form>
-                                @endif
-
-                                @if($member->status == 'pending' || $member->status == 'approved')
-                                    <button type="button" @click="showRejectModal = true"
-                                        class="inline-flex items-center px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs rounded-lg transition-all shadow-xs gap-1">
-                                        ✕ {{ __('messages.reject') }}
-                                    </button>
-                                @endif
-
-                                <a href="{{ route('admin.members.edit', $member->id) }}"
-                                    class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs rounded-lg transition-all shadow-xs gap-1.5">
-                                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    <span>{{ __('messages.edit_profile') }}</span>
-                                </a>
-                            @endif
                         </div>
                     </div>
+
+                    <!-- Action Buttons Toolbar -->
+                    @if($canEditMember)
+                        <div class="flex flex-wrap items-center gap-2.5 pt-0.5">
+                            <!-- Toggle Account Status Button -->
+                            <form method="POST" action="{{ route('admin.members.toggle_account_status', $member->id) }}" class="inline">
+                                @csrf
+                                @if($member->account_status == 'close')
+                                    <button type="submit"
+                                        class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                                        <span>Open Account</span>
+                                    </button>
+                                @else
+                                    <button type="submit"
+                                        class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                        <span>Close Account</span>
+                                    </button>
+                                @endif
+                            </form>
+
+                            @if($member->status == 'pending' || $member->status == 'rejected')
+                                <form method="POST" action="{{ route('admin.members.approve', $member->id) }}" class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>{{ __('messages.approve') }}</span>
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if($member->status == 'pending' || $member->status == 'approved')
+                                <button type="button" @click="showRejectModal = true"
+                                    class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 border border-rose-200/80 font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer">
+                                    <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    <span>{{ __('messages.reject') }}</span>
+                                </button>
+                            @endif
+
+                            <a href="{{ route('admin.members.edit', $member->id) }}"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-200 font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer">
+                                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                <span>{{ __('messages.edit_profile') }}</span>
+                            </a>
+                        </div>
+                    @endif
 
                     @if($member->status == 'rejected' && $member->rejection_reason)
                         <div class="p-2.5 bg-rose-50 border border-rose-100 rounded-lg text-xs text-rose-700 leading-relaxed">

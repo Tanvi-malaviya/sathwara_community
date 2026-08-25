@@ -30,7 +30,7 @@ class VerifyEmailOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Email Address Update OTP Verification Code',
+            subject: 'Satwara Community — Email Address Update OTP Verification Code',
         );
     }
 

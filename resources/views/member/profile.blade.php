@@ -89,16 +89,17 @@
                     <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap">
                         <!-- Small thumbnail preview -->
                         <div class="relative w-11 h-11 rounded-lg border border-slate-200 bg-white overflow-hidden shrink-0 shadow-2xs">
-                            <img id="photoPreview" src="{{ $profilePhotoUrl }}" alt="Preview" class="w-full h-full object-cover">
+                            <img id="photoPreview" :src="photoPreview ? photoPreview : '{{ $profilePhotoUrl }}'" src="{{ $profilePhotoUrl }}" alt="Preview" class="w-full h-full object-cover">
                         </div>
 
                         <!-- Upload Trigger -->
-                        <div class="flex-1 sm:flex-initial">
+                        <div class="flex-1 sm:flex-initial space-y-1">
                             <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-300 shadow-2xs transition-colors">
                                 <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                                 <span>{{ __('messages.choose_photo') ?? 'Choose Photo' }}</span>
                                 <input type="file" name="photo" id="photoInput" accept="image/jpeg,image/png,image/webp" class="hidden" @change="onPhotoChange($event)">
                             </label>
+                            <span x-show="fileName" x-text="fileName" class="text-[10px] text-primary-600 font-bold max-w-[130px] truncate block" x-cloak></span>
                         </div>
                     </div>
                 </div>

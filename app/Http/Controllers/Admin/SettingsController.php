@@ -15,7 +15,7 @@ class SettingsController extends Controller
     public function index()
     {
         $settings = [
-            'website_name' => Setting::get('website_name', 'Sathwara Community Portal'),
+            'website_name' => Setting::get('website_name', 'Satwara Community Portal'),
             'website_logo' => Setting::get('website_logo'),
             'website_favicon' => Setting::get('website_favicon'),
             'primary_color' => Setting::get('primary_color', '#2563EB'),
@@ -34,7 +34,7 @@ class SettingsController extends Controller
             'about_vision' => Setting::get('about_vision'),
             'about_history' => Setting::get('about_history'),
             'about_objectives' => Setting::get('about_objectives'),
-            'footer_text' => Setting::get('footer_text', '© ' . date('Y') . ' Sathwara Community. All rights reserved.'),
+            'footer_text' => Setting::get('footer_text', '© ' . date('Y') . ' Satwara Community. All rights reserved.'),
         ];
 
         $emailSettings = [
@@ -44,8 +44,8 @@ class SettingsController extends Controller
             'mail_username'     => Setting::get('mail_username', env('MAIL_USERNAME', '')),
             'mail_password'     => Setting::get('mail_password', env('MAIL_PASSWORD', '')),
             'mail_encryption'   => Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls')),
-            'mail_from_address' => Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@sathwaracommunity.com')),
-            'mail_from_name'    => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Sathwara Community Portal')),
+            'mail_from_address' => Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@satwaracommunity.com')),
+            'mail_from_name'    => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Satwara Community Portal')),
         ];
 
         $paymentSettings = [

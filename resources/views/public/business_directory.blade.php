@@ -98,13 +98,13 @@
                                                 <span class="mx-1 text-slate-300">•</span> {{ __('messages.member_id') }}: <span class="text-slate-800 font-bold">{{ $biz->member_id }}</span>
                                             @endif --}}
                                         </p>
-                                        @if($biz->approved_at)
+                                        {{-- @if($biz->approved_at)
                                             <p class="text-[11px] text-slate-400 font-semibold mt-1">
                                                 {{ __('messages.purchase') }}: <span class="text-slate-600">{{ $biz->approved_at->format('d M Y') }}</span>
                                                 <span class="mx-1 text-slate-300">•</span>
                                                 {{ __('messages.expires') }}: <span class="text-slate-600">{{ $biz->approved_at->addYear()->format('d M Y') }}</span>
                                             </p>
-                                        @endif
+                                        @endif --}}
                                     </div>
 
                                     <p class="text-xs sm:text-sm text-slate-600 line-clamp-2 leading-relaxed min-h-[36px]">
