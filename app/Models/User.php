@@ -14,6 +14,16 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user) {
+            if (! $user->isForceDeleting()) {
+                $user->email = null;
+                $user->saveQuietly();
+            }
+        });
+    }
     
     /**
      * The attributes that are mass assignable.

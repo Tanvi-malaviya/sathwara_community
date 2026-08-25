@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Mail\VerifyEmailOtpMail;
 use App\Mail\RegisterEmailOtpMail;
 use Spatie\Permission\Models\Role;
+use Illuminate\Validation\Rule;
 
 class RegistrationController extends Controller
 {
@@ -164,7 +165,7 @@ class RegistrationController extends Controller
             'middle_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required|digits:10',
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')],
             'password' => 'required|string|min:8|confirmed',
             'address' => 'required|string',
             'area_id' => 'required|exists:areas,id',

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Validation\Rule;
 
 class SubAdminController extends Controller
 {
@@ -151,7 +152,7 @@ class SubAdminController extends Controller
 
         $request->validate([
             'name'        => 'required|string|max:255',
-            'email'       => 'required|email|unique:users,email',
+            'email'       => ['required', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')],
             'password'    => 'required|string|min:6',
             'phone'       => 'required|string|max:15',
             'permissions' => 'nullable|array',
@@ -207,7 +208,7 @@ class SubAdminController extends Controller
 
         $request->validate([
             'name'        => 'required|string|max:255',
-            'email'       => 'required|email|unique:users,email,' . $user->id,
+            'email'       => ['required', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')->ignore($user->id)],
             'password'    => 'nullable|string|min:6',
             'phone'       => 'required|digits:10',
             'permissions' => 'nullable|array',
