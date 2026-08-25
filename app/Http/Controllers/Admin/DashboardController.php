@@ -16,8 +16,8 @@ class DashboardController extends Controller
     public function index()
     {
         $stats = [
-            'total_members' => User::role('Member')->where('status', 'approved')->count(),
-            'pending_members' => User::role('Member')->where('status', 'pending')->count(),
+            'total_members' => User::onlyMembers()->where('status', 'approved')->count(),
+            'pending_members' => User::onlyMembers()->where('status', 'pending')->count(),
             'total_businesses' => Business::count(),
             'pending_businesses' => Business::where('status', 'pending')->count(),
             'total_events' => Event::count(),
@@ -27,7 +27,7 @@ class DashboardController extends Controller
             'total_updates' => Update::count(),
         ];
 
-        $latestMembers = User::role('Member')
+        $latestMembers = User::onlyMembers()
             ->with('memberProfile')
             ->orderBy('created_at', 'desc')
             ->take(5)
@@ -39,7 +39,7 @@ class DashboardController extends Controller
 
         // Chart Data - Monthly member registrations for the last 6 months
         // Let's get counts grouped by month
-        $monthlyData = User::role('Member')
+        $monthlyData = User::onlyMembers()
             ->select(DB::raw('count(id) as count'), DB::raw("DATE_FORMAT(created_at, '%b %Y') as month"), DB::raw('max(created_at) as max_date'))
             ->groupBy('month')
             ->orderBy('max_date', 'asc')

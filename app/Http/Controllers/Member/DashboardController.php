@@ -344,11 +344,8 @@ class DashboardController extends Controller
      */
     public function directory(Request $request)
     {
-        $query = User::role('Member')
+        $query = User::onlyMembers()
             ->where('status', 'approved')
-            ->whereDoesntHave('roles', function ($q) {
-                $q->where('name', 'Administrator');
-            })
             ->with(['memberProfile.area']);
 
         if ($request->filled('search')) {

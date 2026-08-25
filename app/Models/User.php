@@ -118,4 +118,14 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Event::class, 'event_registrations', 'user_id', 'event_id');
     }
+
+    /**
+     * Scope to only fetch pure community members (excludes Administrator and Sub-Admin)
+     */
+    public function scopeOnlyMembers($query)
+    {
+        return $query->role('Member')->whereDoesntHave('roles', function ($q) {
+            $q->whereIn('name', ['Administrator', 'Sub-Admin']);
+        });
+    }
 }

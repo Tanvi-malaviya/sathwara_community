@@ -60,7 +60,7 @@ class PublicController extends Controller
 
         // Statistics counts
         $stats = [
-            'total_members' => User::role('Member')->where('status', 'approved')->count(),
+            'total_members' => User::onlyMembers()->where('status', 'approved')->count(),
             'total_businesses' => Business::active()->count(),
             'total_events' => Event::published()->count(),
             'gallery_images' => Gallery::whereNull('event_id')->count(),

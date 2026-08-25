@@ -44,6 +44,7 @@ Route::middleware('guest')->group(function () {
     // Single-page member signup
     Route::get('/register/member', [RegistrationController::class, 'showMemberRegister'])->name('register.member');
     Route::post('/register/member', [RegistrationController::class, 'submitMemberRegister'])->name('register.member.submit');
+    Route::post('/register/member/pre-validate', [RegistrationController::class, 'preValidateMember'])->name('register.member.pre_validate');
     Route::post('/register/member/send-otp', [RegistrationController::class, 'sendRegistrationOtp'])->name('register.member.send_otp');
     Route::post('/register/member/verify-otp', [RegistrationController::class, 'verifyRegistrationOtp'])->name('register.member.verify_otp');
 });

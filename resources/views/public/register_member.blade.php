@@ -101,7 +101,7 @@
                         <!-- Mobile Number — moved to Personal Details -->
                         <div class="space-y-1">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.mobile_whatsapp_number') }} <span class="text-rose-500">*</span></label>
-                            <input type="text" name="phone" value="{{ old('phone') }}" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
+                            <input type="text" name="phone" value="{{ old('phone') }}" required minlength="10" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
                         </div>
 
                         <!-- Profile Photo Upload -->
@@ -171,7 +171,7 @@
                         <div class="space-y-1" x-data="{ showPass: false }">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.password') }} <span class="text-rose-500">*</span></label>
                             <div class="relative">
-                                <input :type="showPass ? 'text' : 'password'" name="password" required class="w-full text-sm font-semibold pl-3 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
+                                <input :type="showPass ? 'text' : 'password'" name="password" required minlength="8" class="w-full text-sm font-semibold pl-3 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
                                 <button type="button" @click="showPass = !showPass" 
                                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                                     title="{{ __('messages.toggle_password_visibility') }}">
@@ -188,7 +188,7 @@
                         <div class="space-y-1" x-data="{ showConfirmPass: false }">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.confirm_password') }} <span class="text-rose-500">*</span></label>
                             <div class="relative">
-                                <input :type="showConfirmPass ? 'text' : 'password'" name="password_confirmation" required class="w-full text-sm font-semibold pl-3 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
+                                <input :type="showConfirmPass ? 'text' : 'password'" name="password_confirmation" required minlength="8" class="w-full text-sm font-semibold pl-3 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition">
                                 <button type="button" @click="showConfirmPass = !showConfirmPass" 
                                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                                     title="{{ __('messages.toggle_password_visibility') }}">
@@ -635,10 +635,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Form submit listener
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
+        // 1. HTML5 validation check
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            form.reportValidity();
+            return false;
+        }
+
+        // 2. Email OTP verification check
         if (!isEmailVerified) {
             e.preventDefault();
-            e.stopPropagation();
             showModal("{{ __('messages.please_verify_email') }}", 'warning', "{{ __('messages.verification_required') }}");
             if (!sendOtpBtn.classList.contains('hidden')) {
                 sendOtpBtn.focus();
@@ -648,26 +655,82 @@ document.addEventListener('DOMContentLoaded', function () {
             return false;
         }
 
+        // 3. Explicit client validation checks
+        const phone = form.querySelector('[name="phone"]')?.value.trim() || '';
+        if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+            e.preventDefault();
+            showModal("{{ __('messages.mobile_10_digits_required') ?? 'મોબાઈલ નંબર બરાબર ૧૦ અંકનો હોવો જરૂરી છે.' }}", 'warning', "{{ __('messages.invalid_mobile') ?? 'અમાન્ય મોબાઈલ નંબર' }}");
+            form.querySelector('[name="phone"]')?.focus();
+            return false;
+        }
+
+        const password = form.querySelector('[name="password"]')?.value || '';
+        const passwordConfirmation = form.querySelector('[name="password_confirmation"]')?.value || '';
+        if (password.length < 8) {
+            e.preventDefault();
+            showModal("{{ __('messages.password_min_8') ?? 'પાસવર્ડ ઓછામાં ઓછો ૮ અક્ષરનો હોવો જરૂરી છે.' }}", 'warning', "{{ __('messages.invalid_password') ?? 'અમાન્ય પાસવર્ડ' }}");
+            form.querySelector('[name="password"]')?.focus();
+            return false;
+        }
+        if (password !== passwordConfirmation) {
+            e.preventDefault();
+            showModal("{{ __('messages.password_confirmation_mismatch') ?? 'પાસવર્ડ અને કન્ફર્મ પાસવર્ડ સરખા નથી.' }}", 'warning', "{{ __('messages.password_mismatch') ?? 'પાસવર્ડ મેળ ખાતો નથી' }}");
+            form.querySelector('[name="password_confirmation"]')?.focus();
+            return false;
+        }
+
         const paymentIdInput = document.getElementById('razorpay_payment_id');
         if (paymentIdInput && paymentIdInput.value) {
-            return true; // Already paid, allow submit
+            return true; // Already paid, allow normal submission
         }
 
         @if(($signupFee ?? 1000) > 0)
             e.preventDefault();
 
-            // HTML5 validation
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
+            const submitBtn = document.getElementById('submitMemberBtn');
+            const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> {{ __("messages.validating") ?? "ચકાસણી ચાલુ છે..." }}';
             }
 
+            // 4. Server-Side Pre-Validation before opening Razorpay
+            try {
+                const formData = new FormData(form);
+                const preValRes = await fetch("{{ route('register.member.pre_validate') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                const preValData = await preValRes.json();
+
+                if (!preValRes.ok || !preValData.success) {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnHtml;
+                    }
+                    const errorsList = preValData.errors ? preValData.errors.join('<br>• ') : (preValData.message || 'વિગતો ચકાસવામાં ભૂલ આવી છે.');
+                    showModal('• ' + errorsList, 'error', "{{ __('messages.please_correct_errors') }}");
+                    return false;
+                }
+            } catch (err) {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+                showModal("{{ __('messages.network_error_retry') ?? 'સર્વર સાથે સંપર્ક કરવામાં સમસ્યા આવી. કૃપા કરીને ફરી પ્રયાસ કરો.' }}", 'error', "{{ __('messages.network_error') }}");
+                return false;
+            }
+
+            // 5. Open Razorpay Gateway
             const razorpayKey = "{{ $razorpayKeyId ?? '' }}";
             const feeAmountPaise = {{ ($signupFee ?? 1000) * 100 }};
             const firstName = form.querySelector('[name="first_name"]')?.value || '';
             const lastName = form.querySelector('[name="last_name"]')?.value || '';
             const email = form.querySelector('[name="email"]')?.value || '';
-            const phone = form.querySelector('[name="phone"]')?.value || '';
 
             const options = {
                 "key": razorpayKey || "rzp_test_key",
@@ -678,6 +741,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 "handler": function (response) {
                     paymentIdInput.value = response.razorpay_payment_id;
                     form.submit();
+                },
+                "modal": {
+                    "ondismiss": function() {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnHtml;
+                        }
+                    }
                 },
                 "prefill": {
                     "name": firstName + " " + lastName,
@@ -691,11 +762,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (window.Razorpay) {
                 const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function (response) {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnHtml;
+                    }
+                    showModal(response.error.description || 'પેમેન્ટ અસફળ રહ્યું. કૃપા કરીને ફરી પ્રયાસ કરો.', 'error', 'પેમેન્ટ નિષ્ફળ');
+                });
                 rzp.open();
             } else {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
                 showModal('Razorpay Payment Gateway failed to load. Your application will be submitted without payment.', 'error', 'Payment Gateway Error');
                 setTimeout(() => form.submit(), 2000);
             }
+        @else
+            return true;
         @endif
     });
 });
