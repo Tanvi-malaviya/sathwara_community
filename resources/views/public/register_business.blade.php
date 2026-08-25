@@ -141,7 +141,7 @@
                         <!-- Phone Field -->
                         <div class="space-y-1">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.phone_mobile') }} <span class="text-rose-500">*</span></label>
-                            <input type="text" name="phone" x-model="phoneNum" @input="if(sameWhatsapp) whatsappNum = phoneNum" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="{{ __('messages.ten_digits') }}" class="w-full text-sm font-semibold px-3 py-2 bg-white border border-slate-200 rounded-lg focus:border-primary-500 focus:ring-0">
+                            <input type="text" name="phone" x-model="phoneNum" @input="if(sameWhatsapp) whatsappNum = phoneNum" required minlength="10" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="{{ __('messages.ten_digits') }}" class="w-full text-sm font-semibold px-3 py-2 bg-white border border-slate-200 rounded-lg focus:border-primary-500 focus:ring-0">
                         </div>
 
                         <!-- WhatsApp Field -->
@@ -397,7 +397,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const businessName = form.querySelector('[name="business_name"]')?.value || '';
         const ownerName = form.querySelector('[name="owner_name"]')?.value || '';
         const email = form.querySelector('[name="email"]')?.value || '';
-        const phone = form.querySelector('[name="phone"]')?.value || '';
+        const phone = form.querySelector('[name="phone"]')?.value.trim() || '';
+        if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+            alert("{{ __('messages.mobile_10_digits_required') ?? 'મોબાઈલ નંબર બરાબર ૧૦ અંકનો હોવો જરૂરી છે.' }}");
+            form.querySelector('[name="phone"]')?.focus();
+            return;
+        }
 
         const options = {
             "key": razorpayKey || "rzp_test_key",

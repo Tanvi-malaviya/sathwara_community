@@ -16,7 +16,7 @@ class MemberController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::role('Member')->with(['memberProfile.area']);
+        $query = User::onlyMembers()->with(['memberProfile.area']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -75,10 +75,10 @@ class MemberController extends Controller
         $members = $query->orderByRaw("CAST(REGEXP_REPLACE(COALESCE(NULLIF(member_code, ''), id), '[^0-9]', '') AS UNSIGNED) DESC, id DESC")->paginate(15)->withQueryString();
 
         // Get status counts for filter tabs
-        $pendingCount = User::role('Member')->where('status', 'pending')->count();
-        $approvedCount = User::role('Member')->where('status', 'approved')->count();
-        $rejectedCount = User::role('Member')->where('status', 'rejected')->count();
-        $allCount = User::role('Member')->count();
+        $pendingCount = User::onlyMembers()->where('status', 'pending')->count();
+        $approvedCount = User::onlyMembers()->where('status', 'approved')->count();
+        $rejectedCount = User::onlyMembers()->where('status', 'rejected')->count();
+        $allCount = User::onlyMembers()->count();
 
         // Get all unique cities for filtering options
         $cities = MemberProfile::select('city')->distinct()->pluck('city')->toArray();
@@ -183,7 +183,7 @@ class MemberController extends Controller
      */
     public function show($id)
     {
-        $member = User::role('Member')->with(['memberProfile.area', 'familyMembers'])->findOrFail($id);
+        $member = User::onlyMembers()->with(['memberProfile.area', 'familyMembers'])->findOrFail($id);
         return view('admin.members.show', compact('member'));
     }
 
@@ -192,7 +192,7 @@ class MemberController extends Controller
      */
     public function edit($id)
     {
-        $member = User::role('Member')->with(['memberProfile.area'])->findOrFail($id);
+        $member = User::onlyMembers()->with(['memberProfile.area'])->findOrFail($id);
         $areas = \App\Models\Area::orderBy('name')->get();
         return view('admin.members.edit', compact('member', 'areas'));
     }
@@ -202,7 +202,7 @@ class MemberController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $member = User::role('Member')->findOrFail($id);
+        $member = User::onlyMembers()->findOrFail($id);
         $profile = $member->memberProfile;
 
         $request->validate([
@@ -318,7 +318,7 @@ class MemberController extends Controller
     {
         $this->checkEditPermission();
 
-        $member = User::role('Member')->findOrFail($id);
+        $member = User::onlyMembers()->findOrFail($id);
         $member->update([
             'status' => 'approved',
             'rejection_reason' => null,
@@ -338,7 +338,7 @@ class MemberController extends Controller
             'rejection_reason' => 'required|string',
         ]);
 
-        $member = User::role('Member')->findOrFail($id);
+        $member = User::onlyMembers()->findOrFail($id);
         $member->update([
             'status' => 'rejected',
             'rejection_reason' => $request->rejection_reason,
@@ -356,7 +356,7 @@ class MemberController extends Controller
     {
         $this->checkEditPermission();
 
-        $member = User::role('Member')->findOrFail($id);
+        $member = User::onlyMembers()->findOrFail($id);
         $newStatus = ($member->account_status === 'close') ? 'open' : 'close';
         $member->update([
             'account_status' => $newStatus,
@@ -371,7 +371,7 @@ class MemberController extends Controller
      */
     public function destroy($id)
     {
-        $member = User::role('Member')->findOrFail($id);
+        $member = User::onlyMembers()->findOrFail($id);
         $member->delete();
 
         return redirect()->route('admin.members.index')->with('success', 'Member deleted successfully.');
@@ -390,7 +390,7 @@ class MemberController extends Controller
             "Expires" => "0"
         ];
 
-        $query = User::role('Member')->with(['memberProfile', 'familyMembers']);
+        $query = User::onlyMembers()->with(['memberProfile', 'familyMembers']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -494,7 +494,7 @@ class MemberController extends Controller
      */
     public function printList(Request $request)
     {
-        $query = User::role('Member')->with('memberProfile');
+        $query = User::onlyMembers()->with('memberProfile');
 
         if ($request->filled('search')) {
             $search = trim($request->search);

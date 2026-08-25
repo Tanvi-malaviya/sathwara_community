@@ -155,6 +155,54 @@ class RegistrationController extends Controller
     }
 
     /**
+     * Pre-validate Member Registration Form before initiating Razorpay Payment
+     */
+    public function preValidateMember(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'phone' => 'required|digits:10',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')],
+            'password' => 'required|string|min:8|confirmed',
+            'address' => 'required|string',
+            'area_id' => 'required|exists:areas,id',
+            'father_member_id' => 'nullable|string|max:50',
+            'gender' => 'nullable|in:Male,Female,Other',
+            'dob' => 'nullable|date|before:today',
+            'blood_group' => 'nullable|string|max:10',
+            'education' => 'nullable|string|max:255',
+            'occupation' => 'nullable|string|max:255',
+            'whatsapp' => 'nullable|digits:10',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'pincode' => 'nullable|string|max:10',
+            'photo' => 'nullable|image|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()->all(),
+            ], 422);
+        }
+
+        // Verify that email OTP was verified in session
+        $verifiedEmail = session('reg_email_verified');
+        if (empty($verifiedEmail) || strtolower(trim($request->email)) !== strtolower(trim($verifiedEmail))) {
+            return response()->json([
+                'success' => false,
+                'errors' => [__('messages.please_verify_email')],
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    /**
      * Final Submission of Membership Registration
      */
     public function submitMemberRegister(Request $request)
