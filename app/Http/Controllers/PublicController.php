@@ -252,15 +252,6 @@ class PublicController extends Controller
         $isStudentForm = ($event->event_type === 'inam_vitaran' && $request->filled('student_name'));
         $isYuvaMeloCandidateForm = ($event->event_type === 'yuva_melo' && ($request->filled('surname') || $request->filled('qualification') || $request->filled('first_name')));
 
-        // For inam_vitaran student form: check if user has purchased pass / registered for the event
-        if ($isStudentForm) {
-            $hasEventPass = $user ? $user->eventRegistrations()->where('event_id', $id)->exists() : false;
-
-            if (!$hasEventPass) {
-                return redirect()->route('event.details', $event->id)->with('error', 'ઇનામ વિતરણ ફોર્મ ભરવા માટે પહેલા આ ઇવેન્ટ માટે પાસ બુક કરવો જરૂરી છે.');
-            }
-        }
-
         // Capture form data depending on event type
         $formData = [];
         if ($isStudentForm) {

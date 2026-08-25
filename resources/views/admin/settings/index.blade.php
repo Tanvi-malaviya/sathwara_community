@@ -6,36 +6,39 @@
 <div class="w-full" x-data="{ activeTab: '{{ old('active_tab', session('active_settings_tab', 'general')) }}' }">
 
     <!-- Tab Navigation -->
-    <div class="flex items-center gap-1 bg-slate-100 rounded-2xl p-1 mb-6 w-fit">
+    <div class="flex items-center gap-1 bg-slate-100 rounded-2xl p-1 mb-6 w-fit flex-wrap">
         <button @click="activeTab = 'general'"
             :class="activeTab === 'general' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
             class="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer">
-            <span>🎨</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
             <span>{{ __('messages.general_settings') }}</span>
         </button>
         <button @click="activeTab = 'contact'"
             :class="activeTab === 'contact' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
             class="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer">
-            <span>📍</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             <span>{{ __('messages.contact_social') }}</span>
         </button>
         <button @click="activeTab = 'email'"
             :class="activeTab === 'email' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
             class="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer">
-            <span>📧</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             <span>{{ __('messages.email_smtp_settings') }}</span>
         </button>
         <button @click="activeTab = 'payment'"
             :class="activeTab === 'payment' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
             class="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer">
-            <span>💳</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
             <span>{{ __('messages.payment_gateway_settings') }}</span>
         </button>
     </div>
 
     @if($errors->any())
         <div class="mb-5 p-4 bg-rose-50 border border-rose-100 text-rose-700 text-xs font-semibold rounded-xl">
-            <div class="font-extrabold mb-1">⚠️ {{ __('messages.please_correct_errors') }}:</div>
+            <div class="font-extrabold mb-1 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>{{ __('messages.please_correct_errors') }}:</span>
+            </div>
             <ul class="list-disc pl-4 space-y-1">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>

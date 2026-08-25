@@ -223,9 +223,10 @@
             <div @click.away="showAddModal = false" style="scrollbar-width: none; -ms-overflow-style: none;" class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-xl w-full space-y-3 relative max-h-[90vh] overflow-y-auto no-scrollbar">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
                     <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                        <span class="text-primary-500">🛡️</span> + {{ __('messages.add_new_sub_admin') }}
+                        <svg class="w-4 h-4 text-primary-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        <span>+ {{ __('messages.add_new_sub_admin') }}</span>
                     </h3>
-                    <button type="button" @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
+                    <button type="button" @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer">&times;</button>
                 </div>
 
                 <form method="POST" action="{{ route('admin.sub_admins.store') }}" class="space-y-3">
@@ -258,9 +259,22 @@
                             <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.email_address_login') }} <span class="text-rose-500">*</span></label>
                             <input type="email" name="email" value="{{ old('email') }}" required placeholder="subadmin@satwara.org" class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
                         </div>
-                        <div class="space-y-0.5">
+                        <div class="space-y-0.5" x-data="{ showPass: false }">
                             <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.password') }} <span class="text-rose-500">*</span></label>
-                            <input type="password" name="password" required placeholder="••••••••" class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                            <div class="relative">
+                                <input :type="showPass ? 'text' : 'password'" name="password" required placeholder="••••••••" class="w-full text-xs font-semibold pl-2.5 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                                <button type="button" @click="showPass = !showPass" 
+                                    class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                                    title="{{ __('messages.toggle_password_visibility') }}">
+                                    <svg x-show="!showPass" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    <svg x-show="showPass" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.018 10.018 0 013.682-.863c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21M3 3l18 18"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -282,22 +296,34 @@
                                     <div class="flex items-center gap-1 shrink-0 flex-wrap">
                                         <label class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white border border-slate-200 cursor-pointer hover:bg-blue-50 transition-colors text-[9px] font-bold select-none">
                                             <input type="checkbox" name="permissions[]" value="{{ $modPrefix }}_view" class="w-3 h-3 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer">
-                                            <span class="text-blue-700">👁️ {{ __('messages.view') }}</span>
+                                            <span class="text-blue-700 inline-flex items-center gap-0.5">
+                                                <svg class="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                <span>{{ __('messages.view') }}</span>
+                                            </span>
                                         </label>
 
                                         <label class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white border border-slate-200 cursor-pointer hover:bg-emerald-50 transition-colors text-[9px] font-bold select-none">
                                             <input type="checkbox" name="permissions[]" value="{{ $modPrefix }}_add" class="w-3 h-3 rounded border-slate-300 text-emerald-600 focus:ring-0 cursor-pointer">
-                                            <span class="text-emerald-700">➕ {{ __('messages.add') }}</span>
+                                            <span class="text-emerald-700 inline-flex items-center gap-0.5">
+                                                <svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                <span>{{ __('messages.add') }}</span>
+                                            </span>
                                         </label>
 
                                         <label class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white border border-slate-200 cursor-pointer hover:bg-amber-50 transition-colors text-[9px] font-bold select-none">
                                             <input type="checkbox" name="permissions[]" value="{{ $modPrefix }}_edit" class="w-3 h-3 rounded border-slate-300 text-amber-600 focus:ring-0 cursor-pointer">
-                                            <span class="text-amber-700">✏️ {{ __('messages.edit') }}</span>
+                                            <span class="text-amber-700 inline-flex items-center gap-0.5">
+                                                <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                <span>{{ __('messages.edit') }}</span>
+                                            </span>
                                         </label>
 
                                         <label class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white border border-slate-200 cursor-pointer hover:bg-rose-50 transition-colors text-[9px] font-bold select-none">
                                             <input type="checkbox" name="permissions[]" value="{{ $modPrefix }}_delete" class="w-3 h-3 rounded border-slate-300 text-rose-600 focus:ring-0 cursor-pointer">
-                                            <span class="text-rose-700">🗑️ {{ __('messages.delete') }}</span>
+                                            <span class="text-rose-700 inline-flex items-center gap-0.5">
+                                                <svg class="w-3 h-3 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                <span>{{ __('messages.delete') }}</span>
+                                            </span>
                                         </label>
                                     </div>
                                 </div>
@@ -306,8 +332,8 @@
                     </div>
 
                     <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showAddModal = false" class="px-3.5 py-1.5 border border-slate-200 text-slate-600 font-bold text-xs rounded-lg">{{ __('messages.cancel') }}</button>
-                        <button type="submit" class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs">{{ __('messages.save_sub_admin') }}</button>
+                        <button type="button" @click="showAddModal = false" class="px-3.5 py-1.5 border border-slate-200 text-slate-600 font-bold text-xs rounded-lg cursor-pointer">{{ __('messages.cancel') }}</button>
+                        <button type="submit" class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs cursor-pointer">{{ __('messages.save_sub_admin') }}</button>
                     </div>
                 </form>
             </div>
@@ -320,9 +346,10 @@
             <div @click.away="showEditModal = false" style="scrollbar-width: none; -ms-overflow-style: none;" class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-xl w-full space-y-3 relative max-h-[90vh] overflow-y-auto no-scrollbar">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
                     <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                        <span class="text-primary-500">✏️</span> {{ __('messages.edit_sub_admin_permissions') }}
+                        <svg class="w-4 h-4 text-primary-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <span>{{ __('messages.edit_sub_admin_permissions') }}</span>
                     </h3>
-                    <button type="button" @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
+                    <button type="button" @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer">&times;</button>
                 </div>
 
                 <form method="POST" :action="editAdmin.update_url" class="space-y-3">
@@ -345,9 +372,22 @@
                             <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.email_address_login') }}</label>
                             <input type="email" name="email" :value="editAdmin.email" required class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
                         </div>
-                        <div class="space-y-0.5">
+                        <div class="space-y-0.5" x-data="{ showEditPass: false }">
                             <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">{{ __('messages.new_password_optional') }}</label>
-                            <input type="password" name="password" placeholder="{{ __('messages.leave_blank_to_keep_current') }}" class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                            <div class="relative">
+                                <input :type="showEditPass ? 'text' : 'password'" name="password" placeholder="{{ __('messages.leave_blank_to_keep_current') }}" class="w-full text-xs font-semibold pl-2.5 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 outline-none">
+                                <button type="button" @click="showEditPass = !showEditPass" 
+                                    class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                                    title="{{ __('messages.toggle_password_visibility') }}">
+                                    <svg x-show="!showEditPass" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    <svg x-show="showEditPass" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.018 10.018 0 013.682-.863c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21M3 3l18 18"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -375,7 +415,10 @@
                                                    :checked="editAdmin.permissions && editAdmin.permissions.includes('{{ $modPrefix }}_view')"
                                                    @change="toggleActionAccess('{{ $permKey }}', '{{ $modPrefix }}', '{{ $modPrefix }}_view', $event)"
                                                    class="w-3 h-3 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer">
-                                            <span class="text-blue-700">👁️ {{ __('messages.view') }}</span>
+                                            <span class="text-blue-700 inline-flex items-center gap-0.5">
+                                                <svg class="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                <span>{{ __('messages.view') }}</span>
+                                            </span>
                                         </label>
 
                                         <label class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white border border-slate-200 cursor-pointer hover:bg-emerald-50 transition-colors text-[9px] font-bold select-none">
@@ -383,7 +426,10 @@
                                                    :checked="editAdmin.permissions && editAdmin.permissions.includes('{{ $modPrefix }}_add')"
                                                    @change="toggleActionAccess('{{ $permKey }}', '{{ $modPrefix }}', '{{ $modPrefix }}_add', $event)"
                                                    class="w-3 h-3 rounded border-slate-300 text-emerald-600 focus:ring-0 cursor-pointer">
-                                            <span class="text-emerald-700">➕ {{ __('messages.add') }}</span>
+                                            <span class="text-emerald-700 inline-flex items-center gap-0.5">
+                                                <svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                <span>{{ __('messages.add') }}</span>
+                                            </span>
                                         </label>
 
                                         <label class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white border border-slate-200 cursor-pointer hover:bg-amber-50 transition-colors text-[9px] font-bold select-none">
@@ -391,7 +437,10 @@
                                                    :checked="editAdmin.permissions && editAdmin.permissions.includes('{{ $modPrefix }}_edit')"
                                                    @change="toggleActionAccess('{{ $permKey }}', '{{ $modPrefix }}', '{{ $modPrefix }}_edit', $event)"
                                                    class="w-3 h-3 rounded border-slate-300 text-amber-600 focus:ring-0 cursor-pointer">
-                                            <span class="text-amber-700">✏️ {{ __('messages.edit') }}</span>
+                                            <span class="text-amber-700 inline-flex items-center gap-0.5">
+                                                <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                <span>{{ __('messages.edit') }}</span>
+                                            </span>
                                         </label>
 
                                         <label class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white border border-slate-200 cursor-pointer hover:bg-rose-50 transition-colors text-[9px] font-bold select-none">
@@ -399,7 +448,10 @@
                                                    :checked="editAdmin.permissions && editAdmin.permissions.includes('{{ $modPrefix }}_delete')"
                                                    @change="toggleActionAccess('{{ $permKey }}', '{{ $modPrefix }}', '{{ $modPrefix }}_delete', $event)"
                                                    class="w-3 h-3 rounded border-slate-300 text-rose-600 focus:ring-0 cursor-pointer">
-                                            <span class="text-rose-700">🗑️ {{ __('messages.delete') }}</span>
+                                            <span class="text-rose-700 inline-flex items-center gap-0.5">
+                                                <svg class="w-3 h-3 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                <span>{{ __('messages.delete') }}</span>
+                                            </span>
                                         </label>
                                     </div>
                                 </div>
@@ -408,8 +460,8 @@
                     </div>
 
                     <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showEditModal = false" class="px-3.5 py-1.5 border border-slate-200 text-slate-600 font-bold text-xs rounded-lg">{{ __('messages.cancel') }}</button>
-                        <button type="submit" class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs">{{ __('messages.update_permissions') }}</button>
+                        <button type="button" @click="showEditModal = false" class="px-3.5 py-1.5 border border-slate-200 text-slate-600 font-bold text-xs rounded-lg cursor-pointer">{{ __('messages.cancel') }}</button>
+                        <button type="submit" class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs cursor-pointer">{{ __('messages.update_sub_admin') }}</button>
                     </div>
                 </form>
             </div>
@@ -435,15 +487,16 @@
                 <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
                     <div>
                         <h3 class="text-sm font-extrabold flex items-center gap-2">
-                            <span>📅</span> {{ __('messages.events_access_permissions') }}
+                            <svg class="w-4 h-4 text-primary-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>{{ __('messages.events_access_permissions') }}</span>
                         </h3>
                         <p class="text-[11px] text-slate-400 font-medium mt-0.5">
                             {{ __('messages.managing_event_access_for') }} <span class="text-primary-400 font-black" x-text="eventsAdmin.name"></span>
                         </p>
                     </div>
                     <button type="button" @click="showEventsModal = false" 
-                            class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-xs transition-colors">
-                        ✕
+                            class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-xs transition-colors cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
 
@@ -475,14 +528,20 @@
                                                :checked="isAllEventsSelected()" 
                                                @change="toggleSelectAllEvents($event)"
                                                class="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-0 cursor-pointer">
-                                        <span>✨ {{ __('messages.select_all') }}</span>
+                                        <span class="inline-flex items-center gap-1">
+                                            <svg class="w-3 h-3 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            <span>{{ __('messages.select_all') }}</span>
+                                        </span>
                                     </label>
                                 </div>
 
                                 <!-- Live Search Input -->
                                 <div class="relative w-full sm:w-64">
-                                    <input type="text" x-model="eventsSearch" placeholder="🔍 {{ __('messages.search_event_placeholder') }}" 
-                                           class="w-full text-xs font-semibold px-3 py-1.5 pr-7 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                                    <input type="text" x-model="eventsSearch" placeholder="{{ __('messages.search_event_placeholder') }}" 
+                                           class="w-full text-xs font-semibold pl-8 pr-7 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-all">
+                                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
                                     <button type="button" x-show="eventsSearch" @click="eventsSearch = ''" 
                                             class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-bold text-xs">&times;</button>
                                 </div>
@@ -515,7 +574,10 @@
                                                 <input type="checkbox" name="event_permissions[]" value="event_view_{{ $evt->id }}" 
                                                        x-model="eventsAdmin.permissions"
                                                        class="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer">
-                                                <span class="text-blue-700 font-black">👁️ {{ __('messages.view') }}</span>
+                                                <span class="text-blue-700 font-black inline-flex items-center gap-1">
+                                                    <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    <span>{{ __('messages.view') }}</span>
+                                                </span>
                                             </label>
 
                                             <!-- Edit Permission -->
@@ -523,7 +585,10 @@
                                                 <input type="checkbox" name="event_permissions[]" value="event_edit_{{ $evt->id }}" 
                                                        x-model="eventsAdmin.permissions"
                                                        class="w-3.5 h-3.5 rounded border-slate-300 text-amber-600 focus:ring-0 cursor-pointer">
-                                                <span class="text-amber-700 font-black">✏️ {{ __('messages.edit') }}</span>
+                                                <span class="text-amber-700 font-black inline-flex items-center gap-1">
+                                                    <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    <span>{{ __('messages.edit') }}</span>
+                                                </span>
                                             </label>
                                         </div>
 
@@ -546,7 +611,7 @@
                         </button>
                         <button type="submit" 
                                 class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors cursor-pointer flex items-center gap-1.5">
-                            <span>💾</span>
+                            <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                             <span>{{ __('messages.save_event_permissions') }}</span>
                         </button>
                     </div>

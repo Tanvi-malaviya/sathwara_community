@@ -1393,4 +1393,5 @@ return [
     'total_pass_count' => 'Total Pass Count',
     'total_passes' => 'Total Passes',
     'upload_photos' => 'Upload Photos',
+    'choose_photo' => 'Choose Photo',
 ];

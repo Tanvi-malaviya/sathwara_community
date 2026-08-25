@@ -38,7 +38,7 @@
                 <!-- Quick Action: Membership Card -->
                 <a href="{{ route('member.card') }}"
                     class="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0">
-                    <span>🪪</span>
+                    <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
                     <span>{{ $isGu ? 'મેમ્બરશિપ કાર્ડ જુઓ' : 'View Membership Card' }}</span>
                 </a>
             </div>
@@ -73,9 +73,9 @@
                         @php
                             $alreadyRegistered = $myRegistrations->where('event_id', $event->id)->first();
                             $eventTypeBadge = match ($event->event_type ?? 'normal') {
-                                'inam_vitaran' => ['bg' => 'bg-amber-50 text-amber-700 border-amber-200', 'label' => ($isGu ? '🎓 ઇનામ વિતરણ' : 'Inam Vitran')],
-                                'yuva_melo' => ['bg' => 'bg-purple-50 text-purple-700 border-purple-200', 'label' => ($isGu ? '⚡ યુવા મેળો' : 'Yuva Melo')],
-                                default => ['bg' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'label' => ($isGu ? '🎉 સામાન્ય કાર્યક્રમ' : 'General Event')],
+                                'inam_vitaran' => ['bg' => 'bg-amber-50 text-amber-700 border-amber-200', 'label' => ($isGu ? 'ઇનામ વિતરણ' : 'Inam Vitran'), 'icon' => 'academic'],
+                                'yuva_melo' => ['bg' => 'bg-purple-50 text-purple-700 border-purple-200', 'label' => ($isGu ? 'યુવા મેળો' : 'Yuva Melo'), 'icon' => 'bolt'],
+                                default => ['bg' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'label' => ($isGu ? 'સામાન્ય કાર્યક્રમ' : 'General Event'), 'icon' => 'sparkles'],
                             };
 
                             $regPasses = [];
@@ -86,17 +86,41 @@
                                     $regPasses[] = sprintf('%03d', $basePassNo + $i);
                                 }
                             }
+
+                            // Registration Form Check & Last Date Deadline
+                            $hasForm = (bool) ($event->has_registration_form ?? $event->registration_option);
+                            if (in_array($event->event_type ?? 'normal', ['inam_vitaran', 'yuva_melo'])) {
+                                $hasForm = true;
+                            }
+                            $isFormDeadlinePassed = !empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString();
                         @endphp
-                        <div
-                            class="bg-white rounded-xl border border-slate-200/90 p-3 shadow-2xs hover:shadow-xs hover:border-primary-400 transition-all flex flex-col justify-between space-y-2.5 group">
+                        <div onclick="window.location.href='{{ route('event.details', $event->id) }}'"
+                            class="bg-white rounded-xl border border-slate-200/90 p-3 shadow-2xs hover:shadow-md hover:border-primary-400 transition-all flex flex-col justify-between space-y-2.5 group cursor-pointer">
 
                             <div class="space-y-2">
-                                <!-- Event Header -->
+                                <!-- Event Header: Type Badge (Left) & Pass Fee (Top-Right Corner) -->
                                 <div class="flex items-center justify-between gap-2">
                                     <span
-                                        class="px-2.5 py-1 rounded-md text-[10.5px] font-black uppercase tracking-wider border {{ $eventTypeBadge['bg'] }}">
-                                        {{ $eventTypeBadge['label'] }}
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10.5px] font-black uppercase tracking-wider border {{ $eventTypeBadge['bg'] }}">
+                                        @if($eventTypeBadge['icon'] === 'academic')
+                                            <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                        @elseif($eventTypeBadge['icon'] === 'bolt')
+                                            <svg class="w-3.5 h-3.5 text-purple-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        @else
+                                            <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                                        @endif
+                                        <span>{{ $eventTypeBadge['label'] }}</span>
                                     </span>
+
+                                    <!-- Top Right Pass Fee -->
+                                    <div class="text-right shrink-0">
+                                        <span
+                                            class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight">{{ $isGu ? 'પાસ ફી' : 'Pass Fee' }}</span>
+                                        <span
+                                            class="text-xs font-black {{ $event->pass_fee > 0 ? 'text-primary-600' : 'text-emerald-600' }}">
+                                            {{ $event->pass_fee > 0 ? '₹' . number_format($event->pass_fee, 0) : ($isGu ? 'મફત પ્રવેશ' : 'Free Entry') }}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <h4 class="text-sm font-black text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1"
@@ -107,7 +131,7 @@
                                 <!-- Date & Venue -->
                                 <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 space-y-1 text-xs text-slate-700">
                                     <div class="flex items-center gap-1.5 font-bold text-slate-800">
-                                        <span>📅</span>
+                                        <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         <span>{{ date('d M, Y', strtotime($event->date)) }}</span>
                                         @if($event->time)
                                             <span
@@ -116,36 +140,51 @@
                                     </div>
                                     <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium truncate"
                                         title="{{ $event->venue }}">
-                                        <span>📍</span>
+                                        <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                         <span
                                             class="truncate">{{ $event->venue ?: ($isGu ? 'સ્થળ જાહેર થશે' : 'Venue TBA') }}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Booking Action Button -->
-                            <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                                <div>
-                                    <span
-                                        class="text-[9.5px] font-extrabold text-slate-400 uppercase block tracking-wider">{{ $isGu ? 'પાસ ફી' : 'Pass Fee' }}</span>
-                                    <span
-                                        class="text-xs font-black {{ $event->pass_fee > 0 ? 'text-primary-600' : 'text-emerald-600' }}">
-                                        {{ $event->pass_fee > 0 ? '₹' . number_format($event->pass_fee, 0) : ($isGu ? 'મફત પ્રવેશ' : 'Free Entry') }}
-                                    </span>
-                                </div>
+                            <!-- Bottom Action Area -->
+                            <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap" onclick="event.stopPropagation()">
+                                <!-- Form Action / Last Date Expired Badge -->
+                                @if($hasForm)
+                                    @if($isFormDeadlinePassed)
+                                        <div class="flex items-center gap-1 text-[10.5px] font-bold text-rose-700 bg-rose-50 border border-rose-200/90 px-2 py-1 rounded-lg">
+                                            <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span>{{ $isGu ? 'છેલ્લી તારીખ:' : 'Last Date:' }} {{ date('d M, Y', strtotime($event->registration_end_date)) }}</span>
+                                            <span class="text-[9px] bg-rose-600 text-white font-black px-1.5 py-0.5 rounded ml-0.5">{{ $isGu ? 'પૂર્ણ' : 'Closed' }}</span>
+                                        </div>
+                                    @else
+                                        <a href="{{ route('member.events.register_form', $event->id) }}"
+                                            onclick="event.stopPropagation()"
+                                            class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            <span>{{ $isGu ? 'ફોર્મ ભરો' : 'Fill Form' }}</span>
+                                            <span>&rarr;</span>
+                                        </a>
+                                    @endif
+                                @else
+                                    <div></div>
+                                @endif
 
+                                <!-- Pass Booking / View Pass Button -->
                                 @if($alreadyRegistered)
                                     <button type="button"
-                                        @click="openPassModal({{ json_encode(['id' => $event->id, 'title' => $event->title, 'date' => date('d-M-Y', strtotime($event->date)), 'time' => $event->time ? date('h:i A', strtotime($event->time)) : '', 'venue' => $event->venue, 'url' => route('event.details', $event->id)]) }}, {{ json_encode($regPasses) }}, '{{ addslashes($userName) }}')"
+                                        @click.stop="openPassModal({{ json_encode(['id' => $event->id, 'title' => $event->title, 'date' => date('d-M-Y', strtotime($event->date)), 'time' => $event->time ? date('h:i A', strtotime($event->time)) : '', 'venue' => $event->venue, 'url' => route('event.details', $event->id)]) }}, {{ json_encode($regPasses) }}, '{{ addslashes($userName) }}')"
                                         class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0">
-                                        <span>🎫
-                                            {{ $isGu ? 'પાસ જુઓ (' . count($regPasses) . ')' : 'View Pass (' . count($regPasses) . ')' }}</span>
+                                        <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                                        <span>{{ $isGu ? 'પાસ જુઓ (' . count($regPasses) . ')' : 'View Pass (' . count($regPasses) . ')' }}</span>
                                         <span>&rarr;</span>
                                     </button>
                                 @else
                                     <a href="{{ route('event.details', $event->id) }}"
+                                        onclick="event.stopPropagation()"
                                         class="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0">
-                                        <span>🎫 {{ $isGu ? 'પાસ બુક કરો' : 'Book Pass' }}</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                                        <span>{{ $isGu ? 'પાસ બુક કરો' : 'Book Pass' }}</span>
                                         <span>&rarr;</span>
                                     </a>
                                 @endif
@@ -156,7 +195,7 @@
             @else
                 <!-- Empty State for Active Events -->
                 <div class="text-center py-8 bg-slate-50/70 rounded-lg border border-slate-100 p-4 space-y-1.5">
-                    <span class="text-2xl block">📅</span>
+                    <svg class="w-8 h-8 text-slate-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <h4 class="text-xs font-black text-slate-800">
                         {{ $isGu ? 'હાલમાં કોઈ સક્રિય કાર્યક્રમ ઉપલબ્ધ નથી' : 'No active events currently scheduled' }}
                     </h4>
@@ -179,8 +218,8 @@
                     <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-9 h-9 rounded-xl bg-primary-600/30 border border-primary-500/40 text-primary-400 flex items-center justify-center text-lg">
-                                🎟️
+                                class="w-9 h-9 rounded-xl bg-primary-600/30 border border-primary-500/40 text-primary-400 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
                             </div>
                             <div>
                                 <h3 class="text-sm font-extrabold flex items-center gap-2">
@@ -195,11 +234,12 @@
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="downloadAllPassesMember()"
                                 class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer">
-                                ⬇️ Download All PDF
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>Download All PDF</span>
                             </button>
                             <button type="button" @click="showPassModal = false"
                                 class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs font-bold cursor-pointer">
-                                ✕
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
                     </div>
@@ -210,7 +250,7 @@
                             <div class="bg-white rounded-2xl border-2 border-slate-900 shadow-sm overflow-hidden text-slate-900 print-pass-member-item"
                                 :id="'dashboard-pass-card-' + idx" :data-pass-no="pNo"
                                 :data-event-title="activeEvent?.title || ''" data-mandal="Satwara Gyati Mandal Ahm."
-                                :data-date="(activeEvent?.date || '') + (activeEvent?.time ? ' | ⏰ ' + activeEvent?.time : '')"
+                                :data-date="(activeEvent?.date || '') + (activeEvent?.time ? ' | ' + activeEvent?.time : '')"
                                 :data-venue="activeEvent?.venue || ''" :data-attendee="activeAttendee || ''"
                                 :data-member-code="activeMemberId || ''" data-logo="{{ $logoUrl }}">
                                 <!-- Top Bar -->
@@ -244,10 +284,10 @@
                                         </div>
                                         <div
                                             class="text-xs font-bold text-slate-700 flex items-center justify-center sm:justify-start gap-1">
-                                            <span>📅 {{ $isGu ? 'તારીખ:' : 'Date:' }}</span>
+                                            <span>{{ $isGu ? 'તારીખ:' : 'Date:' }}</span>
                                             <span x-text="activeEvent?.date"></span>
                                             <span x-show="activeEvent?.time" class="text-slate-400">|</span>
-                                            <span x-show="activeEvent?.time" x-text="'⏰ ' + activeEvent?.time"></span>
+                                            <span x-show="activeEvent?.time" x-text="activeEvent?.time"></span>
                                         </div>
                                     </div>
 
@@ -269,14 +309,15 @@
                                 <div
                                     class="border-t-2 border-dashed border-slate-200 bg-slate-50/80 px-4 py-2.5 text-xs font-bold text-slate-700 flex items-center justify-between gap-1.5">
                                     <span class="flex items-center gap-1.5">
-                                        <span class="text-rose-500">📍</span>
+                                        <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                         <span><strong>{{ $isGu ? 'સ્થળ / સરનામું:' : 'Location / Venue:' }}</strong> <span
                                                 x-text="activeEvent?.venue"></span></span>
                                     </span>
                                     <button type="button" :data-card-id="'dashboard-pass-card-' + idx"
                                         onclick="downloadSinglePassMember(this.dataset.cardId)"
                                         class="flex items-center gap-1 px-2.5 py-1 bg-slate-900 hover:bg-slate-700 text-white text-[10px] font-extrabold rounded-lg transition-colors cursor-pointer">
-                                        ⬇️ Download
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                        <span>Download</span>
                                     </button>
                                 </div>
                             </div>
@@ -286,13 +327,14 @@
                     <!-- Modal Footer -->
                     <div
                         class="px-6 py-3 bg-white border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 shrink-0">
-                        <span class="text-[11px] text-slate-400 font-medium">💡
+                        <span class="text-[11px] text-slate-400 font-medium inline-flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             {{ $isGu ? 'કૃપા કરીને કાર્યક્રમ સ્થળે પ્રવેશ વખતે આ પાસ દર્શાવો.' : 'Please present this pass at the event entrance.' }}</span>
                         <div class="flex items-center gap-2">
                             <template x-if="activeEvent?.url">
                                 <a :href="activeEvent.url"
                                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5">
-                                    <span>➕</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                     <span>{{ $isGu ? 'વધુ પાસ ખરીદો' : 'Buy More Passes' }}</span>
                                 </a>
                             </template>
@@ -356,8 +398,9 @@
                         <div style="font-size: 16px; font-weight: 900; color: #e11d48; line-height: 1.25; margin-bottom: 6px;">
                             ${title}
                         </div>
-                        <div style="font-size: 12px; font-weight: 700; color: #334155;">
-                            📅 ${date}
+                        <div style="font-size: 12px; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 4px;">
+                            <svg style="width: 14px; height: 14px; color: #e11d48; display: inline-block; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>${date}</span>
                         </div>
                     </td>
 
@@ -372,8 +415,9 @@
             </table>
 
             <!-- Bottom Location Strip -->
-            <div style="border-top: 2px dashed #e2e8f0; background-color: #f8fafc; padding: 9px 16px; font-size: 11px; font-weight: 700; color: #334155;">
-                📍 <strong>Location / Venue:</strong> ${venue}
+            <div style="border-top: 2px dashed #e2e8f0; background-color: #f8fafc; padding: 9px 16px; font-size: 11px; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 4px;">
+                <svg style="width: 14px; height: 14px; color: #e11d48; display: inline-block; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span><strong>Location / Venue:</strong> ${venue}</span>
             </div>
         </div>`;
         }

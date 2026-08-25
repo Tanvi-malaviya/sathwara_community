@@ -1393,6 +1393,7 @@ return [
     'total_pass_count' => 'કુલ પાસ સંખ્યા',
     'total_passes' => 'કુલ પાસ',
     'upload_photos' => 'ફોટો અપલોડ કરો',
+    'choose_photo' => 'ફોટો પસંદ કરો',
 ];
 
 
