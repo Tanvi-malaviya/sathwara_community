@@ -245,6 +245,9 @@ class RegistrationController extends Controller
         $paymentId = $request->input('razorpay_payment_id');
         $paymentStatus = (!empty($paymentId) || $signupFee <= 0) ? 'paid' : 'unpaid';
 
+          // Release unique email constraint from any previously soft-deleted user records
+        User::onlyTrashed()->where('email', $validated['email'])->update(['email' => null]);
+
         // 1. Create Login User (status remains 'pending' for Admin Approval)
         $user = User::create([
             'name' => $validated['first_name'] . ' ' . $validated['last_name'],

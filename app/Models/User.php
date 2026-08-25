@@ -20,6 +20,7 @@ class User extends Authenticatable
         static::deleting(function (User $user) {
             if (! $user->isForceDeleting()) {
                 $user->email = null;
+                  $user->member_code = null;
                 $user->saveQuietly();
             }
         });

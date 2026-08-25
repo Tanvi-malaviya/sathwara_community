@@ -124,6 +124,13 @@ class MemberController extends Controller
         $fullName = trim(preg_replace('/\s+/', ' ', implode(' ', array_filter([$request->first_name, $request->middle_name, $request->last_name]))));
         $memberCode = $request->filled('member_code') ? strtoupper(trim($request->member_code)) : null;
 
+           if ($request->filled('email')) {
+            User::onlyTrashed()->where('email', $request->email)->update(['email' => null]);
+        }
+        if ($memberCode) {
+            User::onlyTrashed()->where('member_code', $memberCode)->update(['member_code' => null]);
+        }
+
         // Create User
         $user = User::create([
             'name' => $fullName,
