@@ -94,7 +94,7 @@
                     <select name="area_id" required class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         <option value="">-- {{ __('messages.select_area') }} --</option>
                         @foreach($areas as $area)
-                            <option value="{{ $area->id }}" {{ old('area_id', $business->area_id) == $area->id ? 'selected' : '' }}>{{ $area->name }}</option>
+                            <option value="{{ $area->id }}" {{ old('area_id', $business->area_id) == $area->id ? 'selected' : '' }}>{{ $area->name }}{{ $area->pincode ? ' (' . $area->pincode . ')' : '' }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -170,13 +170,15 @@
             </h3>
             <div class="space-y-4">
                 <!-- LOGO UPLOAD -->
-                <div class="space-y-2 border border-slate-100 rounded-xl p-3.5 bg-slate-50/50 max-w-md">
+                <div class="space-y-2 border border-slate-100 rounded-xl p-3.5 bg-slate-50/50 max-w-md" 
+                     x-data="{ logoPreview: '{{ str_starts_with($business->logo_path, 'http') ? $business->logo_path : asset('storage/' . $business->logo_path) }}' }">
                     <label class="text-xs font-bold text-slate-500 uppercase block">{{ __('messages.business_logo_label') }}</label>
                     <div class="flex items-center space-x-3">
-                        <img src="{{ str_starts_with($business->logo_path, 'http') ? $business->logo_path : asset('storage/' . $business->logo_path) }}" 
+                        <img :src="logoPreview" src="{{ str_starts_with($business->logo_path, 'http') ? $business->logo_path : asset('storage/' . $business->logo_path) }}" 
                              class="w-12 h-12 rounded-xl object-cover border border-slate-200 bg-white shadow-sm shrink-0" alt="Logo">
                         <div class="space-y-1">
                             <input type="file" name="logo" accept="image/*" 
+                                   @change="const file = $event.target.files[0]; if (file) { const r = new FileReader(); r.onload = e => logoPreview = e.target.result; r.readAsDataURL(file); }"
                                    class="text-xs font-semibold file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
                             <p class="text-[10px] text-slate-400 font-semibold">Max 2MB</p>
                         </div>
