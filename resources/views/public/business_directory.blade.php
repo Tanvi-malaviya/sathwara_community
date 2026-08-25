@@ -10,15 +10,15 @@
 <!-- Search and Directory Grid -->
 <section class="py-10 bg-transparent">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
             <!-- Filters Sidebar -->
-            <div class="lg:col-span-1 space-y-4">
+            <div class="lg:col-span-1 space-y-4 lg:sticky lg:top-24">
                 <!-- Search Box -->
-                <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-xs space-y-3">
-                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-100">{{ __('messages.search_directory') }}</h3>
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/60 shadow-xs space-y-3">
+                    <h3 class="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-100">{{ __('messages.search_directory') }}</h3>
                     <form method="GET" action="{{ route('business.directory') }}" class="relative">
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_company_owner') }}" 
-                               class="w-full text-xs sm:text-[13.5px] font-bold pl-3 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:ring-0">
+                               class="w-full text-xs sm:text-[13px] font-bold pl-3 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:ring-0">
                         @if(request('category'))
                             <input type="hidden" name="category" value="{{ request('category') }}">
                         @endif
@@ -31,18 +31,31 @@
                 </div>
 
                 <!-- Categories -->
-                <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-xs space-y-4">
-                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-100">{{ __('messages.categories') }}</h3>
-                    <div class="flex flex-col space-y-1.5">
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/60 shadow-xs space-y-3" x-data="{ catFilter: '' }">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                        <h3 class="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider">{{ __('messages.categories') }}</h3>
+                        <span class="text-[11px] font-extrabold text-slate-400">({{ $categories->count() }})</span>
+                    </div>
+
+                    @if($categories->count() > 6)
+                        <div class="relative">
+                            <input type="text" x-model="catFilter" placeholder="{{ __('messages.search_directory') }}..." 
+                                   class="w-full text-[11px] font-bold pl-7 pr-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">
+                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                    @endif
+
+                    <div class="flex flex-col space-y-1 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar" style="max-height: 300px; overflow-y: auto;">
                         <a href="{{ route('business.directory', request()->only('search')) }}" 
-                           class="text-xs sm:text-[13.5px] font-bold px-3 py-2 rounded-xl flex justify-between items-center transition-all {{ !request('category') ? 'bg-primary-50 text-primary-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                           class="text-xs sm:text-[13px] font-bold px-3 py-1.5 rounded-xl flex justify-between items-center transition-all {{ !request('category') ? 'bg-primary-50 text-primary-600 font-black' : 'text-slate-600 hover:bg-slate-50' }}">
                             <span>{{ __('messages.all_categories') }}</span>
                         </a>
                         @foreach($categories as $cat)
                             <a href="{{ route('business.directory', array_merge(request()->only('search'), ['category' => $cat->slug])) }}" 
-                               class="text-xs sm:text-[13.5px] font-bold px-3 py-2 rounded-xl flex justify-between items-center transition-all {{ request('category') == $cat->slug ? 'bg-primary-50 text-primary-600' : 'text-slate-600 hover:bg-slate-50' }}">
-                                <span>{{ $cat->name }}</span>
-                                <span class="text-[11px] font-black px-2 py-0.5 rounded-md transition-all {{ request('category') == $cat->slug ? 'bg-primary-100 text-primary-700' : 'bg-slate-100 text-slate-600' }}">{{ $cat->businesses_count }}</span>
+                               x-show="!catFilter || '{{ strtolower(addslashes($cat->name)) }}'.includes(catFilter.toLowerCase())"
+                               class="text-xs sm:text-[13px] font-bold px-3 py-1.5 rounded-xl flex justify-between items-center transition-all {{ request('category') == $cat->slug ? 'bg-primary-50 text-primary-600 font-black' : 'text-slate-600 hover:bg-slate-50' }}">
+                                <span class="truncate pr-2">{{ $cat->name }}</span>
+                                <span class="text-[10px] font-black px-1.5 py-0.5 rounded-md shrink-0 transition-all {{ request('category') == $cat->slug ? 'bg-primary-100 text-primary-700' : 'bg-slate-100 text-slate-500' }}">{{ $cat->businesses_count }}</span>
                             </a>
                         @endforeach
                     </div>
