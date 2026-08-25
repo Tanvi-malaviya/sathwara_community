@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\MemberProfile;
 use App\Models\FamilyMember;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MemberController extends Controller
 {
@@ -100,8 +101,8 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'member_code' => 'nullable|string|max:50|unique:users,member_code',
-            'email' => 'nullable|email|unique:users,email',
+            'member_code' => ['nullable', 'string', 'max:50', Rule::unique('users', 'member_code')->whereNull('deleted_at')],
+            'email' => ['nullable', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')],
             'password' => 'required|string|min:8|confirmed',
             'status' => 'required|in:pending,approved,rejected',
             'account_status' => 'nullable|in:open,close',
@@ -205,8 +206,8 @@ class MemberController extends Controller
         $profile = $member->memberProfile;
 
         $request->validate([
-            'member_code' => 'nullable|string|max:50|unique:users,member_code,' . $member->id,
-            'email' => 'nullable|email|unique:users,email,' . $member->id,
+            'member_code' => ['nullable', 'string', 'max:50', Rule::unique('users', 'member_code')->whereNull('deleted_at')->ignore($member->id)],
+            'email' => ['nullable', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')->ignore($member->id)],
             'status' => 'required|in:pending,approved,rejected',
             'account_status' => 'required|in:open,close',
             'first_name' => 'required|string|max:255',
@@ -294,7 +295,7 @@ class MemberController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.members.show', $member->id)->with('success', 'Member details updated successfully.');
+        return redirect()->route('admin.members.index')->with('success', 'Member details updated successfully.');
     }
 
     private function checkEditPermission()

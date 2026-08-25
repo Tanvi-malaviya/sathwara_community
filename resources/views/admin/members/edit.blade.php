@@ -204,7 +204,7 @@
 
                 <!-- ACTIONS -->
                 <div class="pt-4 border-t border-slate-100 flex justify-end items-center space-x-3">
-                    <a href="{{ route('admin.members.show', $member->id) }}"
+                    <a href="{{ route('admin.members.index') }}"
                         class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors">
                         {{ __('messages.cancel') }}
                     </a>

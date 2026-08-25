@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerifyEmailOtpMail;
+use Illuminate\Validation\Rule;
 
 class DashboardController extends Controller
 {
@@ -248,7 +249,7 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         $request->validate([
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => ['required', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')->ignore($user->id)],
         ], [
             'email.unique' => 'This email address is already in use by another account.',
         ]);
