@@ -196,7 +196,7 @@
                             @if($fatherUser)
                                 <p class="text-[11px] text-emerald-600 font-bold mt-0.5 flex items-center gap-1">
                                     <span>✓</span>
-                                    <span>{{ $fatherUser->display_name }} (#{{ sprintf('%05d', $fatherUser->id) }})</span>
+                                    <span>{{ $fatherUser->display_name }} ({{ $fatherUser->member_code ?: $fatherUser->formatted_member_id }})</span>
                                 </p>
                             @endif
                         @endif
