@@ -16,16 +16,20 @@ echo -e "${BOLD}==========================================${NC}"
 echo -e "\n${CYAN}[1/5] Pulling latest code...${NC}"
 git pull origin main || git pull
 
-echo -e "\n${CYAN}[2/5] Running database migrations...${NC}"
+echo -e "\n${CYAN}[2/6] Installing PHP dependencies...${NC}"
+export COMPOSER_ALLOW_SUPERUSER=1
+composer install --no-interaction --prefer-dist --optimize-autoloader
+
+echo -e "\n${CYAN}[3/6] Running database migrations...${NC}"
 php artisan migrate --force
 
-echo -e "\n${CYAN}[3/5] Clearing and optimizing caches...${NC}"
+echo -e "\n${CYAN}[4/6] Clearing and optimizing caches...${NC}"
 php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-echo -e "\n${CYAN}[4/5] Building frontend assets...${NC}"
+echo -e "\n${CYAN}[5/6] Building frontend assets...${NC}"
 if [ -f "package.json" ]; then
     if command -v npm &> /dev/null; then
         npm install
@@ -35,7 +39,7 @@ if [ -f "package.json" ]; then
     fi
 fi
 
-echo -e "\n${CYAN}[5/5] Setting storage & cache permissions...${NC}"
+echo -e "\n${CYAN}[6/6] Setting storage & cache permissions...${NC}"
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chown -R www-data:www-data storage bootstrap/cache public 2>/dev/null || true
 
