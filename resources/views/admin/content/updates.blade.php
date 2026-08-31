@@ -89,13 +89,18 @@
                         <tr class="hover:bg-slate-50/50">
                             <td class="py-2 px-3 text-slate-900 font-bold">
                                 <div class="flex items-center space-x-3 min-w-0">
-                                    @if($up->image_path)
-                                        <img class="rounded-lg object-cover shrink-0" style="width: 32px; height: 32px;"
-                                            src="{{ str_starts_with($up->image_path, 'http') ? $up->image_path : asset('storage/' . $up->image_path) }}"
-                                            alt="{{ $up->title }}">
+                                    @php $upImg = $up->image_path ? (str_starts_with($up->image_path, 'http') ? $up->image_path : asset('storage/' . $up->image_path)) : null; @endphp
+                                    @if($upImg)
+                                        <div class="w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border border-slate-200/80 shrink-0 relative flex items-center justify-center">
+                                            <img class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                                 style="object-fit: cover; object-position: center; filter: blur(8px) brightness(0.5); transform: scale(1.12); z-index: 0;"
+                                                 src="{{ $upImg }}" alt="">
+                                            <img class="relative w-full h-full object-contain"
+                                                 style="z-index: 1;"
+                                                 src="{{ $upImg }}" alt="{{ $up->title }}">
+                                        </div>
                                     @else
-                                        <div class="rounded-lg bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-400 shrink-0"
-                                            style="width: 32px; height: 32px;">NA</div>
+                                        <div class="rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-400 shrink-0 w-8 h-8">NA</div>
                                     @endif
                                     <span class="truncate min-w-0">{{ $up->title }}</span>
                                 </div>
@@ -118,13 +123,14 @@
                                     @if($canEditAnnouncements)
                                         <button type="button" @click="openEdit({
                                                     id: {{ $up->id }},
+                                                    image_url: '{{ $upImg ?? '' }}',
                                                     title: {{ json_encode($up->title) }},
                                                     publish_date: '{{ date('Y-m-d', strtotime($up->publish_date)) }}',
                                                     status: '{{ $up->status }}',
                                                     description: {{ json_encode($up->description) }},
                                                     update_url: '{{ route('admin.content.updates.update', $up->id) }}'
                                                 })"
-                                            class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
+                                            class="flex items-center justify-center w-7 h-7 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors cursor-pointer"
                                             title="{{ __('messages.edit') }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -137,7 +143,7 @@
                                     @if($canDeleteAnnouncements)
                                         <button type="button"
                                             @click="$dispatch('confirm-delete', { action: '{{ route('admin.content.updates.destroy', $up->id) }}', message: '{{ __('messages.delete_confirm_update', ['name' => addslashes($up->title)]) }}' })"
-                                            class="flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                                            class="flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer"
                                             title="{{ __('messages.delete') }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -161,15 +167,18 @@
         <!-- Pagination -->
         <div class="mt-4">
             {{ $updates->links() }}
-        </div        <!-- ============ ADD MODAL ============ -->
+        </div>
+
+        <!-- ============ ADD MODAL ============ -->
         <template x-teleport="body">
             <div x-show="showAddModal"
+                x-data="{ newAddImagePreview: null }"
                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
                 x-cloak>
-                <div @click.away="showAddModal = false"
+                <div @click.away="showAddModal = false; newAddImagePreview = null"
                     class="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xl max-w-xl w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
-                    <button @click="showAddModal = false"
-                        class="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                    <button @click="showAddModal = false; newAddImagePreview = null"
+                        class="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -214,11 +223,29 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="space-y-0.5">
+                        <div class="space-y-1">
                             <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.image_file_optional') }}</label>
-                            <input type="file" name="image"
-                                class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide flex items-center justify-between">
+                                <span>{{ __('messages.image_file_optional') }}</span>
+                                <span x-show="newAddImagePreview" class="text-emerald-600 font-bold text-[9px]">{{ __('messages.preview') }}</span>
+                            </label>
+                            <div class="flex items-center gap-2.5">
+                                <div x-show="newAddImagePreview" 
+                                     class="w-12 h-12 rounded-xl overflow-hidden bg-slate-950 border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 relative">
+                                    <img :src="newAddImagePreview" 
+                                         alt="" 
+                                         aria-hidden="true" 
+                                         class="absolute inset-0 w-full h-full pointer-events-none select-none" 
+                                         style="object-fit: cover; object-position: center; filter: blur(10px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                                    <img :src="newAddImagePreview" 
+                                         alt="Preview" 
+                                         class="relative w-full h-full object-contain" 
+                                         style="z-index: 1;">
+                                </div>
+                                <input type="file" name="image" accept="image/*"
+                                    @change="const file = $event.target.files[0]; if(file) { newAddImagePreview = URL.createObjectURL(file); }"
+                                    class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 border border-slate-200 rounded-lg p-1 bg-slate-50">
+                            </div>
                         </div>
                         <div class="space-y-1">
                             <label
@@ -231,10 +258,10 @@
                             </div>
                         </div>
                         <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                            <button type="button" @click="showAddModal = false"
-                                class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                            <button type="button" @click="showAddModal = false; newAddImagePreview = null"
+                                class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors cursor-pointer">{{ __('messages.cancel') }}</button>
                             <button type="submit"
-                                class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">{{ __('messages.publish_bulletin') }}</button>
+                                class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors cursor-pointer">{{ __('messages.publish_bulletin') }}</button>
                         </div>
                     </form>
                 </div>
@@ -244,12 +271,13 @@
         <!-- ============ EDIT MODAL ============ -->
         <template x-teleport="body">
             <div x-show="showEditModal"
+                x-data="{ newEditImagePreview: null }"
                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
                 x-cloak>
-                <div @click.away="showEditModal = false"
+                <div @click.away="showEditModal = false; newEditImagePreview = null"
                     class="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xl max-w-xl w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
-                    <button @click="showEditModal = false"
-                        class="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                    <button @click="showEditModal = false; newEditImagePreview = null"
+                        class="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -294,11 +322,31 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="space-y-0.5">
+                        <div class="space-y-1">
                             <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.replace_image_optional') }}</label>
-                            <input type="file" name="image"
-                                class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide flex items-center justify-between">
+                                <span>{{ __('messages.replace_image_optional') }}</span>
+                                <span x-show="newEditImagePreview" class="text-emerald-600 font-bold text-[9px]">{{ __('messages.preview') }} ({{ __('messages.new') ?? 'New' }})</span>
+                                <span x-show="!newEditImagePreview && editUpdate.image_url" class="text-primary-600 font-bold text-[9px]">{{ __('messages.current_image') }}</span>
+                            </label>
+                            <div class="flex items-center gap-2.5">
+                                <!-- Photo Preview Box -->
+                                <div x-show="newEditImagePreview || editUpdate.image_url" 
+                                     class="w-12 h-12 rounded-xl overflow-hidden bg-slate-950 border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 relative">
+                                    <img :src="newEditImagePreview || editUpdate.image_url" 
+                                         alt="" 
+                                         aria-hidden="true" 
+                                         class="absolute inset-0 w-full h-full pointer-events-none select-none" 
+                                         style="object-fit: cover; object-position: center; filter: blur(10px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                                    <img :src="newEditImagePreview || editUpdate.image_url" 
+                                         alt="Announcement Image" 
+                                         class="relative w-full h-full object-contain" 
+                                         style="z-index: 1;">
+                                </div>
+                                <input type="file" name="image" accept="image/*"
+                                    @change="const file = $event.target.files[0]; if(file) { newEditImagePreview = URL.createObjectURL(file); }"
+                                    class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 border border-slate-200 rounded-lg p-1 bg-slate-50">
+                            </div>
                         </div>
                         <div class="space-y-1">
                             <label
@@ -309,10 +357,10 @@
                             </div>
                         </div>
                         <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                            <button type="button" @click="showEditModal = false"
-                                class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                            <button type="button" @click="showEditModal = false; newEditImagePreview = null"
+                                class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors cursor-pointer">{{ __('messages.cancel') }}</button>
                             <button type="submit"
-                                class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">{{ __('messages.save_changes') }}</button>
+                                class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors cursor-pointer">{{ __('messages.save_changes') }}</button>
                         </div>
                     </form>
                 </div>

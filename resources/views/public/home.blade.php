@@ -589,14 +589,23 @@
                             $imageUrl = str_starts_with($item->image_path, 'http') ? $item->image_path : asset('storage/' . $item->image_path);
                         @endphp
                         <div @click="openLightbox({{ $index }})"
-                            class="break-inside-avoid group relative w-full overflow-hidden bg-slate-900 border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer {{ $shapeClass }}">
+                            class="break-inside-avoid group relative w-full overflow-hidden bg-slate-950 border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer flex items-center justify-center {{ $shapeClass }}">
 
-                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
+                            <!-- Blurred Background Image (same image, scaled + blurred) -->
+                            <img src="{{ $imageUrl }}"
+                                alt=""
+                                aria-hidden="true"
+                                class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                style="object-fit: cover; object-position: center; filter: blur(16px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                            <!-- Main Image (Full object-contain, never cropped) -->
+                            <img class="relative w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+                                style="z-index: 1;"
                                 src="{{ $imageUrl }}" alt="{{ $item->caption ?: 'Community Gallery' }}">
 
                             <!-- Gradient Overlay & High-Contrast Caption -->
-                            <div
-                                class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex items-end p-5 transition-opacity duration-300">
+                            <div style="z-index: 10;"
+                                class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent flex items-end p-5 transition-opacity duration-300">
                                 <div class="w-full space-y-2">
                                     <p class="text-sm sm:text-base font-extrabold text-white leading-snug drop-shadow-md truncate">
                                         {{ $item->caption ?: 'Satwara Community Photo' }}

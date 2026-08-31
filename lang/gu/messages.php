@@ -35,6 +35,8 @@ return [
     'latest_updates' => 'નવીનતમ અપડેટ્સ',
     'featured_businesses' => 'વિશેષ વ્યવસાયો',
     'gallery_preview' => 'ગેલેરી ઝલક',
+    'preview' => 'પ્રીવ્યૂ',
+    'current_image' => 'હાલની ઈમેજ',
     'testimonials' => 'અભિપ્રાયો',
     'contact_section' => 'સંપર્ક વિભાગ',
     'mission' => 'ધ્યેય (Mission)',

@@ -54,9 +54,11 @@
                     <!-- Action Buttons (Hidden by default, show on hover) -->
                     <div class="absolute top-3 right-3 flex items-center space-x-1.5  transition-opacity duration-150">
                     {{-- Edit --}}
+@php $cPhoto = $c->photo_path ? (str_starts_with($c->photo_path, 'http') ? $c->photo_path : asset('storage/' . $c->photo_path)) : ''; @endphp
 <button type="button"
     @click="openEdit({
         id: {{ $c->id }},
+        photo_url: '{{ $cPhoto }}',
         name: {{ json_encode($c->name) }},
         designation: {{ json_encode($c->designation) }},
         status: {{ $c->status ? 1 : 0 }},
@@ -142,11 +144,12 @@
 
         <!-- ============ ADD MODAL ============ -->
         <div x-show="showAddModal"
+            x-data="{ addCPhotoPreview: null }"
             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
             x-cloak>
-            <div @click.away="showAddModal = false"
+            <div @click.away="showAddModal = false; addCPhotoPreview = null"
                 class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
-                <button @click="showAddModal = false"
+                <button @click="showAddModal = false; addCPhotoPreview = null"
                     class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2">
@@ -176,10 +179,20 @@
                         <input type="text" name="designation" value="{{ old('designation') }}" required placeholder="e.g. Trustee, Secretary"
                             class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
                     </div>
-                    <div class="space-y-0.5">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.photo_optional') }}</label>
-                        <input type="file" name="photo"
-                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide flex items-center justify-between">
+                            <span>{{ __('messages.photo_optional') }}</span>
+                            <span x-show="addCPhotoPreview" class="text-emerald-600 font-bold text-[9px]">{{ __('messages.preview') }}</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <div x-show="addCPhotoPreview" class="w-10 h-12 rounded-lg overflow-hidden bg-slate-950 border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 relative">
+                                <img :src="addCPhotoPreview" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full pointer-events-none select-none" style="object-fit: cover; object-position: center; filter: blur(10px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                                <img :src="addCPhotoPreview" alt="Preview" class="relative w-full h-full object-contain" style="z-index: 1;">
+                            </div>
+                            <input type="file" name="photo" accept="image/*"
+                                @change="const file = $event.target.files[0]; if(file) { addCPhotoPreview = URL.createObjectURL(file); }"
+                                class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 border border-slate-200 rounded-lg p-1 bg-slate-50">
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-0.5">
@@ -197,7 +210,7 @@
                         </div>
                     </div>
                     <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showAddModal = false" class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                        <button type="button" @click="showAddModal = false; addCPhotoPreview = null" class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
                         <button type="submit" class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">{{ __('messages.add_member_submit') }}</button>
                     </div>
                 </form>
@@ -206,11 +219,12 @@
 
         <!-- ============ EDIT MODAL ============ -->
         <div x-show="showEditModal"
+            x-data="{ editCPhotoPreview: null }"
             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
             x-cloak>
-            <div @click.away="showEditModal = false"
+            <div @click.away="showEditModal = false; editCPhotoPreview = null"
                 class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
-                <button @click="showEditModal = false"
+                <button @click="showEditModal = false; editCPhotoPreview = null"
                     class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2">
@@ -241,10 +255,31 @@
                             placeholder="e.g. Trustee, Secretary"
                             class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary-400">
                     </div>
-                    <div class="space-y-0.5">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.replace_photo_optional') }}</label>
-                        <input type="file" name="photo"
-                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide flex items-center justify-between">
+                            <span>{{ __('messages.replace_photo_optional') }}</span>
+                            <span x-show="editCPhotoPreview" class="text-emerald-600 font-bold text-[9px]">{{ __('messages.preview') }} ({{ __('messages.new') ?? 'New' }})</span>
+                            <span x-show="!editCPhotoPreview && editMember.photo_url" class="text-primary-600 font-bold text-[9px]">{{ __('messages.current_image') }}</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <!-- Photo Preview Box -->
+                            <div x-show="editCPhotoPreview || editMember.photo_url" 
+                                 class="w-10 h-12 rounded-lg overflow-hidden bg-slate-950 border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 relative">
+                                <img :src="editCPhotoPreview || editMember.photo_url" 
+                                     alt="" 
+                                     aria-hidden="true" 
+                                     class="absolute inset-0 w-full h-full pointer-events-none select-none" 
+                                     style="object-fit: cover; object-position: center; filter: blur(10px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                                <img :src="editCPhotoPreview || editMember.photo_url" 
+                                     alt="Member Photo" 
+                                     class="relative w-full h-full object-contain" 
+                                     style="z-index: 1;"
+                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Member&background=fef2f2&color=dc2626&size=256&bold=true';">
+                            </div>
+                            <input type="file" name="photo" accept="image/*"
+                                @change="const file = $event.target.files[0]; if(file) { editCPhotoPreview = URL.createObjectURL(file); }"
+                                class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 border border-slate-200 rounded-lg p-1 bg-slate-50">
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-0.5">
@@ -262,7 +297,7 @@
                         </div>
                     </div>
                     <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showEditModal = false" class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
+                        <button type="button" @click="showEditModal = false; editCPhotoPreview = null" class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
                         <button type="submit" class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors">{{ __('messages.save_changes') }}</button>
                     </div>
                 </form>

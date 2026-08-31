@@ -175,21 +175,6 @@
                         </div>
                     </div>
 
-                    <!-- Venue & Google Map Location -->
-                    @if(!empty($event->map_embed_url))
-                        <div class="space-y-4 pt-4 border-t border-slate-100">
-                            <div class="flex items-center justify-between gap-2 flex-wrap">
-                                <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                    <span>{{ __('messages.event_location_venue') }}</span>
-                                </h2>
-                            </div>
-                            <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-56 sm:h-64 w-full bg-slate-50">
-                                <iframe src="{{ $event->map_embed_url }}" class="w-full h-full border-0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                            </div>
-                        </div>
-                    @endif
-
                     <!-- Event Gallery -->
                     @if($gallery->count() > 0)
                         <div class="space-y-6">
@@ -229,14 +214,26 @@
                                  @keydown.window.left="if(lightbox) prevImage()">
 
                                 @foreach($gallery as $index => $photo)
-                                    <div class="aspect-video rounded-xl overflow-hidden bg-slate-50 border border-slate-100 group relative cursor-pointer"
+                                    @php $gImgUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
+                                    <div class="aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-200/80 group relative cursor-pointer flex items-center justify-center shadow-xs"
                                          @click="lightboxIndex = {{ $index }}; lightbox = true">
-                                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                             src="{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}"
+                                        <!-- Blurred Background Image (same image, scaled + blurred like hero section) -->
+                                        <img src="{{ $gImgUrl }}"
+                                             alt=""
+                                             aria-hidden="true"
+                                             class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                             style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                                        <!-- Main Slide Image (Full object-contain, on top) -->
+                                        <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                                             style="z-index: 1;"
+                                             src="{{ $gImgUrl }}"
                                              alt="{{ $photo->caption }}">
-                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <span class="text-white text-xs font-bold inline-flex items-center gap-1">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+
+                                        <!-- Hover Zoom Badge -->
+                                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
+                                            <span class="text-white text-xs font-bold inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-white/20 backdrop-blur-xs shadow-md">
+                                                <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
                                                 Zoom
                                             </span>
                                         </div>
@@ -825,6 +822,24 @@
                             @endif
                         </div>
                     </div>
+
+                    <!-- Right Column: Location & Google Map Widget -->
+                    @if(!empty($event->map_embed_url))
+                        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-md space-y-3.5 mt-4">
+                            <div class="flex items-center justify-between gap-2 flex-wrap border-b border-slate-100 pb-3">
+                                <h3 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span>{{ __('messages.event_location_venue') }}</span>
+                                </h3>
+                                @if($event->venue)
+                                    <span class="text-[11px] font-bold text-slate-500 truncate max-w-[170px]" title="{{ $event->venue }}">{{ $event->venue }}</span>
+                                @endif
+                            </div>
+                            <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-2xs h-48 sm:h-56 w-full bg-slate-50">
+                                <iframe src="{{ $event->map_embed_url }}" class="w-full h-full border-0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

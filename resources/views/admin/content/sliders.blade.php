@@ -31,29 +31,41 @@
         </div>
 
         <!-- Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             @forelse($sliders as $slide)
+                @php $sImg = str_starts_with($slide->image_path, 'http') ? $slide->image_path : asset('storage/' . $slide->image_path); @endphp
                 <div
-                    class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-                    <div class="aspect-video w-full overflow-hidden bg-slate-50 relative">
-                        <img class="w-full h-full object-cover"
-                            src="{{ str_starts_with($slide->image_path, 'http') ? $slide->image_path : asset('storage/' . $slide->image_path) }}"
-                            alt="Slider image">
+                    class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div class="aspect-video w-full overflow-hidden bg-slate-950 relative flex items-center justify-center">
+                        <!-- Blurred Backdrop -->
+                        <img src="{{ $sImg }}" 
+                             alt="" 
+                             aria-hidden="true"
+                             class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                             style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                        <!-- Main Full Image -->
+                        <img class="relative w-full h-full object-contain"
+                             style="z-index: 1;"
+                             src="{{ $sImg }}"
+                             alt="Slider image">
+
                         <span
-                            class="absolute top-2 right-2 px-2 py-0.5 text-[9px] font-bold rounded {{ $slide->status ? 'bg-emerald-500 text-white' : 'bg-slate-400 text-white' }}">
+                            class="absolute top-2 right-2 px-2 py-0.5 text-[9px] font-bold rounded z-10 shadow-xs {{ $slide->status ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-white' }}">
                             {{ $slide->status ? __('messages.active') : __('messages.inactive') }}
                         </span>
                     </div>
-                    <div class="p-4 space-y-3">
-                        <div class="flex items-center justify-between text-[9px] text-slate-400 font-bold pt-1">
+                    <div class="p-3.5 space-y-2.5">
+                        <div class="flex items-center justify-between text-[9.5px] text-slate-400 font-bold">
                             <span>{{ __('messages.priority') }}: {{ $slide->display_order }}</span>
                             @if($slide->button_text)
-                                <span class="text-primary-500">Btn: {{ $slide->button_text }}</span>
+                                <span class="text-primary-600 truncate max-w-[120px]">Btn: {{ $slide->button_text }}</span>
                             @endif
                         </div>
                         <div class="flex gap-2">
                             <button type="button" @click="openEdit({
                                         id: {{ $slide->id }},
+                                        image_url: '{{ $sImg }}',
                                         title: {{ json_encode($slide->title) }},
                                         subtitle: {{ json_encode($slide->subtitle) }},
                                         button_text: {{ json_encode($slide->button_text) }},
@@ -62,7 +74,7 @@
                                         display_order: {{ $slide->display_order }},
                                         update_url: '{{ route('admin.content.sliders.update', $slide->id) }}'
                                     })"
-                                class="flex-1 flex items-center justify-center gap-1 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-600 font-bold text-[10px] rounded-lg transition-colors">
+                                class="flex-1 flex items-center justify-center gap-1 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-600 font-bold text-[10px] rounded-lg transition-colors cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -72,7 +84,7 @@
                             </button>
                             <button type="button"
                                 @click="$dispatch('confirm-delete', { action: '{{ route('admin.content.sliders.destroy', $slide->id) }}', message: '{{ __('messages.delete_confirm_slider') }}' })"
-                                class="flex-1 flex items-center justify-center gap-1 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] rounded-lg transition-colors">
+                                class="flex-1 flex items-center justify-center gap-1 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] rounded-lg transition-colors cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -101,11 +113,12 @@
 
         <!-- ============ ADD MODAL ============ -->
         <div x-show="showAddModal"
+            x-data="{ addImagePreview: null }"
             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
             x-cloak>
-            <div @click.away="showAddModal = false"
+            <div @click.away="showAddModal = false; addImagePreview = null"
                 class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
-                <button @click="showAddModal = false"
+                <button @click="showAddModal = false; addImagePreview = null"
                     class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2">
@@ -116,11 +129,22 @@
                 <form method="POST" action="{{ route('admin.content.sliders.store') }}" enctype="multipart/form-data"
                     class="space-y-3">
                     @csrf
-                    <div class="space-y-0.5">
+                    <div class="space-y-1.5">
                         <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.banner_image_label') }}</label>
-                        <input type="file" name="image" required
-                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide flex items-center justify-between">
+                            <span>{{ __('messages.banner_image_label') }}</span>
+                            <span x-show="addImagePreview" class="text-emerald-600 font-bold text-[9px]">{{ __('messages.preview') }}</span>
+                        </label>
+
+                        <!-- Live Preview for Add Modal -->
+                        <div x-show="addImagePreview" class="h-28 w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-200/80 shadow-xs flex items-center justify-center relative">
+                            <img :src="addImagePreview" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full pointer-events-none select-none" style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                            <img :src="addImagePreview" alt="Preview" class="relative w-full h-full object-contain" style="z-index: 1;">
+                        </div>
+
+                        <input type="file" name="image" required accept="image/*"
+                            @change="const file = $event.target.files[0]; if(file) { addImagePreview = URL.createObjectURL(file); }"
+                            class="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 border border-slate-200 rounded-lg p-1 w-full bg-slate-50">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
@@ -155,7 +179,7 @@
                         </div>
                     </div>
                     <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showAddModal = false"
+                        <button type="button" @click="showAddModal = false; addImagePreview = null"
                             class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
                         <button type="submit"
                             class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm">{{ __('messages.add_slider_submit') }}</button>
@@ -166,11 +190,12 @@
 
         <!-- ============ EDIT MODAL ============ -->
         <div x-show="showEditModal"
+            x-data="{ newEditPreview: null }"
             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
             x-cloak>
-            <div @click.away="showEditModal = false"
+            <div @click.away="showEditModal = false; newEditPreview = null"
                 class="bg-white rounded-2xl p-4 border border-slate-100 shadow-2xl max-w-sm w-full space-y-3 relative max-h-[90vh] overflow-y-auto">
-                <button @click="showEditModal = false"
+                <button @click="showEditModal = false; newEditPreview = null"
                     class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2">
@@ -181,11 +206,36 @@
                 <form method="POST" :action="editSlider.update_url" enctype="multipart/form-data" class="space-y-3">
                     @csrf
                     @method('PUT')
-                    <div class="space-y-0.5">
+                    
+                    <!-- Prefilled Image Preview & Live File Change Preview -->
+                    <div class="space-y-1.5">
                         <label
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.replace_image_label') }}</label>
-                        <input type="file" name="image"
-                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700">
+                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wide flex items-center justify-between">
+                            <span>{{ __('messages.replace_image_label') }}</span>
+                            <span x-show="newEditPreview" class="text-emerald-600 font-bold text-[9px]">{{ __('messages.preview') }} ({{ __('messages.new') ?? 'New' }})</span>
+                            <span x-show="!newEditPreview && editSlider.image_url" class="text-primary-600 font-bold text-[9px]">{{ __('messages.current_image') }}</span>
+                        </label>
+
+                        <!-- Preview Container -->
+                        <div x-show="newEditPreview || editSlider.image_url" 
+                             class="h-28 w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-200/80 shadow-xs flex items-center justify-center relative">
+                            <!-- Blurred Backdrop -->
+                            <img :src="newEditPreview || editSlider.image_url" 
+                                 alt="" 
+                                 aria-hidden="true" 
+                                 class="absolute inset-0 w-full h-full pointer-events-none select-none" 
+                                 style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                            <!-- Main Image -->
+                            <img :src="newEditPreview || editSlider.image_url" 
+                                 alt="Slider Preview" 
+                                 class="relative w-full h-full object-contain" 
+                                 style="z-index: 1;">
+                        </div>
+
+                        <input type="file" name="image" accept="image/*"
+                            @change="const file = $event.target.files[0]; if(file) { newEditPreview = URL.createObjectURL(file); }"
+                            class="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 border border-slate-200 rounded-lg p-1 w-full bg-slate-50">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
@@ -220,7 +270,7 @@
                         </div>
                     </div>
                     <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showEditModal = false"
+                        <button type="button" @click="showEditModal = false; newEditPreview = null"
                             class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-lg transition-colors">{{ __('messages.cancel') }}</button>
                         <button type="submit"
                             class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-sm">{{ __('messages.save_changes') }}</button>
