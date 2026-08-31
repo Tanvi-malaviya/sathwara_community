@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\SettingsController as AdminSettings;
 use App\Http\Controllers\Admin\EmailSettingsController as AdminEmailSettings;
 use App\Http\Controllers\Admin\AwardController as AdminAward;
 use App\Http\Controllers\Admin\AreaController as AdminArea;
+use App\Http\Controllers\Admin\SponsorshipController as AdminSponsorship;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\SubAdminController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,7 @@ Route::get('/events', [PublicController::class, 'events'])->name('events');
 Route::get('/events/{id}', [PublicController::class, 'eventDetails'])->name('event.details');
 Route::get('/events/{id}/register', [PublicController::class, 'showPublicRegistrationForm'])->name('events.public_register_form');
 Route::post('/events/{id}/register', [PublicController::class, 'registerEvent'])->name('events.public_register');
+Route::post('/events/{id}/sponsor', [PublicController::class, 'registerSponsor'])->name('events.sponsor.register');
 Route::get('/updates', [PublicController::class, 'updates'])->name('updates');
 Route::get('/updates/{id}', [PublicController::class, 'updateDetails'])->name('update.details');
 Route::get('/gallery', [PublicController::class, 'gallery'])->name('gallery');
@@ -185,6 +187,19 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
         Route::post('/events/{id}/gallery', [AdminEvent::class, 'uploadGallery'])->name('events.gallery.upload');
         Route::delete('/events/gallery/{id}', [AdminEvent::class, 'deleteGalleryPhoto'])->name('events.gallery.destroy');
 
+        // Event Sponsorships
+        Route::post('/events/{id}/sponsorship-types', [AdminSponsorship::class, 'storeType'])->name('events.sponsorship_types.store');
+        Route::put('/events/sponsorship-types/{id}', [AdminSponsorship::class, 'updateType'])->name('events.sponsorship_types.update');
+        Route::delete('/events/sponsorship-types/{id}', [AdminSponsorship::class, 'destroyType'])->name('events.sponsorship_types.destroy');
+        Route::post('/events/sponsorship-types/{id}/toggle-status', [AdminSponsorship::class, 'toggleTypeStatus'])->name('events.sponsorship_types.toggle_status');
+
+        Route::post('/events/{id}/sponsors', [AdminSponsorship::class, 'storeSponsor'])->name('events.sponsors.store');
+        Route::put('/events/sponsors/{id}', [AdminSponsorship::class, 'updateSponsor'])->name('events.sponsors.update');
+        Route::post('/events/sponsors/{id}/approve', [AdminSponsorship::class, 'approveSponsor'])->name('events.sponsors.approve');
+        Route::post('/events/sponsors/{id}/reject', [AdminSponsorship::class, 'rejectSponsor'])->name('events.sponsors.reject');
+        Route::delete('/events/sponsors/{id}', [AdminSponsorship::class, 'destroySponsor'])->name('events.sponsors.destroy');
+        Route::get('/events/{id}/sponsors/export', [AdminSponsorship::class, 'exportSponsorsCsv'])->name('events.sponsors.export');
+
         // Student Awards Applications
         Route::get('/awards', [AdminAward::class, 'index'])->name('awards.index');
         Route::get('/awards/export', [AdminAward::class, 'exportCsv'])->name('awards.export');
@@ -262,6 +277,15 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
         Route::get('/email-settings', [AdminEmailSettings::class, 'index'])->name('email_settings.index');
         Route::post('/email-settings', [AdminEmailSettings::class, 'update'])->name('email_settings.update');
         Route::post('/email-settings/test', [AdminEmailSettings::class, 'sendTestMail'])->name('email_settings.test');
+    });
+
+    // Receipts Download Routes
+    Route::prefix('receipts')->name('receipts.')->group(function() {
+        Route::get('/membership/{id}', [\App\Http\Controllers\ReceiptController::class, 'downloadMembership'])->name('membership');
+        Route::get('/business/{id}', [\App\Http\Controllers\ReceiptController::class, 'downloadBusiness'])->name('business');
+        Route::get('/event-pass/{id}', [\App\Http\Controllers\ReceiptController::class, 'downloadEventPass'])->name('event_pass');
+        Route::get('/sponsorship/{id}', [\App\Http\Controllers\ReceiptController::class, 'downloadSponsorship'])->name('sponsorship');
+        Route::get('/preview/{type}', [\App\Http\Controllers\ReceiptController::class, 'previewDemo'])->name('preview');
     });
 });
 

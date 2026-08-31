@@ -16,11 +16,15 @@
                 $userPerms->contains('events_manage') ||
                 $userPerms->contains('event_manage_' . $event->id);
 
-            $isGu = (app()->getLocale() === 'gu');
             $totalCount = count($registrations);
             $approvedCount = $registrations->where('status', 'approved')->count();
             $rejectedCount = $registrations->where('status', 'rejected')->count();
             $galleryCount = $gallery->count();
+            $sponsorsCount = $sponsors->count();
+            $sponsorshipTypesCount = $sponsorshipTypes->count();
+            $approvedSponsorsCount = $sponsors->where('status', 'approved')->count();
+            $pendingSponsorsCount = $sponsors->where('status', 'pending')->count();
+            $totalSponsorshipAmount = $sponsors->where('status', 'approved')->sum('amount');
         @endphp
 
         <!-- Top Navigation Bar: Back Button + Main Tabs + Action Buttons -->
@@ -39,8 +43,10 @@
                 <!-- Tab 1: Details -->
                 <button type="button" @click="mainTab = 'details'"
                     :class="mainTab === 'details' ? 'bg-primary-500 text-white shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold hover:bg-slate-100'"
-                    class="px-3.5 py-2 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
-                    <span>📋</span>
+                    class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
                     <span>{{ __('messages.event_details') }}</span>
                 </button>
 
@@ -48,9 +54,12 @@
                 <!-- Tab 2: Submissions / Registrations (Only for Inam Vitaran & Yuva Melo) -->
                 <button type="button" @click="mainTab = 'submissions'"
                     :class="mainTab === 'submissions' ? 'bg-primary-500 text-white shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold hover:bg-slate-100'"
-                    class="px-3.5 py-2 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
-                    <span>{{ ($event->event_type ?? 'normal') === 'yuva_melo' ? '⚡' : '🎓' }}</span>
-                    <span>{{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? ($isGu ? 'વિદ્યાર્થી ઇનામ સબમિશન' : 'Student Inam Submissions') : (($event->event_type ?? 'normal') === 'yuva_melo' ? ($isGu ? 'યુવા મેળો ઉમેદવાર સબમિશન' : 'Yuva Melo Candidate Submissions') : __('messages.event_registrations')) }}</span>
+                    class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                    </svg>
+                    <span>{{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? __('messages.student_inam_submissions') : (($event->event_type ?? 'normal') === 'yuva_melo' ? __('messages.yuva_melo_candidate_submissions') : __('messages.event_registrations')) }}</span>
                     <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black"
                         :class="mainTab === 'submissions' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">{{ $totalCount }}</span>
                 </button>
@@ -59,11 +68,28 @@
                 <!-- Tab 3: Gallery -->
                 <button type="button" @click="mainTab = 'gallery'"
                     :class="mainTab === 'gallery' ? 'bg-primary-500 text-white shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold hover:bg-slate-100'"
-                    class="px-3.5 py-2 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
-                    <span>🖼️</span>
+                    class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                     <span>{{ __('messages.gallery') }}</span>
                     <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black"
                         :class="mainTab === 'gallery' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">{{ $galleryCount }}</span>
+                </button>
+
+                <!-- Tab 4: Sponsorship -->
+                <button type="button" @click="mainTab = 'sponsorship'"
+                    :class="mainTab === 'sponsorship' ? 'bg-primary-500 text-white shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold hover:bg-slate-100'"
+                    class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{{ __('messages.sponsorship') }}</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black"
+                        :class="mainTab === 'sponsorship' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">{{ $sponsorsCount }}</span>
+                    @if($pendingSponsorsCount > 0)
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    @endif
                 </button>
             </div>
 
@@ -154,7 +180,7 @@
                                 @if($event->event_type === 'yuva_melo' && ($event->form_fee ?? 0) > 0)
                                     <span
                                         class="px-2 py-0.5 rounded bg-purple-50 text-purple-800 border border-purple-200 text-[10px] font-extrabold uppercase tracking-wider">⚡
-                                        ₹{{ number_format($event->form_fee, 2) }} {{ $isGu ? 'ફોર્મ ફી' : 'Form Fee' }}</span>
+                                        ₹{{ number_format($event->form_fee, 2) }} {{ __('messages.form_fee') }}</span>
                                 @endif
                             </div>
                         </div>
@@ -180,56 +206,71 @@
                                 </div>
                             </div>
 
-                            <!-- Venue -->
+                            <!-- Location -->
                             <div class="flex items-start gap-2.5 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
                                 <div
-                                    class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-xs">
+                                    class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 text-xs">
                                     📍
                                 </div>
                                 <div>
                                     <p class="text-[9px] font-bold text-slate-400 uppercase">
-                                        {{ __('messages.venue_location') }}
+                                        {{ __('messages.location') }}
                                     </p>
-                                    <p class="font-extrabold text-slate-900 text-xs leading-snug">{{ $event->venue }}</p>
+                                    <p class="font-extrabold text-slate-900 text-xs line-clamp-1" title="{{ $event->venue }}">
+                                        {{ $event->venue ?: __('messages.not_specified') }}
+                                    </p>
+                                    <p class="font-semibold text-slate-600 text-[10px] line-clamp-1" title="{{ $event->city }}">
+                                        {{ $event->city }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Event Sequence & Form Numbers Statistics Card -->
-                    <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-4 rounded-xl shadow-sm space-y-3">
-                        <div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
+                    <!-- Sequence & Summary Statistics Box -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-white space-y-3">
+                        <div class="flex items-center justify-between">
                             <span class="text-xs font-black tracking-wide uppercase flex items-center gap-1.5 text-primary-300">
-                                <span>🔢</span> {{ $isGu ? 'ઇવેન્ટ-વાઇઝ ક્રમાંક અને આંકડા' : 'Event-Wise Sequence & Summary' }}
+                                <span>🔢</span> {{ __('messages.event_sequence_summary') }}
                             </span>
                             <span class="text-[10px] bg-slate-700/80 px-2 py-0.5 rounded font-mono text-slate-300">
                                 Event #{{ $event->id }}
                             </span>
                         </div>
 
-                        <div class="grid {{ ($event->event_type ?? 'normal') === 'normal' ? 'grid-cols-1' : 'grid-cols-2' }} gap-2.5 text-center">
+                        <div class="grid grid-cols-2 gap-2.5 text-center">
                             <!-- Passes Sequence (Always shown) -->
-                            <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70 flex flex-col justify-center items-center">
-                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">{{ $isGu ? 'કુલ પાસ' : 'Total Passes' }}</span>
+                            <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70 flex flex-col justify-center items-center {{ ($event->event_type ?? 'normal') === 'normal' ? 'col-span-2' : '' }}">
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">{{ __('messages.total_passes') }}</span>
                                 <span class="text-base font-black text-emerald-400 block">{{ $stats['total_passes'] ?? 0 }}</span>
-                                <!-- <span class="text-[9px] text-slate-400 font-mono">Last #{{ sprintf('%03d', $stats['last_pass_no'] ?? 0) }}</span> -->
                             </div>
 
                             @if(($event->event_type ?? 'normal') === 'inam_vitaran')
                             <!-- Inam Forms Sequence -->
                             <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70 flex flex-col justify-center items-center">
-                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">{{ $isGu ? 'ઇનામ ફોર્મ' : 'Inam Forms' }}</span>
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">{{ __('messages.inam_forms') }}</span>
                                 <span class="text-base font-black text-amber-400 block">{{ $stats['total_inam_forms'] ?? 0 }}</span>
-                                <!-- <span class="text-[9px] text-slate-400 font-mono">Last #{{ sprintf('%03d', $stats['last_inam_no'] ?? 0) }}</span> -->
                             </div>
                             @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
                             <!-- Yuva Melo Sequence -->
                             <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/70 flex flex-col justify-center items-center">
-                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">{{ $isGu ? 'યુવા મેળો ફોર્મ' : 'Yuva Melo Forms' }}</span>
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase block truncate">{{ __('messages.yuva_melo_forms') }}</span>
                                 <span class="text-lg font-black text-purple-400 block">{{ $stats['total_yuva_forms'] ?? 0 }}</span>
-                                <!-- <span class="text-[9px] text-slate-400 font-mono">Last #{{ sprintf('%03d', $stats['last_yuva_melo_no'] ?? 0) }}</span> -->
                             </div>
                             @endif
+
+                            <!-- Sponsorship Stats Box (Clickable to switch to Sponsorship Tab) -->
+                            <div @click="mainTab = 'sponsorship'; sponsorshipSubTab = 'sponsors'"
+                                class="bg-amber-950/40 hover:bg-amber-900/60 p-2.5 rounded-lg border border-amber-500/30 flex flex-col justify-center items-center cursor-pointer transition-all hover:scale-[1.02] col-span-2">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="text-[9px] font-extrabold text-amber-300 uppercase block truncate">💎 {{ __('messages.sponsors_total_fund') }}</span>
+                                    <span class="text-[9px] text-amber-400 font-bold underline">{{ __('messages.view_all') }} →</span>
+                                </div>
+                                <div class="flex items-center justify-between w-full mt-1">
+                                    <span class="text-base font-black text-amber-300">{{ $sponsorsCount }} <span class="text-[10px] font-normal text-amber-200/70">({{ $approvedSponsorsCount }} {{ __('messages.approved') }})</span></span>
+                                    <span class="text-sm font-black text-emerald-400">₹{{ number_format($totalSponsorshipAmount) }}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -314,7 +355,7 @@
                     <!-- Total Submissions Badge -->
                     <div
                         class="px-2.5 py-1.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs font-bold inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
-                        <span>{{ $isGu ? '🏆 કુલ:' : '🏆 Total:' }}</span>
+                        <span>🏆 {{ __('messages.total_prefix') }}</span>
                         <span class="font-black text-amber-800">{{ $totalCount }}</span>
                     </div>
 
@@ -323,7 +364,7 @@
                         <div class="relative shrink-0">
                             <select x-model="selectedStandard"
                                 class="text-xs font-bold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-primary-500 shadow-2xs text-slate-800 cursor-pointer">
-                                <option value="all">📚 {{ $isGu ? 'બધા ધોરણ' : 'All Standards' }}
+                                <option value="all">📚 {{ __('messages.all_standards') }}
                                     ({{ count($allStandardsList) }})</option>
                                 @foreach($groupedByStandard as $stdName => $stdStudents)
                                     <option value="{{ $stdName }}">{{ $stdName }} ({{ $stdStudents->count() }})</option>
@@ -337,19 +378,19 @@
                             <button type="button" @click="topRankFilter = 'all'"
                                 :class="topRankFilter === 'all' ? 'bg-slate-900 text-white font-extrabold shadow-xs' : 'text-slate-600 hover:text-slate-900 font-semibold'"
                                 class="px-2.5 py-1 text-xs rounded-lg transition-all cursor-pointer whitespace-nowrap">
-                                {{ $isGu ? 'બધા વિદ્યાર્થીઓ' : 'All Students' }}
+                                {{ __('messages.all_students') }}
                             </button>
                             <button type="button" @click="topRankFilter = 'top5'"
                                 :class="topRankFilter === 'top5' ? 'bg-amber-500 text-white font-black shadow-xs' : 'text-amber-800 hover:text-amber-900 font-bold bg-amber-50/60'"
                                 class="px-2.5 py-1 text-xs rounded-lg transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap"
-                                title="{{ $isGu ? 'દરેક ધોરણના ટોપ ૧ થી ૫ વિદ્યાર્થીઓ' : 'Show Top 1 to 5 students of every standard' }}">
-                                <span>{{ $isGu ? '🌟 ટોપ ૫ (દરેક ધોરણ)' : '🌟 Top 5 per Standard' }}</span>
+                                title="{{ __('messages.top_5_tooltip') }}">
+                                <span>🌟 {{ __('messages.top_5_per_standard') }}</span>
                             </button>
                             <button type="button" @click="topRankFilter = 'top3'"
                                 :class="topRankFilter === 'top3' ? 'bg-amber-600 text-white font-black shadow-xs' : 'text-amber-800 hover:text-amber-900 font-bold bg-amber-50/40'"
                                 class="px-2.5 py-1 text-xs rounded-lg transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap"
-                                title="{{ $isGu ? 'દરેક ધોરણના ટોપ ૧ થી ૩ વિદ્યાર્થીઓ' : 'Show Top 1 to 3 students of every standard' }}">
-                                <span>{{ $isGu ? '🥇 ટોપ ૩' : '🥇 Top 3' }}</span>
+                                title="{{ __('messages.top_3_tooltip') }}">
+                                <span>🥇 {{ __('messages.top_3') }}</span>
                             </button>
                         </div>
                     @endif
@@ -359,7 +400,7 @@
                 <div class="flex items-center gap-1.5 shrink-0">
                     <div class="relative w-36 sm:w-44">
                         <input type="text" x-model="search"
-                            placeholder="{{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? ($isGu ? 'વિદ્યાર્થી, શાળા શોધો...' : 'Search student...') : (($event->event_type ?? 'normal') === 'yuva_melo' ? ($isGu ? 'ઉમેદવાર શોધો...' : 'Search candidate...') : ($isGu ? 'શોધો...' : 'Search...')) }}"
+                            placeholder="{{ ($event->event_type ?? 'normal') === 'inam_vitaran' ? __('messages.search_student_school') : (($event->event_type ?? 'normal') === 'yuva_melo' ? __('messages.search_candidate') : __('messages.search')) }}"
                             class="text-xs font-semibold pl-7 pr-6 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-primary-500 w-full transition-colors">
                         <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
@@ -377,13 +418,13 @@
                         <a :href="'{{ route('admin.events.inam_submissions.export', $event->id) }}' + '?top=' + topRankFilter + '&standard=' + encodeURIComponent(selectedStandard) + '&search=' + encodeURIComponent(search)"
                             class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-colors shrink-0 inline-flex items-center gap-1.5 whitespace-nowrap">
                             <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <span>{{ $isGu ? 'એક્સેલ એક્સપોર્ટ' : 'Export Excel' }}</span>
+                            <span>{{ __('messages.export_excel') }}</span>
                         </a>
                     @elseif(($event->event_type ?? 'normal') === 'yuva_melo')
                         <a href="{{ route('admin.events.yuva_submissions.export', $event->id) }}"
                             class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200/60 shadow-xs transition-colors shrink-0 inline-flex items-center gap-1.5 whitespace-nowrap">
                             <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <span>{{ $isGu ? 'ઉમેદવારો એક્સેલ એક્સપોર્ટ' : 'Export Candidates Excel' }}</span>
+                            <span>{{ __('messages.export_candidates_excel') }}</span>
                         </a>
                     @else
                         <a href="{{ route('admin.events.registrations.export', $event->id) }}"
@@ -419,11 +460,11 @@
                                             <span>{{ $stdName }}</span>
                                             <span
                                                 class="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">
-                                                {{ $stdStudents->count() }} {{ $isGu ? 'ઉમેદવારો' : 'Candidates' }}
+                                                {{ $stdStudents->count() }} {{ __('messages.candidates') }}
                                             </span>
                                         </h3>
                                         <p class="text-[11px] text-slate-500 font-medium">
-                                            {{ $isGu ? 'ટકાવારી / ગુણના આધારે ટોપ ૧ થી ૫ વિદ્યાર્થીઓ' : 'Top 1 to 5 student rankers based on percentage / marks' }}
+                                            {{ __('messages.top_rankers_desc') }}
                                         </p>
                                     </div>
                                 </div>
@@ -432,7 +473,7 @@
                                     @if($topScore > 0)
                                         <span
                                             class="px-2.5 py-1 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 font-black text-[11px] inline-flex items-center gap-1 shadow-2xs">
-                                            ⭐ {{ $isGu ? 'ટોપ ટકાવારી:' : 'Top Percentage:' }} <span
+                                            ⭐ {{ __('messages.top_percentage') }} <span
                                                 class="text-amber-700 font-black">{{ $topScore }}%</span>
                                         </span>
                                     @endif
@@ -445,13 +486,13 @@
                                     <thead>
                                         <tr
                                             class="bg-slate-50 text-slate-800 font-black border-b border-slate-200 uppercase text-xs sm:text-[13px] tracking-wider">
-                                            <th class="py-2.5 px-2 text-center w-20">{{ $isGu ? 'ક્રમ' : 'Rank' }}</th>
-                                            <th class="py-2.5 px-2.5">{{ $isGu ? 'વિદ્યાર્થીનું નામ' : 'Student Name' }}</th>
-                                            <th class="py-2.5 px-2">{{ $isGu ? 'પિતાનું નામ' : 'Father Name' }}</th>
-                                            <th class="py-2.5 px-2 text-center">{{ $isGu ? 'ટકાવારી' : 'Percentage' }}</th>
-                                            <th class="py-2.5 px-2">{{ $isGu ? 'શાળા / કોલેજ' : 'School / College' }}</th>
-                                            <th class="py-2.5 px-2">{{ $isGu ? 'સંપર્ક' : 'Contact' }}</th>
-                                            <th class="py-2.5 px-2 text-center w-28">{{ $isGu ? 'માર્કશીટ' : 'Marksheet' }}</th>
+                                            <th class="py-2.5 px-2 text-center w-20">{{ __('messages.rank') }}</th>
+                                            <th class="py-2.5 px-2.5">{{ __('messages.student_name') }}</th>
+                                            <th class="py-2.5 px-2">{{ __('messages.father_name') }}</th>
+                                            <th class="py-2.5 px-2 text-center">{{ __('messages.percentage') }}</th>
+                                            <th class="py-2.5 px-2">{{ __('messages.school_college') }}</th>
+                                            <th class="py-2.5 px-2">{{ __('messages.contact') }}</th>
+                                            <th class="py-2.5 px-2 text-center w-28">{{ __('messages.marksheet') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -485,27 +526,27 @@
                                                     @if($stdRank === 1)
                                                         <span
                                                             class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-md text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-                                                            🥇 {{ $isGu ? 'નંબર ૧' : 'Rank 1' }}
+                                                            🥇 {{ __('messages.rank_1') }}
                                                         </span>
                                                     @elseif($stdRank === 2)
                                                         <span
                                                             class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-md text-[10px] font-black bg-slate-200 text-slate-900 border border-slate-300">
-                                                            🥈 {{ $isGu ? 'નંબર ૨' : 'Rank 2' }}
+                                                            🥈 {{ __('messages.rank_2') }}
                                                         </span>
                                                     @elseif($stdRank === 3)
                                                         <span
                                                             class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-md text-[10px] font-black bg-amber-50 text-amber-800 border border-amber-200">
-                                                            🥉 {{ $isGu ? 'નંબર ૩' : 'Rank 3' }}
+                                                            🥉 {{ __('messages.rank_3') }}
                                                         </span>
                                                     @elseif($stdRank <= 5)
                                                         <span
                                                             class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-md text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                                            🎖️ {{ $isGu ? 'નંબર ' . $stdRank : 'Rank ' . $stdRank }}
+                                                            🎖️ {{ __('messages.rank_n', ['rank' => $stdRank]) }}
                                                         </span>
                                                     @else
                                                         <span
                                                             class="inline-flex items-center justify-center px-1.5 py-0.2 rounded text-[10px] font-bold text-slate-500 bg-slate-100">
-                                                            {{ $isGu ? 'નંબર ' . $stdRank : 'Rank ' . $stdRank }}
+                                                            {{ __('messages.rank_n', ['rank' => $stdRank]) }}
                                                         </span>
                                                     @endif
                                                 </td>
@@ -554,11 +595,11 @@
                                                         <a href="{{ str_starts_with($marksheetUrl, 'http') ? $marksheetUrl : asset('storage/' . $marksheetUrl) }}"
                                                             target="_blank"
                                                             class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold text-[10px] transition-colors shadow-2xs">
-                                                            <span>📄 {{ $isGu ? 'માર્કશીટ ↗' : 'Marksheet ↗' }}</span>
+                                                            <span>📄 {{ __('messages.marksheet') }} ↗</span>
                                                         </a>
                                                     @else
                                                         <span
-                                                            class="text-slate-400 font-medium text-[10px]">{{ $isGu ? 'નથી' : 'No File' }}</span>
+                                                            class="text-slate-400 font-medium text-[10px]">{{ __('messages.no_file') }}</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -569,7 +610,7 @@
                         </div>
                     @empty
                         <div class="py-12 text-center text-slate-400 font-medium bg-white rounded-xl border border-slate-100">
-                            {{ $isGu ? 'આ ઇવેન્ટ માટે કોઈ વિદ્યાર્થી સબમિશન મળ્યા નથી.' : 'No student submissions found for this event.' }}
+                            {{ __('messages.no_student_submissions') }}
                         </div>
                     @endforelse
                 </div>
@@ -665,7 +706,7 @@
                                         @if(!empty($fd['qualification']))
                                             <div
                                                 class="bg-slate-50/80 px-2 py-0.5 rounded border border-slate-100/80 flex items-center justify-between">
-                                                <span class="text-slate-500 font-medium">{{ $isGu ? 'અભ્યાસ:' : 'Edu:' }}</span>
+                                                <span class="text-slate-500 font-medium">{{ __('messages.education_label') }}</span>
                                                 <span
                                                     class="font-bold text-slate-800 truncate max-w-[140px]">{{ $fd['qualification'] }}</span>
                                             </div>
@@ -674,7 +715,7 @@
                                         @if(!empty($fd['occupation']))
                                             <div
                                                 class="bg-slate-50/80 px-2 py-0.5 rounded border border-slate-100/80 flex items-center justify-between">
-                                                <span class="text-slate-500 font-medium">{{ $isGu ? 'વ્યવસાય:' : 'Job:' }}</span>
+                                                <span class="text-slate-500 font-medium">{{ __('messages.job_label') }}</span>
                                                 <span
                                                     class="font-bold text-slate-800 truncate max-w-[140px]">{{ $fd['occupation'] }}</span>
                                             </div>
@@ -684,9 +725,9 @@
                                             <div
                                                 class="bg-purple-50/80 px-2 py-0.5 rounded border border-purple-200/60 flex items-center justify-between">
                                                 <span
-                                                    class="text-purple-800 font-bold">{{ $isGu ? 'ઉંમર / જન્મ તારીખ:' : 'Age / DOB:' }}</span>
+                                                    class="text-purple-800 font-bold">{{ __('messages.age_dob') }}</span>
                                                 <span class="font-black text-purple-900 text-[10px]">
-                                                    {{ !empty($fd['age']) ? $fd['age'] . ($isGu ? ' વર્ષ' : ' Yrs') : '' }}
+                                                    {{ !empty($fd['age']) ? $fd['age'] . ' ' . __('messages.years') : '' }}
                                                     {{ !empty($fd['birth_date']) ? '(' . $fd['birth_date'] . ')' : '' }}
                                                 </span>
                                             </div>
@@ -698,11 +739,11 @@
                                         <button type="button"
                                             @click.stop="openBiodata({{ json_encode($modalData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) }})"
                                             class="flex-1 py-1.5 bg-purple-50 hover:bg-purple-100 active:scale-95 text-purple-800 rounded-lg text-[10px] font-black border border-purple-200 transition-all shadow-2xs cursor-pointer flex items-center justify-center gap-1">
-                                            <span>👁️ {{ $isGu ? 'બાયોડેટા જુઓ' : 'View Biodata' }}</span>
+                                            <span>👁️ {{ __('messages.view_biodata') }}</span>
                                         </button>
                                         <a href="{{ route('admin.events.registrations.edit', $reg->id) }}"
                                             class="py-1.5 px-3 bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-800 rounded-lg text-[10px] font-black border border-amber-200 transition-all shadow-2xs flex items-center justify-center gap-1 shrink-0">
-                                            <span>✏️ {{ $isGu ? 'સુધારો' : 'Edit' }}</span>
+                                            <span>✏️ {{ __('messages.edit') }}</span>
                                         </a>
                                     </div>
                                 </div>
@@ -725,19 +766,19 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                     <div>
                         <h2 class="text-sm font-black text-slate-900 flex items-center gap-2">
-                            <span>📸 {{ $isGu ? 'ઇવેન્ટ ફોટો ગેલેરી' : 'Event Photo Gallery' }}</span>
+                            <span>📸 {{ __('messages.event_photo_gallery') }}</span>
                             <span
                                 class="px-2 py-0.5 rounded-full text-xs font-black bg-primary-50 text-primary-700 border border-primary-100">{{ $galleryCount }}
-                                {{ $isGu ? 'ફોટા' : 'Photos' }}</span>
+                                {{ __('messages.photos') }}</span>
                         </h2>
                         <p class="text-[11px] text-slate-400 font-medium">
-                            {{ $isGu ? 'ઇવેન્ટની યાદો અને ઉજવણીના ફોટોગ્રાફ્સ અપલોડ કરો.' : 'Manage and upload event memories and celebration photos.' }}
+                            {{ __('messages.gallery_desc') }}
                         </p>
                     </div>
 
                     <button type="button" @click="showUploadModal = true"
                         class="px-3.5 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
-                        <span>{{ $isGu ? '+ ફોટો ઉમેરો' : '+ Add Photos' }}</span>
+                        <span>{{ __('messages.add_photos') }}</span>
                     </button>
                 </div>
 
@@ -753,9 +794,9 @@
                             </div>
                             <div class="p-2 border-t border-slate-100 bg-slate-50/50">
                                 <button type="button"
-                                    @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.gallery.destroy', $photo->id) }}', message: '{{ $isGu ? 'શું તમે ખરેખર આ ફોટો ઇવેન્ટ ગેલેરીમાંથી કાઢી નાખવા માંગો છો?' : 'Are you sure you want to delete this photo from the event gallery?' }}' })"
+                                    @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.gallery.destroy', $photo->id) }}', message: '{{ __('messages.delete_photo_confirm') }}' })"
                                     class="w-full py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[9px] rounded-lg transition-colors cursor-pointer">
-                                    {{ $isGu ? 'ફોટો કાઢી નાખો' : 'Delete Photo' }}
+                                    {{ __('messages.delete_photo') }}
                                 </button>
                             </div>
                         </div>
@@ -764,16 +805,361 @@
                             class="col-span-full text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                             <span class="text-3xl block mb-2">📸</span>
                             <p class="text-xs font-bold text-slate-600">
-                                {{ $isGu ? 'હજુ કોઈ ગેલેરી ફોટો અપલોડ થયેલ નથી.' : 'No gallery photos uploaded yet.' }}</p>
-                            <p class="text-[11px] text-slate-400 mt-1">
-                                {{ $isGu ? 'સમાજના સભ્યોને બતાવવા માટે ઇવેન્ટના ફોટોગ્રાફ્સ અપલોડ કરો.' : 'Upload event photos to showcase them to community members.' }}
-                            </p>
+                                {{ __('messages.no_photos_uploaded') }}</p>
                             <button type="button" @click="showUploadModal = true"
                                 class="mt-3 px-3.5 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors inline-flex items-center gap-1 cursor-pointer">
-                                <span>{{ $isGu ? '+ ફોટો અપલોડ કરો' : '+ Upload Photos' }}</span>
+                                <span>{{ __('messages.upload_photos') }}</span>
                             </button>
                         </div>
                     @endforelse
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: SPONSORSHIP ================= -->
+        <div x-show="mainTab === 'sponsorship'" x-transition class="space-y-3.5">
+            <!-- Nested Sub-Tab Navigation Bar -->
+            <div class="bg-white p-2 rounded-xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2">
+                    <!-- Sub-Tab 1: Sponsorship Type -->
+                    <button type="button" @click="sponsorshipSubTab = 'types'"
+                        :class="sponsorshipSubTab === 'types' ? 'bg-primary-500 text-white shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold hover:bg-slate-100'"
+                        class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        <span>{{ __('messages.sponsorship_type') }}</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black"
+                            :class="sponsorshipSubTab === 'types' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">{{ $sponsorshipTypesCount }}</span>
+                    </button>
+
+                    <!-- Sub-Tab 2: Registered Sponsor -->
+                    <button type="button" @click="sponsorshipSubTab = 'sponsors'"
+                        :class="sponsorshipSubTab === 'sponsors' ? 'bg-primary-500 text-white shadow-xs font-black' : 'text-slate-600 hover:text-slate-900 font-bold hover:bg-slate-100'"
+                        class="px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>{{ __('messages.registered_sponsor') }}</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black"
+                            :class="sponsorshipSubTab === 'sponsors' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'">{{ $sponsorsCount }}</span>
+                    </button>
+                </div>
+
+                <!-- Sub-Tab Header Action Buttons -->
+                <div class="flex items-center gap-2">
+                    <template x-if="sponsorshipSubTab === 'types'">
+                        <button type="button" @click="showAddTypeModal = true"
+                            class="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-extrabold text-xs rounded-lg shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span>{{ __('messages.add_sponsorship_type') }}</span>
+                        </button>
+                    </template>
+                    <template x-if="sponsorshipSubTab === 'sponsors'">
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('admin.events.sponsors.export', $event->id) }}"
+                                class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-xs rounded-lg border border-emerald-200/60 shadow-2xs transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                <span>{{ __('messages.export_excel') }}</span>
+                            </a>
+                            <button type="button" @click="openAddSponsor()"
+                                class="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-extrabold text-xs rounded-lg shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>{{ __('messages.add_sponsor') }}</span>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- ================= SUB-TAB 1: SPONSORSHIP TYPES (EXTRA COMPACT CARD STYLE) ================= -->
+            <div x-show="sponsorshipSubTab === 'types'" x-transition class="space-y-3">
+                <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-3">
+                    <!-- Extra Compact Card Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
+                        @forelse($sponsorshipTypes as $index => $st)
+                            <div class="bg-slate-50/60 hover:bg-white rounded-xl border border-slate-200/80 shadow-2xs hover:shadow-xs transition-all p-2.5 flex flex-col justify-between space-y-2 relative group">
+                                <!-- Card Header: Title + Inline Action Buttons -->
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="text-xs font-black text-slate-900 truncate leading-tight group-hover:text-primary-600 transition-colors" title="{{ $st->title }}">
+                                            {{ $st->title }}
+                                        </h3>
+                                        @if($st->description)
+                                            <p class="text-[9.5px] text-slate-400 font-medium line-clamp-1 mt-0.5" title="{{ $st->description }}">
+                                                {{ $st->description }}
+                                            </p>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        <button type="button" @click="openEditType({{ json_encode($st) }})"
+                                            class="p-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-md border border-amber-200/60 transition-colors cursor-pointer"
+                                            title="{{ __('messages.edit') }}">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button type="button"
+                                            @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.sponsorship_types.destroy', $st->id) }}', message: '{{ __('messages.delete_confirmation') }}' })"
+                                            class="p-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-md border border-rose-200/60 transition-colors cursor-pointer"
+                                            title="{{ __('messages.delete') }}">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Card Body: Amount & Registration Slots -->
+                                <div class="bg-white p-2 rounded-lg border border-slate-200/70 shadow-2xs space-y-1">
+                                    <div class="flex items-baseline justify-between gap-1">
+                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{{ __('messages.amount') }}</span>
+                                        <span class="text-xs font-black text-emerald-700 font-mono">
+                                            ₹ {{ number_format($st->amount, 2) }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-[10px] font-bold pt-1 border-t border-slate-100">
+                                        <span class="text-slate-500 text-[9.5px]">{{ __('messages.registered') }}:</span>
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-black text-slate-900">{{ $st->approved_sponsors_count }}</span>
+                                            <span class="text-slate-400">/</span>
+                                            <span class="text-slate-600">{{ $st->max_sponsors > 0 ? $st->max_sponsors : '∞' }}</span>
+                                            @if($st->is_full)
+                                                <span class="px-1.5 py-0.2 rounded text-[8.5px] font-black bg-rose-50 text-rose-700 border border-rose-200">{{ __('messages.slots_full') }}</span>
+                                            @elseif($st->max_sponsors > 0)
+                                                <!-- <span class="px-1.5 py-0.2 rounded text-[8.5px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                    {{ $st->available_slots }} {{ __('messages.remaining') }}
+                                                </span> -->
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-span-full py-6 text-center text-slate-400 font-medium bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                                <div class="space-y-1.5">
+                                    <svg class="w-6 h-6 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                    <p class="text-xs font-bold text-slate-600">{{ __('messages.no_data_found') }}</p>
+                                    <button type="button" @click="showAddTypeModal = true"
+                                        class="mt-1 px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center gap-1 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        <span>{{ __('messages.add_sponsorship_type') }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SUB-TAB 2: REGISTERED SPONSORS (COMPACT WITH ICONS) ================= -->
+            <div x-show="sponsorshipSubTab === 'sponsors'" x-transition class="space-y-3.5">
+                <!-- Summary Stats Cards -->
+                <!-- <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">{{ __('messages.registered_sponsors') }}</span>
+                        <div class="text-base font-black text-slate-900 mt-0.5">{{ $sponsorsCount }}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs">
+                        <span class="text-[10px] font-black text-emerald-600 uppercase tracking-wider block">{{ __('messages.approved') }}</span>
+                        <div class="text-base font-black text-emerald-700 mt-0.5">{{ $approvedSponsorsCount }}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs">
+                        <span class="text-[10px] font-black text-amber-600 uppercase tracking-wider block">{{ __('messages.pending') }}</span>
+                        <div class="text-base font-black text-amber-700 mt-0.5">{{ $pendingSponsorsCount }}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs">
+                        <span class="text-[10px] font-black text-blue-600 uppercase tracking-wider block">{{ __('messages.sponsors_total_fund') }}</span>
+                        <div class="text-base font-black text-blue-700 mt-0.5">₹ {{ number_format($totalSponsorshipAmount, 2) }}</div>
+                    </div>
+                </div> -->
+
+                <!-- Registered Sponsors Card Grid -->
+                <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3">
+                        @forelse($sponsors as $index => $s)
+                            @php
+                                $sJson = json_encode([
+                                    'id' => $s->id,
+                                    'name' => $s->name,
+                                    'contact_person' => $s->contact_person,
+                                    'mobile' => $s->mobile,
+                                    'email' => $s->email,
+                                    'sponsorship_type_id' => $s->sponsorship_type_id,
+                                    'type_title' => $s->sponsorshipType?->title ?? __('messages.general_sponsor'),
+                                    'amount' => (float)$s->amount,
+                                    'logo_url' => $s->logo_path ? (str_starts_with($s->logo_path, 'http') ? $s->logo_path : asset('storage/' . $s->logo_path)) : null,
+                                    'city' => $s->city,
+                                    'address' => $s->address,
+                                    'notes' => $s->notes,
+                                    'payment_status' => $s->payment_status,
+                                    'status' => $s->status,
+                                    'created_at' => $s->created_at ? $s->created_at->format('d-M-Y h:i A') : '-',
+                                ], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+                            @endphp
+                            <div class="bg-slate-50/60 hover:bg-white rounded-xl border border-slate-200/80 shadow-2xs hover:shadow-xs transition-all p-3 flex flex-col justify-between space-y-2.5 relative group">
+                                
+                                <!-- Top Row: Logo/Avatar + Full Name + Status Badge on Top Right -->
+                                <div class="space-y-2">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                            @if($s->logo_path)
+                                                <img src="{{ str_starts_with($s->logo_path, 'http') ? $s->logo_path : asset('storage/' . $s->logo_path) }}"
+                                                     alt="{{ $s->name }}"
+                                                     class="w-8 h-8 rounded-lg object-contain bg-white border border-slate-200 p-0.5 shrink-0 shadow-2xs">
+                                            @else
+                                                <div class="w-8 h-8 rounded-lg bg-primary-50 text-primary-700 font-black text-xs flex items-center justify-center border border-primary-100 shrink-0 shadow-2xs">
+                                                    {{ strtoupper(substr($s->name, 0, 1)) }}
+                                                </div>
+                                            @endif
+                                            <div class="min-w-0 flex-1">
+                                                <h3 class="text-xs font-black text-slate-900 leading-snug group-hover:text-primary-600 transition-colors break-words" title="{{ $s->name }}">
+                                                    {{ $s->name }}
+                                                </h3>
+                                                @if($s->city)
+                                                    <p class="text-[10px] font-bold text-slate-400 flex items-center gap-0.5 mt-0.5" title="{{ $s->city }}">
+                                                        <svg class="w-2.5 h-2.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                        <span>{{ $s->city }}</span>
+                                                    </p>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <!-- Status Badge (Top Right) -->
+                                        <div class="shrink-0">
+                                            @if($s->status === 'approved')
+                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70 shadow-2xs leading-none">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                                                    <span>{{ __('messages.approved') }}</span>
+                                                </span>
+                                            @elseif($s->status === 'rejected')
+                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/70 shadow-2xs leading-none">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>
+                                                    <span>{{ __('messages.rejected') }}</span>
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/70 shadow-2xs leading-none">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                                    <span>{{ __('messages.pending') }}</span>
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <!-- Package & Amount Info Box -->
+                                    <div class="bg-white p-2.5 rounded-lg border border-slate-200/70 shadow-2xs space-y-1.5">
+                                        <!-- Package Title & Amount -->
+                                        <div class="flex items-center justify-between gap-1.5 pb-1.5 border-b border-slate-100">
+                                            <span class="inline-flex items-center gap-1 font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded text-[9.5px] truncate max-w-[120px]" title="{{ $s->sponsorshipType?->title ?? __('messages.general_sponsor') }}">
+                                                <svg class="w-2.5 h-2.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                                <span class="truncate">{{ $s->sponsorshipType?->title ?? __('messages.general_sponsor') }}</span>
+                                            </span>
+                                            
+                                            <span class="text-xs font-black text-emerald-700 font-mono">
+                                                ₹ {{ number_format($s->amount, 2) }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Contact Phone -->
+                                        <div class="space-y-1 text-[10px]">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-slate-400 font-bold text-[9px]">{{ __('messages.phone') }}:</span>
+                                                <a href="tel:{{ $s->mobile }}" class="text-blue-700 hover:text-blue-800 font-bold flex items-center gap-1">
+                                                    <svg class="w-2.5 h-2.5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                    <span>{{ $s->mobile }}</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Footer: Date & Actions -->
+                                <div class="flex items-center justify-between pt-1 border-t border-slate-200/60">
+                                    <span class="text-[9px] font-bold text-slate-400">{{ $s->created_at ? $s->created_at->format('d M Y') : '-' }}</span>
+                                    <div class="flex items-center gap-1">
+                                        @if($s->status === 'pending')
+                                            <form method="POST" action="{{ route('admin.events.sponsors.approve', $s->id) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="p-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-md border border-emerald-200 transition-colors shadow-2xs cursor-pointer" title="{{ __('messages.approve') }}">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ route('admin.events.sponsors.reject', $s->id) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="p-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-md border border-rose-200 transition-colors shadow-2xs cursor-pointer" title="{{ __('messages.reject') }}">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        <!-- Receipt PDF Download Button -->
+                                        <a href="{{ route('admin.receipts.sponsorship', $s->id) }}"
+                                            class="p-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md border border-blue-200 transition-colors shadow-2xs cursor-pointer"
+                                            title="{{ __('messages.download_receipt') }}">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </a>
+
+                                        <!-- View Details Button -->
+                                        <button type="button" @click="openViewSponsor({{ $sJson }})"
+                                            class="p-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md border border-slate-200 transition-colors shadow-2xs cursor-pointer"
+                                            title="{{ __('messages.view_details') }}">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </button>
+
+                                        <!-- Edit Button -->
+                                        <button type="button" @click="openEditSponsor({{ $sJson }})"
+                                            class="p-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-md border border-amber-200/60 transition-colors shadow-2xs cursor-pointer"
+                                            title="{{ __('messages.edit') }}">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Delete Button -->
+                                        <button type="button"
+                                            @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.sponsors.destroy', $s->id) }}', message: '{{ __('messages.delete_sponsor_confirm') }}' })"
+                                            class="p-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-md border border-rose-200/60 transition-colors shadow-2xs cursor-pointer"
+                                            title="{{ __('messages.delete') }}">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-span-full py-8 text-center text-slate-400 font-medium bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                                <div class="space-y-1.5">
+                                    <svg class="w-7 h-7 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    <p class="text-xs font-bold text-slate-600">{{ __('messages.no_sponsors_registered') }}</p>
+                                    <button type="button" @click="openAddSponsor()"
+                                        class="mt-1 px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center gap-1 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        <span>{{ __('messages.add_sponsor') }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
             </div>
         </div>
@@ -788,7 +1174,7 @@
 
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                         <h3 class="text-xs font-extrabold text-slate-950">
-                            {{ $isGu ? 'ઇવેન્ટ ગેલેરીમાં ફોટો ઉમેરો' : 'Add Photos to Event Gallery' }}</h3>
+                            {{ __('messages.upload_photos') }}</h3>
                         <button type="button" @click="showUploadModal = false"
                             class="text-slate-400 hover:text-slate-600 text-sm font-black cursor-pointer">
                             &times;
@@ -800,24 +1186,24 @@
                         @csrf
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">
-                                {{ $isGu ? 'ફોટો અથવા .ZIP ફાઈલ પસંદ કરો (મહત્તમ 50MB)' : 'Select Images or .ZIP File (Max 50MB)' }}
+                                {{ __('messages.select_images_or_zip') }}
                             </label>
                             <input type="file" name="images[]" multiple required accept=".jpg,.jpeg,.png,.webp,.gif,.zip"
                                 @change="$el.name = ($el.files.length === 1 && $el.files[0].name.toLowerCase().endsWith('.zip')) ? 'image' : 'images[]'"
                                 class="text-[11px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 border border-slate-200 rounded-lg p-1 bg-slate-50">
                             <p class="text-[10px] text-slate-400 font-medium">
-                                {{ $isGu ? '💡 તમે એક સાથે અનેક ફોટા (.jpg, .png, .webp) અથવા ફોટા ધરાવતી એક .ZIP ફાઈલ અપલોડ કરી શકો છો.' : '💡 You can upload multiple image files (.jpg, .png, .webp) or a single .ZIP file containing event photos.' }}
+                                {{ __('messages.zip_upload_hint') }}
                             </p>
                         </div>
 
                         <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                             <button type="button" @click="showUploadModal = false"
                                 class="px-3.5 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">
-                                {{ $isGu ? 'રદ કરો' : 'Cancel' }}
+                                {{ __('messages.cancel') ?? 'Cancel' }}
                             </button>
                             <button type="submit"
                                 class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">
-                                {{ $isGu ? 'ગેલેરીમાં અપલોડ કરો' : 'Upload to Gallery' }}
+                                {{ __('messages.upload_photos') }}
                             </button>
                         </div>
                     </form>
@@ -1262,12 +1648,540 @@
                 </div>
             </div>
         </template>
+
+        <!-- ================= MODALS: SPONSORSHIP TYPE ================= -->
+        <!-- 1. Add Sponsorship Type Modal (Compact) -->
+        <template x-teleport="body">
+            <div x-show="showAddTypeModal"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" x-transition
+                x-cloak>
+                <div class="bg-white rounded-xl max-w-md w-full p-4 border border-slate-100 shadow-xl space-y-3 max-h-[90vh] overflow-y-auto"
+                    @click.away="showAddTypeModal = false">
+                    <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                        <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                            <span>{{ __('messages.add_sponsorship_type') }}</span>
+                        </h3>
+                        <button type="button" @click="showAddTypeModal = false"
+                            class="text-slate-400 hover:text-slate-600 text-base font-black cursor-pointer leading-none">&times;</button>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.events.sponsorship_types.store', $event->id) }}" class="space-y-2.5">
+                        @csrf
+                        <input type="hidden" name="status" value="1">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-700 block mb-1">
+                                {{ __('messages.sponsorship_title_category') }} <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" name="title" required placeholder="{{ __('messages.sponsorship_title_placeholder') }}"
+                                class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.amount') }} (₹) <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="number" step="0.01" min="0" name="amount" required placeholder="0.00"
+                                    class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.max_sponsors') }}
+                                </label>
+                                <input type="number" min="0" name="max_sponsors" placeholder="0 = {{ __('messages.unlimited') }}"
+                                    class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-700 block mb-1">
+                                {{ __('messages.sponsorship_desc_perks') }}
+                            </label>
+                            <textarea name="description" rows="2" placeholder="{{ __('messages.sponsorship_desc_placeholder') }}"
+                                class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-2.5 border-t border-slate-100">
+                            <button type="button" @click="showAddTypeModal = false"
+                                class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg transition-colors cursor-pointer">
+                                {{ __('messages.cancel') ?? 'Cancel' }}
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-extrabold text-xs rounded-lg shadow-2xs transition-all cursor-pointer">
+                                {{ __('messages.save') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
+
+        <!-- 2. Edit Sponsorship Type Modal (Compact) -->
+        <template x-teleport="body">
+            <div x-show="showEditTypeModal"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" x-transition
+                x-cloak>
+                <div class="bg-white rounded-xl max-w-md w-full p-4 border border-slate-100 shadow-xl space-y-3 max-h-[90vh] overflow-y-auto"
+                    @click.away="showEditTypeModal = false">
+                    <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                        <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span>{{ __('messages.edit_sponsorship_type') }}</span>
+                        </h3>
+                        <button type="button" @click="showEditTypeModal = false"
+                            class="text-slate-400 hover:text-slate-600 text-base font-black cursor-pointer leading-none">&times;</button>
+                    </div>
+
+                    <form method="POST" :action="'{{ url('admin/events/sponsorship-types') }}/' + editingType.id" class="space-y-2.5">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="status" value="1">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-700 block mb-1">
+                                {{ __('messages.sponsorship_title_category') }} <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" name="title" required x-model="editingType.title"
+                                class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.amount') }} (₹) <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="number" step="0.01" min="0" name="amount" required x-model="editingType.amount"
+                                    class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.max_sponsors') }}
+                                </label>
+                                <input type="number" min="0" name="max_sponsors" x-model="editingType.max_sponsors"
+                                    class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-700 block mb-1">
+                                {{ __('messages.sponsorship_desc_perks') }}
+                            </label>
+                            <textarea name="description" rows="2" x-model="editingType.description"
+                                class="w-full text-xs font-semibold px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-2.5 border-t border-slate-100">
+                            <button type="button" @click="showEditTypeModal = false"
+                                class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-lg transition-colors cursor-pointer">
+                                {{ __('messages.cancel') ?? 'Cancel' }}
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-extrabold text-xs rounded-lg shadow-2xs transition-all cursor-pointer">
+                                {{ __('messages.save') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
+
+        <!-- ================= MODALS: REGISTERED SPONSOR ================= -->
+        <!-- 3. Add Sponsor Modal (Admin Manual Add) -->
+        <template x-teleport="body">
+            <div x-show="showAddSponsorModal"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" x-transition
+                x-cloak>
+                <div class="bg-white rounded-2xl max-w-xl w-full p-5 border border-slate-100 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+                    @click.away="showAddSponsorModal = false">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                            </svg>
+                            <span>{{ __('messages.add_sponsor') }}</span>
+                        </h3>
+                        <button type="button" @click="showAddSponsorModal = false"
+                            class="text-slate-400 hover:text-slate-600 text-lg font-black cursor-pointer leading-none">&times;</button>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.events.sponsors.store', $event->id) }}" enctype="multipart/form-data" class="space-y-3.5">
+                        @csrf
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.sponsor_name') }} <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" name="name" required placeholder="{{ __('messages.sponsor_name_placeholder') }}"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.phone') }} <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" name="mobile" required placeholder="9876543210" maxlength="10" minlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.email') }}
+                                </label>
+                                <input type="email" name="email" placeholder="Email Address"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.sponsorship_type') }}
+                                </label>
+                                <select name="sponsorship_type_id" x-model="editingSponsor.sponsorship_type_id"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="">{{ __('messages.general_sponsor_option') }}</option>
+                                    @foreach($sponsorshipTypes as $st)
+                                        <option value="{{ $st->id }}">{{ $st->title }} (₹ {{ number_format($st->amount) }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.amount') }} (₹)
+                                </label>
+                                <input type="number" step="0.01" min="0" name="amount" x-model="editingSponsor.amount" placeholder="0.00"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.city') }}
+                                </label>
+                                <input type="text" name="city" placeholder="City / Area"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.sponsor_logo') }} ({{ __('messages.optional') }})
+                                </label>
+                                <input type="file" name="logo" accept="image/*"
+                                    class="text-[11px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 border border-slate-200 rounded-xl p-1 bg-slate-50">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.address') }}
+                                </label>
+                                <input type="text" name="address" placeholder="Address"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.payment_status') }}
+                                </label>
+                                <select name="payment_status" x-model="editingSponsor.payment_status"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="pending">{{ __('messages.payment_pending') }}</option>
+                                    <option value="received">{{ __('messages.payment_received') }}</option>
+                                    <option value="failed">{{ __('messages.payment_failed') }}</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.status') }}
+                                </label>
+                                <select name="status" x-model="editingSponsor.status"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="approved">{{ __('messages.approved') }}</option>
+                                    <option value="pending">{{ __('messages.pending') }}</option>
+                                    <option value="rejected">{{ __('messages.rejected') }}</option>
+                                </select>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.notes_remarks') }}
+                                </label>
+                                <textarea name="notes" rows="2" placeholder="Notes..."
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                            <button type="button" @click="showAddSponsorModal = false"
+                                class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                                {{ __('messages.cancel') ?? 'Cancel' }}
+                            </button>
+                            <button type="submit"
+                                class="px-5 py-2 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-black text-xs rounded-xl shadow-xs transition-all cursor-pointer">
+                                {{ __('messages.save') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
+
+        <!-- 4. Edit Sponsor Modal -->
+        <template x-teleport="body">
+            <div x-show="showEditSponsorModal"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm" x-transition
+                x-cloak>
+                <div class="bg-white rounded-2xl max-w-xl w-full p-5 border border-slate-100 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+                    @click.away="showEditSponsorModal = false">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span>{{ __('messages.edit_sponsor') }}</span>
+                        </h3>
+                        <button type="button" @click="showEditSponsorModal = false"
+                            class="text-slate-400 hover:text-slate-600 text-lg font-black cursor-pointer leading-none">&times;</button>
+                    </div>
+
+                    <form method="POST" :action="'{{ url('admin/events/sponsors') }}/' + editingSponsor.id" enctype="multipart/form-data" class="space-y-3.5">
+                        @csrf
+                        @method('PUT')
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.sponsor_name') }} <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" name="name" required x-model="editingSponsor.name"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.phone') }} <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" name="mobile" required x-model="editingSponsor.mobile" maxlength="10" minlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.email') }}
+                                </label>
+                                <input type="email" name="email" x-model="editingSponsor.email"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.sponsorship_type') }}
+                                </label>
+                                <select name="sponsorship_type_id" x-model="editingSponsor.sponsorship_type_id"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="">{{ __('messages.general_sponsor_option') }}</option>
+                                    @foreach($sponsorshipTypes as $st)
+                                        <option value="{{ $st->id }}">{{ $st->title }} (₹ {{ number_format($st->amount) }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.amount') }} (₹) <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="number" step="0.01" min="0" name="amount" required x-model="editingSponsor.amount"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.city') }}
+                                </label>
+                                <input type="text" name="city" x-model="editingSponsor.city"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.sponsor_logo') }} ({{ __('messages.upload_new_logo') }})
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <template x-if="editingSponsor.logo_url">
+                                        <img :src="editingSponsor.logo_url" class="w-10 h-10 object-contain rounded-lg border border-slate-200 bg-white p-0.5 shrink-0">
+                                    </template>
+                                    <input type="file" name="logo" accept="image/*"
+                                        class="text-[11px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 border border-slate-200 rounded-xl p-1 bg-slate-50">
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.address') }}
+                                </label>
+                                <input type="text" name="address" x-model="editingSponsor.address"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.payment_status') }}
+                                </label>
+                                <select name="payment_status" x-model="editingSponsor.payment_status"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="pending">{{ __('messages.payment_pending') }}</option>
+                                    <option value="received">{{ __('messages.payment_received') }}</option>
+                                    <option value="failed">{{ __('messages.payment_failed') }}</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.status') }}
+                                </label>
+                                <select name="status" x-model="editingSponsor.status"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="approved">{{ __('messages.approved') }}</option>
+                                    <option value="pending">{{ __('messages.pending') }}</option>
+                                    <option value="rejected">{{ __('messages.rejected') }}</option>
+                                </select>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.notes_remarks') }}
+                                </label>
+                                <textarea name="notes" rows="2" x-model="editingSponsor.notes"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                            <button type="button" @click="showEditSponsorModal = false"
+                                class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                                {{ __('messages.cancel') ?? 'Cancel' }}
+                            </button>
+                            <button type="submit"
+                                class="px-5 py-2 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-black text-xs rounded-xl shadow-xs transition-all cursor-pointer">
+                                {{ __('messages.save') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
+
+        <!-- 5. View Sponsor Details Modal -->
+        <template x-teleport="body">
+            <div x-show="showViewSponsorModal"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm" x-transition
+                x-cloak>
+                <div class="bg-white rounded-2xl max-w-md w-full p-5 border border-slate-100 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+                    @click.away="showViewSponsorModal = false">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{{ __('messages.sponsor_details') }}</span>
+                        </h3>
+                        <button type="button" @click="showViewSponsorModal = false"
+                            class="text-slate-400 hover:text-slate-600 text-lg font-black cursor-pointer leading-none">&times;</button>
+                    </div>
+
+                    <div class="space-y-3.5">
+                        <!-- Top Header with Logo -->
+                        <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <template x-if="viewingSponsor.logo_url">
+                                <img :src="viewingSponsor.logo_url" class="w-14 h-14 object-contain rounded-xl bg-white border border-slate-200 p-1 shrink-0">
+                            </template>
+                            <template x-if="!viewingSponsor.logo_url">
+                                <div class="w-14 h-14 rounded-xl bg-primary-50 text-primary-700 font-black text-xl flex items-center justify-center border border-primary-100 shrink-0"
+                                     x-text="(viewingSponsor.name || '').charAt(0).toUpperCase()"></div>
+                            </template>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="text-sm font-black text-slate-900 leading-tight" x-text="viewingSponsor.name"></h4>
+                                <div class="inline-flex items-center gap-1 font-bold text-slate-600 text-[11px] mt-1 bg-white px-2 py-0.5 rounded border border-slate-200">
+                                    <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                    <span x-text="viewingSponsor.type_title || '{{ __('messages.general_sponsor_option') }}'"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info Grid -->
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 min-w-0 overflow-hidden">
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">{{ __('messages.phone') }}</span>
+                                <span class="font-bold text-blue-700 block mt-0.5 truncate" x-text="viewingSponsor.mobile || '-'"></span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 min-w-0 overflow-hidden">
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">{{ __('messages.amount') }}</span>
+                                <span class="font-black text-emerald-700 block mt-0.5 truncate" x-text="'₹ ' + Number(viewingSponsor.amount || 0).toLocaleString()"></span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 min-w-0 overflow-hidden">
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">{{ __('messages.payment_status') }}</span>
+                                <span class="font-black block mt-0.5 truncate"
+                                      :class="viewingSponsor.payment_status === 'received' ? 'text-emerald-700' : (viewingSponsor.payment_status === 'failed' ? 'text-rose-700' : 'text-amber-700')"
+                                      x-text="viewingSponsor.payment_status === 'received' ? '{{ __('messages.payment_received') }}' : (viewingSponsor.payment_status === 'failed' ? '{{ __('messages.payment_failed') }}' : '{{ __('messages.payment_pending') }}')"></span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 min-w-0 overflow-hidden">
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">{{ __('messages.status') }}</span>
+                                <span class="font-black block mt-0.5 truncate"
+                                      :class="viewingSponsor.status === 'approved' ? 'text-emerald-700' : (viewingSponsor.status === 'rejected' ? 'text-rose-700' : 'text-amber-700')"
+                                      x-text="viewingSponsor.status === 'approved' ? '{{ __('messages.approved') }}' : (viewingSponsor.status === 'rejected' ? '{{ __('messages.rejected') }}' : '{{ __('messages.pending') }}')"></span>
+                            </div>
+                            <template x-if="viewingSponsor.city">
+                                <div class="col-span-2 bg-slate-50 p-2 rounded-lg border border-slate-100 min-w-0 overflow-hidden">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">{{ __('messages.city') }}</span>
+                                    <span class="font-bold text-slate-800 block mt-0.5 break-words" x-text="viewingSponsor.city"></span>
+                                </div>
+                            </template>
+                            <template x-if="viewingSponsor.email">
+                                <div class="col-span-2 bg-slate-50 p-2 rounded-lg border border-slate-100 min-w-0 overflow-hidden">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">{{ __('messages.email') }}</span>
+                                    <span class="font-bold text-slate-800 block mt-0.5 break-all text-[11px]" x-text="viewingSponsor.email"></span>
+                                </div>
+                            </template>
+                            <template x-if="viewingSponsor.address">
+                                <div class="col-span-2 bg-slate-50 p-2 rounded-lg border border-slate-100 min-w-0 overflow-hidden">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">{{ __('messages.address') }}</span>
+                                    <span class="font-bold text-slate-800 block mt-0.5 break-words leading-relaxed" x-text="viewingSponsor.address"></span>
+                                </div>
+                            </template>
+                            <template x-if="viewingSponsor.notes">
+                                <div class="col-span-2 bg-slate-50 p-2 rounded-lg border border-slate-100 min-w-0 overflow-hidden">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">{{ __('messages.notes_remarks') }}</span>
+                                    <span class="font-medium text-slate-700 block mt-0.5 leading-relaxed break-words" x-text="viewingSponsor.notes"></span>
+                                </div>
+                            </template>
+                            <div class="col-span-2 bg-slate-50 p-2 rounded-lg border border-slate-100 text-[10px] text-slate-500 font-medium flex items-center justify-between min-w-0 overflow-hidden">
+                                <span>{{ __('messages.registered_on') }}</span>
+                                <span class="font-bold text-slate-800" x-text="viewingSponsor.created_at"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-3 border-t border-slate-100">
+                        <button type="button" @click="showViewSponsorModal = false"
+                            class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                            {{ __('messages.close') ?? 'Close' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 
     <script>
         function adminEventShowData() {
             return {
-                mainTab: 'details',
+                mainTab: @json(request('tab', 'details')),
+                sponsorshipSubTab: @json(request('subtab', 'types')),
                 statusTab: 'all',
                 topRankFilter: 'top5',
                 selectedEduType: 'all',
@@ -1277,6 +2191,89 @@
                 showDetailsModal: false,
                 selectedRegistration: {},
                 previewLang: @json(app()->getLocale() === 'gu' ? 'gu' : 'en'),
+
+                // Sponsorship state
+                sponsorFilterType: 'all',
+                sponsorFilterStatus: 'all',
+                sponsorFilterPayment: 'all',
+                sponsorSearch: '',
+                showAddTypeModal: false,
+                showEditTypeModal: false,
+                editingType: { id: '', title: '', amount: '', max_sponsors: 0, description: '', status: true },
+                showAddSponsorModal: false,
+                showEditSponsorModal: false,
+                editingSponsor: { id: '', name: '', contact_person: '', mobile: '', email: '', sponsorship_type_id: '', amount: '', city: '', address: '', notes: '', payment_status: 'pending', status: 'pending' },
+                showViewSponsorModal: false,
+                viewingSponsor: {},
+
+                openEditType(type) {
+                    this.editingType = Object.assign({}, type);
+                    this.showEditTypeModal = true;
+                },
+                openAddSponsor(typeId = '') {
+                    this.editingSponsor = {
+                        sponsorship_type_id: typeId || '',
+                        amount: '',
+                        payment_status: 'pending',
+                        status: 'approved'
+                    };
+                    this.showAddSponsorModal = true;
+                },
+                openEditSponsor(sponsor) {
+                    this.editingSponsor = Object.assign({}, sponsor);
+                    this.showEditSponsorModal = true;
+                },
+                openViewSponsor(sponsor) {
+                    this.viewingSponsor = sponsor || {};
+                    this.showViewSponsorModal = true;
+                },
+                async toggleTypeStatus(typeId) {
+                    const btn = document.getElementById('status-btn-' + typeId);
+                    try {
+                        const res = await fetch('{{ url('admin/events/sponsorship-types') }}/' + typeId + '/toggle-status', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            }
+                        });
+                        const data = await res.json();
+                        if (data.success && btn) {
+                            if (data.status) {
+                                btn.className = 'px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider transition-colors cursor-pointer bg-emerald-50 text-emerald-700 border border-emerald-200/60';
+                                btn.textContent = this.previewLang === 'gu' ? 'સક્રિય' : 'Active';
+                            } else {
+                                btn.className = 'px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider transition-colors cursor-pointer bg-slate-100 text-slate-600 border border-slate-200';
+                                btn.textContent = this.previewLang === 'gu' ? 'નિષ્ક્રિય' : 'Inactive';
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                },
+                sponsorMatches(s) {
+                    if (!s) return false;
+                    if (this.sponsorFilterType !== 'all') {
+                        if (String(s.sponsorship_type_id) !== String(this.sponsorFilterType)) return false;
+                    }
+                    if (this.sponsorFilterStatus !== 'all') {
+                        if (s.status !== this.sponsorFilterStatus) return false;
+                    }
+                    if (this.sponsorFilterPayment !== 'all') {
+                        if (s.payment_status !== this.sponsorFilterPayment) return false;
+                    }
+                    if (this.sponsorSearch && this.sponsorSearch.trim()) {
+                        const q = this.sponsorSearch.toLowerCase().trim();
+                        const nameMatch = (s.name || '').toLowerCase().includes(q);
+                        const contactMatch = (s.contact_person || '').toLowerCase().includes(q);
+                        const mobileMatch = (s.mobile || '').toLowerCase().includes(q);
+                        const cityMatch = (s.city || '').toLowerCase().includes(q);
+                        const typeMatch = (s.type_title || '').toLowerCase().includes(q);
+                        if (!nameMatch && !contactMatch && !mobileMatch && !cityMatch && !typeMatch) return false;
+                    }
+                    return true;
+                },
+
                 openBiodata(data) {
                     this.selectedRegistration = data || {};
                     this.showDetailsModal = true;

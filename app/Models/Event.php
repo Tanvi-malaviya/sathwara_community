@@ -144,4 +144,24 @@ class Event extends Model
 
         return 'https://maps.google.com/maps?q=' . urlencode($this->venue ?? $this->title) . '&output=embed';
     }
+
+    public function sponsorshipTypes()
+    {
+        return $this->hasMany(SponsorshipType::class)->orderBy('display_order')->orderBy('amount', 'desc');
+    }
+
+    public function activeSponsorshipTypes()
+    {
+        return $this->hasMany(SponsorshipType::class)->where('status', true)->orderBy('display_order')->orderBy('amount', 'desc');
+    }
+
+    public function sponsors()
+    {
+        return $this->hasMany(EventSponsor::class)->orderBy('created_at', 'desc');
+    }
+
+    public function approvedSponsors()
+    {
+        return $this->hasMany(EventSponsor::class)->where('status', 'approved')->orderBy('created_at', 'desc');
+    }
 }

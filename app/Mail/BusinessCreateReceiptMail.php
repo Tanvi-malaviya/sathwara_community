@@ -2,8 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Event;
-use App\Models\EventRegistration;
+use App\Models\Business;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -14,15 +13,12 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Attachment;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class EventPassPurchasedMail extends Mailable
+class BusinessCreateReceiptMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public Event $event;
-    public EventRegistration $registration;
+    public Business $business;
     public ?User $user;
-    public array $passes;
-    public int $personCount;
     public string $receiptNo;
     public float $amount;
     public string $paymentStatus;
@@ -31,17 +27,14 @@ class EventPassPurchasedMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(Event $event, EventRegistration $registration, ?User $user = null, array $passes = [], int $personCount = 1)
+    public function __construct(Business $business, ?User $user = null, ?float $amount = null, ?string $paymentStatus = null, ?string $paymentId = null)
     {
-        $this->event = $event;
-        $this->registration = $registration;
-        $this->user = $user;
-        $this->passes = $passes;
-        $this->personCount = $personCount;
-        $this->amount = (float)($registration->payment_amount ?? 0);
-        $this->paymentStatus = $registration->payment_status ?? 'paid';
-        $this->paymentId = $registration->payment_id;
-        $this->receiptNo = 'RCP-PASS-' . date('Y') . '-' . sprintf('%05d', $registration->id);
+        $this->business = $business;
+        $this->user = $user ?? $business->user;
+        $this->amount = $amount ?? (float)($business->payment_amount ?? \App\Models\Setting::get('business_registration_fee', '500'));
+        $this->paymentStatus = $paymentStatus ?? ($business->payment_status ?? 'paid');
+        $this->paymentId = $paymentId ?? $business->payment_id;
+        $this->receiptNo = 'RCP-BIZ-' . date('Y') . '-' . sprintf('%05d', $business->id);
     }
 
     /**
@@ -50,7 +43,7 @@ class EventPassPurchasedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🎟️ Entry Pass & Payment Receipt #' . $this->receiptNo . ' - ' . $this->event->title,
+            subject: '🧾 Business Registration Receipt #' . $this->receiptNo . ' - ' . $this->business->business_name,
         );
     }
 
@@ -60,7 +53,7 @@ class EventPassPurchasedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.event_pass',
+            view: 'emails.business_receipt',
         );
     }
 
@@ -71,12 +64,9 @@ class EventPassPurchasedMail extends Mailable
      */
     public function attachments(): array
     {
-        $pdf = Pdf::loadView('emails.receipt_pdf.event_pass', [
-            'event' => $this->event,
-            'registration' => $this->registration,
+        $pdf = Pdf::loadView('emails.receipt_pdf.business', [
+            'business' => $this->business,
             'user' => $this->user,
-            'passes' => $this->passes,
-            'personCount' => $this->personCount,
             'receiptNo' => $this->receiptNo,
             'amount' => $this->amount,
             'paymentStatus' => $this->paymentStatus,
@@ -84,7 +74,7 @@ class EventPassPurchasedMail extends Mailable
         ]);
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'Event_Pass_Receipt_' . $this->receiptNo . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'Business_Receipt_' . $this->receiptNo . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }

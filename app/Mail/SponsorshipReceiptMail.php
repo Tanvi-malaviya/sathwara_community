@@ -3,8 +3,8 @@
 namespace App\Mail;
 
 use App\Models\Event;
-use App\Models\EventRegistration;
-use App\Models\User;
+use App\Models\EventSponsor;
+use App\Models\SponsorshipType;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -14,15 +14,13 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Attachment;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class EventPassPurchasedMail extends Mailable
+class SponsorshipReceiptMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public Event $event;
-    public EventRegistration $registration;
-    public ?User $user;
-    public array $passes;
-    public int $personCount;
+    public EventSponsor $sponsor;
+    public ?SponsorshipType $sponsorshipType;
     public string $receiptNo;
     public float $amount;
     public string $paymentStatus;
@@ -31,17 +29,15 @@ class EventPassPurchasedMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(Event $event, EventRegistration $registration, ?User $user = null, array $passes = [], int $personCount = 1)
+    public function __construct(Event $event, EventSponsor $sponsor, ?SponsorshipType $sponsorshipType = null, ?float $amount = null, ?string $paymentStatus = null, ?string $paymentId = null)
     {
         $this->event = $event;
-        $this->registration = $registration;
-        $this->user = $user;
-        $this->passes = $passes;
-        $this->personCount = $personCount;
-        $this->amount = (float)($registration->payment_amount ?? 0);
-        $this->paymentStatus = $registration->payment_status ?? 'paid';
-        $this->paymentId = $registration->payment_id;
-        $this->receiptNo = 'RCP-PASS-' . date('Y') . '-' . sprintf('%05d', $registration->id);
+        $this->sponsor = $sponsor;
+        $this->sponsorshipType = $sponsorshipType ?? $sponsor->sponsorshipType;
+        $this->amount = $amount ?? (float)($sponsor->amount ?? 0);
+        $this->paymentStatus = $paymentStatus ?? ($sponsor->payment_status ?? 'pending');
+        $this->paymentId = $paymentId ?? $sponsor->payment_id;
+        $this->receiptNo = 'RCP-SPN-' . date('Y') . '-' . sprintf('%05d', $sponsor->id);
     }
 
     /**
@@ -50,7 +46,7 @@ class EventPassPurchasedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🎟️ Entry Pass & Payment Receipt #' . $this->receiptNo . ' - ' . $this->event->title,
+            subject: '🧾 Sponsorship Receipt #' . $this->receiptNo . ' - ' . $this->event->title,
         );
     }
 
@@ -60,7 +56,7 @@ class EventPassPurchasedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.event_pass',
+            view: 'emails.sponsorship_receipt',
         );
     }
 
@@ -71,12 +67,10 @@ class EventPassPurchasedMail extends Mailable
      */
     public function attachments(): array
     {
-        $pdf = Pdf::loadView('emails.receipt_pdf.event_pass', [
+        $pdf = Pdf::loadView('emails.receipt_pdf.sponsorship', [
             'event' => $this->event,
-            'registration' => $this->registration,
-            'user' => $this->user,
-            'passes' => $this->passes,
-            'personCount' => $this->personCount,
+            'sponsor' => $this->sponsor,
+            'sponsorshipType' => $this->sponsorshipType,
             'receiptNo' => $this->receiptNo,
             'amount' => $this->amount,
             'paymentStatus' => $this->paymentStatus,
@@ -84,7 +78,7 @@ class EventPassPurchasedMail extends Mailable
         ]);
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'Event_Pass_Receipt_' . $this->receiptNo . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'Sponsorship_Receipt_' . $this->receiptNo . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }

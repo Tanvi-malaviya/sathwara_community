@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Gallery;
 use App\Models\EventRegistration;
+use App\Models\SponsorshipType;
+use App\Models\EventSponsor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -53,6 +55,17 @@ class EventController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $sponsorshipTypes = SponsorshipType::where('event_id', $event->id)
+            ->withCount(['sponsors', 'approvedSponsors'])
+            ->orderBy('display_order')
+            ->orderBy('amount', 'desc')
+            ->get();
+
+        $sponsors = EventSponsor::where('event_id', $event->id)
+            ->with(['sponsorshipType', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         // Calculate event summary statistics
         $stats = [
             'total_registrations' => $allRegistrations->count(),
@@ -62,6 +75,10 @@ class EventController extends Controller
             'last_pass_no' => (int)($allRegistrations->whereNotNull('pass_number')->max('pass_number') ?? 0),
             'last_inam_no' => (int)($allRegistrations->whereNotNull('inam_number')->max('inam_number') ?? 0),
             'last_yuva_melo_no' => (int)($allRegistrations->whereNotNull('yuva_melo_number')->max('yuva_melo_number') ?? 0),
+            'total_sponsorship_types' => $sponsorshipTypes->count(),
+            'total_sponsors' => $sponsors->count(),
+            'approved_sponsors_count' => $sponsors->where('status', 'approved')->count(),
+            'total_sponsorship_amount' => $sponsors->where('status', 'approved')->sum('amount'),
         ];
 
         // For inam_vitaran and yuva_melo events, only show student/candidate form registrations on the show page
@@ -75,7 +92,7 @@ class EventController extends Controller
             return true;
         });
 
-        return view('admin.events.show', compact('event', 'gallery', 'registrations', 'stats'));
+        return view('admin.events.show', compact('event', 'gallery', 'registrations', 'stats', 'sponsorshipTypes', 'sponsors'));
     }
 
     /**
