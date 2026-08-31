@@ -1,6 +1,9 @@
 @extends('layouts.public')
 
 @section('content')
+    @php
+        $isGu = (app()->getLocale() === 'gu');
+    @endphp
     <style>
         /* Event Details Page Font Enhancements */
         .event-details-content .rich-text,
@@ -115,8 +118,52 @@
     </section>
 
     <!-- Event Content & Registration -->
-    <section class="py-12 md:py-16 bg-white event-details-content">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="py-12 md:py-16 bg-white event-details-content"
+             x-data="{
+                 showSponsorModal: false,
+                 selectedTypeId: '',
+                 selectedTypeAmount: '',
+                 selectedTypeTitle: '',
+                 openSponsorModal(typeId = '', amount = '', title = '') {
+                     this.selectedTypeId = typeId || '';
+                     this.selectedTypeAmount = amount || '';
+                     this.selectedTypeTitle = title || '';
+                     this.showSponsorModal = true;
+                 }
+             }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            @if(session('success'))
+                <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl flex items-center gap-3 shadow-2xs">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span class="text-xs sm:text-sm font-bold">{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="p-4 bg-rose-50 border border-rose-200 text-rose-900 rounded-2xl flex items-center gap-3 shadow-2xs">
+                    <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <span class="text-xs sm:text-sm font-bold">{{ session('error') }}</span>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="p-4 bg-rose-50 border border-rose-200 text-rose-900 rounded-2xl space-y-1.5 shadow-2xs">
+                    <div class="font-bold text-xs sm:text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>{{ $isGu ? 'કૃપા કરીને નીચેની ભૂલો સુધારો:' : 'Please correct the following errors:' }}</span>
+                    </div>
+                    <ul class="list-disc list-inside text-xs font-semibold pl-2 space-y-0.5">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
                 
                 <!-- Left: Description / Gallery (7 cols) -->
@@ -299,6 +346,125 @@
                                     class="inline-flex items-center justify-center px-6 py-3 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-sm font-extrabold rounded-xl shadow-xs transition-all cursor-pointer">
                                     <span>{{ __('messages.fill_yuva_form') ?? 'Fill Yuva Melo Registration Form' }}</span>
                                 </a>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Sponsorship Opportunities / Packages Section -->
+                    @if($sponsorshipTypes->isNotEmpty())
+                        <div class="space-y-6 pt-6 border-t border-slate-100">
+                            <div class="flex items-center justify-between gap-3 flex-wrap">
+                                <div>
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-500/10 text-amber-700 border border-amber-500/20 uppercase tracking-wider mb-1.5">
+                                        <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>{{ __('messages.sponsorship') }}</span>
+                                    </div>
+                                    <h2 class="text-2xl font-black text-slate-900">{{ __('messages.sponsorship_opportunities') }}</h2>
+                                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                                        {{ __('messages.sponsorship_desc') }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                @foreach($sponsorshipTypes as $st)
+                                    <div class="rounded-2xl p-5 border transition-all duration-300 flex flex-col justify-between {{ $st->is_full ? 'bg-slate-50 border-slate-200 opacity-75' : 'bg-gradient-to-br from-white via-amber-50/20 to-orange-50/30 border-amber-200/80 shadow-sm hover:shadow-md hover:-translate-y-0.5' }}">
+                                        <div class="space-y-3">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <div>
+                                                    <span class="text-[10px] font-black text-amber-700 uppercase tracking-wider block">{{ $isGu ? 'સ્પોન્સરશિપ પેકેજ' : 'Sponsorship Package' }}</span>
+                                                    <h3 class="text-base font-black text-slate-900 leading-tight mt-0.5">{{ $st->title }}</h3>
+                                                </div>
+                                                <div class="text-right shrink-0">
+                                                    <div class="text-lg font-black text-slate-900">₹{{ number_format($st->amount) }}</div>
+                                                </div>
+                                            </div>
+
+                                            @if($st->description)
+                                                <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                                                    {{ $st->description }}
+                                                </p>
+                                            @endif
+
+                                            <!-- Slots Available Badge -->
+                                            <div class="pt-1">
+                                                @if($st->is_full)
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200">
+                                                        <svg class="w-3 h-3 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                                        <span>{{ __('messages.slots_full') }}</span>
+                                                    </span>
+                                                @elseif($st->max_sponsors > 0)
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                        <svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                        <span>{{ __('messages.slots_remaining', ['count' => $st->available_slots, 'max' => $st->max_sponsors]) }}</span>
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">
+                                                        <svg class="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                        <span>{{ __('messages.unlimited') }} {{ $isGu ? 'સ્લોટ્સ' : 'Slots' }}</span>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-4 mt-2 border-t border-amber-100">
+                                            @if($st->is_full)
+                                                <button type="button" disabled
+                                                    class="w-full py-2.5 bg-slate-200 text-slate-400 font-bold text-xs rounded-xl cursor-not-allowed text-center">
+                                                    {{ __('messages.slots_full') }}
+                                                </button>
+                                            @else
+                                                <button type="button" @click="openSponsorModal('{{ $st->id }}', '{{ (float)$st->amount }}', '{{ addslashes($st->title) }}')"
+                                                    class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                                                    <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    <span>{{ __('messages.become_sponsor') }}</span>
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Our Proud Sponsors Section -->
+                    @if($approvedSponsors->isNotEmpty())
+                        <div class="space-y-4 pt-6 border-t border-slate-100">
+                            <div class="flex items-center justify-between gap-2">
+                                <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                                    <span>{{ __('messages.our_sponsors') }}</span>
+                                </h2>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200">{{ $approvedSponsors->count() }}</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                @foreach($approvedSponsors as $sp)
+                                    <div class="bg-slate-50/80 hover:bg-white p-3 rounded-2xl border border-slate-200/80 hover:border-primary-300 hover:shadow-md transition-all flex flex-col items-center text-center group">
+                                        @if($sp->logo_path)
+                                            <div class="w-16 h-16 rounded-xl bg-white p-1 border border-slate-200 flex items-center justify-center overflow-hidden mb-2 shadow-2xs group-hover:scale-105 transition-transform">
+                                                <img src="{{ str_starts_with($sp->logo_path, 'http') ? $sp->logo_path : asset('storage/' . $sp->logo_path) }}"
+                                                     alt="{{ $sp->name }}" class="w-full h-full object-contain">
+                                            </div>
+                                        @else
+                                            <div class="w-16 h-16 rounded-xl bg-primary-100 text-primary-800 font-black text-xl flex items-center justify-center border border-primary-200 mb-2 group-hover:scale-105 transition-transform shadow-2xs">
+                                                {{ strtoupper(substr($sp->name, 0, 1)) }}
+                                            </div>
+                                        @endif
+                                        <div class="font-extrabold text-slate-900 text-xs line-clamp-1 w-full" title="{{ $sp->name }}">{{ $sp->name }}</div>
+                                        @if($sp->sponsorshipType)
+                                            <span class="text-[10px] font-bold text-primary-700 bg-primary-50 px-2 py-0.5 rounded mt-1 border border-primary-100/60 line-clamp-1">
+                                                {{ $sp->sponsorshipType->title }}
+                                            </span>
+                                        @endif
+                                        @if($sp->city)
+                                            <span class="text-[9px] text-slate-400 font-medium mt-0.5 flex items-center justify-center gap-0.5">
+                                                <svg class="w-2.5 h-2.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                <span>{{ $sp->city }}</span>
+                                            </span>
+                                        @endif
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     @endif
@@ -662,68 +828,273 @@
                 </div>
             </div>
         </div>
+
+        <!-- Become a Sponsor Modal -->
+        <template x-teleport="body">
+            <div x-show="showSponsorModal"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 x-cloak>
+                <div @click.away="showSponsorModal = false"
+                     class="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-xl w-full overflow-hidden relative max-h-[90vh] flex flex-col">
+                    
+                    <!-- Modal Header -->
+                    <div class="px-5 py-3 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                        <div>
+                            <h3 class="text-xs sm:text-sm font-extrabold flex items-center gap-2">
+                                <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>{{ __('messages.become_sponsor') }}</span>
+                                <template x-if="selectedTypeTitle">
+                                    <span class="text-amber-300 font-bold">&bull; <span x-text="selectedTypeTitle"></span></span>
+                                </template>
+                            </h3>
+                            <p class="text-[10px] text-slate-400 font-medium mt-0.5 truncate max-w-[280px]">{{ $event->title }}</p>
+                        </div>
+                        <button type="button" @click="showSponsorModal = false" 
+                                class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs font-bold cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Modal Body / Form -->
+                    <form method="POST" action="{{ route('events.sponsor.register', $event->id) }}" id="publicSponsorRegisterForm" enctype="multipart/form-data" class="p-4 sm:p-5 space-y-3 overflow-y-auto">
+                        @csrf
+                        <input type="hidden" name="razorpay_payment_id" id="sponsor_razorpay_payment_id">
+                        <input type="hidden" name="sponsorship_type_id" x-model="selectedTypeId">
+                        <input type="hidden" name="amount" x-model="selectedTypeAmount">
+                        
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                {{ __('messages.sponsorship_type') }}
+                            </label>
+                            <div class="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                                <span class="text-xs font-bold text-slate-900" x-text="selectedTypeTitle || '{{ $isGu ? 'સામાન્ય સ્પોન્સર' : 'General Sponsor' }}'"></span>
+                                <span class="text-xs font-black text-emerald-700" x-show="selectedTypeAmount">₹<span x-text="Number(selectedTypeAmount || 0).toLocaleString()"></span></span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.sponsor_name') }} <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" name="name" required placeholder="{{ $isGu ? 'નામ / સ્પોન્સરનું નામ' : 'Sponsor / Company Name' }}"
+                                    value="{{ auth()->user()?->name ?? '' }}"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.phone') }} <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" name="mobile" required placeholder="9876543210" maxlength="10" minlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+                                    value="{{ auth()->user()?->phone ?? '' }}"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.email') }}
+                                </label>
+                                <input type="email" name="email" placeholder="Email Address"
+                                    value="{{ auth()->user()?->email ?? '' }}"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            </div>
+
+                            <input type="hidden" name="amount" x-model="selectedTypeAmount">
+
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.address') }}
+                                </label>
+                                <textarea name="address" rows="2" placeholder="{{ $isGu ? 'સંપૂર્ણ સરનામું...' : 'Full Address...' }}"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ __('messages.sponsor_logo') }} ({{ $isGu ? 'વૈકલ્પિક' : 'Optional' }})
+                                </label>
+                                <input type="file" name="logo" accept="image/*"
+                                    class="text-xs block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 border border-slate-200 rounded-xl p-1 bg-slate-50">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="text-[11px] font-bold text-slate-700 block mb-1">
+                                    {{ $isGu ? 'સંદેશ / નોંધ (વૈકલ્પિક)' : 'Message / Remarks (Optional)' }}
+                                </label>
+                                <textarea name="notes" rows="2" placeholder="{{ $isGu ? 'કોઈ ખાસ સૂચના અથવા સંદેશ...' : 'Any message or notes...' }}"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+                            <button type="button" @click="showSponsorModal = false"
+                                class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer text-center">
+                                {{ __('messages.cancel') ?? 'Cancel' }}
+                            </button>
+
+                            <template x-if="Number(selectedTypeAmount || 0) > 0">
+                                <div class="flex flex-col sm:flex-row items-stretch gap-2">
+                                    <!-- <button type="submit"
+                                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl transition-all cursor-pointer text-center">
+                                        {{ $isGu ? 'ઓફલાઇન સબમિટ (Pay Later)' : 'Submit Offline (Pay Later)' }}
+                                    </button> -->
+                                    <button type="button" onclick="submitSponsorFormWithRazorpay()"
+                                        class="px-5 py-2 bg-primary-600 hover:bg-primary-500 active:scale-95 text-white font-black text-xs rounded-xl shadow-md shadow-primary-500/20 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center">
+                                        <svg class="w-3.5 h-3.5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                        <span>{{ $isGu ? 'ઓનલાઇન ચુકવણી કરો & સબમિટ' : 'Pay Online & Submit' }} (₹<span x-text="Number(selectedTypeAmount || 0).toLocaleString()"></span>) &rarr;</span>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <template x-if="!Number(selectedTypeAmount || 0)">
+                                <button type="submit"
+                                    class="px-5 py-2 bg-primary-600 hover:bg-primary-500 active:scale-95 text-white font-black text-xs rounded-xl shadow-md shadow-primary-500/20 transition-all cursor-pointer text-center">
+                                    {{ $isGu ? 'સબમિટ કરો' : 'Submit Sponsorship' }} &rarr;
+                                </button>
+                            </template>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
     </section>
 
-@if(($event->pass_fee ?? 0) > 0)
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('publicEventRegisterForm');
-    if (!form) return;
+const razorpayKey = "{{ \App\Models\Setting::get('razorpay_key_id', env('RAZORPAY_KEY_ID', '')) }}";
+const appName = "{{ config('app.name', 'Satwara Community') }}";
 
-    form.addEventListener('submit', function (e) {
-        const paymentIdInput = document.getElementById('event_razorpay_payment_id');
-        if (paymentIdInput && paymentIdInput.value) {
-            return true; // Already paid
-        }
+function submitSponsorFormWithRazorpay() {
+    const sponsorForm = document.getElementById('publicSponsorRegisterForm');
+    if (!sponsorForm) return;
 
-        e.preventDefault();
+    if (!sponsorForm.reportValidity()) {
+        return; // HTML5 validation failed
+    }
 
-        const passFee = {{ (float)($event->pass_fee ?? 0) }};
-        const personCountInput = form.querySelector('[name="person_count"]');
-        const personCount = personCountInput ? parseInt(personCountInput.value) || 1 : 1;
-        const totalAmountPaise = Math.round(passFee * personCount * 100);
+    const paymentIdInput = document.getElementById('sponsor_razorpay_payment_id');
+    if (paymentIdInput && paymentIdInput.value) {
+        sponsorForm.submit();
+        return;
+    }
 
-        const razorpayKey = "{{ \App\Models\Setting::get('razorpay_key_id', env('RAZORPAY_KEY_ID', '')) }}";
-        const userEmail = "{{ auth()->user() ? auth()->user()->email : '' }}";
-        const userName = "{{ auth()->user() ? auth()->user()->name : '' }}";
-        const userPhone = "{{ (auth()->user() && auth()->user()->memberProfile) ? auth()->user()->memberProfile->phone : '' }}";
+    const amountInput = sponsorForm.querySelector('[name="amount"]');
+    const sponsorAmount = amountInput ? parseFloat(amountInput.value) || 0 : 0;
+    const totalAmountPaise = Math.round(sponsorAmount * 100);
 
-        const options = {
-            "key": razorpayKey || "rzp_test_key",
-            "amount": totalAmountPaise,
-            "currency": "INR",
-            "name": "{{ config('app.name', 'Satwara Community') }}",
-            "description": "Event Pass Booking - {{ addslashes($event->title) }} (" + personCount + " Person/s)",
-            "handler": function (response) {
-                paymentIdInput.value = response.razorpay_payment_id;
-                window.dispatchEvent(new CustomEvent('close-all-modals'));
-                document.querySelectorAll('[x-show="showPassModal"], [x-show="showViewPassesModal"]').forEach(function(el) {
-                    el.style.display = 'none';
-                });
-                form.submit();
-            },
-            "prefill": {
-                "name": userName,
-                "email": userEmail,
-                "contact": userPhone
-            },
-            "theme": {
-                "color": "#2563EB"
+    if (totalAmountPaise <= 0) {
+        sponsorForm.submit();
+        return;
+    }
+
+    const sponsorName = (sponsorForm.querySelector('[name="name"]')?.value || '').trim();
+    const sponsorContact = (sponsorForm.querySelector('[name="mobile"]')?.value || '').trim();
+    const sponsorEmail = (sponsorForm.querySelector('[name="email"]')?.value || '').trim();
+
+    const options = {
+        "key": razorpayKey || "rzp_test_key",
+        "amount": totalAmountPaise,
+        "currency": "INR",
+        "name": appName,
+        "description": "Event Sponsorship - {{ addslashes($event->title) }} (₹" + sponsorAmount.toLocaleString() + ")",
+        "handler": function (response) {
+            paymentIdInput.value = response.razorpay_payment_id;
+            sponsorForm.submit();
+        },
+        "prefill": {
+            "name": sponsorName,
+            "email": sponsorEmail,
+            "contact": sponsorContact
+        },
+        "theme": {
+            "color": "#D97706"
+        },
+        "modal": {
+            "ondismiss": function() {
+                if (confirm("{{ $isGu ? 'ઓનલાઇન પેમેન્ટ પૂર્ણ થયું નથી. શું તમે આ સ્પોન્સરશિપ વિગતો સાથે સબમિટ કરવા માંગો છો (Pending Payment)?' : 'Payment was not completed. Do you want to submit your sponsorship details with Pending payment status?' }}")) {
+                    sponsorForm.submit();
+                }
             }
-        };
-
-        if (window.Razorpay) {
-            const rzp = new Razorpay(options);
-            rzp.open();
-        } else {
-            alert('Razorpay Payment Gateway failed to load. Submitting registration...');
-            form.submit();
         }
-    });
+    };
+
+    if (window.Razorpay) {
+        const rzp = new Razorpay(options);
+        rzp.open();
+    } else {
+        alert('Razorpay Payment Gateway is initializing. Submitting registration...');
+        sponsorForm.submit();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    /* =================== PASS REGISTRATION RAZORPAY =================== */
+    const passForm = document.getElementById('publicEventRegisterForm');
+    if (passForm) {
+        passForm.addEventListener('submit', function (e) {
+            const paymentIdInput = document.getElementById('event_razorpay_payment_id');
+            if (paymentIdInput && paymentIdInput.value) {
+                return true; // Already paid
+            }
+
+            const passFee = {{ (float)($event->pass_fee ?? 0) }};
+            const personCountInput = passForm.querySelector('[name="person_count"]');
+            const personCount = personCountInput ? parseInt(personCountInput.value) || 1 : 1;
+            const totalAmountPaise = Math.round(passFee * personCount * 100);
+
+            if (totalAmountPaise <= 0) {
+                return true; // Free pass
+            }
+
+            e.preventDefault();
+
+            const userEmail = "{{ auth()->user() ? auth()->user()->email : '' }}";
+            const userName = "{{ auth()->user() ? auth()->user()->name : '' }}";
+            const userPhone = "{{ (auth()->user() && auth()->user()->memberProfile) ? auth()->user()->memberProfile->phone : '' }}";
+
+            const options = {
+                "key": razorpayKey || "rzp_test_key",
+                "amount": totalAmountPaise,
+                "currency": "INR",
+                "name": appName,
+                "description": "Event Pass Booking - {{ addslashes($event->title) }} (" + personCount + " Person/s)",
+                "handler": function (response) {
+                    paymentIdInput.value = response.razorpay_payment_id;
+                    window.dispatchEvent(new CustomEvent('close-all-modals'));
+                    document.querySelectorAll('[x-show="showPassModal"], [x-show="showViewPassesModal"]').forEach(function(el) {
+                        el.style.display = 'none';
+                    });
+                    passForm.submit();
+                },
+                "prefill": {
+                    "name": userName,
+                    "email": userEmail,
+                    "contact": userPhone
+                },
+                "theme": {
+                    "color": "#2563EB"
+                }
+            };
+
+            if (window.Razorpay) {
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                alert('Razorpay Payment Gateway failed to load. Submitting registration...');
+                passForm.submit();
+            }
+        });
+    }
 });
 </script>
-@endif
 
 <script>
 /* =================== PASS PDF DOWNLOAD =================== */

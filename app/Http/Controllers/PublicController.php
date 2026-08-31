@@ -15,9 +15,15 @@ use App\Models\BusinessCategory;
 use App\Models\Business;
 use App\Models\User;
 use App\Models\EventRegistration;
+use App\Models\SponsorshipType;
+use App\Models\EventSponsor;
 use App\Services\EventSequenceService;
+use App\Mail\EventPassPurchasedMail;
+use App\Mail\SponsorshipReceiptMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class PublicController extends Controller
 {
@@ -179,7 +185,21 @@ class PublicController extends Controller
                 ->first();
         }
 
-        return view('public.event_details', compact('event', 'gallery', 'registration'));
+        $sponsorshipTypes = SponsorshipType::where('event_id', $event->id)
+            ->where('status', true)
+            ->withCount(['approvedSponsors'])
+            ->orderBy('display_order')
+            ->orderBy('amount', 'desc')
+            ->get();
+
+        $approvedSponsors = EventSponsor::where('event_id', $event->id)
+            ->where('status', 'approved')
+            ->with('sponsorshipType')
+            ->orderBy('amount', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('public.event_details', compact('event', 'gallery', 'registration', 'sponsorshipTypes', 'approvedSponsors'));
     }
 
     /**
@@ -678,6 +698,81 @@ class PublicController extends Controller
         $registration->delete();
 
         return redirect()->route('event.details', $event->id)->with('success', 'Registration deleted successfully.');
+    }
+
+    /**
+     * Submit Sponsor Registration from Public Website
+     */
+    public function registerSponsor(Request $request, $id)
+    {
+        $event = Event::published()->findOrFail($id);
+
+        $validated = $request->validate([
+            'sponsorship_type_id' => 'nullable|exists:sponsorship_types,id',
+            'name' => 'required|string|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'mobile' => 'required|string|size:10',
+            'email' => 'nullable|email|max:255',
+            'amount' => 'nullable|numeric|min:0',
+            'logo' => 'nullable|image|max:4096',
+            'city' => 'nullable|string|max:100',
+            'address' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:1000',
+            'razorpay_payment_id' => 'nullable|string|max:255',
+        ]);
+
+        // Check if the selected sponsorship type is full
+        if (!empty($validated['sponsorship_type_id'])) {
+            $type = SponsorshipType::where('event_id', $event->id)->findOrFail($validated['sponsorship_type_id']);
+            if ($type->is_full) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', __('messages.sponsorship_slots_full') ?? 'Sorry, the slots for this sponsorship type are already full.');
+            }
+            if (empty($validated['amount']) || (float)$validated['amount'] <= 0) {
+                $validated['amount'] = $type->amount;
+            }
+        }
+
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('sponsors', 'public');
+        }
+
+        $paymentId = $request->input('razorpay_payment_id');
+        $paymentStatus = !empty($paymentId) ? 'received' : 'pending';
+
+        $sponsor = EventSponsor::create([
+            'event_id' => $event->id,
+            'sponsorship_type_id' => $validated['sponsorship_type_id'] ?? null,
+            'user_id' => auth()->id() ?? null,
+            'name' => $validated['name'],
+            'contact_person' => $validated['contact_person'] ?? null,
+            'mobile' => $validated['mobile'],
+            'email' => $validated['email'] ?? null,
+            'amount' => !empty($validated['amount']) ? (float)$validated['amount'] : 0.00,
+            'logo_path' => $logoPath,
+            'city' => $validated['city'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'payment_status' => $paymentStatus,
+            'payment_id' => $paymentId,
+            'status' => 'pending',
+        ]);
+
+        // Dispatch Sponsorship Receipt Email
+        $recipientEmail = $validated['email'] ?? (auth()->check() ? auth()->user()->email : null);
+        if (!empty($recipientEmail)) {
+            try {
+                $st = !empty($validated['sponsorship_type_id']) ? SponsorshipType::find($validated['sponsorship_type_id']) : null;
+                Mail::to($recipientEmail)->send(new SponsorshipReceiptMail($event, $sponsor, $st, $sponsor->amount, $paymentStatus, $paymentId));
+            } catch (\Throwable $th) {
+                Log::error('Sponsorship Receipt Mail Error: ' . $th->getMessage());
+            }
+        }
+
+        return redirect()->route('event.details', $event->id)
+            ->with('success', __('messages.sponsor_registered_public_success') ?? 'Thank you for your sponsorship! We have received your details and will contact you shortly.');
     }
 }
 

@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\MemberProfile;
 use App\Models\FamilyMember;
+use App\Mail\MembershipPurchaseReceiptMail;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class MemberController extends Controller
 {
@@ -162,8 +165,7 @@ class MemberController extends Controller
             }
         }
 
-        // Create Member Profile
-        MemberProfile::create([
+        $profile = MemberProfile::create([
             'user_id' => $user->id,
             'first_name' => $request->first_name,
             'middle_name' => $request->middle_name,
@@ -181,6 +183,16 @@ class MemberController extends Controller
             'aadhaar_number' => 'NOT_SPECIFIED',
             'aadhaar_path' => 'NOT_SPECIFIED',
         ]);
+
+        // Dispatch Membership Receipt Email if email is present
+        if (!empty($user->email)) {
+            try {
+                $fee = (float)\App\Models\Setting::get('member_signup_fee', '1000');
+                Mail::to($user->email)->send(new MembershipPurchaseReceiptMail($user, $profile, $fee, 'paid', null));
+            } catch (\Throwable $th) {
+                Log::error('Admin Member Receipt Mail Error: ' . $th->getMessage());
+            }
+        }
 
         return redirect()->route('admin.members.index')->with('success', 'Member created successfully.');
     }

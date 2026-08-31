@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\VerifyEmailOtpMail;
 use App\Mail\RegisterEmailOtpMail;
+use App\Mail\MembershipPurchaseReceiptMail;
+use App\Mail\BusinessCreateReceiptMail;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
 
@@ -304,10 +306,17 @@ class RegistrationController extends Controller
         // Clear OTP verification session
         session()->forget(['reg_otp_email', 'reg_otp_code', 'reg_otp_expires', 'reg_email_verified']);
 
+        // Dispatch Membership Purchase Receipt Email
+        if (!empty($user->email)) {
+            try {
+                Mail::to($user->email)->send(new MembershipPurchaseReceiptMail($user, $user->memberProfile, $signupFee, $paymentStatus, $paymentId));
+            } catch (\Throwable $th) {
+                Log::error('Membership Receipt Mail Error: ' . $th->getMessage());
+            }
+        }
 
         // Log the user in and redirect to account status page
         auth()->login($user);
-
 
         return redirect()->route('account.status')->with('success', 'Your membership registration has been submitted successfully and is pending approval.');
     }
@@ -444,7 +453,7 @@ class RegistrationController extends Controller
         }
 
         // Create Business (anyone can register)
-        Business::create([
+        $newBusiness = Business::create([
             'user_id' => $userId,
             'category_id' => $request->category_id,
             'area_id' => $request->area_id,
@@ -468,6 +477,16 @@ class RegistrationController extends Controller
             'payment_status' => $paymentStatus,
             'payment_amount' => $businessFee,
         ]);
+
+        // Dispatch Business Registration Receipt Email
+        $recipientEmail = $request->email ?? ($userId ? User::find($userId)?->email : null);
+        if (!empty($recipientEmail)) {
+            try {
+                Mail::to($recipientEmail)->send(new BusinessCreateReceiptMail($newBusiness, $userId ? User::find($userId) : null, $businessFee, $paymentStatus, $paymentId));
+            } catch (\Throwable $th) {
+                Log::error('Business Receipt Mail Error: ' . $th->getMessage());
+            }
+        }
 
         return redirect()->route('business.directory')->with('success', 'Your business directory registration has been submitted successfully and is pending admin approval.');
     }
