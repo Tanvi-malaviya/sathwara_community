@@ -198,6 +198,7 @@ return [
     'last_name' => 'અટક / છેલ્લું નામ',
     'father_member_id' => 'પિતાનું સભ્ય આઈડી',
     'father_member_id_optional' => 'પિતાનું સભ્ય આઈડી (જો નોંધાયેલ હોય)',
+    'no_member_found' => 'કોઈ સભ્ય મળ્યા નથી',
     'registered_father_info' => 'નોંધાયેલ પિતા',
     'blood_group' => 'રક્ત જૂથ',
     'contact_details_sec' => 'સંપર્ક વિગતો',

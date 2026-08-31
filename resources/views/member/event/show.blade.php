@@ -248,8 +248,9 @@
                                      galleryImages: [
                                          @foreach($gallery as $photo)
                                              {
-                                                 src: '{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}',
-                                                 caption: '{{ addslashes($photo->caption ?? $event->title) }}'
+                                                 src: '{{ $photo->url }}',
+                                                 caption: '{{ addslashes($photo->caption ?? $event->title) }}',
+                                                 isVideo: {{ $photo->isVideo() ? 'true' : 'false' }}
                                              },
                                          @endforeach
                                      ],
@@ -267,18 +268,37 @@
                             @keydown.window.left="if(lightbox) prevImage()">
 
                             @foreach($gallery as $index => $photo)
-                                <div class="aspect-video rounded-xl overflow-hidden bg-slate-50 border border-slate-100 group relative cursor-pointer shadow-sm"
+                                @php $mImgUrl = $photo->url; $isMVideo = $photo->isVideo(); @endphp
+                                <div class="aspect-video rounded-xl overflow-hidden bg-slate-950 border border-slate-100 group relative cursor-pointer shadow-sm flex items-center justify-center"
                                     @click="lightboxIndex = {{ $index }}; lightbox = true">
-                                    <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        src="{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}"
-                                        alt="{{ $photo->caption }}">
+                                    @if($isMVideo)
+                                        <video class="w-full h-full object-cover pointer-events-none" preload="metadata" muted playsinline>
+                                            <source src="{{ $mImgUrl }}">
+                                        </video>
+                                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 2;">
+                                            <div class="w-10 h-10 rounded-full bg-slate-900/85 border border-white/30 text-white flex items-center justify-center shadow-md backdrop-blur-xs group-hover:scale-110 transition-transform">
+                                                <svg class="w-5 h-5 fill-current ml-0.5 text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            src="{{ $mImgUrl }}"
+                                            alt="{{ $photo->caption }}">
+                                    @endif
                                     <div
-                                        class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path>
-                                        </svg>
+                                        class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
+                                        @if($isMVideo)
+                                            <span class="text-white text-xs font-bold inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-white/20 backdrop-blur-xs shadow-md">
+                                                <svg class="w-3.5 h-3.5 text-primary-400 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                <span>Play</span>
+                                            </span>
+                                        @else
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path>
+                                            </svg>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
@@ -329,16 +349,27 @@
                                         </button>
                                     </div>
 
-                                    <!-- Main Section: Centered Image -->
+                                    <!-- Main Section: Centered Media -->
                                     <div class="relative w-full flex-1 flex items-center justify-center my-auto max-w-5xl mx-auto px-4 pb-14"
                                         @click.stop>
                                         <div class="relative flex flex-col items-center justify-center max-w-full max-h-full">
                                             <div
-                                                class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-900/50">
-                                                <img :src="galleryImages[lightboxIndex]?.src"
-                                                    :alt="galleryImages[lightboxIndex]?.caption || 'Gallery Image'"
-                                                    class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
-                                                    style="max-height: 68vh; max-width: 80vw;">
+                                                class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-900/50 flex items-center justify-center">
+                                                <template x-if="galleryImages[lightboxIndex]?.isVideo">
+                                                    <video :src="galleryImages[lightboxIndex]?.src"
+                                                           controls
+                                                           autoplay
+                                                           playsinline
+                                                           class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
+                                                           style="max-height: 68vh; max-width: 80vw; outline: none;">
+                                                    </video>
+                                                </template>
+                                                <template x-if="!galleryImages[lightboxIndex]?.isVideo">
+                                                    <img :src="galleryImages[lightboxIndex]?.src"
+                                                        :alt="galleryImages[lightboxIndex]?.caption || 'Gallery Image'"
+                                                        class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
+                                                        style="max-height: 68vh; max-width: 80vw;">
+                                                </template>
                                             </div>
                                         </div>
                                     </div>

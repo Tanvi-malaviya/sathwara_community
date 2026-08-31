@@ -105,13 +105,81 @@
                                 class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                         </div>
 
-                        <div class="space-y-1">
+                        @php
+                            $adminFatherUser = ($profile && !empty($profile->father_member_id)) ? $profile->father_user : null;
+                            $adminInitialFatherCode = old('father_member_id', $profile ? $profile->father_member_id : '');
+                            $adminInitialStatus = $adminFatherUser ? 'found' : (!empty($adminInitialFatherCode) ? 'not_found' : 'idle');
+                            $adminInitialStatusMsg = $adminFatherUser 
+                                ? ($adminFatherUser->display_name . ' (' . ($adminFatherUser->member_code ?: $adminFatherUser->formatted_member_id) . ')') 
+                                : '';
+                        @endphp
+                        <div class="space-y-1"
+                             x-data="{
+                                 fatherCode: '{{ $adminInitialFatherCode }}',
+                                 searching: false,
+                                 status: '{{ $adminInitialStatus }}',
+                                 statusMsg: '{{ addslashes($adminInitialStatusMsg) }}',
+                                 async checkFather() {
+                                     const code = this.fatherCode.trim();
+                                     if (!code) {
+                                         this.status = 'idle';
+                                         this.statusMsg = '';
+                                         return;
+                                     }
+                                     this.searching = true;
+                                     this.status = 'searching';
+                                     try {
+                                         const res = await fetch(`{{ route('api.lookup_father_member') }}?code=${encodeURIComponent(code)}`);
+                                         const data = await res.json();
+                                         if (data.found) {
+                                             this.status = 'found';
+                                             this.statusMsg = data.message;
+                                         } else {
+                                             this.status = 'not_found';
+                                             this.statusMsg = data.message;
+                                         }
+                                     } catch (e) {
+                                         this.status = 'not_found';
+                                         this.statusMsg = 'Error checking member code';
+                                     } finally {
+                                         this.searching = false;
+                                     }
+                                 }
+                             }">
                             <label
                                 class="text-xs font-bold text-slate-500 uppercase">{{ __('messages.father_member_id_label') }}</label>
-                            <input type="text" name="father_member_id"
-                                value="{{ old('father_member_id', $profile ? $profile->father_member_id : '') }}"
-                                placeholder="e.g. #00005"
-                                class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
+                            <div class="flex items-center gap-1.5">
+                                <input type="text" name="father_member_id"
+                                    x-model="fatherCode"
+                                    @keydown.enter.prevent="checkFather()"
+                                    placeholder="e.g. SSAM0653 or #00005"
+                                    class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
+                                <button type="button" 
+                                        @click="checkFather()"
+                                        :disabled="searching"
+                                        class="inline-flex items-center justify-center gap-1 px-3 py-2 bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-bold text-xs rounded-lg transition-all cursor-pointer shrink-0 disabled:opacity-50">
+                                    <template x-if="searching">
+                                        <svg class="w-3.5 h-3.5 animate-spin text-primary-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </template>
+                                    <template x-if="!searching">
+                                        <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </template>
+                                    <span>{{ __('messages.search') }}</span>
+                                </button>
+                            </div>
+                            <div x-show="status === 'found'" class="text-[11px] font-bold text-emerald-600 flex items-center gap-1" x-cloak>
+                                <span>✓</span>
+                                <span x-text="statusMsg"></span>
+                            </div>
+                            <div x-show="status === 'not_found'" class="text-[11px] font-bold text-rose-600 flex items-center gap-1" x-cloak>
+                                <span>✕</span>
+                                <span x-text="statusMsg"></span>
+                            </div>
                         </div>
 
                         <div class="space-y-1">

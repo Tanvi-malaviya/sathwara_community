@@ -324,12 +324,6 @@ class DatabaseSeeder extends Seeder
             'caption' => 'Youth Cultural Event',
             'display_order' => 2
         ]);
-        Gallery::create([
-            'event_id' => $event1->id,
-            'image_path' => 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800',
-            'caption' => 'Sports Ground Setup',
-            'display_order' => 1
-        ]);
 
         // 13. Members Dataset Import
         $this->call(MemberImportSeeder::class);

@@ -111,7 +111,7 @@ class EventController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'event_type' => 'required|in:normal,inam_vitaran,yuva_melo',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'venue' => 'required|string|max:255',
             'google_map_link' => 'nullable|string',
             'date' => 'required|date',
@@ -136,7 +136,7 @@ class EventController extends Controller
         Event::create([
             'title' => $request->title,
             'event_type' => $request->event_type,
-            'description' => $request->description,
+            'description' => $request->description ?? '',
             'venue' => $request->venue,
             'google_map_link' => $request->google_map_link,
             'date' => $request->date,
@@ -202,7 +202,7 @@ class EventController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'event_type' => 'required|in:normal,inam_vitaran,yuva_melo',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'venue' => 'required|string|max:255',
             'google_map_link' => 'nullable|string',
             'date' => 'required|date',
@@ -230,7 +230,7 @@ class EventController extends Controller
         $event->update([
             'title' => $request->title,
             'event_type' => $request->event_type,
-            'description' => $request->description,
+            'description' => $request->description ?? '',
             'venue' => $request->venue,
             'google_map_link' => $request->google_map_link,
             'date' => $request->date,
@@ -319,8 +319,8 @@ class EventController extends Controller
         $event = Event::findOrFail($id);
 
         $request->validate([
-            'image' => 'nullable|file|mimes:zip,jpeg,png,jpg,gif,svg,webp|max:51200',
-            'images.*' => 'nullable|file|mimes:zip,jpeg,png,jpg,gif,svg,webp|max:51200',
+            'image' => 'nullable|file|mimes:zip,jpeg,png,jpg,gif,svg,webp,mp4,mov,webm,ogg,m4v,avi,mkv|max:102400',
+            'images.*' => 'nullable|file|mimes:zip,jpeg,png,jpg,gif,svg,webp,mp4,mov,webm,ogg,m4v,avi,mkv|max:102400',
         ]);
 
         $uploadedCount = 0;
@@ -350,7 +350,7 @@ class EventController extends Controller
                         \RecursiveIteratorIterator::LEAVES_ONLY
                     );
 
-                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'mp4', 'mov', 'webm', 'ogg', 'm4v'];
 
                     foreach ($files as $name => $f) {
                         if (!$f->isDir()) {
@@ -379,10 +379,10 @@ class EventController extends Controller
                     $this->deleteTempDir($tempPath);
 
                     if ($uploadedCount === 0) {
-                        return redirect()->back()->with('error', 'No valid images found inside the ZIP archive.');
+                        return redirect()->back()->with('error', 'No valid photos or videos found inside the ZIP archive.');
                     }
 
-                    return redirect()->back()->with('success', "$uploadedCount photos extracted and uploaded successfully from ZIP archive.");
+                    return redirect()->back()->with('success', "$uploadedCount media files extracted and uploaded successfully from ZIP archive.");
                 } else {
                     return redirect()->back()->with('error', 'Failed to open the ZIP file.');
                 }
@@ -417,7 +417,7 @@ class EventController extends Controller
                                 new \RecursiveDirectoryIterator($tempPath),
                                 \RecursiveIteratorIterator::LEAVES_ONLY
                             );
-                            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'mp4', 'mov', 'webm', 'ogg', 'm4v'];
                             foreach ($files as $name => $f) {
                                 if (!$f->isDir()) {
                                     $filePath = $f->getRealPath();
@@ -455,10 +455,10 @@ class EventController extends Controller
         }
 
         if ($uploadedCount === 0) {
-            return redirect()->back()->with('error', 'Please select images or a ZIP file to upload.');
+            return redirect()->back()->with('error', 'Please select photos, videos, or a ZIP file to upload.');
         }
 
-        return redirect()->back()->with('success', "$uploadedCount gallery photos uploaded successfully.");
+        return redirect()->back()->with('success', "$uploadedCount gallery media uploaded successfully.");
     }
 
     private function deleteTempDir($dirPath)

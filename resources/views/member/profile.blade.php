@@ -184,23 +184,89 @@
                                class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
                     </div>
 
-                    <!-- Father's Member ID -->
-                    <div class="space-y-1.5 sm:col-span-2">
+                    <!-- Father's Member ID with Search & Live Verification -->
+                    @php
+                        $fatherUser = !empty($profile->father_member_id) ? $profile->father_user : null;
+                        $initialFatherCode = old('father_member_id', $profile->father_member_id ?? '');
+                        $initialStatus = $fatherUser ? 'found' : (!empty($initialFatherCode) ? 'not_found' : 'idle');
+                        $initialStatusMsg = $fatherUser 
+                            ? ($fatherUser->display_name . ' (' . ($fatherUser->member_code ?: $fatherUser->formatted_member_id) . ')') 
+                            : (!empty($initialFatherCode) ? __('messages.no_member_found') : '');
+                    @endphp
+                    <div class="space-y-1.5 sm:col-span-2"
+                         x-data="{
+                             fatherCode: '{{ $initialFatherCode }}',
+                             searching: false,
+                             status: '{{ $initialStatus }}',
+                             statusMsg: '{{ addslashes($initialStatusMsg) }}',
+                             async checkFather() {
+                                 const code = this.fatherCode.trim();
+                                 if (!code) {
+                                     this.status = 'idle';
+                                     this.statusMsg = '';
+                                     return;
+                                 }
+                                 this.searching = true;
+                                 this.status = 'searching';
+                                 try {
+                                     const res = await fetch(`{{ route('api.lookup_father_member') }}?code=${encodeURIComponent(code)}`);
+                                     const data = await res.json();
+                                     if (data.found) {
+                                         this.status = 'found';
+                                         this.statusMsg = data.message;
+                                     } else {
+                                         this.status = 'not_found';
+                                         this.statusMsg = data.message;
+                                     }
+                                 } catch (e) {
+                                     this.status = 'not_found';
+                                     this.statusMsg = '{{ app()->getLocale() == "gu" ? "ચકાસણીમાં ભૂલ આવી" : "Error checking member code" }}';
+                                 } finally {
+                                     this.searching = false;
+                                 }
+                             }
+                         }">
                         <label class="text-xs font-bold text-slate-700 block">{{ __('messages.father_member_id_optional') }}</label>
-                        <input type="text" name="father_member_id" value="{{ old('father_member_id', $profile->father_member_id ?? '') }}" placeholder="e.g. #00005 or 5"
-                               class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
-                        @if(!empty($profile->father_member_id))
-                            @php
-                                $fatherUser = $profile->father_user;
-                            @endphp
-                            @if($fatherUser)
-                                <p class="text-[11px] text-emerald-600 font-bold mt-0.5 flex items-center gap-1">
-                                    <span>✓</span>
-                                    <span>{{ $fatherUser->display_name }} ({{ $fatherUser->member_code ?: $fatherUser->formatted_member_id }})</span>
-                                </p>
-                            @endif
-                        @endif
-                    </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <div class="relative flex-1">
+                                <input type="text" 
+                                       name="father_member_id" 
+                                       x-model="fatherCode"
+                                       @keydown.enter.prevent="checkFather()"
+                                       placeholder="e.g. SSAM0653 or #00005"
+                                       class="w-full text-xs font-semibold h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-primary-500 focus:outline-none transition-colors">
+                            </div>
+                            <button type="button" 
+                                    @click="checkFather()"
+                                    :disabled="searching"
+                                    class="inline-flex items-center justify-center gap-1.5 px-4 h-10 bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-bold text-xs rounded-xl transition-all shadow-2xs hover:shadow-xs cursor-pointer shrink-0 disabled:opacity-50">
+                                <template x-if="searching">
+                                    <svg class="w-3.5 h-3.5 animate-spin text-primary-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </template>
+                                <template x-if="!searching">
+                                    <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </template>
+                                <span>{{ __('messages.search') }}</span>
+                            </button>
+                        </div>
+
+                        <!-- Status feedback -->
+                        <div x-show="status === 'found'" class="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-emerald-600" x-cloak>
+                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 text-[10px]">✓</span>
+                            <span x-text="statusMsg"></span>
+                        </div>
+
+                        <div x-show="status === 'not_found'" class="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-rose-600" x-cloak>
+                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-rose-100 text-rose-700 text-[10px]">✕</span>
+                            <span x-text="statusMsg"></span>
+                        </div>
+                    </div></div>
                 </div>
             </div>
 

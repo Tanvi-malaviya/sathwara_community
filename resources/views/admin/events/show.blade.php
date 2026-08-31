@@ -776,29 +776,49 @@
                 <!-- Gallery Grid -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                     @forelse($gallery as $photo)
-                        @php $gpUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
+                        @php $gpUrl = $photo->url; $isGpVideo = $photo->isVideo(); @endphp
                         <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between group">
-                            <!-- Clickable Image with Blurred Background & Full Object Contain -->
+                            <!-- Clickable Media with Blurred Background or Video Stream -->
                             <div class="aspect-video w-full overflow-hidden bg-slate-950 relative flex items-center justify-center cursor-pointer"
                                  @click="galleryLightboxIndex = {{ $loop->index }}; galleryLightbox = true">
-                                <!-- Blurred Backdrop -->
-                                <img src="{{ $gpUrl }}" 
-                                     alt="" 
-                                     aria-hidden="true"
-                                     class="absolute inset-0 w-full h-full pointer-events-none select-none"
-                                     style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                                @if($isGpVideo)
+                                    <video class="w-full h-full object-cover pointer-events-none" preload="metadata" muted playsinline>
+                                        <source src="{{ $gpUrl }}">
+                                    </video>
+                                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 2;">
+                                        <div class="w-10 h-10 rounded-full bg-slate-900/85 border border-white/30 text-white flex items-center justify-center shadow-md backdrop-blur-xs group-hover:scale-110 transition-transform">
+                                            <svg class="w-5 h-5 fill-current ml-0.5 text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                        </div>
+                                    </div>
+                                    <span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md bg-slate-900/80 text-white text-[9px] font-black uppercase tracking-wider backdrop-blur-xs border border-white/20 flex items-center gap-1">
+                                        <svg class="w-2.5 h-2.5 fill-current text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                        Video
+                                    </span>
+                                @else
+                                    <!-- Blurred Backdrop -->
+                                    <img src="{{ $gpUrl }}" 
+                                         alt="" 
+                                         aria-hidden="true"
+                                         class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                         style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
 
-                                <!-- Main Full Image (object-contain, never cropped) -->
-                                <img class="relative w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
-                                     style="z-index: 1;"
-                                     src="{{ $gpUrl }}" 
-                                     alt="Gallery Image">
+                                    <!-- Main Full Image -->
+                                    <img class="relative w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
+                                         style="z-index: 1;"
+                                         src="{{ $gpUrl }}" 
+                                         alt="Gallery Image">
+                                @endif
 
                                 <!-- Hover Overlay -->
                                 <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
                                     <span class="text-white text-[10px] font-bold inline-flex items-center gap-1 bg-slate-900/80 px-2.5 py-1 rounded-full backdrop-blur-xs border border-white/20 shadow-sm">
-                                        <svg class="w-3 h-3 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
-                                        {{ __('messages.preview') }}
+                                        @if($isGpVideo)
+                                            <svg class="w-3 h-3 text-primary-400 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                            Play Video
+                                        @else
+                                            <svg class="w-3 h-3 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                            {{ __('messages.preview') }}
+                                        @endif
                                     </span>
                                 </div>
                             </div>
@@ -2225,13 +2245,24 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </button>
 
-                <!-- Main Centered Preview Image -->
+                <!-- Main Centered Preview Media -->
                 <div class="flex-1 flex items-center justify-center max-w-4xl w-full my-auto px-4 py-8" @click.stop>
                     <div class="relative flex items-center justify-center bg-slate-900/60 p-2 sm:p-3 rounded-2xl border border-white/10 shadow-2xl overflow-hidden max-h-[70vh] max-w-[80vw]">
-                        <img :src="galleryImages[galleryLightboxIndex]?.src" 
-                             :alt="galleryImages[galleryLightboxIndex]?.caption || 'Event Photo'"
-                             class="rounded-xl shadow-lg transition-all duration-300 select-none pointer-events-auto"
-                             style="max-height: 58vh; max-width: 65vw; width: auto; height: auto; object-fit: contain; display: block;">
+                        <template x-if="galleryImages[galleryLightboxIndex]?.isVideo">
+                            <video :src="galleryImages[galleryLightboxIndex]?.src"
+                                   controls
+                                   autoplay
+                                   playsinline
+                                   class="rounded-xl shadow-2xl transition-all duration-300"
+                                   style="max-height: 60vh; max-width: 70vw; width: auto; height: auto; outline: none;">
+                            </video>
+                        </template>
+                        <template x-if="!galleryImages[galleryLightboxIndex]?.isVideo">
+                            <img :src="galleryImages[galleryLightboxIndex]?.src" 
+                                 :alt="galleryImages[galleryLightboxIndex]?.caption || 'Event Media'"
+                                 class="rounded-xl shadow-lg transition-all duration-300 select-none pointer-events-auto"
+                                 style="max-height: 58vh; max-width: 65vw; width: auto; height: auto; object-fit: contain; display: block;">
+                        </template>
                     </div>
                 </div>
 
@@ -2268,8 +2299,9 @@
                 galleryImages: [
                     @foreach($gallery as $photo)
                         {
-                            src: '{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}',
-                            caption: '{{ addslashes($photo->caption ?? $event->title) }}'
+                            src: '{{ $photo->url }}',
+                            caption: '{{ addslashes($photo->caption ?? $event->title) }}',
+                            isVideo: {{ $photo->isVideo() ? 'true' : 'false' }}
                         },
                     @endforeach
                 ],

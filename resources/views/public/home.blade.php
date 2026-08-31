@@ -534,7 +534,7 @@
             lightbox: false,
             lightboxIndex: 0,
             currentGallery: {{ json_encode(collect($galleryPreview)->map(function ($item) {
-        return ['src' => str_starts_with($item->image_path, 'http') ? $item->image_path : asset('storage/' . $item->image_path), 'caption' => $item->caption ?? '']; })->values()) }},
+        return ['src' => $item->url, 'caption' => $item->caption ?? '', 'isVideo' => $item->isVideo()]; })->values()) }},
             openLightbox(index) {
                 this.lightboxIndex = index;
                 this.lightbox = true;
@@ -576,7 +576,6 @@
                 <div class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
                     @foreach($galleryPreview as $index => $item)
                         @php
-                            // Dynamic organic shapes & varied aspect heights for random collage feel
                             $shapes = [
                                 0 => 'h-72 sm:h-80 rounded-[2.2rem]',
                                 1 => 'h-52 sm:h-60 rounded-3xl',
@@ -586,39 +585,60 @@
                                 5 => 'h-60 sm:h-64 rounded-3xl',
                             ];
                             $shapeClass = $shapes[$index % count($shapes)];
-                            $imageUrl = str_starts_with($item->image_path, 'http') ? $item->image_path : asset('storage/' . $item->image_path);
+                            $imageUrl = $item->url;
+                            $isVideo = $item->isVideo();
                         @endphp
                         <div @click="openLightbox({{ $index }})"
                             class="break-inside-avoid group relative w-full overflow-hidden bg-slate-950 border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer flex items-center justify-center {{ $shapeClass }}">
 
-                            <!-- Blurred Background Image (same image, scaled + blurred) -->
-                            <img src="{{ $imageUrl }}"
-                                alt=""
-                                aria-hidden="true"
-                                class="absolute inset-0 w-full h-full pointer-events-none select-none"
-                                style="object-fit: cover; object-position: center; filter: blur(16px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                            @if($isVideo)
+                                <video class="w-full h-full object-cover pointer-events-none" preload="metadata" muted playsinline>
+                                    <source src="{{ $imageUrl }}">
+                                </video>
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 2;">
+                                    <div class="w-12 h-12 rounded-full bg-slate-900/85 border border-white/30 text-white flex items-center justify-center shadow-xl backdrop-blur-xs group-hover:scale-110 transition-transform">
+                                        <svg class="w-6 h-6 fill-current ml-0.5 text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    </div>
+                                </div>
+                                <span class="absolute top-3 left-3 z-10 px-2.5 py-0.5 rounded-lg bg-slate-900/85 text-white text-[10px] font-black uppercase tracking-wider backdrop-blur-xs border border-white/20 flex items-center gap-1">
+                                    <svg class="w-2.5 h-2.5 fill-current text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    Video
+                                </span>
+                            @else
+                                <!-- Blurred Background Image (same image, scaled + blurred) -->
+                                <img src="{{ $imageUrl }}"
+                                    alt=""
+                                    aria-hidden="true"
+                                    class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                    style="object-fit: cover; object-position: center; filter: blur(16px) brightness(0.45); transform: scale(1.12); z-index: 0;">
 
-                            <!-- Main Image (Full object-contain, never cropped) -->
-                            <img class="relative w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
-                                style="z-index: 1;"
-                                src="{{ $imageUrl }}" alt="{{ $item->caption ?: 'Community Gallery' }}">
+                                <!-- Main Image (Full object-contain, never cropped) -->
+                                <img class="relative w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+                                    style="z-index: 1;"
+                                    src="{{ $imageUrl }}" alt="{{ $item->caption ?: 'Community Gallery' }}">
+                            @endif
 
                             <!-- Gradient Overlay & High-Contrast Caption -->
                             <div style="z-index: 10;"
                                 class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent flex items-end p-5 transition-opacity duration-300">
                                 <div class="w-full space-y-2">
                                     <p class="text-sm sm:text-base font-extrabold text-white leading-snug drop-shadow-md truncate">
-                                        {{ $item->caption ?: 'Satwara Community Photo' }}
+                                        {{ $item->caption ?: 'Satwara Community' }}
                                     </p>
 
                                     <!-- High-Visibility Badge -->
                                     <div
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900/85 group-hover:bg-primary-600 backdrop-blur-md border border-white/30 text-white text-xs font-bold shadow-md transition-colors duration-300">
-                                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                        </svg>
-                                        <span class="text-white">{{ __('messages.click_to_enlarge') }}</span>
+                                        @if($isVideo)
+                                            <svg class="w-3.5 h-3.5 text-primary-400 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                            <span class="text-white">Play Video</span>
+                                        @else
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                            </svg>
+                                            <span class="text-white">{{ __('messages.click_to_enlarge') }}</span>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -673,13 +693,24 @@
                         </svg>
                     </button>
 
-                    <!-- Center Content: Image -->
+                    <!-- Center Content: Media -->
                     <div class="relative w-full flex-1 flex flex-col items-center justify-center my-auto max-w-4xl mx-auto px-12 sm:px-20 pb-14"
                         @click.stop>
-                        <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-slate-900/40">
-                            <img :src="currentGallery[lightboxIndex]?.src"
-                                :alt="currentGallery[lightboxIndex]?.caption || 'Gallery Image'"
-                                class="w-auto max-w-full object-contain rounded-xl shadow-2xl" style="max-height: 68vh;">
+                        <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-slate-900/40 flex items-center justify-center">
+                            <template x-if="currentGallery[lightboxIndex]?.isVideo">
+                                <video :src="currentGallery[lightboxIndex]?.src"
+                                       controls
+                                       autoplay
+                                       playsinline
+                                       class="w-auto max-w-full object-contain rounded-xl shadow-2xl"
+                                       style="max-height: 68vh; outline: none;">
+                                </video>
+                            </template>
+                            <template x-if="!currentGallery[lightboxIndex]?.isVideo">
+                                <img :src="currentGallery[lightboxIndex]?.src"
+                                    :alt="currentGallery[lightboxIndex]?.caption || 'Gallery Image'"
+                                    class="w-auto max-w-full object-contain rounded-xl shadow-2xl" style="max-height: 68vh;">
+                            </template>
                         </div>
                     </div>
 

@@ -198,6 +198,7 @@ return [
     'last_name' => 'Last Name',
     'father_member_id' => "Father's Member ID",
     'father_member_id_optional' => "Father's Member ID (If Registered)",
+    'no_member_found' => 'No member found',
     'registered_father_info' => 'Registered Father',
     'blood_group' => 'Blood Group',
     'contact_details_sec' => 'Contact Details',

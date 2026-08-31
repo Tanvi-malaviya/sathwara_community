@@ -13,10 +13,10 @@
     activeEventId: null,
     activeEventTitle: '',
     activeEventDate: '',
-    generalImages: {{ json_encode(collect($generalImages->items())->map(function($img) { return ['src' => str_starts_with($img->image_path, 'http') ? $img->image_path : asset('storage/' . $img->image_path), 'caption' => $img->caption ?? '']; })) }},
+    generalImages: {{ json_encode(collect($generalImages->items())->map(function($img) { return ['src' => $img->url, 'caption' => $img->caption ?? '', 'isVideo' => $img->isVideo()]; })) }},
     eventImages: {
         @foreach($eventsWithGallery as $event)
-            '{{ $event->id }}': {{ json_encode($event->galleries->map(function($img) { return ['src' => str_starts_with($img->image_path, 'http') ? $img->image_path : asset('storage/' . $img->image_path), 'caption' => $img->caption ?? '']; })) }},
+            '{{ $event->id }}': {{ json_encode($event->galleries->map(function($img) { return ['src' => $img->url, 'caption' => $img->caption ?? '', 'isVideo' => $img->isVideo()]; })) }},
         @endforeach
     },
     lightbox: false,
@@ -81,27 +81,6 @@
     }
 }" @keydown.window.escape="lightbox = false" @keydown.window.right="if(lightbox) nextImage()" @keydown.window.left="if(lightbox) prevImage()">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Search bar -->
-        {{-- <div class="mb-6 max-w-md mx-auto">
-            <form method="GET" action="{{ route('gallery') }}" class="flex items-center gap-2">
-                <div class="relative flex-grow">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_gallery_placeholder') }}" 
-                           class="text-xs font-semibold pl-10 pr-4 py-2.5 w-full bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors shadow-xs">
-                    <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    @if(request()->filled('search'))
-                        <a href="{{ route('gallery') }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 font-extrabold text-sm" title="Clear search">
-                            &times;
-                        </a>
-                    @endif
-                </div>
-                <button type="submit" class="px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-2xl shadow-xs transition-colors shrink-0">
-                    {{ __('messages.search') }}
-                </button>
-            </form>
-        </div> --}}
-
         <!-- Tabs selector (Segmented Toggle Pill) -->
         <div class="flex justify-center mb-8">
             <div class="inline-flex p-1.5 bg-white rounded-2xl border border-slate-200/80 shadow-xs gap-1.5">
@@ -122,28 +101,48 @@
         <div x-show="activeTab === 'general'" class="space-y-8">
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 @forelse($generalImages as $photo)
-                    @php $photoImgUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
+                    @php $photoImgUrl = $photo->url; $isVideo = $photo->isVideo(); @endphp
                     <div class="bg-white rounded-3xl border border-slate-200/80 p-2.5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col group overflow-hidden"
                          @click="openLightbox({{ $loop->index }}, 'general')">
                         <div class="relative overflow-hidden rounded-2xl bg-slate-950 flex items-center justify-center" style="aspect-ratio: 4/3;">
-                            <!-- Blurred Background Image -->
-                            <img src="{{ $photoImgUrl }}" 
-                                 alt="" 
-                                 aria-hidden="true"
-                                 class="absolute inset-0 w-full h-full pointer-events-none select-none"
-                                 style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                            @if($isVideo)
+                                <video class="w-full h-full object-cover pointer-events-none" preload="metadata" muted playsinline>
+                                    <source src="{{ $photoImgUrl }}">
+                                </video>
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 2;">
+                                    <div class="w-11 h-11 rounded-full bg-slate-900/85 border border-white/30 text-white flex items-center justify-center shadow-xl backdrop-blur-xs group-hover:scale-110 transition-transform">
+                                        <svg class="w-5 h-5 fill-current ml-0.5 text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    </div>
+                                </div>
+                                <span class="absolute top-2.5 left-2.5 z-10 px-2.5 py-0.5 rounded-lg bg-slate-900/85 text-white text-[10px] font-black uppercase tracking-wider backdrop-blur-xs border border-white/20 flex items-center gap-1">
+                                    <svg class="w-2.5 h-2.5 fill-current text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    Video
+                                </span>
+                            @else
+                                <!-- Blurred Background Image -->
+                                <img src="{{ $photoImgUrl }}" 
+                                     alt="" 
+                                     aria-hidden="true"
+                                     class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                     style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
 
-                            <!-- Main Image (Full object-contain, never cropped) -->
-                            <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
-                                 style="z-index: 1;"
-                                 src="{{ $photoImgUrl }}" 
-                                 alt="{{ $photo->caption }}">
+                                <!-- Main Image -->
+                                <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
+                                     style="z-index: 1;"
+                                     src="{{ $photoImgUrl }}" 
+                                     alt="{{ $photo->caption }}">
+                            @endif
 
                             <!-- Overlay -->
                             <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
                                 <span class="inline-flex items-center gap-1.5 text-white text-xs font-bold bg-slate-900/80 px-3 py-1.5 rounded-xl border border-white/20 backdrop-blur-xs shadow-md">
-                                    <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
-                                    <span>{{ __('messages.click_to_enlarge') }}</span>
+                                    @if($isVideo)
+                                        <svg class="w-3.5 h-3.5 text-primary-400 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                        <span>Play Video</span>
+                                    @else
+                                        <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                        <span>{{ __('messages.click_to_enlarge') }}</span>
+                                    @endif
                                 </span>
                             </div>
                         </div>
@@ -199,7 +198,7 @@
                                                  alt="{{ $event->title }}">
                                         @else
                                             <div class="w-full h-full bg-primary-50 flex items-center justify-center text-primary-500">
-                                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                                             </div>
                                         @endif
                                         
@@ -213,13 +212,13 @@
                                 </div>
                             </div>
 
-                            <!-- Event Folder Title & Photo Count -->
+                            <!-- Event Folder Title & Media Count -->
                             <div class="px-2 pt-1 text-center space-y-1">
                                 <h4 class="text-sm sm:text-base font-black text-slate-900 leading-snug line-clamp-2 group-hover:text-primary-600 transition-colors" title="{{ $event->title }}">
                                     {{ $event->title }}
                                 </h4>
                                 <span class="text-xs text-slate-500 font-bold block">
-                                    {{ $event->galleries->count() }} {{ __('messages.photos') }}
+                                    {{ $event->galleries->count() }} {{ __('messages.photos') }} & Videos
                                 </span>
                             </div>
                         </div>
@@ -257,27 +256,47 @@
                 @foreach($eventsWithGallery as $event)
                     <div x-show="activeEventId === {{ $event->id }}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                         @foreach($event->galleries as $photo)
-                            @php $innerPhotoImgUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
+                            @php $innerPhotoImgUrl = $photo->url; $isInnerVideo = $photo->isVideo(); @endphp
                             <div class="bg-white rounded-3xl border border-slate-200/80 p-2.5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col group overflow-hidden"
                                  @click="openLightbox({{ $loop->index }}, 'event', {{ $event->id }})">
                                 <div class="relative overflow-hidden rounded-2xl bg-slate-950 flex items-center justify-center" style="aspect-ratio: 4/3;">
-                                    <!-- Blurred Background Image -->
-                                    <img src="{{ $innerPhotoImgUrl }}" 
-                                         alt="" 
-                                         aria-hidden="true"
-                                         class="absolute inset-0 w-full h-full pointer-events-none select-none"
-                                         style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                                    @if($isInnerVideo)
+                                        <video class="w-full h-full object-cover pointer-events-none" preload="metadata" muted playsinline>
+                                            <source src="{{ $innerPhotoImgUrl }}">
+                                        </video>
+                                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 2;">
+                                            <div class="w-11 h-11 rounded-full bg-slate-900/85 border border-white/30 text-white flex items-center justify-center shadow-xl backdrop-blur-xs group-hover:scale-110 transition-transform">
+                                                <svg class="w-5 h-5 fill-current ml-0.5 text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                            </div>
+                                        </div>
+                                        <span class="absolute top-2.5 left-2.5 z-10 px-2.5 py-0.5 rounded-lg bg-slate-900/85 text-white text-[10px] font-black uppercase tracking-wider backdrop-blur-xs border border-white/20 flex items-center gap-1">
+                                            <svg class="w-2.5 h-2.5 fill-current text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                            Video
+                                        </span>
+                                    @else
+                                        <!-- Blurred Background Image -->
+                                        <img src="{{ $innerPhotoImgUrl }}" 
+                                             alt="" 
+                                             aria-hidden="true"
+                                             class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                             style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
 
-                                    <!-- Main Image (Full object-contain, never cropped) -->
-                                    <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
-                                         style="z-index: 1;"
-                                         src="{{ $innerPhotoImgUrl }}" 
-                                         alt="{{ $photo->caption }}">
+                                        <!-- Main Image -->
+                                        <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
+                                             style="z-index: 1;"
+                                             src="{{ $innerPhotoImgUrl }}" 
+                                             alt="{{ $photo->caption }}">
+                                    @endif
 
                                     <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
                                         <span class="inline-flex items-center gap-1.5 text-white text-xs font-bold bg-slate-900/80 px-3 py-1.5 rounded-xl border border-white/20 backdrop-blur-xs shadow-md">
-                                            <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
-                                            <span>{{ __('messages.click_to_enlarge') }}</span>
+                                            @if($isInnerVideo)
+                                                <svg class="w-3.5 h-3.5 text-primary-400 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                <span>Play Video</span>
+                                            @else
+                                                <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                                <span>{{ __('messages.click_to_enlarge') }}</span>
+                                            @endif
                                         </span>
                                     </div>
                                 </div>
@@ -303,23 +322,23 @@
                  @click="lightbox = false" 
                  x-cloak>
                 
-                <!-- PREVIOUS ARROW BUTTON (Fixed on Far Left Edge of Screen) -->
+                <!-- PREVIOUS ARROW BUTTON -->
                 <button x-show="currentGallery.length > 0" 
                         @click.stop="prevImage()" 
                         style="position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 10000000;"
                         class="left-4 sm:left-8 group p-2.5 sm:p-3 rounded-full bg-slate-900/80 hover:bg-primary-500 text-white border border-white/20 hover:border-primary-400 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-                        title="Previous Image (Left Arrow)">
+                        title="Previous (Left Arrow)">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </button>
 
-                <!-- NEXT ARROW BUTTON (Fixed on Far Right Edge of Screen) -->
+                <!-- NEXT ARROW BUTTON -->
                 <button x-show="currentGallery.length > 0" 
                         @click.stop="nextImage()" 
                         style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 10000000;"
                         class="right-4 sm:right-8 group p-2.5 sm:p-3 rounded-full bg-slate-900/80 hover:bg-primary-500 text-white border border-white/20 hover:border-primary-400 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-                        title="Next Image (Right Arrow)">
+                        title="Next (Right Arrow)">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
                     </svg>
@@ -336,20 +355,30 @@
                     </button>
                 </div>
 
-                <!-- Main Section: Centered Image -->
+                <!-- Main Section: Centered Media -->
                 <div class="relative w-full flex-1 flex items-center justify-center my-auto max-w-5xl mx-auto px-4 pb-14" @click.stop>
-                    <!-- Center Container: Image -->
                     <div class="relative flex flex-col items-center justify-center max-w-full max-h-full">
-                        <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-900/50">
-                            <img :src="currentGallery[lightboxIndex]?.src" 
-                                 :alt="currentGallery[lightboxIndex]?.caption || 'Gallery Image'" 
-                                 class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
-                                 style="max-height: 68vh; max-width: 80vw;">
+                        <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-900/50 flex items-center justify-center">
+                            <template x-if="currentGallery[lightboxIndex]?.isVideo">
+                                <video :src="currentGallery[lightboxIndex]?.src"
+                                       controls
+                                       autoplay
+                                       playsinline
+                                       class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
+                                       style="max-height: 68vh; max-width: 80vw; outline: none;">
+                                </video>
+                            </template>
+                            <template x-if="!currentGallery[lightboxIndex]?.isVideo">
+                                <img :src="currentGallery[lightboxIndex]?.src" 
+                                     :alt="currentGallery[lightboxIndex]?.caption || 'Gallery Image'" 
+                                     class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
+                                     style="max-height: 68vh; max-width: 80vw;">
+                            </template>
                         </div>
                     </div>
                 </div>
 
-                <!-- Bottom Bar: Image Numbers Counter (Bottom Center) -->
+                <!-- Bottom Bar: Numbers Counter -->
                 <div x-show="currentGallery.length > 0" 
                      style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 10000000;"
                      class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-white/20 text-white text-xs font-bold shadow-2xl backdrop-blur-md">
