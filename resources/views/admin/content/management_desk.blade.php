@@ -116,8 +116,10 @@
                             <td class="py-3 px-4 text-right">
                                 <div class="flex justify-end items-center space-x-2">
                                     {{-- Edit --}}
+                                    @php $mPhoto = str_starts_with($m->photo_path, 'http') ? $m->photo_path : asset('storage/' . $m->photo_path); @endphp
                                     <button type="button" @click="openEdit({
                                                                         id: {{ $m->id }},
+                                                                        photo_url: '{{ $mPhoto }}',
                                                                         name: {{ json_encode($m->name) }},
                                                                         name_gu: {{ json_encode($m->name_gu) }},
                                                                         designation: {{ json_encode($m->designation) }},
@@ -150,7 +152,14 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-12 text-center text-slate-400">{{ __('messages.no_desk_entries_yet') }}
+                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                <div class="flex flex-col items-center justify-center space-y-2">
+                                    <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    <p class="text-xs font-semibold text-slate-500">{{ __('messages.no_desk_members_found') }}</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -168,18 +177,19 @@
         <!-- ============ ADD MODAL ============ -->
         <template x-teleport="body">
             <div x-show="showAddModal"
+                x-data="{ addPhotoPreview: null }"
                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
                 x-cloak>
-                <div @click.away="showAddModal = false"
+                <div @click.away="showAddModal = false; addPhotoPreview = null"
                     class="bg-white rounded-xl p-5 border border-slate-100 shadow-2xl max-w-2xl w-full space-y-4 relative max-h-[90vh] overflow-y-auto">
-                    <button @click="showAddModal = false"
+                    <button @click="showAddModal = false; addPhotoPreview = null"
                         class="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
-                    <h3 class="text-xs font-black text-slate-900 pr-6 uppercase tracking-wider">{{ __('messages.new_desk_message') }}</h3>
+                    <h3 class="text-xs font-black text-slate-900 pr-6 uppercase tracking-wider">{{ __('messages.add_desk_entry_modal_title') }}</h3>
                     <form method="POST" action="{{ route('admin.content.desk.store') }}" enctype="multipart/form-data"
                         class="space-y-3.5">
                         @csrf
@@ -225,12 +235,22 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 items-end">
                             <div class="space-y-1">
                                 <label
-                                    class="text-[11px] font-bold text-slate-700">{{ __('messages.photo_square_max2mb') }} <span class="text-rose-500">*</span></label>
-                                <input type="file" name="photo" required
-                                    class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                                    class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                                    <span>{{ __('messages.photo_square_max2mb') }} <span class="text-rose-500">*</span></span>
+                                    <span x-show="addPhotoPreview" class="text-emerald-600 font-bold text-[9.5px]">{{ __('messages.preview') }}</span>
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <div x-show="addPhotoPreview" class="w-10 h-12 rounded-lg overflow-hidden bg-slate-950 border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 relative">
+                                        <img :src="addPhotoPreview" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full pointer-events-none select-none" style="object-fit: cover; object-position: center; filter: blur(10px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                                        <img :src="addPhotoPreview" alt="Preview" class="relative w-full h-full object-contain" style="z-index: 1;">
+                                    </div>
+                                    <input type="file" name="photo" required accept="image/*"
+                                        @change="const file = $event.target.files[0]; if(file) { addPhotoPreview = URL.createObjectURL(file); }"
+                                        class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer border border-slate-200 rounded-lg p-1 bg-slate-50">
+                                </div>
                             </div>
                             <div class="space-y-1">
                                 <label
@@ -250,7 +270,7 @@
                         </div>
 
                         <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                            <button type="button" @click="showAddModal = false"
+                            <button type="button" @click="showAddModal = false; addPhotoPreview = null"
                                 class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">{{ __('messages.cancel') }}</button>
                             <button type="submit"
                                 class="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">{{ __('messages.add_entry_submit') }}</button>
@@ -263,11 +283,12 @@
         <!-- ============ EDIT MODAL ============ -->
         <template x-teleport="body">
             <div x-show="showEditModal"
+                x-data="{ newEditPhotoPreview: null }"
                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition
                 x-cloak>
-                <div @click.away="showEditModal = false"
+                <div @click.away="showEditModal = false; newEditPhotoPreview = null"
                     class="bg-white rounded-xl p-5 border border-slate-100 shadow-2xl max-w-2xl w-full space-y-4 relative max-h-[90vh] overflow-y-auto">
-                    <button @click="showEditModal = false"
+                    <button @click="showEditModal = false; newEditPhotoPreview = null"
                         class="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
@@ -320,12 +341,39 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 items-end">
                             <div class="space-y-1">
                                 <label
-                                    class="text-[11px] font-bold text-slate-700">{{ __('messages.replace_photo_optional') }}</label>
-                                <input type="file" name="photo"
-                                    class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                                    class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                                    <span>{{ __('messages.replace_photo_optional') }}</span>
+                                    <span x-show="newEditPhotoPreview" class="text-emerald-600 font-bold text-[9.5px]">{{ __('messages.preview') }} ({{ __('messages.new') ?? 'New' }})</span>
+                                    <span x-show="!newEditPhotoPreview && editDesk.photo_url" class="text-primary-600 font-bold text-[9.5px]">{{ __('messages.current_image') }}</span>
+                                </label>
+
+                                <div class="flex items-center gap-2">
+                                    <!-- Photo Preview Container -->
+                                    <div x-show="newEditPhotoPreview || editDesk.photo_url" 
+                                         class="w-10 h-12 rounded-lg overflow-hidden bg-slate-950 border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 relative">
+                                        <!-- Blurred Backdrop -->
+                                        <img :src="newEditPhotoPreview || editDesk.photo_url" 
+                                             alt="" 
+                                             aria-hidden="true" 
+                                             class="absolute inset-0 w-full h-full pointer-events-none select-none" 
+                                             style="object-fit: cover; object-position: center; filter: blur(10px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                                        <!-- Main Image -->
+                                        <img :src="newEditPhotoPreview || editDesk.photo_url" 
+                                             alt="Member Photo" 
+                                             class="relative w-full h-full object-contain" 
+                                             style="z-index: 1;"
+                                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Member&background=fef2f2&color=dc2626&size=256&bold=true';">
+                                    </div>
+
+                                    <div class="flex-1 min-w-0">
+                                        <input type="file" name="photo" accept="image/*"
+                                            @change="const file = $event.target.files[0]; if(file) { newEditPhotoPreview = URL.createObjectURL(file); }"
+                                            class="text-[10px] block w-full text-slate-500 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer border border-slate-200 rounded-lg p-0.5 bg-slate-50">
+                                    </div>
+                                </div>
                             </div>
                             <div class="space-y-1">
                                 <label
@@ -345,7 +393,7 @@
                         </div>
 
                         <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                            <button type="button" @click="showEditModal = false"
+                            <button type="button" @click="showEditModal = false; newEditPhotoPreview = null"
                                 class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">{{ __('messages.cancel') }}</button>
                             <button type="submit"
                                 class="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white font-extrabold text-xs rounded-xl shadow-xs transition-colors cursor-pointer">{{ __('messages.save_changes') }}</button>

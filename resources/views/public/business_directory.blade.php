@@ -81,9 +81,11 @@
                             <div>
                                 <!-- Top Row: Logo + Category Badge (Zero Overlapping) -->
                                 <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
-                                    <img class="w-12 h-12 rounded-xl object-cover bg-slate-50 border border-slate-200/80 shadow-xs shrink-0 group-hover:scale-105 transition-transform duration-300" 
-                                         src="{{ str_starts_with($biz->logo_path, 'http') ? $biz->logo_path : asset('storage/' . $biz->logo_path) }}" 
-                                         alt="{{ $biz->business_name }}">
+                                    <div class="w-12 h-12 rounded-xl bg-white border border-slate-200/80 shadow-xs shrink-0 p-0.5 flex items-center justify-center overflow-hidden">
+                                        <img class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" 
+                                             src="{{ str_starts_with($biz->logo_path, 'http') ? $biz->logo_path : asset('storage/' . $biz->logo_path) }}" 
+                                             alt="{{ $biz->business_name }}">
+                                    </div>
                                     
                                     <div class="flex flex-col items-end gap-1 shrink-0">
                                         <span class="text-[11px] font-extrabold text-primary-700 bg-primary-50 border border-primary-100 px-2.5 py-0.5 rounded-md uppercase tracking-wider">

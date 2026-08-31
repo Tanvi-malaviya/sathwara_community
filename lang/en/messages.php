@@ -35,6 +35,8 @@ return [
     'latest_updates' => 'Latest Updates',
     'featured_businesses' => 'Featured Businesses',
     'gallery_preview' => 'Gallery Preview',
+    'preview' => 'Preview',
+    'current_image' => 'Current Image',
     'testimonials' => 'Testimonials',
     'contact_section' => 'Contact Section',
     'mission' => 'Mission',

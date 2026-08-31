@@ -20,9 +20,11 @@
             </div>
 
             <div class="flex flex-col md:flex-row items-center gap-5">
-                <img class="w-20 h-20 rounded-2xl object-cover bg-white border-2 border-slate-700 shadow-xl shrink-0"
-                    src="{{ str_starts_with($business->logo_path, 'http') ? $business->logo_path : asset('storage/' . $business->logo_path) }}"
-                    alt="{{ $business->business_name }}">
+                <div class="w-20 h-20 rounded-2xl bg-white border-2 border-slate-700 shadow-xl shrink-0 p-1 flex items-center justify-center overflow-hidden">
+                    <img class="w-full h-full object-contain"
+                        src="{{ str_starts_with($business->logo_path, 'http') ? $business->logo_path : asset('storage/' . $business->logo_path) }}"
+                        alt="{{ $business->business_name }}">
+                </div>
                 <div class="text-center md:text-left space-y-1.5">
                     <span
                         class="text-[10px] font-black text-primary-400 bg-primary-500/10 border border-primary-500/20 px-3 py-0.5 rounded-full uppercase tracking-wider inline-block">
@@ -107,16 +109,27 @@
                              @keydown.window.right="if(lightbox) nextImage()"
                              @keydown.window.left="if(lightbox) prevImage()">
                         @foreach($business->gallery_images as $idx => $img)
+                            @php $bImgUrl = str_starts_with($img, 'http') ? $img : asset('storage/' . $img); @endphp
                             <div @click="lightboxIndex = {{ $idx }}; lightbox = true"
-                                class="relative aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-200/80 group cursor-pointer shadow-2xs hover:shadow-md transition-all duration-300">
-                                <img src="{{ str_starts_with($img, 'http') ? $img : asset('storage/' . $img) }}"
+                                class="relative aspect-square rounded-xl overflow-hidden bg-slate-950 border border-slate-200/80 group cursor-pointer shadow-2xs hover:shadow-md transition-all duration-300 flex items-center justify-center">
+                                <!-- Blurred Background Image -->
+                                <img src="{{ $bImgUrl }}"
+                                    alt=""
+                                    aria-hidden="true"
+                                    class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                    style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                                <!-- Main Image (Full object-contain, never cropped) -->
+                                <img src="{{ $bImgUrl }}"
                                     alt="Gallery image"
-                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    class="relative w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                                    style="z-index: 1;">
+
                                 <div
-                                    class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
                                     <span
-                                        class="p-2 rounded-full bg-white/90 text-slate-900 transform translate-y-2 group-hover:translate-y-0 transition-transform shadow-md">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        class="p-2 rounded-full bg-slate-900/80 text-white border border-white/20 backdrop-blur-xs transform translate-y-2 group-hover:translate-y-0 transition-transform shadow-md">
+                                        <svg class="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7">
                                             </path>

@@ -3,7 +3,11 @@
 @section('page_title', __('messages.event_details'))
 
 @section('content')
-    <div class="space-y-4" x-data="adminEventShowData()">
+    <div class="space-y-4" 
+         x-data="adminEventShowData()"
+         @keydown.window.escape="galleryLightbox = false"
+         @keydown.window.right="if(galleryLightbox) nextGalleryImage()"
+         @keydown.window.left="if(galleryLightbox) prevGalleryImage()">
         @php
             $user = auth()->user();
             $userPerms = $user->permissions->pluck('name');
@@ -258,19 +262,6 @@
                                 <span class="text-lg font-black text-purple-400 block">{{ $stats['total_yuva_forms'] ?? 0 }}</span>
                             </div>
                             @endif
-
-                            <!-- Sponsorship Stats Box (Clickable to switch to Sponsorship Tab) -->
-                            <div @click="mainTab = 'sponsorship'; sponsorshipSubTab = 'sponsors'"
-                                class="bg-amber-950/40 hover:bg-amber-900/60 p-2.5 rounded-lg border border-amber-500/30 flex flex-col justify-center items-center cursor-pointer transition-all hover:scale-[1.02] col-span-2">
-                                <div class="flex items-center justify-between w-full">
-                                    <span class="text-[9px] font-extrabold text-amber-300 uppercase block truncate">💎 {{ __('messages.sponsors_total_fund') }}</span>
-                                    <span class="text-[9px] text-amber-400 font-bold underline">{{ __('messages.view_all') }} →</span>
-                                </div>
-                                <div class="flex items-center justify-between w-full mt-1">
-                                    <span class="text-base font-black text-amber-300">{{ $sponsorsCount }} <span class="text-[10px] font-normal text-amber-200/70">({{ $approvedSponsorsCount }} {{ __('messages.approved') }})</span></span>
-                                    <span class="text-sm font-black text-emerald-400">₹{{ number_format($totalSponsorshipAmount) }}</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -785,14 +776,33 @@
                 <!-- Gallery Grid -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                     @forelse($gallery as $photo)
-                        <div
-                            class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-2xs flex flex-col justify-between group hover:border-slate-300 transition-all">
-                            <div class="aspect-video w-full overflow-hidden bg-slate-50 relative">
-                                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    src="{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}"
-                                    alt="Gallery Image">
+                        @php $gpUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
+                        <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between group">
+                            <!-- Clickable Image with Blurred Background & Full Object Contain -->
+                            <div class="aspect-video w-full overflow-hidden bg-slate-950 relative flex items-center justify-center cursor-pointer"
+                                 @click="galleryLightboxIndex = {{ $loop->index }}; galleryLightbox = true">
+                                <!-- Blurred Backdrop -->
+                                <img src="{{ $gpUrl }}" 
+                                     alt="" 
+                                     aria-hidden="true"
+                                     class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                     style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                                <!-- Main Full Image (object-contain, never cropped) -->
+                                <img class="relative w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
+                                     style="z-index: 1;"
+                                     src="{{ $gpUrl }}" 
+                                     alt="Gallery Image">
+
+                                <!-- Hover Overlay -->
+                                <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
+                                    <span class="text-white text-[10px] font-bold inline-flex items-center gap-1 bg-slate-900/80 px-2.5 py-1 rounded-full backdrop-blur-xs border border-white/20 shadow-sm">
+                                        <svg class="w-3 h-3 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                        {{ __('messages.preview') }}
+                                    </span>
+                                </div>
                             </div>
-                            <div class="p-2 border-t border-slate-100 bg-slate-50/50">
+                            <div class="p-2.5 border-t border-slate-100 bg-white">
                                 <button type="button"
                                     @click="$dispatch('confirm-delete', { action: '{{ route('admin.events.gallery.destroy', $photo->id) }}', message: '{{ __('messages.delete_photo_confirm') }}' })"
                                     class="w-full py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[9px] rounded-lg transition-colors cursor-pointer">
@@ -2175,6 +2185,66 @@
                 </div>
             </div>
         </template>
+
+        <!-- Event Gallery Lightbox Preview Modal -->
+        <template x-teleport="body">
+            <div x-show="galleryLightbox" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 style="position: fixed; inset: 0; z-index: 999999; background-color: rgba(15, 23, 42, 0.96); backdrop-filter: blur(12px);"
+                 class="flex flex-col items-center justify-between p-4 sm:p-6 select-none" 
+                 @click="galleryLightbox = false"
+                 x-cloak>
+                
+                <!-- Close button (Top Right) -->
+                <button @click="galleryLightbox = false" 
+                        style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: 1000000;"
+                        class="p-2.5 rounded-full bg-slate-800/90 hover:bg-rose-600 text-white border border-white/20 hover:border-rose-500 transition-all duration-200 cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+                        title="Close (Esc)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <!-- Prev / Next Navigation Buttons -->
+                <button x-show="galleryImages.length > 1" 
+                        @click.stop="prevGalleryImage()" 
+                        style="position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 1000000;"
+                        class="p-3 rounded-full bg-slate-800/90 hover:bg-white text-white hover:text-slate-900 border border-white/20 hover:border-white transition-all duration-200 cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+                        title="Previous Image (Left Arrow)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+
+                <button x-show="galleryImages.length > 1" 
+                        @click.stop="nextGalleryImage()" 
+                        style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 1000000;"
+                        class="p-3 rounded-full bg-slate-800/90 hover:bg-white text-white hover:text-slate-900 border border-white/20 hover:border-white transition-all duration-200 cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+                        title="Next Image (Right Arrow)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+
+                <!-- Main Centered Preview Image -->
+                <div class="flex-1 flex items-center justify-center max-w-4xl w-full my-auto px-4 py-8" @click.stop>
+                    <div class="relative flex items-center justify-center bg-slate-900/60 p-2 sm:p-3 rounded-2xl border border-white/10 shadow-2xl overflow-hidden max-h-[70vh] max-w-[80vw]">
+                        <img :src="galleryImages[galleryLightboxIndex]?.src" 
+                             :alt="galleryImages[galleryLightboxIndex]?.caption || 'Event Photo'"
+                             class="rounded-xl shadow-lg transition-all duration-300 select-none pointer-events-auto"
+                             style="max-height: 58vh; max-width: 65vw; width: auto; height: auto; object-fit: contain; display: block;">
+                    </div>
+                </div>
+
+                <!-- Bottom Image Counter -->
+                <div x-show="galleryImages.length > 0"
+                     style="position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 1000000;"
+                     class="px-4 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-md border border-white/20 text-white font-bold text-xs tracking-wider shadow-xl flex items-center gap-1.5">
+                    <span class="text-primary-400 font-black" x-text="galleryLightboxIndex + 1"></span>
+                    <span class="text-white/40">/</span>
+                    <span class="text-white/80" x-text="galleryImages.length"></span>
+                </div>
+            </div>
+        </template>
     </div>
 
     <script>
@@ -2191,6 +2261,28 @@
                 showDetailsModal: false,
                 selectedRegistration: {},
                 previewLang: @json(app()->getLocale() === 'gu' ? 'gu' : 'en'),
+
+                // Gallery Lightbox State
+                galleryLightbox: false,
+                galleryLightboxIndex: 0,
+                galleryImages: [
+                    @foreach($gallery as $photo)
+                        {
+                            src: '{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}',
+                            caption: '{{ addslashes($photo->caption ?? $event->title) }}'
+                        },
+                    @endforeach
+                ],
+                nextGalleryImage() {
+                    if (this.galleryImages.length > 0) {
+                        this.galleryLightboxIndex = (this.galleryLightboxIndex + 1) % this.galleryImages.length;
+                    }
+                },
+                prevGalleryImage() {
+                    if (this.galleryImages.length > 0) {
+                        this.galleryLightboxIndex = (this.galleryLightboxIndex - 1 + this.galleryImages.length) % this.galleryImages.length;
+                    }
+                },
 
                 // Sponsorship state
                 sponsorFilterType: 'all',

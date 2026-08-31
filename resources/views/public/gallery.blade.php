@@ -122,15 +122,27 @@
         <div x-show="activeTab === 'general'" class="space-y-8">
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 @forelse($generalImages as $photo)
+                    @php $photoImgUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
                     <div class="bg-white rounded-3xl border border-slate-200/80 p-2.5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col group overflow-hidden"
                          @click="openLightbox({{ $loop->index }}, 'general')">
-                        <div class="relative overflow-hidden rounded-2xl bg-slate-50" style="aspect-ratio: 4/3;">
-                            <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                                 src="{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}" 
+                        <div class="relative overflow-hidden rounded-2xl bg-slate-950 flex items-center justify-center" style="aspect-ratio: 4/3;">
+                            <!-- Blurred Background Image -->
+                            <img src="{{ $photoImgUrl }}" 
+                                 alt="" 
+                                 aria-hidden="true"
+                                 class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                 style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                            <!-- Main Image (Full object-contain, never cropped) -->
+                            <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
+                                 style="z-index: 1;"
+                                 src="{{ $photoImgUrl }}" 
                                  alt="{{ $photo->caption }}">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <span class="inline-flex items-center gap-1.5 text-white text-xs font-bold bg-slate-900/80 px-3 py-1.5 rounded-xl border border-white/20">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+
+                            <!-- Overlay -->
+                            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
+                                <span class="inline-flex items-center gap-1.5 text-white text-xs font-bold bg-slate-900/80 px-3 py-1.5 rounded-xl border border-white/20 backdrop-blur-xs shadow-md">
+                                    <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
                                     <span>{{ __('messages.click_to_enlarge') }}</span>
                                 </span>
                             </div>
@@ -169,14 +181,21 @@
                                 
                                 <!-- Main Album Cover -->
                                 <div class="relative w-full h-full rounded-3xl overflow-hidden bg-white border border-slate-200/80 shadow-sm z-10 p-2.5">
-                                    <div class="relative aspect-square w-full rounded-2xl overflow-hidden bg-slate-100 shrink-0">
-                                        @if($event->galleries->first())
-                                            <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                                                 src="{{ str_starts_with($event->galleries->first()->image_path, 'http') ? $event->galleries->first()->image_path : asset('storage/' . $event->galleries->first()->image_path) }}" 
-                                                 alt="{{ $event->title }}">
-                                        @elseif($event->banner_path)
-                                            <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                                                 src="{{ str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path) }}" 
+                                    <div class="relative aspect-square w-full rounded-2xl overflow-hidden bg-slate-950 shrink-0 flex items-center justify-center">
+                                        @php
+                                            $coverImg = $event->galleries->first()?->image_path ?? $event->banner_path;
+                                            $coverImgUrl = $coverImg ? (str_starts_with($coverImg, 'http') ? $coverImg : asset('storage/' . $coverImg)) : null;
+                                        @endphp
+                                        @if($coverImgUrl)
+                                            <img src="{{ $coverImgUrl }}" 
+                                                 alt="" 
+                                                 aria-hidden="true"
+                                                 class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                                 style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                                            <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
+                                                 style="z-index: 1;"
+                                                 src="{{ $coverImgUrl }}" 
                                                  alt="{{ $event->title }}">
                                         @else
                                             <div class="w-full h-full bg-primary-50 flex items-center justify-center text-primary-500">
@@ -185,7 +204,7 @@
                                         @endif
                                         
                                         <!-- Overlay -->
-                                        <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
                                             <span class="text-white text-xs font-extrabold bg-primary-600 px-3 py-1.5 rounded-xl tracking-wider uppercase shadow-md">
                                                 {{ __('messages.view_album') }}
                                             </span>
@@ -238,15 +257,26 @@
                 @foreach($eventsWithGallery as $event)
                     <div x-show="activeEventId === {{ $event->id }}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                         @foreach($event->galleries as $photo)
+                            @php $innerPhotoImgUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
                             <div class="bg-white rounded-3xl border border-slate-200/80 p-2.5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col group overflow-hidden"
                                  @click="openLightbox({{ $loop->index }}, 'event', {{ $event->id }})">
-                                <div class="relative overflow-hidden rounded-2xl bg-slate-50" style="aspect-ratio: 4/3;">
-                                    <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                                         src="{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}" 
+                                <div class="relative overflow-hidden rounded-2xl bg-slate-950 flex items-center justify-center" style="aspect-ratio: 4/3;">
+                                    <!-- Blurred Background Image -->
+                                    <img src="{{ $innerPhotoImgUrl }}" 
+                                         alt="" 
+                                         aria-hidden="true"
+                                         class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                         style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                                    <!-- Main Image (Full object-contain, never cropped) -->
+                                    <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
+                                         style="z-index: 1;"
+                                         src="{{ $innerPhotoImgUrl }}" 
                                          alt="{{ $photo->caption }}">
-                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <span class="inline-flex items-center gap-1.5 text-white text-xs font-bold bg-slate-900/80 px-3 py-1.5 rounded-xl border border-white/20">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+
+                                    <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
+                                        <span class="inline-flex items-center gap-1.5 text-white text-xs font-bold bg-slate-900/80 px-3 py-1.5 rounded-xl border border-white/20 backdrop-blur-xs shadow-md">
+                                            <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
                                             <span>{{ __('messages.click_to_enlarge') }}</span>
                                         </span>
                                     </div>

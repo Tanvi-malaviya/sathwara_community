@@ -9,7 +9,32 @@
         $canAddGallery = $user->hasRole('Administrator') || $userPerms->contains('gallery_manage') || $userPerms->contains('gallery_add');
         $canDeleteGallery = $user->hasRole('Administrator') || $userPerms->contains('gallery_manage') || $userPerms->contains('gallery_delete');
     @endphp
-    <div x-data="{ showAddModal: @json($errors->any()) }">
+    <div x-data="{ 
+            showAddModal: @json($errors->any()),
+            lightbox: false,
+            lightboxIndex: 0,
+            galleryImages: [
+                @foreach($photos as $photo)
+                    {
+                        src: '{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}',
+                        caption: '{{ addslashes($photo->caption ?? 'Gallery Photo') }}'
+                    },
+                @endforeach
+            ],
+            nextImage() {
+                if (this.galleryImages.length > 0) {
+                    this.lightboxIndex = (this.lightboxIndex + 1) % this.galleryImages.length;
+                }
+            },
+            prevImage() {
+                if (this.galleryImages.length > 0) {
+                    this.lightboxIndex = (this.lightboxIndex - 1 + this.galleryImages.length) % this.galleryImages.length;
+                }
+            }
+        }"
+        @keydown.window.escape="lightbox = false"
+        @keydown.window.right="if(lightbox) nextImage()"
+        @keydown.window.left="if(lightbox) prevImage()">
         <!-- Header Actions -->
         <div class="flex items-center justify-end gap-2 bg-white p-3 rounded-xl border border-slate-100 shadow-xs mb-4">
             <a href="{{ route('admin.gallery.export', request()->all()) }}"
@@ -20,7 +45,7 @@
 
             @if($canAddGallery)
                 <button @click="showAddModal = true"
-                    class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 font-bold text-xs text-white rounded-xl shadow-xs transition-transform hover:-translate-y-0.5 shrink-0 whitespace-nowrap">
+                    class="inline-flex items-center justify-center px-4 py-2 bg-primary-500 hover:bg-primary-600 font-bold text-xs text-white rounded-xl shadow-xs transition-transform hover:-translate-y-0.5 shrink-0 whitespace-nowrap cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -31,19 +56,38 @@
         </div>
 
         <!-- Photos Grid List -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             @forelse($photos as $photo)
-                <div class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-                    <div class="aspect-square w-full overflow-hidden bg-slate-50 relative">
-                        <img class="w-full h-full object-cover"
-                            src="{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}"
-                            alt="Gallery Image">
+                @php $pUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
+                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow group">
+                    <div class="aspect-square w-full overflow-hidden bg-slate-950 relative flex items-center justify-center cursor-pointer"
+                         @click="lightboxIndex = {{ $loop->index }}; lightbox = true">
+                        <!-- Blurred Backdrop -->
+                        <img src="{{ $pUrl }}" 
+                             alt="" 
+                             aria-hidden="true"
+                             class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                             style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+
+                        <!-- Main Image (Full contain) -->
+                        <img class="relative w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                             style="z-index: 1;"
+                             src="{{ $pUrl }}"
+                             alt="Gallery Image">
+
+                        <!-- Hover Overlay -->
+                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
+                            <span class="text-white text-[10px] font-bold inline-flex items-center gap-1 bg-slate-900/80 px-2.5 py-1 rounded-full backdrop-blur-xs border border-white/20 shadow-sm">
+                                <svg class="w-3 h-3 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                {{ __('messages.preview') ?? 'Preview' }}
+                            </span>
+                        </div>
                     </div>
                     @if($canDeleteGallery)
-                        <div class="p-3">
+                        <div class="p-3 bg-white">
                             <button type="button"
                                 @click="$dispatch('confirm-delete', { action: '{{ route('admin.gallery.destroy', $photo->id) }}', message: '{{ __('messages.delete_confirm_gallery_photo') }}' })"
-                                class="w-full py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] rounded-lg transition-colors">
+                                class="w-full py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] rounded-lg transition-colors cursor-pointer">
                                 {{ __('messages.delete_image') }}
                             </button>
                         </div>
@@ -101,19 +145,79 @@
                                 class="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 border border-slate-200 rounded-lg p-1 w-full bg-slate-50">
                         </div>
 
-                        <div class="flex items-center justify-end space-x-2 pt-2">
-                            <button type="button" @click="showAddModal = false"
-                                class="px-3 py-1.5 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition-colors">
-                                {{ __('messages.cancel') }}
-                            </button>
-                            <button type="submit"
-                                class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors">
-                                {{ __('messages.upload_photos') }}
-                            </button>
-                        </div>
-                    </form>
+                    <div class="flex items-center justify-end space-x-2 pt-2">
+                        <button type="button" @click="showAddModal = false"
+                            class="px-3 py-1.5 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition-colors">
+                            {{ __('messages.cancel') }}
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors">
+                            {{ __('messages.upload_photos') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <!-- Lightbox Preview Modal -->
+    <template x-teleport="body">
+        <div x-show="lightbox" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             style="position: fixed; inset: 0; z-index: 999999; background-color: rgba(15, 23, 42, 0.96); backdrop-filter: blur(12px);"
+             class="flex flex-col items-center justify-between p-4 sm:p-6 select-none" 
+             @click="lightbox = false"
+             x-cloak>
+            
+            <!-- Close button (Top Right) -->
+            <button @click="lightbox = false" 
+                    style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: 1000000;"
+                    class="p-2.5 rounded-full bg-slate-800/90 hover:bg-rose-600 text-white border border-white/20 hover:border-rose-500 transition-all duration-200 cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+                    title="Close (Esc)">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <!-- Prev / Next Navigation Buttons -->
+            <button x-show="galleryImages.length > 1" 
+                    @click.stop="prevImage()" 
+                    style="position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 1000000;"
+                    class="p-3 rounded-full bg-slate-800/90 hover:bg-white text-white hover:text-slate-900 border border-white/20 hover:border-white transition-all duration-200 cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+                    title="Previous Image (Left Arrow)">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+
+            <button x-show="galleryImages.length > 1" 
+                    @click.stop="nextImage()" 
+                    style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 1000000;"
+                    class="p-3 rounded-full bg-slate-800/90 hover:bg-white text-white hover:text-slate-900 border border-white/20 hover:border-white transition-all duration-200 cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+                    title="Next Image (Right Arrow)">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <!-- Main Centered Preview Image -->
+            <div class="flex-1 flex items-center justify-center max-w-4xl w-full my-auto px-4 py-8" @click.stop>
+                <div class="relative flex items-center justify-center bg-slate-900/60 p-2 sm:p-3 rounded-2xl border border-white/10 shadow-2xl overflow-hidden max-h-[70vh] max-w-[80vw]">
+                    <img :src="galleryImages[lightboxIndex]?.src" 
+                         :alt="galleryImages[lightboxIndex]?.caption || 'Gallery Photo'"
+                         class="rounded-xl shadow-lg transition-all duration-300 select-none pointer-events-auto"
+                         style="max-height: 58vh; max-width: 65vw; width: auto; height: auto; object-fit: contain; display: block;">
                 </div>
             </div>
-        </template>
-    </div>
+
+            <!-- Bottom Image Counter -->
+            <div x-show="galleryImages.length > 0"
+                 style="position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 1000000;"
+                 class="px-4 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-md border border-white/20 text-white font-bold text-xs tracking-wider shadow-xl flex items-center gap-1.5">
+                <span class="text-primary-400 font-black" x-text="lightboxIndex + 1"></span>
+                <span class="text-white/40">/</span>
+                <span class="text-white/80" x-text="galleryImages.length"></span>
+            </div>
+        </div>
+    </template>
+</div>
 @endsection
