@@ -1438,6 +1438,7 @@ return [
     'slots_full' => 'Slots Full',
     'our_sponsors' => 'Our Proud Sponsors',
     'sponsor_details' => 'Sponsor Details',
+    'no_data_found' => 'No Data Found',
     'active_status' => 'Active',
     'inactive_status' => 'Inactive',
     'sponsorship_types_desc' => 'Define sponsorship categories, contribution amounts, and sponsor limits for this event.',

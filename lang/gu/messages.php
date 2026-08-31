@@ -1445,6 +1445,7 @@ return [
     'slots_full' => 'સ્લોટ પૂર્ણ',
     'our_sponsors' => 'આપણા ગૌરવવંતા સ્પોન્સર્સ',
     'sponsor_details' => 'સ્પોન્સરની વિગતો',
+    'no_data_found' => 'કોઈ માહિતી મળી નથી',
     'active_status' => 'સક્રિય',
     'inactive_status' => 'નિષ્ક્રિય',
     'sponsorship_types_desc' => 'ઇવેન્ટ માટે સ્પોન્સરશિપ શ્રેણીઓ (ટાઈટલ, રકમ અને સ્લોટ મર્યાદા) ગોઠવો.',
