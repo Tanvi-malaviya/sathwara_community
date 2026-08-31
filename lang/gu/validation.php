@@ -227,7 +227,7 @@ return [
         'business_name' => 'વ્યવસાયનું નામ',
         'owner_name' => 'માલિકનું નામ',
         'category_id' => 'વ્યવસાય કેટેગરી',
-        'description' => 'વ્યવસાય વિગત',
+        'description' => 'વર્ણન / વિગત',
         'logo' => 'બિઝનેસ લોગો / વિઝિટિંગ કાર્ડ',
         'website' => 'વેબસાઈટ',
         'relation' => 'સંબંધ',

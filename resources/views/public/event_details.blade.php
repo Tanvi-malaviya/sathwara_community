@@ -186,8 +186,9 @@
                                      galleryImages: [
                                          @foreach($gallery as $photo)
                                              {
-                                                 src: '{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}',
-                                                 caption: '{{ addslashes($photo->caption ?? $event->title) }}'
+                                                 src: '{{ $photo->url }}',
+                                                 caption: '{{ addslashes($photo->caption ?? $event->title) }}',
+                                                 isVideo: {{ $photo->isVideo() ? 'true' : 'false' }}
                                              },
                                          @endforeach
                                      ],
@@ -214,27 +215,47 @@
                                  @keydown.window.left="if(lightbox) prevImage()">
 
                                 @foreach($gallery as $index => $photo)
-                                    @php $gImgUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
+                                    @php $gImgUrl = $photo->url; $isGVideo = $photo->isVideo(); @endphp
                                     <div class="aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-200/80 group relative cursor-pointer flex items-center justify-center shadow-xs"
                                          @click="lightboxIndex = {{ $index }}; lightbox = true">
-                                        <!-- Blurred Background Image (same image, scaled + blurred like hero section) -->
-                                        <img src="{{ $gImgUrl }}"
-                                             alt=""
-                                             aria-hidden="true"
-                                             class="absolute inset-0 w-full h-full pointer-events-none select-none"
-                                             style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                                        @if($isGVideo)
+                                            <video class="w-full h-full object-cover pointer-events-none" preload="metadata" muted playsinline>
+                                                <source src="{{ $gImgUrl }}">
+                                            </video>
+                                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 2;">
+                                                <div class="w-11 h-11 rounded-full bg-slate-900/85 border border-white/30 text-white flex items-center justify-center shadow-xl backdrop-blur-xs group-hover:scale-110 transition-transform">
+                                                    <svg class="w-5 h-5 fill-current ml-0.5 text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                </div>
+                                            </div>
+                                            <span class="absolute top-2.5 left-2.5 z-10 px-2.5 py-0.5 rounded-lg bg-slate-900/85 text-white text-[10px] font-black uppercase tracking-wider backdrop-blur-xs border border-white/20 flex items-center gap-1">
+                                                <svg class="w-2.5 h-2.5 fill-current text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                Video
+                                            </span>
+                                        @else
+                                            <!-- Blurred Background Image -->
+                                            <img src="{{ $gImgUrl }}"
+                                                 alt=""
+                                                 aria-hidden="true"
+                                                 class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                                 style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
 
-                                        <!-- Main Slide Image (Full object-contain, on top) -->
-                                        <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                                             style="z-index: 1;"
-                                             src="{{ $gImgUrl }}"
-                                             alt="{{ $photo->caption }}">
+                                            <!-- Main Slide Image -->
+                                            <img class="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                                                 style="z-index: 1;"
+                                                 src="{{ $gImgUrl }}"
+                                                 alt="{{ $photo->caption }}">
+                                        @endif
 
-                                        <!-- Hover Zoom Badge -->
+                                        <!-- Hover Badge -->
                                         <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
                                             <span class="text-white text-xs font-bold inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-white/20 backdrop-blur-xs shadow-md">
-                                                <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
-                                                Zoom
+                                                @if($isGVideo)
+                                                    <svg class="w-3.5 h-3.5 text-primary-400 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                    <span>Play Video</span>
+                                                @else
+                                                    <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                                    <span>Zoom</span>
+                                                @endif
                                             </span>
                                         </div>
                                     </div>
@@ -257,54 +278,65 @@
                                              @click.stop="prevImage()" 
                                              style="position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 10000000;"
                                              class="left-4 sm:left-8 group p-2.5 sm:p-3 rounded-full bg-slate-900/80 hover:bg-primary-500 text-white border border-white/20 hover:border-primary-400 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-                                             title="Previous Image (Left Arrow)">
-                                            <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
-                                            </svg>
-                                        </button>
+                                             title="Previous (Left Arrow)">
+                                         <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+                                         </svg>
+                                     </button>
 
-                                        <button x-show="galleryImages.length > 1" 
-                                                @click.stop="nextImage()" 
-                                                style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 10000000;"
-                                                class="right-4 sm:right-8 group p-2.5 sm:p-3 rounded-full bg-slate-900/80 hover:bg-primary-500 text-white border border-white/20 hover:border-primary-400 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-                                                title="Next Image (Right Arrow)">
-                                            <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
-                                            </svg>
-                                        </button>
+                                     <button x-show="galleryImages.length > 1" 
+                                             @click.stop="nextImage()" 
+                                             style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 10000000;"
+                                             class="right-4 sm:right-8 group p-2.5 sm:p-3 rounded-full bg-slate-900/80 hover:bg-primary-500 text-white border border-white/20 hover:border-primary-400 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+                                             title="Next (Right Arrow)">
+                                         <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+                                         </svg>
+                                     </button>
 
-                                        <div class="w-full flex items-center justify-end z-[10000000] max-w-7xl mx-auto pt-1 px-2" @click.stop>
-                                            <button @click="lightbox = false" 
-                                                    class="group p-2 rounded-full bg-slate-900/80 hover:bg-rose-500 text-white border border-white/20 hover:border-rose-400 transition-all duration-300 cursor-pointer shadow-xl hover:rotate-90 hover:scale-110 active:scale-95"
-                                                    title="Close (Esc)">
-                                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
+                                     <div class="w-full flex items-center justify-end z-[10000000] max-w-7xl mx-auto pt-1 px-2" @click.stop>
+                                         <button @click="lightbox = false" 
+                                                 class="group p-2 rounded-full bg-slate-900/80 hover:bg-rose-500 text-white border border-white/20 hover:border-rose-400 transition-all duration-300 cursor-pointer shadow-xl hover:rotate-90 hover:scale-110 active:scale-95"
+                                                 title="Close (Esc)">
+                                             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                                             </svg>
+                                         </button>
+                                     </div>
 
-                                        <div class="relative w-full flex-1 flex items-center justify-center my-auto max-w-5xl mx-auto px-4 pb-14" @click.stop>
-                                            <div class="relative flex flex-col items-center justify-center max-w-full max-h-full">
-                                                <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-900/50">
-                                                    <img :src="galleryImages[lightboxIndex]?.src" 
-                                                         :alt="galleryImages[lightboxIndex]?.caption || 'Gallery Image'" 
-                                                         class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
-                                                         style="max-height: 68vh; max-width: 80vw;">
-                                                </div>
-                                            </div>
-                                        </div>
+                                     <div class="relative w-full flex-1 flex items-center justify-center my-auto max-w-5xl mx-auto px-4 pb-14" @click.stop>
+                                         <div class="relative flex flex-col items-center justify-center max-w-full max-h-full">
+                                             <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-900/50 flex items-center justify-center">
+                                                 <template x-if="galleryImages[lightboxIndex]?.isVideo">
+                                                     <video :src="galleryImages[lightboxIndex]?.src"
+                                                            controls
+                                                            autoplay
+                                                            playsinline
+                                                            class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
+                                                            style="max-height: 68vh; max-width: 80vw; outline: none;">
+                                                     </video>
+                                                 </template>
+                                                 <template x-if="!galleryImages[lightboxIndex]?.isVideo">
+                                                     <img :src="galleryImages[lightboxIndex]?.src" 
+                                                          :alt="galleryImages[lightboxIndex]?.caption || 'Gallery Media'" 
+                                                          class="w-auto max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
+                                                          style="max-height: 68vh; max-width: 80vw;">
+                                                 </template>
+                                             </div>
+                                         </div>
+                                     </div>
 
-                                        <div x-show="galleryImages.length > 0" 
-                                             style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 10000000;"
-                                             class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-white/20 text-white text-xs font-bold shadow-2xl backdrop-blur-md">
-                                            <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                            <span>
-                                                <span class="text-white" x-text="lightboxIndex + 1"></span>
-                                                <span class="text-white/40"> / </span>
-                                                <span class="text-white/70" x-text="galleryImages.length"></span>
-                                            </span>
-                                        </div>
-                                    </div>
+                                     <div x-show="galleryImages.length > 0" 
+                                          style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 10000000;"
+                                          class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-white/20 text-white text-xs font-bold shadow-2xl backdrop-blur-md">
+                                         <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                         <span>
+                                             <span class="text-white" x-text="lightboxIndex + 1"></span>
+                                             <span class="text-white/40"> / </span>
+                                             <span class="text-white/70" x-text="galleryImages.length"></span>
+                                         </span>
+                                     </div>
+                                 </div>
                             </div>
                         </div>
                     @endif

@@ -56,6 +56,7 @@ Route::middleware('guest')->group(function () {
 Route::get('/register/business', [RegistrationController::class, 'showBusinessRegister'])->name('register.business');
 Route::post('/register/business', [RegistrationController::class, 'submitBusinessRegister'])->name('register.business.submit');
 Route::get('/api/check-member-id', [RegistrationController::class, 'checkMemberId'])->name('api.check_member_id');
+Route::get('/api/lookup-father-member', [RegistrationController::class, 'lookupFatherMember'])->name('api.lookup_father_member');
 
 // ================= ACCOUNT STATUS PAGE & REDIRECT =================
 // Guarded by auth, but accessible even if NOT approved (so they see the pending/rejected status)

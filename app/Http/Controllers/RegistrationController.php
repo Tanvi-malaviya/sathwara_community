@@ -548,4 +548,62 @@ class RegistrationController extends Controller
             'message' => 'Member ID does not exist in database.'
         ]);
     }
+
+    /**
+     * Live AJAX check for Father Member ID / Code
+     */
+    public function lookupFatherMember(Request $request)
+    {
+        $code = trim($request->query('code', ''));
+        if (empty($code)) {
+            return response()->json([
+                'found' => false,
+                'message' => app()->getLocale() == 'gu' ? 'કૃપા કરીને સભ્ય કોડ દાખલ કરો.' : 'Please enter member code.'
+            ]);
+        }
+
+        $cleanCode = str_replace(' ', '', $code);
+
+        // 1. Try exact or spaceless member_code match
+        $user = User::with('memberProfile')
+            ->where(function ($query) use ($code, $cleanCode) {
+                $query->where('member_code', $code)
+                    ->orWhere('member_code', $cleanCode);
+            })
+            ->first();
+
+        // 2. Try normalized SSAM + 4 digits
+        if (!$user) {
+            $digits = preg_replace('/[^0-9]/', '', $code);
+            if (!empty($digits)) {
+                $paddedCode = 'SSAM' . str_pad($digits, 4, '0', STR_PAD_LEFT);
+                $user = User::with('memberProfile')->where('member_code', $paddedCode)->first();
+
+                // 3. Fallback: match by numeric ID
+                if (!$user) {
+                    $fatherId = (int) $digits;
+                    if ($fatherId > 0) {
+                        $user = User::with('memberProfile')->find($fatherId);
+                    }
+                }
+            }
+        }
+
+        if ($user) {
+            $memberCode = $user->member_code ?: $user->formatted_member_id;
+            return response()->json([
+                'found' => true,
+                'name' => $user->display_name,
+                'member_code' => $memberCode,
+                'message' => $user->display_name . ' (' . $memberCode . ')'
+            ]);
+        }
+
+        return response()->json([
+            'found' => false,
+            'message' => app()->getLocale() == 'gu' 
+                ? 'કોઈ સભ્ય મળ્યા નથી. કૃપા કરીને સભ્ય કોડ ચકાસો.' 
+                : 'No member found with this Member ID.'
+        ]);
+    }
 }

@@ -54,14 +54,14 @@ class GalleryController extends Controller
         }
 
         $request->validate([
-            'image' => 'nullable|file|mimes:zip,jpeg,png,jpg,gif,svg,webp|max:51200',
-            'images.*' => 'nullable|image|max:51200',
+            'image' => 'nullable|file|mimes:zip,jpeg,png,jpg,gif,svg,webp,mp4,mov,webm,ogg,m4v,avi,mkv|max:102400',
+            'images.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,mp4,mov,webm,ogg,m4v,avi,mkv,zip|max:102400',
             'caption' => 'nullable|string|max:255',
         ], [
-            'images.*.uploaded' => 'One of the images failed to upload. Please verify that your computer drive has free disk space.',
-            'images.*.image' => 'All selected files must be valid images.',
-            'images.*.max' => 'Each image must be less than 50MB in size.',
-            'image.uploaded' => 'The ZIP file failed to upload. Please verify that your computer drive has free disk space.',
+            'images.*.uploaded' => 'One of the files failed to upload. Please verify that your file is under 100MB and your drive has free space.',
+            'images.*.mimes' => 'All files must be valid photos or videos (JPG, PNG, WebP, GIF, MP4, MOV, WebM, etc.).',
+            'images.*.max' => 'Each photo/video file must be less than 100MB in size.',
+            'image.uploaded' => 'The file failed to upload. Please verify that your computer drive has free disk space.',
         ]);
 
         $eventId = $request->input('event_id');
@@ -90,7 +90,7 @@ class GalleryController extends Controller
                         \RecursiveIteratorIterator::LEAVES_ONLY
                     );
 
-                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'mp4', 'mov', 'webm', 'ogg', 'm4v'];
                     $uploadedCount = 0;
 
                     foreach ($files as $name => $f) {
@@ -109,7 +109,7 @@ class GalleryController extends Controller
                                 Gallery::create([
                                     'event_id' => $eventId,
                                     'image_path' => $publicPath,
-                                    'caption' => $request->caption ?? ($eventId ? 'Event Photo' : 'Gallery Photo'),
+                                    'caption' => $request->caption ?? ($eventId ? 'Event Media' : 'Gallery Media'),
                                     'display_order' => Gallery::where('event_id', $eventId)->max('display_order') + 1,
                                 ]);
                                 $uploadedCount++;
@@ -120,10 +120,10 @@ class GalleryController extends Controller
                     $this->deleteDir($tempPath);
 
                     if ($uploadedCount === 0) {
-                        return redirect()->back()->with('error', 'No valid images found in the ZIP archive.');
+                        return redirect()->back()->with('error', 'No valid photos or videos found in the ZIP archive.');
                     }
 
-                    return redirect()->back()->with('success', "$uploadedCount photos extracted and uploaded successfully from ZIP archive.");
+                    return redirect()->back()->with('success', "$uploadedCount media files extracted and uploaded successfully from ZIP archive.");
                 } else {
                     return redirect()->back()->with('error', 'Failed to open the ZIP file.');
                 }
@@ -132,7 +132,7 @@ class GalleryController extends Controller
                 Gallery::create([
                     'event_id' => $eventId,
                     'image_path' => $path,
-                    'caption' => $request->caption ?? 'Community Event Photo',
+                    'caption' => $request->caption ?? 'Community Media',
                     'display_order' => Gallery::where('event_id', $eventId)->max('display_order') + 1,
                 ]);
             }
@@ -144,13 +144,13 @@ class GalleryController extends Controller
                 Gallery::create([
                     'event_id' => $eventId,
                     'image_path' => $path,
-                    'caption' => $request->caption ?? 'Community Event Photo',
+                    'caption' => $request->caption ?? 'Community Media',
                     'display_order' => Gallery::where('event_id', $eventId)->max('display_order') + 1,
                 ]);
             }
         }
 
-        return redirect()->back()->with('success', 'Photos added successfully.');
+        return redirect()->back()->with('success', 'Media added successfully to gallery.');
     }
 
     /**

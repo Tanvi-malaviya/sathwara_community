@@ -16,8 +16,9 @@
             galleryImages: [
                 @foreach($photos as $photo)
                     {
-                        src: '{{ str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path) }}',
-                        caption: '{{ addslashes($photo->caption ?? 'Gallery Photo') }}'
+                        src: '{{ $photo->url }}',
+                        caption: '{{ addslashes($photo->caption ?? 'Gallery Media') }}',
+                        isVideo: {{ $photo->isVideo() ? 'true' : 'false' }}
                     },
                 @endforeach
             ],
@@ -50,36 +51,57 @@
                         stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    {{ __('messages.add_photo') }}
+                    {{ __('messages.add_photo') }} / Video
                 </button>
             @endif
         </div>
 
-        <!-- Photos Grid List -->
+        <!-- Photos & Videos Grid List -->
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             @forelse($photos as $photo)
-                @php $pUrl = str_starts_with($photo->image_path, 'http') ? $photo->image_path : asset('storage/' . $photo->image_path); @endphp
+                @php $pUrl = $photo->url; $isVideo = $photo->isVideo(); @endphp
                 <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow group">
                     <div class="aspect-square w-full overflow-hidden bg-slate-950 relative flex items-center justify-center cursor-pointer"
                          @click="lightboxIndex = {{ $loop->index }}; lightbox = true">
-                        <!-- Blurred Backdrop -->
-                        <img src="{{ $pUrl }}" 
-                             alt="" 
-                             aria-hidden="true"
-                             class="absolute inset-0 w-full h-full pointer-events-none select-none"
-                             style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
+                        @if($isVideo)
+                            <!-- Video Thumbnail / Stream -->
+                            <video class="w-full h-full object-cover pointer-events-none" preload="metadata" muted playsinline>
+                                <source src="{{ $pUrl }}">
+                            </video>
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index: 2;">
+                                <div class="w-10 h-10 rounded-full bg-slate-900/85 border border-white/30 text-white flex items-center justify-center shadow-lg backdrop-blur-xs group-hover:scale-110 transition-transform">
+                                    <svg class="w-5 h-5 fill-current ml-0.5 text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                            </div>
+                            <span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md bg-slate-900/80 text-white text-[9px] font-black uppercase tracking-wider backdrop-blur-xs border border-white/20 flex items-center gap-1">
+                                <svg class="w-2.5 h-2.5 fill-current text-primary-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                Video
+                            </span>
+                        @else
+                            <!-- Blurred Backdrop -->
+                            <img src="{{ $pUrl }}" 
+                                 alt="" 
+                                 aria-hidden="true"
+                                 class="absolute inset-0 w-full h-full pointer-events-none select-none"
+                                 style="object-fit: cover; object-position: center; filter: blur(14px) brightness(0.45); transform: scale(1.12); z-index: 0;">
 
-                        <!-- Main Image (Full contain) -->
-                        <img class="relative w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                             style="z-index: 1;"
-                             src="{{ $pUrl }}"
-                             alt="Gallery Image">
+                            <!-- Main Image (Full contain) -->
+                            <img class="relative w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                                 style="z-index: 1;"
+                                 src="{{ $pUrl }}"
+                                 alt="Gallery Image">
+                        @endif
 
                         <!-- Hover Overlay -->
                         <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" style="z-index: 10;">
                             <span class="text-white text-[10px] font-bold inline-flex items-center gap-1 bg-slate-900/80 px-2.5 py-1 rounded-full backdrop-blur-xs border border-white/20 shadow-sm">
-                                <svg class="w-3 h-3 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
-                                {{ __('messages.preview') ?? 'Preview' }}
+                                @if($isVideo)
+                                    <svg class="w-3 h-3 text-primary-400 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    Play Video
+                                @else
+                                    <svg class="w-3 h-3 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                    {{ __('messages.preview') ?? 'Preview' }}
+                                @endif
                             </span>
                         </div>
                     </div>
@@ -123,7 +145,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
-                    <h3 class="text-xs font-bold text-slate-900 pr-6">{{ __('messages.upload_general_photo') }}</h3>
+                    <h3 class="text-xs font-bold text-slate-900 pr-6">{{ __('messages.upload_general_photo') }} / Video</h3>
                     <form method="POST" action="{{ route('admin.gallery.store') }}" enctype="multipart/form-data"
                         class="space-y-3">
                         @csrf
@@ -139,8 +161,8 @@
 
                         <div class="space-y-0.5">
                             <label
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ __('messages.select_image_zip') }}</label>
-                            <input type="file" name="images[]" multiple required accept=".jpg,.jpeg,.png,.webp,.gif,.zip"
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Select Photo / Video / ZIP (Max 100MB)</label>
+                            <input type="file" name="images[]" multiple required accept=".jpg,.jpeg,.png,.webp,.gif,.zip,.mp4,.mov,.webm,.ogg,image/*,video/*"
                                 @change="$el.name = ($el.files.length === 1 && $el.files[0].name.toLowerCase().endsWith('.zip')) ? 'image' : 'images[]'"
                                 class="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 border border-slate-200 rounded-lg p-1 w-full bg-slate-50">
                         </div>
@@ -152,7 +174,7 @@
                         </button>
                         <button type="submit"
                             class="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors">
-                            {{ __('messages.upload_photos') }}
+                            {{ __('messages.upload_photos') }} / Videos
                         </button>
                     </div>
                 </form>
@@ -199,13 +221,24 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
 
-            <!-- Main Centered Preview Image -->
+            <!-- Main Centered Preview Media -->
             <div class="flex-1 flex items-center justify-center max-w-4xl w-full my-auto px-4 py-8" @click.stop>
                 <div class="relative flex items-center justify-center bg-slate-900/60 p-2 sm:p-3 rounded-2xl border border-white/10 shadow-2xl overflow-hidden max-h-[70vh] max-w-[80vw]">
-                    <img :src="galleryImages[lightboxIndex]?.src" 
-                         :alt="galleryImages[lightboxIndex]?.caption || 'Gallery Photo'"
-                         class="rounded-xl shadow-lg transition-all duration-300 select-none pointer-events-auto"
-                         style="max-height: 58vh; max-width: 65vw; width: auto; height: auto; object-fit: contain; display: block;">
+                    <template x-if="galleryImages[lightboxIndex]?.isVideo">
+                        <video :src="galleryImages[lightboxIndex]?.src"
+                               controls
+                               autoplay
+                               playsinline
+                               class="rounded-xl shadow-2xl transition-all duration-300"
+                               style="max-height: 60vh; max-width: 70vw; width: auto; height: auto; outline: none;">
+                        </video>
+                    </template>
+                    <template x-if="!galleryImages[lightboxIndex]?.isVideo">
+                        <img :src="galleryImages[lightboxIndex]?.src" 
+                             :alt="galleryImages[lightboxIndex]?.caption || 'Gallery Photo'"
+                             class="rounded-xl shadow-lg transition-all duration-300 select-none pointer-events-auto"
+                             style="max-height: 58vh; max-width: 65vw; width: auto; height: auto; object-fit: contain; display: block;">
+                    </template>
                 </div>
             </div>
 
