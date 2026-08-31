@@ -50,10 +50,38 @@ class MemberProfile extends Model
         if (!$this->father_member_id) {
             return null;
         }
-        $fatherId = (int) preg_replace('/[^0-9]/', '', $this->father_member_id);
-        if ($fatherId > 0) {
-            return User::with('memberProfile')->find($fatherId);
+
+        $input = trim($this->father_member_id);
+        $cleanCode = str_replace(' ', '', $input);
+
+        // 1. Try exact or space-stripped member_code match
+        $user = User::with('memberProfile')
+            ->where(function ($query) use ($input, $cleanCode) {
+                $query->where('member_code', $input)
+                    ->orWhere('member_code', $cleanCode);
+            })
+            ->first();
+
+        if ($user) {
+            return $user;
         }
+
+        // 2. Try normalized SSAM + 4 digits format
+        $digits = preg_replace('/[^0-9]/', '', $input);
+        if (!empty($digits)) {
+            $paddedCode = 'SSAM' . str_pad($digits, 4, '0', STR_PAD_LEFT);
+            $user = User::with('memberProfile')->where('member_code', $paddedCode)->first();
+            if ($user) {
+                return $user;
+            }
+
+            // 3. Fallback: match by Database Primary Key ID if input is just numeric / #ID
+            $fatherId = (int) $digits;
+            if ($fatherId > 0) {
+                return User::with('memberProfile')->find($fatherId);
+            }
+        }
+
         return null;
     }
 
