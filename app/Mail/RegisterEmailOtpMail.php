@@ -30,7 +30,7 @@ class RegisterEmailOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Satwara Community — Email Verification OTP',
+            subject: 'Shree Satwara Gnati Mandal, Ahmedabad — Email Verification OTP',
         );
     }
 

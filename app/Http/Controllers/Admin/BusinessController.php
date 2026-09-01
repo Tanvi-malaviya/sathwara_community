@@ -3,11 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\BusinessPaymentLinkMail;
+use App\Mail\BusinessRenewalReceiptMail;
 use App\Models\Business;
 use App\Models\BusinessCategory;
+use App\Models\BusinessPaymentLink;
+use App\Services\RazorpayPaymentLinkService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class BusinessController extends Controller
@@ -119,8 +125,120 @@ class BusinessController extends Controller
      */
     public function show($id)
     {
-        $business = Business::with('category')->findOrFail($id);
+        $business = Business::with(['category', 'paymentLinks'])->findOrFail($id);
         return view('admin.businesses.show', compact('business'));
+    }
+
+    /**
+     * Generate a 24-hour Razorpay payment link for a business renewal and email it.
+     */
+    public function generatePaymentLink(Request $request, $id)
+    {
+        $business = Business::findOrFail($id);
+
+        if (!$business->isRenewalDue()) {
+            return redirect()->back()->with('error', 'This business\'s 1-year approval period has not completed yet — renewal payment links can only be generated once it has expired.');
+        }
+
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        try {
+            $result = app(RazorpayPaymentLinkService::class)->createLink($business, (float) $request->amount);
+        } catch (\Throwable $e) {
+            Log::error('Generate business payment link failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to generate Razorpay payment link. Please check the Razorpay credentials in Settings and try again.');
+        }
+
+        $link = BusinessPaymentLink::create([
+            'business_id' => $business->id,
+            'amount' => $request->amount,
+            'razorpay_link_id' => $result['id'],
+            'razorpay_link_url' => $result['short_url'],
+            'status' => 'created',
+            'created_by' => auth()->id(),
+            'expires_at' => $result['expires_at'],
+        ]);
+
+        if (!empty($business->email)) {
+            try {
+                Mail::to($business->email)->send(new BusinessPaymentLinkMail($business, $link));
+            } catch (\Throwable $e) {
+                Log::error('Business Payment Link Mail Error: ' . $e->getMessage());
+                return redirect()->back()->with('warning', 'Payment link generated, but the email could not be sent. You can copy/share it manually or use Resend Email.');
+            }
+        }
+
+        return redirect()->back()->with('success', 'Payment link generated and emailed to the business (valid 24 hours).');
+    }
+
+    /**
+     * Resend the payment link email for an existing link.
+     */
+    public function resendPaymentLinkEmail($id, $linkId)
+    {
+        $business = Business::findOrFail($id);
+        $link = BusinessPaymentLink::where('business_id', $business->id)->findOrFail($linkId);
+
+        if (empty($business->email)) {
+            return redirect()->back()->with('error', 'This business has no email address on file.');
+        }
+
+        try {
+            Mail::to($business->email)->send(new BusinessPaymentLinkMail($business, $link));
+        } catch (\Throwable $e) {
+            Log::error('Resend Business Payment Link Mail Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to resend the payment link email.');
+        }
+
+        return redirect()->back()->with('success', 'Payment link email resent.');
+    }
+
+    /**
+     * Manually mark a payment link as paid (fallback if the Razorpay webhook is not configured/reachable).
+     */
+    public function markPaymentLinkPaid(Request $request, $id, $linkId)
+    {
+        $business = Business::findOrFail($id);
+        $link = BusinessPaymentLink::where('business_id', $business->id)->findOrFail($linkId);
+
+        $request->validate([
+            'razorpay_payment_id' => 'nullable|string|max:255',
+        ]);
+
+        if ($link->status === 'paid') {
+            return redirect()->back()->with('warning', 'This payment link is already marked as paid.');
+        }
+
+        $link->status = 'paid';
+        $link->paid_at = now();
+        $link->razorpay_payment_id = $request->razorpay_payment_id ?: $link->razorpay_payment_id;
+        $link->save();
+
+        $business->approved_at = now();
+        $business->status = 'approved';
+        $business->membership_status = 'active';
+        $business->payment_status = 'paid';
+        $business->payment_id = $link->razorpay_payment_id;
+        $business->payment_amount = $link->amount;
+        $business->save();
+
+        Log::info('Business payment link manually marked paid by admin', [
+            'business_id' => $business->id,
+            'link_id' => $link->id,
+            'admin_id' => auth()->id(),
+        ]);
+
+        if (!empty($business->email)) {
+            try {
+                Mail::to($business->email)->send(new BusinessRenewalReceiptMail($business, $link));
+            } catch (\Throwable $e) {
+                Log::error('Business Renewal Receipt Mail Error: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->back()->with('success', 'Business renewal marked as paid and receipt emailed.');
     }
 
     /**

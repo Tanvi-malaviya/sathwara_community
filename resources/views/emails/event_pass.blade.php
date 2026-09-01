@@ -255,7 +255,7 @@
         $attendeeName = $registration->form_data['full_name'] ?? ($user ? $user->name : 'Member');
         $memberId = $user ? sprintf('#%05d', $user->id) : ($registration->form_data['member_id'] ?? '-');
         $logoUrl = App\Models\Setting::get('website_logo') ? asset('storage/' . App\Models\Setting::get('website_logo')) : asset('logo.png');
-        $receiptNoDisplay = $receiptNo ?? ('RCP-PASS-' . date('Y') . '-' . sprintf('%05d', $registration->id));
+        $receiptNoDisplay = $receiptNo ?? \App\Services\ReceiptNumberService::assign($registration, 'receipt_no');
         $finalAmount = $amount ?? (float)($registration->payment_amount ?? 0);
         $finalPaymentStatus = $paymentStatus ?? ($registration->payment_status ?? 'paid');
     @endphp
@@ -263,7 +263,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>{{ config('app.name', 'Satwara Community Portal') }}</h1>
+            <h1>{{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}</h1>
             <p>ઇવેન્ટ પ્રવેશ પાસ અને પેમેન્ટ રસીદ</p>
             <div class="receipt-badge">Pass & Payment Receipt</div>
         </div>
@@ -355,7 +355,7 @@
                             <!-- Middle: Mandal Name, Event Name, Date -->
                             <div class="pass-middle-content">
                                 <div class="pass-mandal-title">
-                                    {{ config('app.name', 'Satwara Gyati Mandal') }}
+                                    {{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}
                                 </div>
                                 <div class="pass-event-title">
                                     {{ $event->title }}
@@ -388,7 +388,7 @@
 
             <div class="footer-note">
                 <p style="margin: 0 0 5px 0;">આ રસીદ અને પાસ તમારા મોબાઇલમાં સાચવી રાખો અથવા પ્રિન્ટ કરીને ઇવેન્ટ સ્થળે સાથે લાવો.</p>
-                <p style="margin: 0; font-size: 11px; color: #94a3b8;">&copy; {{ date('Y') }} {{ config('app.name', 'Satwara Community') }}. All rights reserved.</p>
+                <p style="margin: 0; font-size: 11px; color: #94a3b8;">&copy; {{ date('Y') }} {{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}. All rights reserved.</p>
             </div>
         </div>
     </div>

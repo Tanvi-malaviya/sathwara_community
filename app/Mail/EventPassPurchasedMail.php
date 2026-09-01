@@ -12,7 +12,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 use Illuminate\Mail\Mailables\Attachment;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\ReceiptPdfService;
 
 class EventPassPurchasedMail extends Mailable
 {
@@ -41,7 +41,7 @@ class EventPassPurchasedMail extends Mailable
         $this->amount = (float)($registration->payment_amount ?? 0);
         $this->paymentStatus = $registration->payment_status ?? 'paid';
         $this->paymentId = $registration->payment_id;
-        $this->receiptNo = 'RCP-PASS-' . date('Y') . '-' . sprintf('%05d', $registration->id);
+        $this->receiptNo = \App\Services\ReceiptNumberService::assign($registration, 'receipt_no');
     }
 
     /**
@@ -71,7 +71,7 @@ class EventPassPurchasedMail extends Mailable
      */
     public function attachments(): array
     {
-        $pdf = Pdf::loadView('emails.receipt_pdf.event_pass', [
+        $pdf = ReceiptPdfService::make('emails.receipt_pdf.event_pass', [
             'event' => $this->event,
             'registration' => $this->registration,
             'user' => $this->user,
@@ -84,7 +84,7 @@ class EventPassPurchasedMail extends Mailable
         ]);
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'Event_Pass_Receipt_' . $this->receiptNo . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'Event_Pass_Receipt_' . str_replace('/', '-', $this->receiptNo) . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }

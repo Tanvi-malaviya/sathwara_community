@@ -20,6 +20,7 @@ use App\Mail\MembershipPurchaseReceiptMail;
 use App\Mail\BusinessCreateReceiptMail;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
+use App\Services\AdminNotifier;
 
 class RegistrationController extends Controller
 {
@@ -303,6 +304,16 @@ class RegistrationController extends Controller
             'pan_path' => null,
         ]);
 
+        AdminNotifier::send(
+            permission: 'members_manage',
+            type: 'member_registered',
+            title: 'New Member Registration',
+            message: "{$user->name} registered as a new member (Member Code: {$user->member_code})",
+            url: route('admin.members.show', $user->id),
+            meta: ['member_id' => $user->id, 'member_code' => $user->member_code],
+            color: 'primary'
+        );
+
         // Clear OTP verification session
         session()->forget(['reg_otp_email', 'reg_otp_code', 'reg_otp_expires', 'reg_email_verified']);
 
@@ -477,6 +488,16 @@ class RegistrationController extends Controller
             'payment_status' => $paymentStatus,
             'payment_amount' => $businessFee,
         ]);
+
+        AdminNotifier::send(
+            permission: 'businesses_manage',
+            type: 'business_registered',
+            title: 'New Business Registration',
+            message: "{$newBusiness->business_name} ({$newBusiness->owner_name}) registered a new business listing",
+            url: route('admin.businesses.show', $newBusiness->id),
+            meta: ['business_id' => $newBusiness->id],
+            color: 'emerald'
+        );
 
         // Dispatch Business Registration Receipt Email
         $recipientEmail = $request->email ?? ($userId ? User::find($userId)?->email : null);

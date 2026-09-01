@@ -11,11 +11,13 @@
 <section class="py-8 md:py-12 bg-slate-50/70">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
-        <!-- 4 Top Quick Contact Action Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <!-- Office Address Card -->
-            <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between space-y-4 group">
-                <div class="flex items-center gap-3.5">
+        <!-- Office Address - Full Width (kept separate so a long address never squeezes the other cards) -->
+        @php
+            $contactAddress = App\Models\Setting::get('contact_address', 'Ashram Road, Ahmedabad, Gujarat 380009');
+        @endphp
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 group">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-5">
+                <div class="flex items-center gap-3.5 lg:w-60 lg:shrink-0">
                     <div class="w-12 h-12 rounded-2xl bg-primary-50 border border-primary-100 flex items-center justify-center text-primary-600 font-bold shrink-0 group-hover:scale-105 transition-transform">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -24,16 +26,28 @@
                     </div>
                     <div class="min-w-0">
                         <span class="text-xs font-black text-slate-400 uppercase tracking-widest block">{{ __('messages.office_address') }}</span>
-                        <h4 class="text-base font-black text-slate-900 break-words" title="{{ App\Models\Setting::get('website_name', 'Satwara Community') }}">
-                            {{ App\Models\Setting::get('website_name', 'Satwara Community') }}
+                        <h4 class="text-base font-black text-slate-900 truncate" title="{{ App\Models\Setting::get('website_name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}">
+                            {{ App\Models\Setting::get('website_name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}
                         </h4>
                     </div>
                 </div>
-                <p class="text-sm font-medium text-slate-600 leading-relaxed border-t border-slate-100 pt-3.5">
-                    {{ App\Models\Setting::get('contact_address', 'Ashram Road, Ahmedabad, Gujarat 380009') }}
-                </p>
-            </div>
 
+                <div class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-4 lg:pl-5 lg:border-l lg:border-slate-100">
+                    <address class="not-italic text-sm font-semibold text-slate-700 leading-relaxed whitespace-pre-line flex-1 min-w-0 bg-slate-50/80 border border-dashed border-slate-200 rounded-xl px-4 py-3">{{ $contactAddress }}</address>
+
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode(str_replace("\n", ', ', $contactAddress)) }}" target="_blank"
+                       class="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary-50 hover:bg-primary-100 text-primary-700 font-extrabold text-xs uppercase tracking-wide rounded-xl border border-primary-200/70 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                        </svg>
+                        <span>{{ __('messages.get_directions') }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Quick Contact Action Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start">
             <!-- Phone Helpline Card -->
             <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between space-y-4 group">
                 <div class="flex items-center gap-3.5">

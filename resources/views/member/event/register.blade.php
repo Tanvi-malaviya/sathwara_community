@@ -654,7 +654,10 @@
             <div x-show="mainPageTab === 'form'" class="space-y-3">
             @php
                 $isRegistrationFormDisabled = !($event->has_registration_form ?? $event->registration_option);
-                $isRegistrationClosed = $isRegistrationFormDisabled || (!empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString());
+                $today = now()->toDateString();
+                $formNotYetOpen = !$isRegistrationFormDisabled && !empty($event->form_start_date) && $today < \Carbon\Carbon::parse($event->form_start_date)->toDateString();
+                $formPastDeadline = !$isRegistrationFormDisabled && !empty($event->form_end_date) && $today > \Carbon\Carbon::parse($event->form_end_date)->toDateString();
+                $isRegistrationClosed = $isRegistrationFormDisabled || $formNotYetOpen || $formPastDeadline;
             @endphp
 
             <!-- DEFAULT / CLOSED NOTICE BANNER -->
@@ -679,11 +682,11 @@
                             <span class="text-xs font-black text-amber-900 uppercase tracking-wide">
                                 {{ __('messages.notice_instructions') }}
                             </span>
-                            @if(!empty($event->registration_end_date))
+                            @if(!empty($event->form_end_date))
                                 <span
                                     class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-700 bg-amber-100/90 px-2 py-0.5 rounded-full border border-amber-200/80 shrink-0">
                                     <svg class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    <span>{{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
+                                    <span>{{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->form_end_date)) }}</span>
                                 </span>
                             @endif
                         </div>
@@ -736,21 +739,26 @@
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-600 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
                             </span>
-                            <span>{{ $isRegistrationFormDisabled ? 'Form Disabled' : 'Registration Closed' }}</span>
+                            <span>{{ $isRegistrationFormDisabled ? 'Form Disabled' : ($formNotYetOpen ? 'Not Open Yet' : 'Registration Closed') }}</span>
                         </div>
 
                         <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                            {{ $isRegistrationFormDisabled ? 'Registration Form Is Disabled' : 'Form Fill-up Is Closed' }}</h3>
+                            {{ $isRegistrationFormDisabled ? 'Registration Form Is Disabled' : ($formNotYetOpen ? 'Form Fill-up Has Not Started' : 'Form Fill-up Is Closed') }}</h3>
 
                         <p class="text-xs text-slate-500 font-medium leading-relaxed">
                             @if($isRegistrationFormDisabled)
                                 Online registration form is not enabled for <strong
                                     class="text-slate-800 font-bold">{{ $event->title }}</strong>.
+                            @elseif($formNotYetOpen)
+                                Form fill-up for <strong class="text-slate-800 font-bold">{{ $event->title }}</strong> opens on
+                                <span
+                                    class="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/80 inline-block hover:scale-105 transition-transform animate-pulse">{{ date('d-M-Y', strtotime($event->form_start_date)) }}</span>.
+                                Please check back then.
                             @else
                                 The deadline for submitting registrations for <strong
                                     class="text-slate-800 font-bold">{{ $event->title }}</strong> passed on
                                 <span
-                                    class="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/80 inline-block hover:scale-105 transition-transform animate-pulse">{{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>.
+                                    class="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/80 inline-block hover:scale-105 transition-transform animate-pulse">{{ date('d-M-Y', strtotime($event->form_end_date)) }}</span>.
                                 Form fill-up is disabled for this event.
                             @endif
                         </p>
@@ -1702,13 +1710,21 @@
                                     </div>
 
                                     <!-- Person Counter (+ Person -) -->
-                                    <div x-data="{ count: {{ old('person_count', (isset($registration) && !empty($registration->form_data['person_count'])) ? $registration->form_data['person_count'] : 1) }} }" class="space-y-1.5 pt-1">
+                                    @php
+                                        $alreadyPurchasedPasses = (isset($registration) && !empty($registration->form_data['person_count'])) ? (int)$registration->form_data['person_count'] : 0;
+                                        $maxPassesRemaining = !empty($event->total_pass_limit) ? max(0, $event->total_pass_limit - $event->total_passes_count) : null;
+                                        $initialCount = (int) old('person_count', $alreadyPurchasedPasses > 0 ? $alreadyPurchasedPasses : 1);
+                                        if ($maxPassesRemaining !== null) {
+                                            $initialCount = min(max(1, $initialCount), max(1, $maxPassesRemaining));
+                                        }
+                                    @endphp
+                                    <div x-data="{ count: {{ $initialCount }}, maxAllowed: {{ $maxPassesRemaining ?? 'null' }} }" class="space-y-1.5 pt-1">
                                         <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
                                             <span>{{ __('messages.ketla_person_attending') }} <span class="text-rose-500">*</span></span>
                                         </label>
                                         <div class="flex items-center justify-between bg-slate-100/90 p-1.5 rounded-xl border border-slate-200/80">
-                                            <button type="button" 
-                                                    @click="if (count > 1) count--" 
+                                            <button type="button"
+                                                    @click="if (count > 1) count--"
                                                     :disabled="count <= 1"
                                                     class="w-9 h-9 rounded-lg bg-white hover:bg-slate-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-slate-800 font-black text-lg flex items-center justify-center transition-all cursor-pointer shadow-xs">
                                                 &minus;
@@ -1719,12 +1735,19 @@
                                                 <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider" x-text="count > 1 ? '{{ __('messages.persons') }}' : '{{ __('messages.person') }}'"></span>
                                             </div>
 
-                                            <button type="button" 
-                                                    @click="count++" 
-                                                    class="w-9 h-9 rounded-lg bg-primary-500 hover:bg-primary-600 active:scale-95 text-white font-black text-lg flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                            <button type="button"
+                                                    @click="if (!maxAllowed || count < maxAllowed) count++"
+                                                    :disabled="maxAllowed && count >= maxAllowed"
+                                                    class="w-9 h-9 rounded-lg bg-primary-500 hover:bg-primary-600 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-lg flex items-center justify-center transition-all cursor-pointer shadow-xs">
                                                 &#43;
                                             </button>
                                         </div>
+                                        @if($maxPassesRemaining !== null)
+                                        <p class="text-[10px] font-semibold text-amber-600 flex items-center gap-1">
+                                            <span x-show="count >= maxAllowed">{{ __('messages.max_passes_reached_hint') }}</span>
+                                            <span x-show="count < maxAllowed">{{ __('messages.max_passes_remaining_hint', ['count' => $maxPassesRemaining]) }}</span>
+                                        </p>
+                                        @endif
                                         <input type="hidden" name="person_count" :value="count">
                                     </div>
 
@@ -1869,7 +1892,7 @@
 
                                         <!-- Card Footer Action Actions (Details, Edit, Delete till last date) -->
                                         @php
-                                            $isDeadlinePassed = !empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString();
+                                            $isDeadlinePassed = !empty($event->form_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->form_end_date)->toDateString();
                                             $marksheetUrl = $fd['marksheet_url'] ?? null;
                                             if ($marksheetUrl && !str_starts_with($marksheetUrl, 'http')) {
                                                 $marksheetUrl = asset('storage/' . $marksheetUrl);
@@ -2497,7 +2520,7 @@ document.addEventListener('DOMContentLoaded', function () {
             "key": razorpayKey || "rzp_test_key",
             "amount": totalAmountPaise,
             "currency": "INR",
-            "name": "{{ config('app.name', 'Satwara Community') }}",
+            "name": "{{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}",
             "description": "Yuva Melo Registration Form Fee - {{ addslashes($event->title) }}",
             "handler": function (response) {
                 if (paymentIdInput) {

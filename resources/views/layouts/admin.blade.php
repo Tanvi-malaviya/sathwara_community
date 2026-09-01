@@ -555,6 +555,75 @@
             </div>
 
             <div class="flex items-center space-x-2">
+                <!-- Notifications -->
+                <div class="relative" x-data="{ showNotif: false }">
+                    <button @click="showNotif = !showNotif"
+                        class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+                        @if($unreadNotificationsCount > 0)
+                            <span class="absolute top-1.5 right-1.5 flex items-center justify-center min-w-[15px] h-[15px] px-0.5 bg-rose-500 text-white text-[9px] font-bold rounded-full border-2 border-white leading-none">
+                                {{ $unreadNotificationsCount > 9 ? '9+' : $unreadNotificationsCount }}
+                            </span>
+                        @endif
+                    </button>
+                    <div x-show="showNotif" @click.away="showNotif = false"
+                        class="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-slate-100 rounded-lg shadow-lg z-30 overflow-hidden"
+                        x-cloak>
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                            <span class="text-xs font-black text-slate-900 uppercase tracking-wider">{{ __('messages.notifications') }}</span>
+                            @if($unreadNotificationsCount > 0)
+                                <form method="POST" action="{{ route('admin.notifications.markAllRead') }}">
+                                    @csrf
+                                    <button type="submit" class="text-[11px] font-bold text-primary-600 hover:text-primary-700">{{ __('messages.mark_all_read') }}</button>
+                                </form>
+                            @endif
+                        </div>
+
+                        @php
+                            // Written out literally (not interpolated) so Tailwind's class scanner keeps these in the build.
+                            $notifColorClasses = [
+                                'primary' => 'bg-primary-50 text-primary-600',
+                                'emerald' => 'bg-emerald-50 text-emerald-600',
+                                'sky' => 'bg-sky-50 text-sky-600',
+                                'amber' => 'bg-amber-50 text-amber-600',
+                                'rose' => 'bg-rose-50 text-rose-600',
+                            ];
+                        @endphp
+                        <div class="max-h-96 overflow-y-auto divide-y divide-slate-50">
+                            @forelse($recentNotifications as $n)
+                                <a href="{{ route('admin.notifications.read', $n->id) }}"
+                                   class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors {{ is_null($n->read_at) ? 'bg-primary-50/40' : '' }}">
+                                    <span class="w-8 h-8 rounded-lg {{ $notifColorClasses[$n->data['color'] ?? 'primary'] ?? $notifColorClasses['primary'] }} flex items-center justify-center shrink-0 mt-0.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    </span>
+                                    <span class="min-w-0 flex-1">
+                                        <span class="flex items-center gap-1.5">
+                                            <span class="text-xs font-extrabold text-slate-900 truncate">{{ $n->data['title'] ?? '' }}</span>
+                                            @if(is_null($n->read_at))
+                                                <span class="w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0"></span>
+                                            @endif
+                                        </span>
+                                        <span class="block text-[11px] text-slate-500 leading-snug line-clamp-2 mt-0.5">{{ $n->data['message'] ?? '' }}</span>
+                                        <span class="block text-[10px] text-slate-400 font-semibold mt-1">{{ $n->created_at->diffForHumans() }}</span>
+                                    </span>
+                                </a>
+                            @empty
+                                <div class="px-4 py-8 text-center text-xs text-slate-400 font-medium">
+                                    {{ __('messages.no_notifications_yet') }}
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <a href="{{ route('admin.notifications.index') }}" class="block text-center px-4 py-2.5 text-[11px] font-bold text-primary-600 hover:bg-slate-50 border-t border-slate-100">
+                            {{ __('messages.view_all_notifications') }}
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Language Toggle -->
                 <div class="relative" x-data="{ showLang: false }">
                     <button @click="showLang = !showLang"
@@ -626,6 +695,7 @@
     @include('partials.global_loader')
     @include('partials.delete_confirm_modal')
     @stack('modals')
+    @stack('scripts')
 </body>
 
 </html>

@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -r ' *)",
+      "Bash(git status *)",
+      "Bash(echo \"chromium-cli exit=$?\")",
+      "Bash(npm ls *)",
+      "Bash(npx --no-install playwright --version)",
+      "Bash(find / -maxdepth 6 -iname \"*playwright*\" -type d)",
+      "Bash(php -l resources/views/public/contact.blade.php)",
+      "Read(//Users/bhaveshsathwara/Library/Caches/ms-playwright/**)",
+      "Bash(find / -maxdepth 8 -iname \"playwright\" -type d)",
+      "Bash(pip3 show *)",
+      "Bash(python3 -c \"import playwright; print\\('python playwright ok'\\)\")",
+      "Bash(lsof -ti:8099 -sTCP:LISTEN)",
+      "Bash(xargs -r kill)",
+      "Bash(timeout 20 bash -c 'until curl -sf http://127.0.0.1:8099 >/dev/null; do sleep 1; done')",
+      "Bash(echo \"server ready: $?\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8099/contact-us)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8099/contact)",
+      "Bash(curl -sf http://127.0.0.1:8099)",
+      "Bash(php -l database/seeders/DatabaseSeeder.php)",
+      "Bash(php -l database/migrations/2026_09_01_082016_format_contact_address_with_line_breaks.php)",
+      "Bash(curl -s -o /dev/null -w \"contact-us http=%{http_code}\\\\n\" http://127.0.0.1:8099/contact-us)",
+      "Bash(rm -f /tmp/screenshot_contact.mjs /tmp/artisan_serve*.log)",
+      "Bash(curl -s -o /dev/null -w \"admin login http=%{http_code}\\\\n\" http://127.0.0.1:8099/admin/login)",
+      "Bash(sed -i '' 's/const bellButton = page.locator\\(.*/const bellButton = page.locator\\(String.raw`header div.space-x-2 > div.relative`\\).first\\(\\).locator\\(\"button\"\\).first\\(\\);/' /tmp/screenshot_notif.mjs)",
+      "Bash(node /tmp/screenshot_notif.mjs)",
+      "Bash(php -l resources/views/layouts/admin.blade.php)",
+      "Bash(curl -s -o /dev/null -w \"server alive http=%{http_code}\\\\n\" http://127.0.0.1:8099/admin/login)",
+      "Bash(node -e \"console.log\\(require\\('fs'\\).existsSync\\('/Users/bhaveshsathwara/.npm/_npx/e41f203b7505f1fb/node_modules/sharp'\\)\\)\")",
+      "Bash(node /tmp/screenshot_notif3.mjs)"
+    ]
+  }
+}

@@ -148,7 +148,8 @@
 
                         <div class="space-y-1.5 sm:col-span-2 lg:col-span-3">
                             <label class="text-xs font-bold text-slate-600 block">{{ __('messages.contact_office_address') }}</label>
-                            <textarea name="contact_address" rows="2" class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">{{ old('contact_address', $settings['contact_address'] ?? '') }}</textarea>
+                            <textarea name="contact_address" rows="4" class="w-full text-xs font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">{{ old('contact_address', $settings['contact_address'] ?? '') }}</textarea>
+                            <p class="text-[10px] text-slate-400 font-medium">Put each address line on its own line (building/street, landmark, area, city &amp; pincode) — it will display exactly like this on the site.</p>
                         </div>
 
                         <div class="space-y-1.5 sm:col-span-2 lg:col-span-3">
@@ -305,7 +306,7 @@
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                                 {{ __('messages.from_sender_name') }} <span class="text-rose-500">*</span>
                             </label>
-                            <input type="text" name="mail_from_name" value="{{ old('mail_from_name', $emailSettings['mail_from_name']) }}" required placeholder="Satwara Community Portal" class="h-10 w-full text-xs font-semibold px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">
+                            <input type="text" name="mail_from_name" value="{{ old('mail_from_name', $emailSettings['mail_from_name']) }}" required placeholder="Shree Satwara Gnati Mandal, Ahmedabad" class="h-10 w-full text-xs font-semibold px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">
                         </div>
                     </div>
 
@@ -344,7 +345,6 @@
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-bold">₹</span>
                                 <input type="number" min="0" step="1" name="member_signup_fee" value="{{ old('member_signup_fee', $paymentSettings['member_signup_fee'] ?? '1000') }}" required class="h-10 w-full text-xs font-bold pl-7 pr-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">
                             </div>
-                            <p class="text-[10px] text-slate-400 font-medium">{{ __('messages.member_signup_fee_help') }}</p>
                         </div>
 
                         <div class="space-y-1.5">
@@ -355,7 +355,6 @@
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-bold">₹</span>
                                 <input type="number" min="0" step="1" name="business_registration_fee" value="{{ old('business_registration_fee', $paymentSettings['business_registration_fee'] ?? '500') }}" required class="h-10 w-full text-xs font-bold pl-7 pr-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">
                             </div>
-                            <p class="text-[10px] text-slate-400 font-medium">{{ __('messages.business_register_fee_help') }}</p>
                         </div>
                     </div>
                 </div>
@@ -373,7 +372,6 @@
                                 {{ __('messages.razorpay_key_id') }}
                             </label>
                             <input type="text" name="razorpay_key_id" value="{{ old('razorpay_key_id', $paymentSettings['razorpay_key_id'] ?? '') }}" placeholder="rzp_test_..." class="h-10 w-full text-xs font-semibold px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">
-                            <p class="text-[10px] text-slate-400 font-medium">{{ __('messages.razorpay_key_id_help') }}</p>
                         </div>
 
                         <div class="space-y-1.5" x-data="{ showSecret: false }">
@@ -386,6 +384,21 @@
                                     <span x-text="showSecret ? '🙈' : '👁️'" class="text-xs"></span>
                                 </button>
                             </div>
+                        </div>
+
+                        <div class="space-y-1.5 md:col-span-2" x-data="{ showWebhookSecret: false }">
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                                Razorpay Webhook Secret
+                            </label>
+                            <div class="relative">
+                                <input :type="showWebhookSecret ? 'text' : 'password'" name="razorpay_webhook_secret" value="{{ old('razorpay_webhook_secret', $paymentSettings['razorpay_webhook_secret'] ?? '') }}" placeholder="••••••••••••••••" class="h-10 w-full text-xs font-semibold pl-3 pr-10 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">
+                                <button type="button" @click="showWebhookSecret = !showWebhookSecret" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                    <span x-text="showWebhookSecret ? '🙈' : '👁️'" class="text-xs"></span>
+                                </button>
+                            </div>
+                            <p class="text-[10px] text-slate-400 font-medium">
+                                Required for business renewal payment links. In your Razorpay Dashboard → Settings → Webhooks, add URL <code class="bg-slate-100 px-1 py-0.5 rounded">{{ url('/api/webhooks/razorpay') }}</code>, subscribe to the <code class="bg-slate-100 px-1 py-0.5 rounded">payment_link.paid</code> event, and paste the same secret here.
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -94,10 +94,10 @@
                             <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             <span class="truncate max-w-xs sm:max-w-md" title="{{ $event->venue }}">{{ $event->venue }}</span>
                         </div>
-                        @if(!empty($event->registration_end_date) && ($event->event_type ?? 'normal') !== 'normal')
+                        @if(!empty($event->registration_end_date))
                             <div class="inline-flex items-center gap-2 text-rose-200 font-extrabold bg-rose-950 px-4 py-2.5 rounded-xl border border-rose-800 whitespace-nowrap shadow-xs">
                                 <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span>{{ __('messages.last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
+                                <span>{{ __('messages.pass_purchase_last_date') }}: {{ date('d-M-Y', strtotime($event->registration_end_date)) }}</span>
                             </div>
                         @endif
                     </div>
@@ -664,7 +664,7 @@
                                                                      id="pass-card-{{ $idx }}"
                                                                      data-pass-no="{{ $pNo }}"
                                                                      data-event-title="{{ $event->title }}"
-                                                                     data-mandal="Satwara Gyati Mandal Ahm."
+                                                                     data-mandal="Shree Satwara Gnati Mandal, Ahmedabad"
                                                                      data-date="{{ date('d-M-Y', strtotime($event->date)) }}{{ $event->time ? ' | ' . date('h:i A', strtotime($event->time)) : '' }}"
                                                                      data-venue="{{ $event->venue }}"
                                                                      data-logo="{{ $logoUrl }}">
@@ -684,7 +684,7 @@
                                                                         <!-- Middle Details: Mandal, Event Name, Date, Attendee -->
                                                                         <div class="flex-1 space-y-1.5 text-center sm:text-left">
                                                                             <div class="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-tight">
-                                                                                Satwara Gyati Mandal Ahm.
+                                                                                Shree Satwara Gnati Mandal, Ahmedabad
                                                                             </div>
                                                                             <div class="text-base sm:text-lg font-black text-rose-600 leading-tight">
                                                                                 {{ $event->title }}
@@ -1017,7 +1017,7 @@
 
 <script>
 const razorpayKey = "{{ \App\Models\Setting::get('razorpay_key_id', env('RAZORPAY_KEY_ID', '')) }}";
-const appName = "{{ config('app.name', 'Satwara Community') }}";
+const appName = "{{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}";
 
 function submitSponsorFormWithRazorpay() {
     const sponsorForm = document.getElementById('publicSponsorRegisterForm');
@@ -1148,7 +1148,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function _renderPassHtmlCard(passData) {
     const logoSrc = passData.logo || '/logo.png';
-    const mandal = passData.mandal || 'Satwara Gyati Mandal Ahm.';
+    const mandal = passData.mandal || 'Shree Satwara Gnati Mandal, Ahmedabad';
     const title = passData.title || '';
     const date = passData.date || '';
     const passNo = passData.passNo || '001';
@@ -1160,7 +1160,7 @@ function _renderPassHtmlCard(passData) {
         <table style="width: 100%; border-collapse: collapse; background-color: #0f172a; color: #ffffff;">
             <tr>
                 <td style="padding: 7px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-align: left; color: #ffffff;">
-                    SATWARA COMMUNITY ENTRY PASS
+                    SHREE SATWARA GNATI MANDAL, AHMEDABAD
                 </td>
                 <td style="padding: 7px 16px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-align: right; color: #f59e0b;">
                     ENTRY PASS
@@ -1247,7 +1247,7 @@ function downloadAllPasses() {
         const data = {
             passNo: card.dataset.passNo || card.querySelector('.text-xl')?.innerText.trim() || '001',
             title: card.dataset.eventTitle || '',
-            mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
+            mandal: card.dataset.mandal || 'Shree Satwara Gnati Mandal, Ahmedabad',
             date: card.dataset.date || '',
             venue: card.dataset.venue || '',
             logo: card.dataset.logo || card.querySelector('img')?.src || ''
@@ -1263,7 +1263,7 @@ function downloadSinglePass(cardId) {
     const data = {
         passNo: card.dataset.passNo || card.querySelector('.text-xl')?.innerText.trim() || '001',
         title: card.dataset.eventTitle || '',
-        mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
+        mandal: card.dataset.mandal || 'Shree Satwara Gnati Mandal, Ahmedabad',
         date: card.dataset.date || '',
         venue: card.dataset.venue || '',
         logo: card.dataset.logo || card.querySelector('img')?.src || ''

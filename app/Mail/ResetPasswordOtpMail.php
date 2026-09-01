@@ -28,7 +28,7 @@ class ResetPasswordOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Satwara Community — Password Reset OTP Verification Code',
+            subject: 'Shree Satwara Gnati Mandal, Ahmedabad — Password Reset OTP Verification Code',
         );
     }
 

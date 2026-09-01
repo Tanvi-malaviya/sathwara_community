@@ -12,7 +12,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 use Illuminate\Mail\Mailables\Attachment;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\ReceiptPdfService;
 
 class SponsorshipReceiptMail extends Mailable
 {
@@ -37,7 +37,7 @@ class SponsorshipReceiptMail extends Mailable
         $this->amount = $amount ?? (float)($sponsor->amount ?? 0);
         $this->paymentStatus = $paymentStatus ?? ($sponsor->payment_status ?? 'pending');
         $this->paymentId = $paymentId ?? $sponsor->payment_id;
-        $this->receiptNo = 'RCP-SPN-' . date('Y') . '-' . sprintf('%05d', $sponsor->id);
+        $this->receiptNo = \App\Services\ReceiptNumberService::assign($sponsor, 'receipt_no');
     }
 
     /**
@@ -67,7 +67,7 @@ class SponsorshipReceiptMail extends Mailable
      */
     public function attachments(): array
     {
-        $pdf = Pdf::loadView('emails.receipt_pdf.sponsorship', [
+        $pdf = ReceiptPdfService::make('emails.receipt_pdf.sponsorship', [
             'event' => $this->event,
             'sponsor' => $this->sponsor,
             'sponsorshipType' => $this->sponsorshipType,
@@ -78,7 +78,7 @@ class SponsorshipReceiptMail extends Mailable
         ]);
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'Sponsorship_Receipt_' . $this->receiptNo . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'Sponsorship_Receipt_' . str_replace('/', '-', $this->receiptNo) . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }

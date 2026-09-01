@@ -249,7 +249,7 @@
                         <template x-for="(pNo, idx) in activePasses" :key="idx">
                             <div class="bg-white rounded-2xl border-2 border-slate-900 shadow-sm overflow-hidden text-slate-900 print-pass-member-item"
                                 :id="'dashboard-pass-card-' + idx" :data-pass-no="pNo"
-                                :data-event-title="activeEvent?.title || ''" data-mandal="Satwara Gyati Mandal Ahm."
+                                :data-event-title="activeEvent?.title || ''" data-mandal="Shree Satwara Gnati Mandal, Ahmedabad"
                                 :data-date="(activeEvent?.date || '') + (activeEvent?.time ? ' | ' + activeEvent?.time : '')"
                                 :data-venue="activeEvent?.venue || ''" :data-attendee="activeAttendee || ''"
                                 :data-member-code="activeMemberId || ''" data-logo="{{ $logoUrl }}">
@@ -277,7 +277,7 @@
                                     <!-- Middle Details: Mandal, Event Name, Date, Attendee -->
                                     <div class="flex-1 space-y-1.5 text-center sm:text-left">
                                         <div class="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-tight">
-                                            Satwara Gyati Mandal Ahm.
+                                            Shree Satwara Gnati Mandal, Ahmedabad
                                         </div>
                                         <div class="text-base sm:text-lg font-black text-rose-600 leading-tight"
                                             x-text="activeEvent?.title">
@@ -357,14 +357,14 @@
 
         function _renderMemberPassHtmlCard(passData) {
             const logoSrc = passData.logo || '/logo.png';
-            const mandal = passData.mandal || 'Satwara Gyati Mandal Ahm.';
+            const mandal = passData.mandal || 'Shree Satwara Gnati Mandal, Ahmedabad';
             const title = passData.title || '';
             const date = passData.date || '';
             const passNo = passData.passNo || '001';
             const venue = passData.venue || '';
             const attendee = passData.attendee || '';
             const memberCode = passData.memberCode || '';
-            const topNameWithCode = attendee ? (attendee + (memberCode ? ' (' + memberCode + ')' : '')) : 'SATWARA COMMUNITY ENTRY PASS';
+            const topNameWithCode = attendee ? (attendee + (memberCode ? ' (' + memberCode + ')' : '')) : 'SHREE SATWARA GNATI MANDAL, AHMEDABAD';
 
             return `
         <div style="border: 2px solid #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 22px; page-break-inside: avoid; background: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-sizing: border-box;">
@@ -484,7 +484,7 @@
                 const data = {
                     passNo: card.dataset.passNo || card.querySelector('.text-xl')?.innerText.trim() || '001',
                     title: card.dataset.eventTitle || '',
-                    mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
+                    mandal: card.dataset.mandal || 'Shree Satwara Gnati Mandal, Ahmedabad',
                     date: card.dataset.date || '',
                     venue: card.dataset.venue || '',
                     attendee: card.dataset.attendee || '',
@@ -502,7 +502,7 @@
             const data = {
                 passNo: card.dataset.passNo || card.querySelector('.text-xl')?.innerText.trim() || '001',
                 title: card.dataset.eventTitle || '',
-                mandal: card.dataset.mandal || 'Satwara Gyati Mandal Ahm.',
+                mandal: card.dataset.mandal || 'Shree Satwara Gnati Mandal, Ahmedabad',
                 date: card.dataset.date || '',
                 venue: card.dataset.venue || '',
                 attendee: card.dataset.attendee || '',

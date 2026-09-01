@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\AreaController as AdminArea;
 use App\Http\Controllers\Admin\SponsorshipController as AdminSponsorship;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\SubAdminController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotification;
 use Illuminate\Support\Facades\Route;
 
 // ================= LANGUAGE TOGGLE =================
@@ -117,6 +118,11 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
     // Dashboard overview (all logged in admins/sub-admins)
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
+    // Notifications (all logged in admins/sub-admins manage their own inbox)
+    Route::get('/notifications', [AdminNotification::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{id}/read', [AdminNotification::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [AdminNotification::class, 'markAllRead'])->name('notifications.markAllRead');
+
     // Sub-Admins Management (Administrator role only)
     Route::get('/sub-admins', [SubAdminController::class, 'index'])->name('sub_admins.index');
     Route::post('/sub-admins', [SubAdminController::class, 'store'])->name('sub_admins.store');
@@ -163,6 +169,10 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
         Route::post('/businesses/{id}/deactivate', [AdminBusiness::class, 'deactivate'])->name('businesses.deactivate');
         Route::post('/businesses/{id}/activate', [AdminBusiness::class, 'activate'])->name('businesses.activate');
         Route::delete('/businesses/{id}', [AdminBusiness::class, 'destroy'])->name('businesses.destroy');
+
+        Route::post('/businesses/{id}/payment-links', [AdminBusiness::class, 'generatePaymentLink'])->name('businesses.paymentLinks.generate');
+        Route::post('/businesses/{id}/payment-links/{linkId}/resend', [AdminBusiness::class, 'resendPaymentLinkEmail'])->name('businesses.paymentLinks.resend');
+        Route::post('/businesses/{id}/payment-links/{linkId}/mark-paid', [AdminBusiness::class, 'markPaymentLinkPaid'])->name('businesses.paymentLinks.markPaid');
 
         Route::get('/business-categories', [AdminBusiness::class, 'categories'])->name('businesses.categories');
         Route::post('/business-categories', [AdminBusiness::class, 'storeCategory'])->name('businesses.categories.store');

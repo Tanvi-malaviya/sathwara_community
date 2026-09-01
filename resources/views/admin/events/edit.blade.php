@@ -18,8 +18,9 @@
 
         <form method="POST" action="{{ route('admin.events.update', $event->id) }}" enctype="multipart/form-data"
             class="space-y-3"
-            x-data="{ 
+            x-data="{
                 eventType: '{{ old('event_type', $event->event_type ?? 'normal') }}',
+                allowFormFillup: {{ old('has_registration_form', $event->has_registration_form ?? $event->registration_option ?? 1) ? 'true' : 'false' }},
                 bannerPreview: '{{ $event->banner_path ? (str_starts_with($event->banner_path, 'http') ? $event->banner_path : asset('storage/' . $event->banner_path)) : null }}'
             }">
             @csrf
@@ -27,16 +28,16 @@
 
             <input type="hidden" name="max_participants" value="{{ old('max_participants', $event->max_participants ?? 0) }}">
 
-            <!-- Title, Event Type & Dynamic Register Form Checkbox -->
+            <!-- Title, Event Type & Allow Form Fillup Checkbox -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                <!-- Event Title (Fixed 6 Cols / 50% Width) -->
+                <!-- Event Title -->
                 <div class="md:col-span-6 space-y-0.5">
                     <label class="text-[10px] font-bold text-slate-500 uppercase">{{ __('messages.event_title') }}</label>
                     <input type="text" name="title" value="{{ old('title', $event->title) }}" required
                         class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
 
-                <!-- Event Type (6 Cols when Normal, 3 Cols when Other Event Types) -->
+                <!-- Event Type -->
                 <div :class="eventType !== 'normal' ? 'md:col-span-3' : 'md:col-span-6'" class="space-y-0.5 transition-all duration-200">
                     <label class="text-[10px] font-bold text-slate-500 uppercase">{{ __('messages.event_type') }}</label>
                     <select name="event_type" x-model="eventType" required
@@ -47,16 +48,40 @@
                     </select>
                 </div>
 
-                <!-- Registration Checkbox (Hidden when eventType is normal) -->
+                <!-- Allow Form Fillup Checkbox (Hidden when eventType is normal) -->
                 <div x-show="eventType !== 'normal'" x-cloak class="md:col-span-3 space-y-0.5 transition-all duration-200">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase block">{{ __('messages.register_form') }}</label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase block">{{ __('messages.allow_form_fillup') }}</label>
                     <label class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100/80 transition-colors h-[34px]">
                         <input type="hidden" name="has_registration_form" value="0">
-                        <input type="checkbox" name="has_registration_form" value="1" 
-                            {{ old('has_registration_form', $event->has_registration_form ?? $event->registration_option ?? 1) ? 'checked' : '' }}
+                        <input type="checkbox" name="has_registration_form" value="1" x-model="allowFormFillup"
                             class="w-4 h-4 text-primary-600 bg-white border-slate-300 rounded focus:ring-primary-500 cursor-pointer shrink-0">
-                        <span class="text-[11px] font-bold text-slate-700 select-none truncate">{{ __('messages.enable_registration_form') }}</span>
+                        <span class="text-[11px] font-bold text-slate-700 select-none truncate" x-text="eventType === 'inam_vitaran' ? '{{ __('messages.enable_student_award_form') }}' : '{{ __('messages.enable_registration_form') }}'"></span>
                     </label>
+                </div>
+            </div>
+
+            <!-- Form Fillup Start & End Dates (Only when Allow Form Fillup is checked) -->
+            <div x-show="eventType !== 'normal' && allowFormFillup" x-cloak class="grid grid-cols-1 md:grid-cols-2 gap-3 items-center transition-all duration-200">
+                <div class="space-y-0.5">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                        <span>{{ __('messages.form_published_date') }}</span>
+                        <span class="text-[9px] text-slate-400 font-normal">({{ __('messages.form_start_date') }})</span>
+                    </label>
+                    <input type="date" name="form_start_date" value="{{ old('form_start_date', $event->form_start_date ? $event->form_start_date->format('Y-m-d') : '') }}"
+                           @click="$event.target.showPicker?.()"
+                           @focus="$event.target.showPicker?.()"
+                           class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
+                </div>
+
+                <div class="space-y-0.5">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                        <span>{{ __('messages.form_fillup_last_date') }}</span>
+                        <span class="text-[9px] text-rose-500 font-bold">({{ __('messages.last_date_deadline') }})</span>
+                    </label>
+                    <input type="date" name="form_end_date" value="{{ old('form_end_date', $event->form_end_date ? $event->form_end_date->format('Y-m-d') : '') }}"
+                           @click="$event.target.showPicker?.()"
+                           @focus="$event.target.showPicker?.()"
+                           class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
                 </div>
             </div>
 
@@ -89,30 +114,26 @@
                 </div>
             </div>
 
-            <!-- Published Date & Form Fill Up Last Date (Only for Student Award / Specific Events) -->
-            <div x-show="eventType !== 'normal'" x-cloak class="grid grid-cols-1 md:grid-cols-2 gap-3 items-center transition-all duration-200">
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
-                        <span>{{ __('messages.form_published_date') }}</span>
-                        <span class="text-[9px] text-slate-400 font-normal">({{ __('messages.form_start_date') }})</span>
-                    </label>
-                    <input type="date" name="published_date" value="{{ old('published_date', $event->published_date ? $event->published_date->format('Y-m-d') : ($event->created_at ? $event->created_at->format('Y-m-d') : '')) }}"
-                           @click="$event.target.showPicker?.()"
-                           @focus="$event.target.showPicker?.()"
-                           class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
-                </div>
+            <!-- Pass Purchase Last Date (Mandatory for every event type) -->
+            <div class="space-y-0.5">
+                <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                    <span>{{ __('messages.pass_purchase_last_date') }} <span class="text-rose-500">*</span></span>
+                    <span class="text-[9px] text-rose-500 font-bold">({{ __('messages.last_date_deadline') }})</span>
+                </label>
+                <input type="date" name="registration_end_date" value="{{ old('registration_end_date', $event->registration_end_date ? $event->registration_end_date->format('Y-m-d') : '') }}" required
+                       @click="$event.target.showPicker?.()"
+                       @focus="$event.target.showPicker?.()"
+                       class="w-full md:w-1/2 text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
+            </div>
 
-                <!-- Form Fill Up Last Date -->
-                <div class="space-y-0.5">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
-                        <span>{{ __('messages.form_fillup_last_date') }}</span>
-                        <span class="text-[9px] text-rose-500 font-bold">({{ __('messages.last_date_deadline') }})</span>
-                    </label>
-                    <input type="date" name="registration_end_date" value="{{ old('registration_end_date', $event->registration_end_date ? $event->registration_end_date->format('Y-m-d') : '') }}"
-                           @click="$event.target.showPicker?.()"
-                           @focus="$event.target.showPicker?.()"
-                           class="w-full text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
-                </div>
+            <!-- Total Pass Purchase Limit (All Event Types) -->
+            <div class="space-y-0.5">
+                <label class="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                    <span>{{ __('messages.total_pass_limit') }}</span>
+                    <span class="text-[9px] text-slate-400 font-normal">({{ __('messages.blank_for_unlimited') }})</span>
+                </label>
+                <input type="number" name="total_pass_limit" step="1" min="1" value="{{ old('total_pass_limit', $event->total_pass_limit) }}" placeholder="{{ __('messages.blank_for_unlimited') }}"
+                    class="w-full md:w-1/2 text-xs font-semibold px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500">
             </div>
 
             <div class="space-y-0.5">

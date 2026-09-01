@@ -11,7 +11,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 use Illuminate\Mail\Mailables\Attachment;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\ReceiptPdfService;
 
 class BusinessCreateReceiptMail extends Mailable
 {
@@ -31,10 +31,11 @@ class BusinessCreateReceiptMail extends Mailable
     {
         $this->business = $business;
         $this->user = $user ?? $business->user;
-        $this->amount = $amount ?? (float)($business->payment_amount ?? \App\Models\Setting::get('business_registration_fee', '500'));
+        $paidAmount = (float) $business->payment_amount;
+        $this->amount = $amount ?? ($paidAmount > 0 ? $paidAmount : (float) \App\Models\Setting::get('business_registration_fee', '500'));
         $this->paymentStatus = $paymentStatus ?? ($business->payment_status ?? 'paid');
         $this->paymentId = $paymentId ?? $business->payment_id;
-        $this->receiptNo = 'RCP-BIZ-' . date('Y') . '-' . sprintf('%05d', $business->id);
+        $this->receiptNo = \App\Services\ReceiptNumberService::assign($business, 'receipt_no');
     }
 
     /**
@@ -64,7 +65,7 @@ class BusinessCreateReceiptMail extends Mailable
      */
     public function attachments(): array
     {
-        $pdf = Pdf::loadView('emails.receipt_pdf.business', [
+        $pdf = ReceiptPdfService::make('emails.receipt_pdf.business', [
             'business' => $this->business,
             'user' => $this->user,
             'receiptNo' => $this->receiptNo,
@@ -74,7 +75,7 @@ class BusinessCreateReceiptMail extends Mailable
         ]);
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'Business_Receipt_' . $this->receiptNo . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'Business_Receipt_' . str_replace('/', '-', $this->receiptNo) . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }

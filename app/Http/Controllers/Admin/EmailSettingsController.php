@@ -23,7 +23,7 @@ class EmailSettingsController extends Controller
             'mail_password' => Setting::get('mail_password', env('MAIL_PASSWORD', '')),
             'mail_encryption' => Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls')),
             'mail_from_address' => Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@satwaracommunity.com')),
-            'mail_from_name' => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Satwara Community Portal')),
+            'mail_from_name' => Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Shree Satwara Gnati Mandal, Ahmedabad')),
         ];
 
         return view('admin.settings.email', compact('emailSettings'));
@@ -98,7 +98,7 @@ class EmailSettingsController extends Controller
             $password = Setting::get('mail_password', env('MAIL_PASSWORD', ''));
             $encryption = Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls'));
             $fromAddress = Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@satwaracommunity.com'));
-            $fromName = Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Satwara Community Portal'));
+            $fromName = Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'Shree Satwara Gnati Mandal, Ahmedabad'));
 
             config([
                 'mail.default' => $mailer,
@@ -115,7 +115,7 @@ class EmailSettingsController extends Controller
 
             Mail::raw("Hello! This is a test email sent from " . $fromName . " to verify your SMTP configuration settings. If you received this email, your email configuration is working perfectly!", function ($message) use ($recipient, $fromName, $fromAddress) {
                 $message->to($recipient)
-                    ->subject("Satwara Community - SMTP Test Email");
+                    ->subject("Shree Satwara Gnati Mandal, Ahmedabad - SMTP Test Email");
             });
 
             return redirect()->back()

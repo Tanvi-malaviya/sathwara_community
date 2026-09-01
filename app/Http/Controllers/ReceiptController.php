@@ -8,11 +8,22 @@ use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\EventSponsor;
 use App\Models\SponsorshipType;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\ReceiptNumberService;
+use App\Services\ReceiptPdfService;
 use Illuminate\Http\Request;
 
 class ReceiptController extends Controller
 {
+    /**
+     * Receipt numbers contain "/" (e.g. "2026-27/00006"), which Symfony's
+     * download() response rejects in a filename. Swap it for "-" so every
+     * download call below gets a filesystem/HTTP-safe name.
+     */
+    private static function filenameSafe(string $receiptNo): string
+    {
+        return str_replace('/', '-', $receiptNo);
+    }
+
     /**
      * Download Membership Receipt PDF
      */
@@ -20,12 +31,13 @@ class ReceiptController extends Controller
     {
         $user = User::with('memberProfile')->findOrFail($id);
         $profile = $user->memberProfile;
-        $fee = (float)($user->payment_amount ?? \App\Models\Setting::get('member_signup_fee', '1000'));
+        $paidAmount = (float) $user->payment_amount;
+        $fee = $paidAmount > 0 ? $paidAmount : (float) \App\Models\Setting::get('member_signup_fee', '1000');
         $paymentStatus = $user->payment_status ?? 'paid';
         $paymentId = $user->payment_id;
-        $receiptNo = 'RCP-MEM-' . date('Y') . '-' . sprintf('%05d', $user->id);
+        $receiptNo = ReceiptNumberService::assign($user, 'receipt_no');
 
-        $pdf = Pdf::loadView('emails.receipt_pdf.membership', [
+        $pdf = ReceiptPdfService::make('emails.receipt_pdf.membership', [
             'user' => $user,
             'profile' => $profile,
             'receiptNo' => $receiptNo,
@@ -34,7 +46,7 @@ class ReceiptController extends Controller
             'paymentId' => $paymentId,
         ]);
 
-        return $pdf->download('Membership_Receipt_' . $receiptNo . '.pdf');
+        return $pdf->download('Membership_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
     }
 
     /**
@@ -44,12 +56,13 @@ class ReceiptController extends Controller
     {
         $business = Business::with(['user', 'category', 'area'])->findOrFail($id);
         $user = $business->user;
-        $fee = (float)($business->payment_amount ?? \App\Models\Setting::get('business_registration_fee', '500'));
+        $paidAmount = (float) $business->payment_amount;
+        $fee = $paidAmount > 0 ? $paidAmount : (float) \App\Models\Setting::get('business_registration_fee', '500');
         $paymentStatus = $business->payment_status ?? 'paid';
         $paymentId = $business->payment_id;
-        $receiptNo = 'RCP-BIZ-' . date('Y') . '-' . sprintf('%05d', $business->id);
+        $receiptNo = ReceiptNumberService::assign($business, 'receipt_no');
 
-        $pdf = Pdf::loadView('emails.receipt_pdf.business', [
+        $pdf = ReceiptPdfService::make('emails.receipt_pdf.business', [
             'business' => $business,
             'user' => $user,
             'receiptNo' => $receiptNo,
@@ -58,7 +71,7 @@ class ReceiptController extends Controller
             'paymentId' => $paymentId,
         ]);
 
-        return $pdf->download('Business_Receipt_' . $receiptNo . '.pdf');
+        return $pdf->download('Business_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
     }
 
     /**
@@ -84,9 +97,9 @@ class ReceiptController extends Controller
         $amount = (float)($registration->payment_amount ?? 0);
         $paymentStatus = $registration->payment_status ?? 'paid';
         $paymentId = $registration->payment_id;
-        $receiptNo = 'RCP-PASS-' . date('Y') . '-' . sprintf('%05d', $registration->id);
+        $receiptNo = ReceiptNumberService::assign($registration, 'receipt_no');
 
-        $pdf = Pdf::loadView('emails.receipt_pdf.event_pass', [
+        $pdf = ReceiptPdfService::make('emails.receipt_pdf.event_pass', [
             'event' => $event,
             'registration' => $registration,
             'user' => $user,
@@ -98,7 +111,7 @@ class ReceiptController extends Controller
             'paymentId' => $paymentId,
         ]);
 
-        return $pdf->download('Event_Pass_Receipt_' . $receiptNo . '.pdf');
+        return $pdf->download('Event_Pass_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
     }
 
     /**
@@ -112,9 +125,9 @@ class ReceiptController extends Controller
         $amount = (float)($sponsor->amount ?? 0);
         $paymentStatus = $sponsor->payment_status ?? 'received';
         $paymentId = $sponsor->payment_id;
-        $receiptNo = 'RCP-SPN-' . date('Y') . '-' . sprintf('%05d', $sponsor->id);
+        $receiptNo = ReceiptNumberService::assign($sponsor, 'receipt_no');
 
-        $pdf = Pdf::loadView('emails.receipt_pdf.sponsorship', [
+        $pdf = ReceiptPdfService::make('emails.receipt_pdf.sponsorship', [
             'event' => $event,
             'sponsor' => $sponsor,
             'sponsorshipType' => $sponsorshipType,
@@ -124,7 +137,7 @@ class ReceiptController extends Controller
             'paymentId' => $paymentId,
         ]);
 
-        return $pdf->download('Sponsorship_Receipt_' . $receiptNo . '.pdf');
+        return $pdf->download('Sponsorship_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
     }
 
     /**
@@ -144,8 +157,8 @@ class ReceiptController extends Controller
                     ]);
                 }
                 $fee = (float)\App\Models\Setting::get('member_signup_fee', '1000');
-                $receiptNo = 'RCP-MEM-' . date('Y') . '-' . sprintf('%05d', $user->id);
-                $pdf = Pdf::loadView('emails.receipt_pdf.membership', [
+                $receiptNo = ReceiptNumberService::currentFinancialYear() . '/DEMO';
+                $pdf = ReceiptPdfService::make('emails.receipt_pdf.membership', [
                     'user' => $user,
                     'profile' => $user->memberProfile ?? (object)['phone' => '9898989898', 'city' => 'Ahmedabad', 'address' => 'Satellite Road'],
                     'receiptNo' => $receiptNo,
@@ -153,7 +166,7 @@ class ReceiptController extends Controller
                     'paymentStatus' => 'paid',
                     'paymentId' => 'pay_MEM_Demo12345',
                 ]);
-                return $pdf->download('Membership_Receipt_' . $receiptNo . '.pdf');
+                return $pdf->download('Membership_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
 
             case 'business':
                 $business = Business::with(['user', 'category', 'area'])->first();
@@ -168,8 +181,8 @@ class ReceiptController extends Controller
                         'payment_amount' => 500.00,
                     ]);
                 }
-                $receiptNo = 'RCP-BIZ-' . date('Y') . '-' . sprintf('%05d', $business->id);
-                $pdf = Pdf::loadView('emails.receipt_pdf.business', [
+                $receiptNo = ReceiptNumberService::currentFinancialYear() . '/DEMO';
+                $pdf = ReceiptPdfService::make('emails.receipt_pdf.business', [
                     'business' => $business,
                     'user' => $business->user,
                     'receiptNo' => $receiptNo,
@@ -177,7 +190,7 @@ class ReceiptController extends Controller
                     'paymentStatus' => 'paid',
                     'paymentId' => 'pay_BIZ_Demo67890',
                 ]);
-                return $pdf->download('Business_Receipt_' . $receiptNo . '.pdf');
+                return $pdf->download('Business_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
 
             case 'pass':
             case 'event_pass':
@@ -207,8 +220,8 @@ class ReceiptController extends Controller
                     ]);
                 }
                 $passes = $reg->form_data['passes'] ?? ['001', '002'];
-                $receiptNo = 'RCP-PASS-' . date('Y') . '-' . sprintf('%05d', $reg->id);
-                $pdf = Pdf::loadView('emails.receipt_pdf.event_pass', [
+                $receiptNo = ReceiptNumberService::currentFinancialYear() . '/DEMO';
+                $pdf = ReceiptPdfService::make('emails.receipt_pdf.event_pass', [
                     'event' => $event,
                     'registration' => $reg,
                     'user' => User::first(),
@@ -219,7 +232,7 @@ class ReceiptController extends Controller
                     'paymentStatus' => 'paid',
                     'paymentId' => 'pay_PASS_Demo999',
                 ]);
-                return $pdf->download('Event_Pass_Receipt_' . $receiptNo . '.pdf');
+                return $pdf->download('Event_Pass_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
 
             case 'sponsorship':
             case 'sponsor':
@@ -246,8 +259,8 @@ class ReceiptController extends Controller
                         'payment_status' => 'received',
                     ]);
                 }
-                $receiptNo = 'RCP-SPN-' . date('Y') . '-' . sprintf('%05d', $sponsor->id);
-                $pdf = Pdf::loadView('emails.receipt_pdf.sponsorship', [
+                $receiptNo = ReceiptNumberService::currentFinancialYear() . '/DEMO';
+                $pdf = ReceiptPdfService::make('emails.receipt_pdf.sponsorship', [
                     'event' => $event,
                     'sponsor' => $sponsor,
                     'sponsorshipType' => $sponsor->sponsorshipType,
@@ -256,7 +269,7 @@ class ReceiptController extends Controller
                     'paymentStatus' => 'received',
                     'paymentId' => 'pay_SPN_Demo888',
                 ]);
-                return $pdf->download('Sponsorship_Receipt_' . $receiptNo . '.pdf');
+                return $pdf->download('Sponsorship_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
 
             default:
                 abort(404, 'Unknown receipt type');

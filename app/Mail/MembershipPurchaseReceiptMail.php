@@ -11,7 +11,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 use Illuminate\Mail\Mailables\Attachment;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\ReceiptPdfService;
 
 class MembershipPurchaseReceiptMail extends Mailable
 {
@@ -31,10 +31,11 @@ class MembershipPurchaseReceiptMail extends Mailable
     {
         $this->user = $user;
         $this->profile = $profile ?? $user->memberProfile;
-        $this->amount = $amount ?? (float)($user->payment_amount ?? \App\Models\Setting::get('member_signup_fee', '1000'));
+        $paidAmount = (float) $user->payment_amount;
+        $this->amount = $amount ?? ($paidAmount > 0 ? $paidAmount : (float) \App\Models\Setting::get('member_signup_fee', '1000'));
         $this->paymentStatus = $paymentStatus ?? ($user->payment_status ?? 'paid');
         $this->paymentId = $paymentId ?? $user->payment_id;
-        $this->receiptNo = 'RCP-MEM-' . date('Y') . '-' . sprintf('%05d', $user->id);
+        $this->receiptNo = \App\Services\ReceiptNumberService::assign($user, 'receipt_no');
     }
 
     /**
@@ -43,7 +44,7 @@ class MembershipPurchaseReceiptMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🧾 Membership Purchase Receipt #' . $this->receiptNo . ' - ' . config('app.name', 'Satwara Community'),
+            subject: '🧾 Membership Purchase Receipt #' . $this->receiptNo . ' - ' . config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad'),
         );
     }
 
@@ -64,7 +65,7 @@ class MembershipPurchaseReceiptMail extends Mailable
      */
     public function attachments(): array
     {
-        $pdf = Pdf::loadView('emails.receipt_pdf.membership', [
+        $pdf = ReceiptPdfService::make('emails.receipt_pdf.membership', [
             'user' => $this->user,
             'profile' => $this->profile,
             'receiptNo' => $this->receiptNo,
@@ -74,7 +75,7 @@ class MembershipPurchaseReceiptMail extends Mailable
         ]);
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'Membership_Receipt_' . $this->receiptNo . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'Membership_Receipt_' . str_replace('/', '-', $this->receiptNo) . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }

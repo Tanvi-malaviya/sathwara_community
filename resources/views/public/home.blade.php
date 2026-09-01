@@ -265,10 +265,10 @@
                     <div
                         class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white text-xs font-bold border border-white/15 mx-auto">
                         <span class="w-2.5 h-2.5 rounded-full bg-primary-500"></span>
-                        <span class="uppercase tracking-widest text-[11px]">{{ App\Models\Setting::get('website_name', 'Satwara Community Portal') }}</span>
+                        <span class="uppercase tracking-widest text-[11px]">{{ App\Models\Setting::get('website_name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}</span>
                     </div>
                     <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight">
-                        {{ __('messages.welcome') }} - {{ App\Models\Setting::get('website_name', 'Satwara Community') }}
+                        {{ __('messages.welcome') }} - {{ App\Models\Setting::get('website_name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}
                     </h1>
                     <p class="text-slate-300 text-base sm:text-xl max-w-2xl mx-auto leading-relaxed">
                         {{ __('messages.home_fallback_desc') }}
@@ -623,7 +623,7 @@
                                 class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent flex items-end p-5 transition-opacity duration-300">
                                 <div class="w-full space-y-2">
                                     <p class="text-sm sm:text-base font-extrabold text-white leading-snug drop-shadow-md truncate">
-                                        {{ $item->caption ?: 'Satwara Community' }}
+                                        {{ $item->caption ?: 'Shree Satwara Gnati Mandal, Ahmedabad' }}
                                     </p>
 
                                     <!-- High-Visibility Badge -->

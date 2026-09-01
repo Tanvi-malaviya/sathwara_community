@@ -72,4 +72,20 @@ class Business extends Model
     {
         return $this->belongsTo(Area::class);
     }
+
+    public function paymentLinks()
+    {
+        return $this->hasMany(BusinessPaymentLink::class)->latest();
+    }
+
+    /**
+     * A business is due for renewal only once it was previously approved AND
+     * that 1-year approval window has now completed. Payment links are only
+     * generated for these (a business never approved yet goes through the
+     * normal registration flow instead).
+     */
+    public function isRenewalDue(): bool
+    {
+        return !is_null($this->approved_at) && now()->greaterThanOrEqualTo($this->approved_at->copy()->addYear());
+    }
 }

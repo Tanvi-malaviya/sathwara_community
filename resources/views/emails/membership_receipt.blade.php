@@ -171,7 +171,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>{{ config('app.name', 'Satwara Community Portal') }}</h1>
+            <h1>{{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}</h1>
             <p>સભ્યપદ ખરીદી / નોંધણી સત્તાવાર રસીદ</p>
             <div class="receipt-badge">Official Payment Receipt</div>
         </div>
@@ -278,7 +278,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            <p style="margin: 0 0 6px 0;">© {{ date('Y') }} {{ config('app.name', 'Satwara Community') }}. All rights reserved.</p>
+            <p style="margin: 0 0 6px 0;">© {{ date('Y') }} {{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}. All rights reserved.</p>
             <p style="margin: 0;">Need Help? Contact Community Helpline or visit <a href="{{ url('/') }}">{{ url('/') }}</a></p>
         </div>
     </div>

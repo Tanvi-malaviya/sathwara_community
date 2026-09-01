@@ -161,7 +161,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>{{ config('app.name', 'Satwara Community Portal') }}</h1>
+            <h1>{{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}</h1>
             <p>ઇવેન્ટ સ્પોન્સરશિપ સહયોગ સત્તાવાર રસીદ</p>
             <div class="receipt-badge">Sponsorship Contribution Receipt</div>
         </div>
@@ -300,7 +300,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            <p style="margin: 0 0 6px 0;">© {{ date('Y') }} {{ config('app.name', 'Satwara Community') }}. All rights reserved.</p>
+            <p style="margin: 0 0 6px 0;">© {{ date('Y') }} {{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}. All rights reserved.</p>
             <p style="margin: 0;">Event Page: <a href="{{ route('event.details', $event->id) }}">{{ route('event.details', $event->id) }}</a></p>
         </div>
     </div>

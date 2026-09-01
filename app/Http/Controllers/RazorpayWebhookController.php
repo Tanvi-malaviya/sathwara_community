@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Mail\BusinessRenewalReceiptMail;
+use App\Models\BusinessPaymentLink;
+use App\Models\Setting;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+
+class RazorpayWebhookController extends Controller
+{
+    public function handle(Request $request)
+    {
+        $secret = Setting::get('razorpay_webhook_secret', env('RAZORPAY_WEBHOOK_SECRET', ''));
+        $signature = $request->header('X-Razorpay-Signature', '');
+
+        if (empty($secret) || empty($signature) || !hash_equals(hash_hmac('sha256', $request->getContent(), $secret), $signature)) {
+            Log::warning('Razorpay webhook: invalid signature');
+            return response()->json(['status' => 'invalid signature'], 400);
+        }
+
+        $payload = $request->json()->all();
+        $event = $payload['event'] ?? null;
+
+        try {
+            if ($event === 'payment_link.paid') {
+                $this->handlePaymentLinkPaid($payload);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Razorpay webhook processing error: ' . $e->getMessage(), ['payload' => $payload]);
+        }
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    private function handlePaymentLinkPaid(array $payload): void
+    {
+        $linkEntity = $payload['payload']['payment_link']['entity'] ?? null;
+        $paymentEntity = $payload['payload']['payment']['entity'] ?? null;
+
+        if (!$linkEntity || empty($linkEntity['id'])) {
+            return;
+        }
+
+        $link = BusinessPaymentLink::where('razorpay_link_id', $linkEntity['id'])->first();
+
+        if (!$link || $link->status === 'paid') {
+            return;
+        }
+
+        $razorpayPaymentId = $paymentEntity['id'] ?? null;
+
+        $link->status = 'paid';
+        $link->paid_at = now();
+        $link->razorpay_payment_id = $razorpayPaymentId;
+        $link->save();
+
+        $business = $link->business;
+        if (!$business) {
+            return;
+        }
+
+        $business->approved_at = now();
+        $business->status = 'approved';
+        $business->membership_status = 'active';
+        $business->payment_status = 'paid';
+        $business->payment_id = $razorpayPaymentId;
+        $business->payment_amount = $link->amount;
+        $business->save();
+
+        if (!empty($business->email)) {
+            try {
+                Mail::to($business->email)->send(new BusinessRenewalReceiptMail($business, $link));
+            } catch (\Throwable $e) {
+                Log::error('Business Renewal Receipt Mail Error: ' . $e->getMessage());
+            }
+        }
+    }
+}

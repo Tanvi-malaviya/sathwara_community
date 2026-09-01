@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>
-        {{ $title ?? App\Models\Setting::get('seo_title', App\Models\Setting::get('website_name', 'Satwara Community Portal')) }}
+        {{ $title ?? App\Models\Setting::get('seo_title', App\Models\Setting::get('website_name', 'Shree Satwara Gnati Mandal, Ahmedabad')) }}
     </title>
     @if(App\Models\Setting::get('seo_description'))
         <meta name="description" content="{{ App\Models\Setting::get('seo_description') }}">
@@ -29,7 +29,7 @@
 
     <style>
         /* ============================================================
-           TYPOGRAPHY SYSTEM — Satwara Community Website
+           TYPOGRAPHY SYSTEM — Shree Satwara Gnati Mandal, Ahmedabad Website
            English  : Plus Jakarta Sans
            Gujarati : Hind Vadodara + Noto Sans Gujarati fallback
            ============================================================ */
@@ -688,7 +688,7 @@
                             </div>
                         @endif
                         <span class="font-extrabold text-lg text-slate-900 tracking-tight">
-                            {{ App\Models\Setting::get('website_name', 'Satwara Community') }}
+                            {{ App\Models\Setting::get('website_name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}
                         </span>
                     </div>
                     <p class="text-xs text-slate-500 leading-relaxed">
@@ -797,7 +797,7 @@
                                     </svg>
                                 </div>
                                 <span
-                                    class="text-xs text-slate-600 leading-snug group-hover:text-slate-900 transition-colors">
+                                    class="text-xs text-slate-600 leading-snug whitespace-pre-line group-hover:text-slate-900 transition-colors">
                                     {{ App\Models\Setting::get('contact_address') }}
                                 </span>
                             </div>
@@ -846,7 +846,7 @@
             <div
                 class="border-t border-slate-100 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
                 <span>
-                    © {{ date('Y') }} {{ App\Models\Setting::get('website_name', 'Satwara Community') }}.
+                    © {{ date('Y') }} {{ App\Models\Setting::get('website_name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}.
                     {{ __('messages.all_rights_reserved') }}
                 </span>
 

@@ -18,6 +18,7 @@ use App\Models\EventRegistration;
 use App\Models\SponsorshipType;
 use App\Models\EventSponsor;
 use App\Services\EventSequenceService;
+use App\Services\AdminNotifier;
 use App\Mail\EventPassPurchasedMail;
 use App\Mail\SponsorshipReceiptMail;
 use Illuminate\Http\Request;
@@ -265,12 +266,24 @@ class PublicController extends Controller
             return redirect()->back()->with('error', 'Registration is not required for this event.');
         }
 
-        if (!empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString()) {
-            return redirect()->back()->with('error', 'Registration for this event closed on ' . date('d-M-Y', strtotime($event->registration_end_date)) . '.');
-        }
-
         $isStudentForm = ($event->event_type === 'inam_vitaran' && $request->filled('student_name'));
         $isYuvaMeloCandidateForm = ($event->event_type === 'yuva_melo' && ($request->filled('surname') || $request->filled('qualification') || $request->filled('first_name')));
+
+        if ($isStudentForm || $isYuvaMeloCandidateForm) {
+            // Form fillup window: form_start_date - form_end_date
+            $today = now()->toDateString();
+            if (!empty($event->form_start_date) && $today < \Carbon\Carbon::parse($event->form_start_date)->toDateString()) {
+                return redirect()->back()->with('error', 'Form submission has not started yet. It opens on ' . date('d-M-Y', strtotime($event->form_start_date)) . '.');
+            }
+            if (!empty($event->form_end_date) && $today > \Carbon\Carbon::parse($event->form_end_date)->toDateString()) {
+                return redirect()->back()->with('error', 'Form submission closed on ' . date('d-M-Y', strtotime($event->form_end_date)) . '.');
+            }
+        } else {
+            // Pass purchase deadline
+            if (!empty($event->registration_end_date) && now()->toDateString() > \Carbon\Carbon::parse($event->registration_end_date)->toDateString()) {
+                return redirect()->back()->with('error', 'Pass purchase for this event closed on ' . date('d-M-Y', strtotime($event->registration_end_date)) . '.');
+            }
+        }
 
         // Capture form data depending on event type
         $formData = [];
@@ -394,6 +407,20 @@ class PublicController extends Controller
                     ->whereNull('form_data->student_name')
                     ->whereNull('form_data->surname')
                     ->first();
+            }
+        }
+
+        // Enforce event-wide total pass purchase limit (general pass registrations only)
+        if (!$isStudentForm && !$isYuvaMeloCandidateForm && !empty($event->total_pass_limit)) {
+            $totalSoldPasses = (int) $event->total_passes_count;
+            $requestedTotal = $totalSoldPasses + (int)($formData['person_count'] ?? 1);
+
+            if ($requestedTotal > $event->total_pass_limit) {
+                $remaining = max(0, $event->total_pass_limit - $totalSoldPasses);
+                $message = $remaining > 0
+                    ? "Only {$remaining} pass(es) remaining for this event (limit: {$event->total_pass_limit})."
+                    : "Sorry, all passes for this event have been sold out (limit: {$event->total_pass_limit}).";
+                return $redirectTarget->with('error', $message);
             }
         }
 
@@ -522,6 +549,31 @@ class PublicController extends Controller
             'payment_status' => $paymentStatus,
             'payment_amount' => $totalAmount,
         ]);
+
+        $registrantName = $formData['student_name'] ?? $formData['full_name'] ?? ($user->name ?? 'Participant');
+        $referenceNo = $inamNumber ?? $yuvaMeloNumber ?? $passNumber;
+
+        if ($regType === 'pass') {
+            AdminNotifier::send(
+                permission: 'events_manage',
+                type: 'event_pass_registered',
+                title: 'New Event Pass Registration',
+                message: "{$registrantName} registered for \"{$event->title}\" (Pass #{$referenceNo})",
+                url: route('admin.events.registrations.edit', $newRegistration->id),
+                meta: ['event_id' => $event->id, 'registration_id' => $newRegistration->id],
+                color: 'sky'
+            );
+        } else {
+            AdminNotifier::send(
+                permission: 'events_manage',
+                type: 'event_form_submitted',
+                title: 'New Event Form Submission',
+                message: "{$registrantName} submitted the form for \"{$event->title}\" (Ref #{$referenceNo})",
+                url: route('admin.events.registrations.edit', $newRegistration->id),
+                meta: ['event_id' => $event->id, 'registration_id' => $newRegistration->id],
+                color: 'sky'
+            );
+        }
 
         // Dispatch Pass Email for General Pass Registration
         if (!$isStudentForm && !$isYuvaMeloCandidateForm) {
@@ -663,6 +715,21 @@ class PublicController extends Controller
         // Get the admin/contact email from settings, fallback to env
         $toEmail = Setting::get('contact_email', config('mail.from.address'));
 
+        AdminNotifier::send(
+            permission: null,
+            type: 'contact_inquiry',
+            title: 'New Contact Inquiry',
+            message: "{$request->input('name')} sent an inquiry: \"{$request->input('subject')}\"",
+            url: 'mailto:' . $request->input('email') . '?subject=' . rawurlencode('Re: ' . $request->input('subject')),
+            meta: [
+                'name' => $request->input('name'),
+                'email' => $request->input('email'),
+                'subject' => $request->input('subject'),
+                'message' => $request->input('message'),
+            ],
+            color: 'rose'
+        );
+
         try {
             \Illuminate\Support\Facades\Mail::to($toEmail)
                 ->send(new \App\Mail\ContactInquiryMail(
@@ -759,6 +826,16 @@ class PublicController extends Controller
             'payment_id' => $paymentId,
             'status' => 'pending',
         ]);
+
+        AdminNotifier::send(
+            permission: 'events_manage',
+            type: 'event_sponsorship',
+            title: 'New Event Sponsorship',
+            message: "{$sponsor->name} offered to sponsor \"{$event->title}\" (₹" . number_format((float) $sponsor->amount, 2) . ")",
+            url: route('admin.events.show', $event->id),
+            meta: ['event_id' => $event->id, 'sponsor_id' => $sponsor->id],
+            color: 'amber'
+        );
 
         // Dispatch Sponsorship Receipt Email
         $recipientEmail = $validated['email'] ?? (auth()->check() ? auth()->user()->email : null);

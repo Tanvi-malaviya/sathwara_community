@@ -136,7 +136,7 @@
                         <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                             {{ __('messages.from_sender_name') }} <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" name="mail_from_name" value="{{ old('mail_from_name', $emailSettings['mail_from_name']) }}" required placeholder="Satwara Community Portal" class="h-10 w-full text-xs font-semibold px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">
+                        <input type="text" name="mail_from_name" value="{{ old('mail_from_name', $emailSettings['mail_from_name']) }}" required placeholder="Shree Satwara Gnati Mandal, Ahmedabad" class="h-10 w-full text-xs font-semibold px-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-primary-500 transition-colors">
                     </div>
                 </div>
 

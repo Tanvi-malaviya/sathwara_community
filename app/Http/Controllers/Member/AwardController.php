@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
 use App\Models\AwardApplication;
+use App\Services\AdminNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -43,7 +44,7 @@ class AwardController extends Controller
 
         $path = $request->file('certificate')->store('awards/certificates', 'public');
 
-        auth()->user()->awardApplications()->create([
+        $application = auth()->user()->awardApplications()->create([
             'student_name' => $request->student_name,
             'standard' => $request->standard,
             'school' => $request->school,
@@ -53,6 +54,16 @@ class AwardController extends Controller
             'remarks' => $request->remarks,
             'status' => 'pending',
         ]);
+
+        AdminNotifier::send(
+            permission: 'events_manage',
+            type: 'award_application',
+            title: 'New Award Application',
+            message: "{$application->student_name} applied for \"{$application->award_name}\" ({$application->school})",
+            url: route('admin.awards.show', $application->id),
+            meta: ['application_id' => $application->id],
+            color: 'amber'
+        );
 
         return redirect()->route('member.awards.index')->with('success', 'Award application submitted successfully and is pending review.');
     }

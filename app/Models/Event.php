@@ -23,7 +23,10 @@ class Event extends Model
         'banner_path',
         'registration_option',
         'has_registration_form',
+        'form_start_date',
+        'form_end_date',
         'pass_fee',
+        'total_pass_limit',
         'form_fee',
         'max_participants',
         'status',
@@ -34,7 +37,10 @@ class Event extends Model
         'registration_end_date' => 'date',
         'registration_option' => 'boolean',
         'has_registration_form' => 'boolean',
+        'form_start_date' => 'date',
+        'form_end_date' => 'date',
         'pass_fee' => 'decimal:2',
+        'total_pass_limit' => 'integer',
         'form_fee' => 'decimal:2',
     ];
 

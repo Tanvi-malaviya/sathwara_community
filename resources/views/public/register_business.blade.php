@@ -295,7 +295,7 @@
                             </div>
                             <div class="text-right">
                                 <span class="text-base font-black text-primary-700">₹{{ number_format($businessFee ?? 500) }}</span>
-                                <span class="block text-xs font-extrabold text-slate-400">{{ __('messages.one_time_fee') }}</span>
+                                <span class="block text-xs font-extrabold text-slate-400">{{ __('messages.business_yearly_fee') }}</span>
                             </div>
                         </div>
                     @endif
@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function () {
             "key": razorpayKey || "rzp_test_key",
             "amount": feeAmountPaise,
             "currency": "INR",
-            "name": "{{ config('app.name', 'Satwara Community') }}",
+            "name": "{{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}",
             "description": "Business Registration Fee - " + businessName,
             "handler": function (response) {
                 paymentIdInput.value = response.razorpay_payment_id;

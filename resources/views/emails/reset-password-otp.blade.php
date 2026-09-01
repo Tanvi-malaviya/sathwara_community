@@ -12,7 +12,7 @@
                     <!-- Header -->
                     <tr>
                         <td align="center" style="background-color: #0f172a; padding: 32px 40px; color: #ffffff;">
-                            <h1 style="margin: 0; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Satwara Community</h1>
+                            <h1 style="margin: 0; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Shree Satwara Gnati Mandal, Ahmedabad</h1>
                             <p style="margin: 6px 0 0 0; font-size: 11px; color: #94a3b8; font-weight: 600;">PORTAL SECURE SERVICE</p>
                         </td>
                     </tr>
@@ -45,7 +45,7 @@
                     <!-- Footer -->
                     <tr>
                         <td align="center" style="background-color: #f8fafc; padding: 24px 40px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 11px; font-weight: 600;">
-                            &copy; {{ date('Y') }} Satwara Community Portal. All rights reserved.
+                            &copy; {{ date('Y') }} Shree Satwara Gnati Mandal, Ahmedabad. All rights reserved.
                         </td>
                     </tr>
                 </table>

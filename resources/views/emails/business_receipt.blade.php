@@ -152,7 +152,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>{{ config('app.name', 'Satwara Community Portal') }}</h1>
+            <h1>{{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}</h1>
             <p>બિઝનેસ ડિરેક્ટરી નોંધણી સત્તાવાર રસીદ</p>
             <div class="receipt-badge">Business Registration Receipt</div>
         </div>
@@ -261,7 +261,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            <p style="margin: 0 0 6px 0;">© {{ date('Y') }} {{ config('app.name', 'Satwara Community') }}. All rights reserved.</p>
+            <p style="margin: 0 0 6px 0;">© {{ date('Y') }} {{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}. All rights reserved.</p>
             <p style="margin: 0;">View Directory at <a href="{{ route('business.directory') }}">{{ route('business.directory') }}</a></p>
         </div>
     </div>

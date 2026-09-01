@@ -673,7 +673,7 @@ document.addEventListener('DOMContentLoaded', function () {
             "key": razorpayKey || "rzp_test_key",
             "amount": totalAmountPaise,
             "currency": "INR",
-            "name": "{{ config('app.name', 'Satwara Community') }}",
+            "name": "{{ config('app.name', 'Shree Satwara Gnati Mandal, Ahmedabad') }}",
             "description": "Event Pass Booking - {{ addslashes($event->title) }} (" + personCount + " Person/s)",
             "handler": function (response) {
                 paymentIdInput.value = response.razorpay_payment_id;

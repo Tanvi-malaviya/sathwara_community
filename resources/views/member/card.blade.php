@@ -56,7 +56,7 @@
                 <div class="w-6 h-6 rounded-md bg-primary-500 flex items-center justify-center text-white font-black text-xs">
                     S
                 </div>
-                <span class="font-black text-xs sm:text-sm tracking-wider">{{ __('messages.satwara_community') }}</span>
+                <span class="font-black text-xs sm:text-sm tracking-wider">{{ __('messages.shree_satwara_gnati_mandal') }}</span>
             </div>
             <span class="text-[10px] font-black text-primary-400 bg-primary-400/10 px-2.5 py-0.5 rounded uppercase tracking-wider">{{ __('messages.official_card') }}</span>
         </div>
