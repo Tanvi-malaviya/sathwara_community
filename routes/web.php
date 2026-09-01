@@ -300,9 +300,11 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
         Route::get('/business/{id}', [\App\Http\Controllers\ReceiptController::class, 'downloadBusiness'])->name('business');
         Route::get('/event-pass/{id}', [\App\Http\Controllers\ReceiptController::class, 'downloadEventPass'])->name('event_pass');
         Route::get('/sponsorship/{id}', [\App\Http\Controllers\ReceiptController::class, 'downloadSponsorship'])->name('sponsorship');
-        Route::get('/preview/{type}', [\App\Http\Controllers\ReceiptController::class, 'previewDemo'])->name('preview');
     });
 });
+
+// Sponsorship Preview Route
+Route::get('/preview/sponsorship', [\App\Http\Controllers\ReceiptController::class, 'previewSponsorship'])->name('preview.sponsorship');
 
 // Fallback to Breeze default auth routes
 require __DIR__ . '/auth.php';

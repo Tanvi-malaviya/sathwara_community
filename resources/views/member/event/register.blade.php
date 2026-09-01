@@ -1048,7 +1048,7 @@
                                                     <div class="space-y-1">
                                                         <label
                                                             class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
-                                                            <span>{{ __('messages.percentage') }} <span class="text-rose-500">*</span></span>
+                                                            <span>{{ __('messages.percentage_label') }} <span class="text-rose-500">*</span></span>
                                                             <span
                                                                 class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80">{{ __('messages.auto_calculated') }}</span>
                                                         </label>

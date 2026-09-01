@@ -7,12 +7,12 @@
     <div class="section-header">Member Information</div>
     <table class="info-table">
         <tr>
-            <td class="label">Member ID / Code:</td>
+            <td class="label">Member Code:</td>
             <td class="value">{{ $user->member_code ?? ('SSAM' . sprintf('%04d', $user->id)) }}</td>
         </tr>
         <tr>
             <td class="label">Full Name:</td>
-            <td class="value">{{ $user->name }}</td>
+            <td class="value">{{ \App\Support\GujaratiText::reorderMatra($user->name) }}</td>
         </tr>
         <tr>
             <td class="label">Phone / Mobile:</td>
@@ -25,13 +25,13 @@
         @if(!empty($profile->city))
         <tr>
             <td class="label">City / Village:</td>
-            <td class="value">{{ $profile->city }} ({{ $profile->state ?? 'Gujarat' }})</td>
+            <td class="value">{{ \App\Support\GujaratiText::reorderMatra($profile->city) }} ({{ \App\Support\GujaratiText::reorderMatra($profile->state ?? 'Gujarat') }})</td>
         </tr>
         @endif
         @if(!empty($profile->address))
         <tr>
             <td class="label">Address:</td>
-            <td class="value">{{ $profile->address }}</td>
+            <td class="value">{{ \App\Support\GujaratiText::reorderMatra($profile->address) }}</td>
         </tr>
         @endif
     </table>

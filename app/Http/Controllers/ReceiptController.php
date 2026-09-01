@@ -144,138 +144,43 @@ class ReceiptController extends Controller
     }
 
     /**
-     * Demo / Instant preview & download for checking receipts
+     * Preview Sponsorship Receipt PDF inline in browser
      */
-    public function previewDemo($type)
+    public function previewSponsorship()
     {
-        switch ($type) {
-            case 'membership':
-                $user = User::with('memberProfile')->first();
-                if (!$user) {
-                    $user = new User([
-                        'id' => 1,
-                        'name' => 'Amitbhai K. Sathwara',
-                        'email' => 'amit@example.com',
-                        'member_code' => 'SSAM0001',
-                    ]);
-                }
-                $fee = (float)\App\Models\Setting::get('member_signup_fee', '1000');
-                $receiptNo = ReceiptNumberService::currentFinancialYear() . '/DEMO';
-                $pdf = ReceiptPdfService::make('emails.receipt_pdf.membership', [
-                    'user' => $user,
-                    'profile' => $user->memberProfile ?? (object)['phone' => '9898989898', 'city' => 'Ahmedabad', 'address' => 'Satellite Road'],
-                    'receiptNo' => $receiptNo,
-                    'amount' => $fee,
-                    'paymentStatus' => 'paid',
-                    'paymentId' => 'pay_MEM_Demo12345',
-                ]);
-                return $pdf->download('Membership_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
-
-            case 'business':
-                $business = Business::with(['user', 'category', 'area'])->first();
-                if (!$business) {
-                    $business = new Business([
-                        'id' => 1,
-                        'business_name' => 'Sathwara Builders & Developers',
-                        'owner_name' => 'Rameshbhai Sathwara',
-                        'phone' => '9876543210',
-                        'email' => 'business@example.com',
-                        'address' => '102, Shivalik Plaza, Ahmedabad',
-                        'payment_amount' => 500.00,
-                    ]);
-                }
-                $receiptNo = ReceiptNumberService::currentFinancialYear() . '/DEMO';
-                $pdf = ReceiptPdfService::make('emails.receipt_pdf.business', [
-                    'business' => $business,
-                    'user' => $business->user,
-                    'receiptNo' => $receiptNo,
-                    'amount' => (float)($business->payment_amount ?? 500),
-                    'paymentStatus' => 'paid',
-                    'paymentId' => 'pay_BIZ_Demo67890',
-                ]);
-                return $pdf->download('Business_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
-
-            case 'pass':
-            case 'event_pass':
-                $event = Event::first();
-                if (!$event) {
-                    $event = new Event([
-                        'id' => 1,
-                        'title' => 'Annual Community Mahotsav 2026',
-                        'event_date' => date('Y-m-d', strtotime('+7 days')),
-                        'start_time' => '18:00:00',
-                        'venue' => 'Sathwara Ground, Satellite, Ahmedabad',
-                    ]);
-                }
-                $reg = EventRegistration::first();
-                if (!$reg) {
-                    $reg = new EventRegistration([
-                        'id' => 101,
-                        'event_id' => $event->id,
-                        'form_data' => [
-                            'full_name' => 'Rajeshbhai Sathwara',
-                            'phone' => '9898123456',
-                            'passes' => ['001', '002'],
-                        ],
-                        'payment_amount' => 1000.00,
-                        'payment_status' => 'paid',
-                        'payment_id' => 'pay_PASS_Demo999',
-                    ]);
-                }
-                $passes = $reg->form_data['passes'] ?? ['001', '002'];
-                $receiptNo = ReceiptNumberService::currentFinancialYear() . '/DEMO';
-                $pdf = ReceiptPdfService::make('emails.receipt_pdf.event_pass', [
-                    'event' => $event,
-                    'registration' => $reg,
-                    'user' => User::first(),
-                    'passes' => $passes,
-                    'personCount' => count($passes),
-                    'receiptNo' => $receiptNo,
-                    'amount' => (float)($reg->payment_amount ?? 1000),
-                    'paymentStatus' => 'paid',
-                    'paymentId' => 'pay_PASS_Demo999',
-                ]);
-                return $pdf->download('Event_Pass_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
-
-            case 'sponsorship':
-            case 'sponsor':
-                $event = Event::first();
-                if (!$event) {
-                    $event = new Event([
-                        'id' => 1,
-                        'title' => 'Annual Community Mahotsav 2026',
-                        'event_date' => date('Y-m-d', strtotime('+7 days')),
-                        'start_time' => '18:00:00',
-                        'venue' => 'Sathwara Ground, Satellite, Ahmedabad',
-                    ]);
-                }
-                $sponsor = EventSponsor::with('sponsorshipType')->first();
-                if (!$sponsor) {
-                    $sponsor = new EventSponsor([
-                        'id' => 1,
-                        'name' => 'Shree Ram Enterprises',
-                        'contact_person' => 'Jigneshbhai Sathwara',
-                        'mobile' => '9825012345',
-                        'email' => 'sponsor@example.com',
-                        'city' => 'Ahmedabad',
-                        'amount' => 25000.00,
-                        'payment_status' => 'received',
-                    ]);
-                }
-                $receiptNo = ReceiptNumberService::currentFinancialYear() . '/DEMO';
-                $pdf = ReceiptPdfService::make('emails.receipt_pdf.sponsorship', [
-                    'event' => $event,
-                    'sponsor' => $sponsor,
-                    'sponsorshipType' => $sponsor->sponsorshipType,
-                    'receiptNo' => $receiptNo,
-                    'amount' => (float)($sponsor->amount ?? 25000),
-                    'paymentStatus' => 'received',
-                    'paymentId' => 'pay_SPN_Demo888',
-                ]);
-                return $pdf->download('Sponsorship_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
-
-            default:
-                abort(404, 'Unknown receipt type');
+        $event = Event::first();
+        if (!$event) {
+            $event = new Event([
+                'id' => 1,
+                'title' => 'સ્નેહ મિલન અને ઈનામ વિતરણ ૨૦૨૬',
+                'event_date' => date('Y-m-d', strtotime('+7 days')),
+                'start_time' => '18:00:00',
+                'venue' => 'સતવારા સમાજ ભવન, ઓઢવ, અમદાવાદ',
+            ]);
         }
+        $sponsor = EventSponsor::with('sponsorshipType')->first();
+        if (!$sponsor) {
+            $sponsor = new EventSponsor([
+                'id' => 1,
+                'name' => 'શ્રી રામ એન્ટરપ્રાઇઝ',
+                'contact_person' => 'જિજ્ઞેશભાઈ સતવારા',
+                'mobile' => '+91-9825012345',
+                'email' => 'sponsor@example.com',
+                'city' => 'અમદાવાદ',
+                'amount' => 25000.00,
+                'payment_status' => 'received',
+            ]);
+        }
+        $receiptNo = ReceiptNumberService::currentFinancialYear() . '/00004';
+        $pdf = ReceiptPdfService::make('emails.receipt_pdf.sponsorship', [
+            'event' => $event,
+            'sponsor' => $sponsor,
+            'sponsorshipType' => $sponsor->sponsorshipType,
+            'receiptNo' => $receiptNo,
+            'amount' => (float)($sponsor->amount ?? 25000),
+            'paymentStatus' => 'received',
+            'paymentId' => 'pay_SPN_10004',
+        ]);
+        return $pdf->stream('Sponsorship_Receipt_' . self::filenameSafe($receiptNo) . '.pdf');
     }
 }

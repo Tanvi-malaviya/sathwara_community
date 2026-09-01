@@ -85,9 +85,6 @@
                 <td>
                     <strong>{{ $formattedEventTitle }} &mdash; Event Sponsorship Contribution</strong><br>
                     <span style="font-size: 10px; color: #64748b;">Package: {{ $formattedPackageTitle }}</span>
-                    @if($sponsorshipType && !empty($sponsorshipType->description))
-                    <br><span style="font-size: 9px; color: #94a3b8;">{{ \Illuminate\Support\Str::limit(strip_tags(\App\Support\GujaratiText::reorderMatra($sponsorshipType->description)), 120) }}</span>
-                    @endif
                 </td>
                 <td style="text-align: center;">
                     {{ !empty($paymentId) ? 'Razorpay Online' : 'Offline / Cash' }}

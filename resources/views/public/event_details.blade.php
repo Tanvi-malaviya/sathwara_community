@@ -809,8 +809,8 @@
                                                                 </div>
 
                                                                 <button type="button" 
-                                                                        @click="if (count < 20) count++" 
-                                                                        :disabled="count >= 20"
+                                                                        @click="if (count < 50) count++"
+                                                                        :disabled="count >= 50"
                                                                         class="w-12 h-12 rounded-xl bg-white hover:bg-slate-100 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 text-slate-800 font-black text-2xl flex items-center justify-center transition-all cursor-pointer shadow-xs">
                                                                     &plus;
                                                                 </button>

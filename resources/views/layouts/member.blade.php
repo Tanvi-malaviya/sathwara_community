@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Styles / Scripts -->
@@ -73,12 +73,12 @@
 
     <style>
         .font-gujarati {
-            font-family: 'Hind Vadodara', 'Noto Sans Gujarati', sans-serif !important;
+            font-family: 'Noto Sans Gujarati', sans-serif !important;
             letter-spacing: 0.01em;
         }
 
         .font-sans {
-            font-family: 'Manrope', sans-serif !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
         body {

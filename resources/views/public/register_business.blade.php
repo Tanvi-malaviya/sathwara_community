@@ -271,7 +271,7 @@
                 </div>
 
                 <div class="space-y-1 md:col-span-3">
-                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.business_desc_label') }} <span class="text-slate-400 font-normal">{{ __('messages.optional') }}</span></label>
+                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">{{ __('messages.business_desc_label') }} <span class="text-slate-400 font-normal">({{ __('messages.optional') }})</span></label>
                     <textarea name="description" rows="2" placeholder="{{ __('messages.business_desc_placeholder') }}" class="w-full text-sm font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-0">{{ old('description') }}</textarea>
                 </div>
 

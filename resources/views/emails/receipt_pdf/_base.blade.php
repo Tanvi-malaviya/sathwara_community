@@ -5,55 +5,51 @@
     <title>@yield('type_label') - {{ $receiptNo }}</title>
     <style>
         @page {
-            margin: 25px 30px;
+            margin: 18px 25px;
         }
         body {
-            font-family: 'HindVadodara', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'NotoSansGujarati', sans-serif;
             color: #1e293b;
-            font-size: 12px;
-            line-height: 1.4;
+            font-size: 11.5px;
+            line-height: 1.35;
         }
         .receipt-box {
+            position: relative;
             border: 2px solid #1e3a8a;
             border-radius: 8px;
-            padding: 20px;
+            padding: 14px 18px;
+        }
+        .watermark-bg {
+            position: absolute;
+            top: 20%;
+            left: 12%;
+            width: 76%;
+            text-align: center;
+            opacity: 0.03;
+            z-index: -1;
+        }
+        .watermark-bg img {
+            width: 380px;
+            max-width: 85%;
+            height: auto;
         }
         .header-table {
             width: 100%;
-            margin-bottom: 8px;
-        }
-        .org-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1e3a8a;
-            text-transform: uppercase;
-        }
-        .type-badge-wrap {
-            text-align: center;
-            border-bottom: 2px solid #1e3a8a;
-            padding-bottom: 12px;
-            margin-bottom: 15px;
-        }
-        .type-badge {
-            background-color: #1e3a8a;
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 12px;
-            padding: 7px 18px;
-            border-radius: 20px;
-            display: inline-block;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            text-align: center;
+            border-collapse: collapse;
+            margin-bottom: 6px;
         }
         .meta-table {
             width: 100%;
             background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
-            padding: 8px 12px;
-            margin-bottom: 15px;
-            font-size: 11px;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .meta-table td {
+            padding: 5px 12px 6px 12px;
+            vertical-align: middle;
+            line-height: 1.0;
         }
         .section-header {
             font-size: 12px;
@@ -61,18 +57,19 @@
             color: #1e3a8a;
             text-transform: uppercase;
             border-bottom: 1px solid #cbd5e1;
-            padding-bottom: 4px;
-            margin-top: 15px;
-            margin-bottom: 8px;
+            padding-bottom: 3px;
+            margin-top: 10px;
+            margin-bottom: 6px;
         }
         .info-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .info-table td {
-            padding: 5px 8px;
+            padding: 4.5px 8px;
             border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
         }
         .info-table td.label {
             color: #64748b;
@@ -90,8 +87,8 @@
         .payment-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            margin-bottom: 15px;
+            margin-top: 6px;
+            margin-bottom: 10px;
         }
         .payment-table th {
             background-color: #1e3a8a;
@@ -100,21 +97,27 @@
             text-align: left;
             font-size: 11px;
             text-transform: uppercase;
+            vertical-align: middle;
+            line-height: 1.0;
         }
         .payment-table td {
-            padding: 8px 10px;
+            padding: 6px 10px;
             border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
         }
         .total-row td {
             background-color: #f1f5f9;
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: bold;
             border-top: 2px solid #cbd5e1;
+            padding: 7px 10px;
+            vertical-align: middle;
         }
         .txn-row td {
             font-size: 10px;
             color: #475569;
-            padding: 8px 10px;
+            padding: 6px 10px;
+            vertical-align: middle;
         }
         .status-badge {
             font-weight: bold;
@@ -135,14 +138,6 @@
             background-color: #fee2e2;
             color: #b91c1c;
         }
-        .footer-note {
-            margin-top: 15px;
-            padding-top: 8px;
-            border-top: 1px solid #e2e8f0;
-            font-size: 10px;
-            color: #64748b;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -156,55 +151,66 @@
     @endphp
 
     <div class="receipt-box">
+        @if($logoBase64)
+        <div class="watermark-bg">
+            <img src="{{ $logoBase64 }}" alt="Watermark">
+        </div>
+        @endif
+
         @php
             $orgAddress = \App\Models\Setting::get('contact_address', '1, Satwara Samaj Bhavan, Opp. Siddheswar Shopping, Viratnagar-Manmohan Road, Odhav, Ahmedabad - 382415');
             $orgPhone = \App\Models\Setting::get('contact_phone', '+91-6353785519');
+            $cleanPhone = preg_replace('/[^0-9+]/', '', $orgPhone);
+            $mapsUrl = 'https://maps.google.com/?q=' . urlencode($orgAddress);
         @endphp
 
-        <!-- Header -->
-        <table class="header-table" style="width: 100%; border-collapse: collapse;">
+        <!-- Header Table: Logo (Left) | Title 2-Line (Left) | Address & Mobile (Right) -->
+        <table class="header-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
             <tr>
                 @if($logoBase64)
-                <td style="width: 65px; vertical-align: middle; text-align: left;">
-                    <img src="{{ $logoBase64 }}" style="max-height: 55px; max-width: 60px; object-fit: contain;" alt="Logo">
+                <td style="width: 52px; vertical-align: middle; text-align: left;">
+                    <img src="{{ $logoBase64 }}" style="max-height: 48px; max-width: 52px; object-fit: contain;" alt="Logo">
                 </td>
                 @endif
-                <td style="text-align: center; vertical-align: middle;">
-                    <div class="org-title">{{ \App\Support\GujaratiText::reorderMatra($orgName) }}</div>
+                <td style="vertical-align: middle; text-align: left; padding-left: 8px;">
+                    <div style="font-size: 16px; font-weight: 900; color: #1e3a8a; text-transform: uppercase; line-height: 1.2; letter-spacing: 0.5px;">
+                        SHREE SATWARA GNATI MANDAL,<br>AHMEDABAD
+                    </div>
+                </td>
+                <td style="vertical-align: middle; text-align: right; font-size: 10.5px; color: #334155; line-height: 1.3; width: 45%;">
                     @if(!empty($orgAddress))
-                        <div style="font-size: 9.5px; color: #334155; font-weight: bold; margin-top: 3px; line-height: 1.3;">
-                            {{ \App\Support\GujaratiText::reorderMatra($orgAddress) }}
+                        <div style="font-weight: bold; font-size: 10.5px;">
+                            <a href="{{ $mapsUrl }}" target="_blank" style="color: #334155; text-decoration: none;">
+                                {{ \App\Support\GujaratiText::reorderMatra($orgAddress) }}
+                            </a>
                         </div>
                     @endif
                     @if(!empty($orgPhone))
-                        <div style="font-size: 10px; color: #1e3a8a; font-weight: bold; margin-top: 2px;">
-                            Mo. / Mobile: {{ $orgPhone }}
+                        <div style="font-weight: bold; color: #1e3a8a; font-size: 11px; margin-top: 2px;">
+                            <a href="tel:{{ $cleanPhone }}" style="color: #1e3a8a; text-decoration: none;">
+                                Mobile No: {{ $orgPhone }}
+                            </a>
                         </div>
                     @endif
                 </td>
-                @if($logoBase64)
-                <td style="width: 65px;"></td>
-                @endif
             </tr>
         </table>
 
-        <!-- Centered Title Badge -->
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px;">
-            <tr>
-                <td align="center" style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px;">
-                    <span class="type-badge">@yield('type_label')</span>
-                </td>
-            </tr>
-        </table>
+        <!-- Left-Aligned Clean Receipt Title (No Background Box) -->
+        <div style="width: 100%; margin-top: 6px; margin-bottom: 8px; border-bottom: 2px solid #1e3a8a; padding-bottom: 4px; text-align: left;">
+            <span style="font-size: 14px; font-weight: 900; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.5px;">
+                @yield('type_label')
+            </span>
+        </div>
 
-        <!-- Receipt Meta Details -->
-        <table class="meta-table">
+        <!-- Receipt Meta Details (Equal Top/Bottom Visual Padding) -->
+        <table class="meta-table" style="line-height: 1.0;">
             <tr>
-                <td style="width: 50%;">
-                    <strong>Receipt Number:</strong> {{ $receiptNo }}
+                <td style="width: 50%; text-align: left; padding: 5px 12px 6px 12px; vertical-align: middle; line-height: 1.0; font-size: 12px;">
+                    <strong style="color: #475569;">Receipt Number:</strong> <span style="font-size: 12.5px; font-weight: bold; color: #0f172a;">{{ $receiptNo }}</span>
                 </td>
-                <td style="width: 50%; text-align: right;">
-                    <strong>Date &amp; Time:</strong> {{ date('d M Y, h:i A') }}
+                <td style="width: 50%; text-align: right; padding: 5px 12px 6px 12px; vertical-align: middle; line-height: 1.0; font-size: 12px;">
+                    <strong style="color: #475569;">Date &amp; Time:</strong> <span style="font-size: 12.5px; font-weight: bold; color: #0f172a;">{{ date('d M Y, h:i A') }}</span>
                 </td>
             </tr>
         </table>

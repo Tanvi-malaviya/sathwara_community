@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Hind+Vadodara:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Styles / Scripts -->
@@ -31,7 +31,7 @@
         /* ============================================================
            TYPOGRAPHY SYSTEM — Shree Satwara Gnati Mandal, Ahmedabad Website
            English  : Plus Jakarta Sans
-           Gujarati : Hind Vadodara + Noto Sans Gujarati fallback
+           Gujarati : Noto Sans Gujarati
            ============================================================ */
 
         html {
@@ -84,7 +84,7 @@
         .font-gujarati h4,
         .font-gujarati h5,
         .font-gujarati h6 {
-            font-family: 'Hind Vadodara', 'Noto Sans Gujarati', sans-serif !important;
+            font-family: 'Noto Sans Gujarati', sans-serif !important;
             letter-spacing: 0.01em;
         }
 

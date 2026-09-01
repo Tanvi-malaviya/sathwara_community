@@ -364,7 +364,7 @@
                     <!-- Modal Scrollable Content containing all passes -->
                     <div class="p-4 sm:p-6 overflow-y-auto space-y-6 bg-slate-50 flex-1">
                         <template x-for="(pObj, idx) in activePasses" :key="idx">
-                            <div class="bg-white rounded-2xl border-2 border-slate-900 shadow-sm overflow-hidden text-slate-900 print-pass-member-item"
+                            <div class="relative bg-white rounded-2xl border-2 border-slate-900 shadow-md overflow-hidden text-slate-900 print-pass-member-item transition-all hover:shadow-xl"
                                 :id="'member-pass-card-' + idx"
                                 :data-pass-no="typeof pObj === 'object' ? pObj.passNo : pObj"
                                 :data-qr-url="typeof pObj === 'object' ? pObj.qrUrl : ''"
@@ -372,72 +372,73 @@
                                 :data-date="(activeEvent?.date || '') + (activeEvent?.time ? ' | ' + activeEvent?.time : '')"
                                 :data-venue="activeEvent?.venue || ''" :data-attendee="activeAttendee || ''"
                                 :data-member-code="activeMemberId || ''" data-logo="{{ $logoUrl }}">
-                                <!-- Top Bar -->
-                                <div
-                                    class="bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-[11px] font-black uppercase tracking-wider">
-                                    <span class="flex items-center gap-1.5 truncate">
+                                
+                                <!-- Left & Right Ticket Notches -->
+                                <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-50 border-2 border-slate-900 z-20"></div>
+                                <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-50 border-2 border-slate-900 z-20"></div>
+
+                                <!-- Top Bar Header -->
+                                <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white px-5 py-2.5 flex items-center justify-between text-[11px] font-black uppercase tracking-wider">
+                                    <span class="flex items-center gap-2 truncate">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                                         <span x-text="activeAttendee"></span>
-                                        <span class="text-primary-400 font-mono" x-show="activeMemberId"
-                                            x-text="'(' + activeMemberId + ')'"></span>
+                                        <span class="text-indigo-300 font-mono" x-show="activeMemberId" x-text="'(' + activeMemberId + ')'"></span>
                                     </span>
-                                    <span class="text-amber-400 shrink-0">Entry Pass</span>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-[10px] font-black shrink-0 tracking-widest">
+                                        VERIFIED PASS #<span x-text="idx + 1"></span>
+                                    </span>
                                 </div>
 
-                                <!-- Pass Core (Sketch Layout) -->
-                                <div
-                                    class="p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
-                                    <!-- Left: Circular Logo -->
-                                    <div
-                                        class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
-                                        <img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-cover"
-                                            onerror="this.src='/logo.png'">
+                                <!-- Pass Core Body -->
+                                <div class="p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 relative bg-white">
+                                    <!-- Left: Mandal Logo -->
+                                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-slate-900 bg-slate-50 p-1 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                                        <img src="{{ $logoUrl }}" alt="Logo" class="w-full h-full object-contain" onerror="this.src='/logo.png'">
                                     </div>
 
-                                    <!-- Middle Details: Mandal, Event Name, Date, Attendee -->
-                                    <div class="flex-1 space-y-1.5 text-center sm:text-left">
-                                        <div class="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-tight">
+                                    <!-- Center: Event & Mandal Info -->
+                                    <div class="flex-1 space-y-1.5 text-center sm:text-left min-w-0">
+                                        <div class="text-[11px] font-black text-slate-500 uppercase tracking-widest">
                                             Shree Satwara Gnati Mandal, Ahmedabad
                                         </div>
-                                        <div class="text-base sm:text-lg font-black text-rose-600 leading-tight"
+                                        <div class="text-base sm:text-lg font-black text-slate-950 leading-tight tracking-tight break-words"
                                             x-text="activeEvent?.title">
                                         </div>
-                                        <div
-                                            class="text-xs font-bold text-slate-700 flex items-center justify-center sm:justify-start gap-1">
+                                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-100 text-slate-800 text-xs font-bold border border-slate-200">
+                                            <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                             <span>{{ $isGu ? 'તારીખ:' : 'Date:' }}</span>
-                                            <span x-text="activeEvent?.date"></span>
+                                            <span x-text="activeEvent?.date" class="font-extrabold text-slate-950"></span>
                                             <span x-show="activeEvent?.time" class="text-slate-400">|</span>
-                                            <span x-show="activeEvent?.time" x-text="activeEvent?.time"></span>
+                                            <span x-show="activeEvent?.time" x-text="activeEvent?.time" class="font-extrabold text-indigo-700"></span>
                                         </div>
-
                                     </div>
 
-                                    <!-- Right: Dedicated QR Code & Pass No. Box -->
-                                    <div
-                                        class="shrink-0 flex items-center justify-end gap-3 self-stretch sm:self-auto pt-2 sm:pt-0">
+                                    <!-- Right: Anti-Fraud QR Code & Pass Number Badge -->
+                                    <div class="shrink-0 flex items-center gap-3 bg-slate-50 border-2 border-slate-900 p-2 rounded-2xl shadow-xs">
                                         <template x-if="typeof pObj === 'object' && pObj.qrUrl">
-                                            <div class="w-20 h-20 border-2 border-slate-900 rounded-xl p-1 bg-white flex flex-col items-center justify-center shrink-0 shadow-xs">
-                                                <img :src="pObj.qrUrl" alt="QR Pass" class="w-full h-full object-contain">
+                                            <div class="w-18 h-18 sm:w-20 sm:h-20 bg-white border border-slate-300 rounded-xl p-1 flex items-center justify-center shrink-0">
+                                                <img :src="pObj.qrUrl" alt="QR Gate Pass" class="w-full h-full object-contain">
                                             </div>
                                         </template>
-                                        <div
-                                            class="border-2 border-slate-900 rounded-xl px-4 py-2 bg-slate-50 text-center shadow-xs">
-                                            <span
-                                                class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">Pass
-                                                No.</span>
-                                            <span class="text-xl font-black text-slate-900 block mt-0.5 tracking-widest"
+                                        <div class="text-center px-2">
+                                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">PASS NO</span>
+                                            <span class="text-2xl font-black text-indigo-950 block mt-0.5 tracking-wider"
                                                 x-text="typeof pObj === 'object' ? pObj.passNo : pObj"></span>
+                                            <template x-if="typeof pObj === 'object' && pObj.passCode">
+                                                <span class="inline-block mt-1 text-[8px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200"
+                                                    x-text="pObj.passCode"></span>
+                                            </template>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Bottom Location Strip -->
-                                <div
-                                    class="border-t-2 border-dashed border-slate-200 bg-slate-50/80 px-4 py-2.5 text-xs font-bold text-slate-700 flex items-center justify-between gap-1.5">
-                                    <span class="flex items-center gap-1.5">
-                                        <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                        <span><strong>{{ $isGu ? 'સ્થળ / સરનામું:' : 'Location / Venue:' }}</strong> <span
-                                                x-text="activeEvent?.venue"></span></span>
+                                <div class="border-t-2 border-dashed border-slate-200 bg-slate-50 px-5 py-2.5 text-xs font-bold text-slate-800 flex items-center justify-between gap-2">
+                                    <span class="flex items-center gap-1.5 min-w-0">
+                                        <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        <span class="truncate"><strong>{{ $isGu ? 'સ્થળ / સરનામું:' : 'Venue:' }}</strong> <span x-text="activeEvent?.venue"></span></span>
                                     </span>
+                                    <span class="text-[10px] text-slate-400 font-mono font-semibold shrink-0 uppercase tracking-widest">GATE SCANNER VALID</span>
                                 </div>
                             </div>
                         </template>

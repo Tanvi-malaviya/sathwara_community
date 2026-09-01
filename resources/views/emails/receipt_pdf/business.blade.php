@@ -8,15 +8,15 @@
     <table class="info-table">
         <tr>
             <td class="label">Business Name:</td>
-            <td class="value accent">{{ $business->business_name }}</td>
+            <td class="value accent">{{ \App\Support\GujaratiText::reorderMatra($business->business_name) }}</td>
         </tr>
         <tr>
             <td class="label">Category:</td>
-            <td class="value">{{ $business->category ? $business->category->name : 'General Business' }}</td>
+            <td class="value">{{ \App\Support\GujaratiText::reorderMatra($business->category ? $business->category->name : 'General Business') }}</td>
         </tr>
         <tr>
             <td class="label">Owner / Contact Person:</td>
-            <td class="value">{{ $business->owner_name }}</td>
+            <td class="value">{{ \App\Support\GujaratiText::reorderMatra($business->owner_name) }}</td>
         </tr>
         @if(!empty($business->member_id))
         <tr>
@@ -36,7 +36,7 @@
         @endif
         <tr>
             <td class="label">Address / Area:</td>
-            <td class="value">{{ $business->address }} {{ $business->area ? '(' . $business->area->name . ')' : '' }}</td>
+            <td class="value">{{ \App\Support\GujaratiText::reorderMatra($business->address) }} {{ $business->area ? '(' . \App\Support\GujaratiText::reorderMatra($business->area->name) . ')' : '' }}</td>
         </tr>
     </table>
 

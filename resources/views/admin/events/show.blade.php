@@ -842,7 +842,7 @@
                             class="col-span-full text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                             <span class="text-3xl block mb-2">📸</span>
                             <p class="text-xs font-bold text-slate-600">
-                                {{ __('messages.no_photos_uploaded') }}</p>
+                                {{ __('messages.no_event_photos_uploaded') }}</p>
                             <button type="button" @click="showUploadModal = true"
                                 class="mt-3 px-3.5 py-1.5 bg-primary-500 hover:bg-primary-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors inline-flex items-center gap-1 cursor-pointer">
                                 <span>{{ __('messages.upload_photos') }}</span>

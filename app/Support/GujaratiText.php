@@ -19,6 +19,11 @@ class GujaratiText
      */
     public static function reorderMatra(string $text): string
     {
+        // Only run matra reordering if the string actually contains Gujarati script
+        if (!preg_match('/[\x{0A80}-\x{0AFF}]/u', $text)) {
+            return $text;
+        }
+
         $pattern = '/((?:[\x{0A95}-\x{0AB9}]\x{0ACD})*[\x{0A95}-\x{0AB9}])\x{0ABF}/u';
 
         return preg_replace($pattern, "\u{0ABF}$1", $text) ?? $text;

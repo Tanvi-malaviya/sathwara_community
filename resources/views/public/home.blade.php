@@ -647,7 +647,7 @@
                 </div>
             @else
                 <div class="text-center py-12 bg-slate-50 rounded-3xl border border-slate-200/80 text-slate-500">
-                    <p class="text-sm font-bold">{{ __('messages.no_photos_uploaded') }}</p>
+                    <p class="text-sm font-bold">{{ __('messages.no_general_images') }}</p>
                 </div>
             @endif
 

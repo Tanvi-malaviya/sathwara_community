@@ -148,13 +148,13 @@
         </div>
     @else
         <div class="bg-white rounded-xl p-8 border border-slate-100 text-center space-y-2">
-            <h3 class="text-xs font-black text-slate-800">{{ __('messages.no_members_found') }}</h3>
+            <h3 class="text-xs font-black text-slate-800">{{ __('messages.no_directory_members_found') }}</h3>
             <p class="text-[11px] text-slate-500 font-medium max-w-sm mx-auto">
                 {{ __('messages.try_adjusting_search') }}
             </p>
             @if(request('search'))
                 <a href="{{ route('member.directory') }}" class="inline-block px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg transition-colors">
-                    {{ __('messages.clear') }}
+                    {{ __('messages.clear_search') }}
                 </a>
             @endif
         </div>
