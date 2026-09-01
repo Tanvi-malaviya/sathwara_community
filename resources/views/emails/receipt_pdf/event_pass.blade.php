@@ -8,6 +8,9 @@
         $finalAmount = $amount ?? (float)($registration->payment_amount ?? 0);
         $eventDate = $event->date ?? ($event->event_date ?? null);
         $eventTime = $event->time ?? ($event->start_time ?? null);
+        $formattedTitle = \App\Support\GujaratiText::reorderMatra($event->title ?? '');
+        $formattedVenue = \App\Support\GujaratiText::reorderMatra($event->venue ?? 'Community Hall');
+        $formattedAttendee = \App\Support\GujaratiText::reorderMatra($attendeeName);
     @endphp
 
     <!-- Event Details -->
@@ -15,7 +18,7 @@
     <table class="info-table">
         <tr>
             <td class="label">Event Title:</td>
-            <td class="value accent">{{ $event->title }}</td>
+            <td class="value accent">{{ $formattedTitle }}</td>
         </tr>
         <tr>
             <td class="label">Event Date &amp; Time:</td>
@@ -26,11 +29,11 @@
         </tr>
         <tr>
             <td class="label">Venue / Location:</td>
-            <td class="value">{{ $event->venue ?? 'Community Hall' }}</td>
+            <td class="value">{{ $formattedVenue }}</td>
         </tr>
         <tr>
             <td class="label">Primary Attendee:</td>
-            <td class="value">{{ $attendeeName }}</td>
+            <td class="value">{{ $formattedAttendee }}</td>
         </tr>
     </table>
 
@@ -47,10 +50,10 @@
         <tbody>
             <tr>
                 <td>
-                    <strong>{{ $event->title }} &mdash; Event Entry Pass Fee</strong><br>
+                    <strong>{{ $formattedTitle }} &mdash; Event Entry Pass Fee</strong><br>
                     <span style="font-size: 10px; color: #64748b;">For {{ $personCount }} Person(s)</span>
                     @if(!empty($event->description))
-                    <br><span style="font-size: 9px; color: #94a3b8;">{{ \Illuminate\Support\Str::limit(strip_tags($event->description), 120) }}</span>
+                    <br><span style="font-size: 9px; color: #94a3b8;">{{ \Illuminate\Support\Str::limit(strip_tags(\App\Support\GujaratiText::reorderMatra($event->description)), 120) }}</span>
                     @endif
                 </td>
                 <td style="text-align: center;">

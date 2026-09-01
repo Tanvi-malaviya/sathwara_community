@@ -84,8 +84,14 @@
                             $pCount = max(1, (int) ($myReg->form_data['person_count'] ?? 1));
                             $regPasses = [];
                             if ($rEvent) {
-                                for ($pi = 1; $pi <= $pCount; $pi++) {
-                                    $regPasses[] = sprintf('%03d', $pi);
+                                $tokens = \App\Services\PassTokenService::getOrGenerateTokens($myReg);
+                                foreach ($tokens as $tk) {
+                                    $regPasses[] = [
+                                        'passNo' => sprintf('%03d', $tk->pass_index),
+                                        'tokenHash' => $tk->token_hash,
+                                        'passCode' => $tk->pass_code,
+                                        'qrUrl' => \App\Services\PassTokenService::getQrCodeImageUrl($tk->token_hash),
+                                    ];
                                 }
                             }
                             $cardAttendee = $myReg->form_data['full_name'] ?? $userName;
@@ -348,11 +354,6 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button type="button" onclick="downloadAllPassesMember()"
-                                class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                <span>Download All PDF</span>
-                            </button>
                             <button type="button" @click="showPassModal = false"
                                 class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-xs font-bold cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -362,9 +363,11 @@
 
                     <!-- Modal Scrollable Content containing all passes -->
                     <div class="p-4 sm:p-6 overflow-y-auto space-y-6 bg-slate-50 flex-1">
-                        <template x-for="(pNo, idx) in activePasses" :key="idx">
+                        <template x-for="(pObj, idx) in activePasses" :key="idx">
                             <div class="bg-white rounded-2xl border-2 border-slate-900 shadow-sm overflow-hidden text-slate-900 print-pass-member-item"
-                                :id="'member-pass-card-' + idx" :data-pass-no="pNo"
+                                :id="'member-pass-card-' + idx"
+                                :data-pass-no="typeof pObj === 'object' ? pObj.passNo : pObj"
+                                :data-qr-url="typeof pObj === 'object' ? pObj.qrUrl : ''"
                                 :data-event-title="activeEvent?.title || ''" data-mandal="Shree Satwara Gnati Mandal, Ahmedabad"
                                 :data-date="(activeEvent?.date || '') + (activeEvent?.time ? ' | ' + activeEvent?.time : '')"
                                 :data-venue="activeEvent?.venue || ''" :data-attendee="activeAttendee || ''"
@@ -408,16 +411,21 @@
 
                                     </div>
 
-                                    <!-- Right: Dedicated Pass No. Box -->
+                                    <!-- Right: Dedicated QR Code & Pass No. Box -->
                                     <div
-                                        class="shrink-0 flex flex-col items-center sm:items-end justify-between self-stretch pt-2 sm:pt-0">
+                                        class="shrink-0 flex items-center justify-end gap-3 self-stretch sm:self-auto pt-2 sm:pt-0">
+                                        <template x-if="typeof pObj === 'object' && pObj.qrUrl">
+                                            <div class="w-20 h-20 border-2 border-slate-900 rounded-xl p-1 bg-white flex flex-col items-center justify-center shrink-0 shadow-xs">
+                                                <img :src="pObj.qrUrl" alt="QR Pass" class="w-full h-full object-contain">
+                                            </div>
+                                        </template>
                                         <div
                                             class="border-2 border-slate-900 rounded-xl px-4 py-2 bg-slate-50 text-center shadow-xs">
                                             <span
                                                 class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">Pass
                                                 No.</span>
                                             <span class="text-xl font-black text-slate-900 block mt-0.5 tracking-widest"
-                                                x-text="pNo"></span>
+                                                x-text="typeof pObj === 'object' ? pObj.passNo : pObj"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -430,12 +438,6 @@
                                         <span><strong>{{ $isGu ? 'સ્થળ / સરનામું:' : 'Location / Venue:' }}</strong> <span
                                                 x-text="activeEvent?.venue"></span></span>
                                     </span>
-                                    <button type="button" :data-card-id="'member-pass-card-' + idx"
-                                        onclick="downloadSinglePassMember(this.dataset.cardId)"
-                                        class="flex items-center gap-1 px-2.5 py-1 bg-slate-900 hover:bg-slate-700 text-white text-[10px] font-extrabold rounded-lg transition-colors cursor-pointer">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                        <span>Download</span>
-                                    </button>
                                 </div>
                             </div>
                         </template>
@@ -521,11 +523,18 @@
                         </div>
                     </td>
 
-                    <!-- Pass No Box -->
-                    <td style="width: 110px; vertical-align: middle; padding: 14px 16px 14px 0; text-align: right;">
-                        <div style="display: inline-block; border: 2px solid #0f172a; border-radius: 10px; background-color: #f8fafc; padding: 8px 14px; text-align: center; min-width: 85px; box-sizing: border-box;">
-                            <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b;">PASS NO.</div>
-                            <div style="font-size: 22px; font-weight: 900; letter-spacing: 4px; color: #0f172a; margin-top: 2px;">${passNo}</div>
+                    <!-- Pass No & QR Code Box -->
+                    <td style="width: 170px; vertical-align: middle; padding: 14px 16px 14px 0; text-align: right;">
+                        <div style="display: inline-flex; align-items: center; gap: 8px;">
+                            ${passData.qrUrl ? `
+                            <div style="border: 2px solid #0f172a; border-radius: 10px; background-color: #ffffff; padding: 3px; width: 68px; height: 68px; box-sizing: border-box; text-align: center;">
+                                <img src="${passData.qrUrl}" style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                            ` : ''}
+                            <div style="display: inline-block; border: 2px solid #0f172a; border-radius: 10px; background-color: #f8fafc; padding: 8px 12px; text-align: center; min-width: 80px; box-sizing: border-box;">
+                                <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b;">PASS NO.</div>
+                                <div style="font-size: 20px; font-weight: 900; letter-spacing: 3px; color: #0f172a; margin-top: 2px;">${passNo}</div>
+                            </div>
                         </div>
                     </td>
                 </tr>

@@ -558,12 +558,12 @@
                 <!-- Notifications -->
                 <div class="relative" x-data="{ showNotif: false }">
                     <button @click="showNotif = !showNotif"
-                        class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                        class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors focus:outline-none">
+                        <svg class="w-5 h-5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                         </svg>
                         @if($unreadNotificationsCount > 0)
-                            <span class="absolute top-1.5 right-1.5 flex items-center justify-center min-w-[15px] h-[15px] px-0.5 bg-rose-500 text-white text-[9px] font-bold rounded-full border-2 border-white leading-none">
+                            <span class="absolute top-0.5 right-0.5 flex items-center justify-center min-w-[17px] h-[17px] px-1 bg-rose-500 text-white text-[9.5px] font-black rounded-full ring-2 ring-white shadow-2xs leading-none">
                                 {{ $unreadNotificationsCount > 9 ? '9+' : $unreadNotificationsCount }}
                             </span>
                         @endif

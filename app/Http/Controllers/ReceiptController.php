@@ -83,16 +83,18 @@ class ReceiptController extends Controller
         $event = $registration->event ?? Event::findOrFail($registration->event_id);
         $user = $registration->user_id ? User::find($registration->user_id) : null;
         
-        $passes = [];
-        if (!empty($registration->form_data['passes']) && is_array($registration->form_data['passes'])) {
-            $passes = $registration->form_data['passes'];
-        } else {
-            $count = (int)($registration->form_data['person_count'] ?? 1);
-            for ($i = 1; $i <= max(1, $count); $i++) {
-                $passes[] = sprintf('%03d', $i);
-            }
+        $tokens = \App\Services\PassTokenService::getOrGenerateTokens($registration);
+        $passTokens = [];
+        foreach ($tokens as $tk) {
+            $passTokens[] = [
+                'passNo' => sprintf('%03d', $tk->pass_index),
+                'passCode' => $tk->pass_code,
+                'tokenHash' => $tk->token_hash,
+                'qrUrl' => \App\Services\PassTokenService::getQrCodeImageUrl($tk->token_hash),
+            ];
         }
 
+        $passes = array_column($passTokens, 'passNo');
         $personCount = count($passes);
         $amount = (float)($registration->payment_amount ?? 0);
         $paymentStatus = $registration->payment_status ?? 'paid';
@@ -104,6 +106,7 @@ class ReceiptController extends Controller
             'registration' => $registration,
             'user' => $user,
             'passes' => $passes,
+            'passTokens' => $passTokens,
             'personCount' => $personCount,
             'receiptNo' => $receiptNo,
             'amount' => $amount,

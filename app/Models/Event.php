@@ -170,4 +170,14 @@ class Event extends Model
     {
         return $this->hasMany(EventSponsor::class)->where('status', 'approved')->orderBy('created_at', 'desc');
     }
+
+    public function passTokens()
+    {
+        return $this->hasMany(PassToken::class);
+    }
+
+    public function getCheckedInPassesCountAttribute(): int
+    {
+        return (int) $this->passTokens()->where('is_checked_in', true)->count();
+    }
 }

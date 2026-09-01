@@ -156,25 +156,42 @@
     @endphp
 
     <div class="receipt-box">
+        @php
+            $orgAddress = \App\Models\Setting::get('contact_address', '1, Satwara Samaj Bhavan, Opp. Siddheswar Shopping, Viratnagar-Manmohan Road, Odhav, Ahmedabad - 382415');
+            $orgPhone = \App\Models\Setting::get('contact_phone', '+91-6353785519');
+        @endphp
+
         <!-- Header -->
-        <table class="header-table">
+        <table class="header-table" style="width: 100%; border-collapse: collapse;">
             <tr>
                 @if($logoBase64)
-                <td style="width: 70px; vertical-align: middle;">
-                    <img src="{{ $logoBase64 }}" style="max-height: 60px; max-width: 65px; object-fit: contain;" alt="Logo">
+                <td style="width: 65px; vertical-align: middle; text-align: left;">
+                    <img src="{{ $logoBase64 }}" style="max-height: 55px; max-width: 60px; object-fit: contain;" alt="Logo">
                 </td>
                 @endif
                 <td style="text-align: center; vertical-align: middle;">
-                    <div class="org-title">{{ $orgName }}</div>
+                    <div class="org-title">{{ \App\Support\GujaratiText::reorderMatra($orgName) }}</div>
+                    @if(!empty($orgAddress))
+                        <div style="font-size: 9.5px; color: #334155; font-weight: bold; margin-top: 3px; line-height: 1.3;">
+                            {{ \App\Support\GujaratiText::reorderMatra($orgAddress) }}
+                        </div>
+                    @endif
+                    @if(!empty($orgPhone))
+                        <div style="font-size: 10px; color: #1e3a8a; font-weight: bold; margin-top: 2px;">
+                            Mo. / Mobile: {{ $orgPhone }}
+                        </div>
+                    @endif
                 </td>
                 @if($logoBase64)
-                <td style="width: 70px;"></td>
+                <td style="width: 65px;"></td>
                 @endif
             </tr>
         </table>
-        <table class="type-badge-wrap" style="width: 100%;">
+
+        <!-- Centered Title Badge -->
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px;">
             <tr>
-                <td style="text-align: center;">
+                <td align="center" style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px;">
                     <span class="type-badge">@yield('type_label')</span>
                 </td>
             </tr>
@@ -193,21 +210,6 @@
         </table>
 
         @yield('content')
-
-        @php
-            $orgAddress = \App\Models\Setting::get('contact_address');
-            $orgPhone = \App\Models\Setting::get('contact_phone');
-        @endphp
-        @if(!empty($orgAddress) || !empty($orgPhone))
-        <div class="footer-note">
-            @if(!empty($orgAddress))
-                <div><strong>Address:</strong> {{ $orgAddress }}</div>
-            @endif
-            @if(!empty($orgPhone))
-                <div style="margin-top: 3px;"><strong>Mobile:</strong> {{ $orgPhone }}</div>
-            @endif
-        </div>
-        @endif
     </div>
 </body>
 </html>

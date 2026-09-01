@@ -198,6 +198,10 @@ Route::middleware(['auth', 'role:Administrator|Sub Admin'])->prefix('admin')->na
         Route::post('/events/{id}/gallery', [AdminEvent::class, 'uploadGallery'])->name('events.gallery.upload');
         Route::delete('/events/gallery/{id}', [AdminEvent::class, 'deleteGalleryPhoto'])->name('events.gallery.destroy');
 
+        // Event Gate Scanner & QR Verification
+        Route::get('/events/{id}/scanner', [AdminEvent::class, 'showScanner'])->name('events.scanner');
+        Route::post('/events/{id}/verify-pass', [AdminEvent::class, 'verifyPass'])->name('events.verify_pass');
+
         // Event Sponsorships
         Route::post('/events/{id}/sponsorship-types', [AdminSponsorship::class, 'storeType'])->name('events.sponsorship_types.store');
         Route::put('/events/sponsorship-types/{id}', [AdminSponsorship::class, 'updateType'])->name('events.sponsorship_types.update');

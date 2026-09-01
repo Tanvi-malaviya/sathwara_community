@@ -7,6 +7,10 @@
         $eventDate = $event->date ?? ($event->event_date ?? null);
         $eventTime = $event->time ?? ($event->start_time ?? null);
         $packageTitle = $sponsorshipType ? $sponsorshipType->title : 'General Event Sponsorship';
+        $formattedEventTitle = \App\Support\GujaratiText::reorderMatra($event->title ?? '');
+        $formattedPackageTitle = \App\Support\GujaratiText::reorderMatra($packageTitle);
+        $formattedSponsorName = \App\Support\GujaratiText::reorderMatra($sponsor->name ?? '');
+        $formattedVenue = \App\Support\GujaratiText::reorderMatra($event->venue ?? '');
     @endphp
 
     <!-- Event Details -->
@@ -14,7 +18,7 @@
     <table class="info-table">
         <tr>
             <td class="label">Event Title:</td>
-            <td class="value accent">{{ $event->title }}</td>
+            <td class="value accent">{{ $formattedEventTitle }}</td>
         </tr>
         <tr>
             <td class="label">Event Date &amp; Time:</td>
@@ -26,12 +30,12 @@
         @if(!empty($event->venue))
         <tr>
             <td class="label">Venue:</td>
-            <td class="value">{{ $event->venue }}</td>
+            <td class="value">{{ $formattedVenue }}</td>
         </tr>
         @endif
         <tr>
             <td class="label">Sponsorship Category:</td>
-            <td class="value">{{ $packageTitle }}</td>
+            <td class="value">{{ $formattedPackageTitle }}</td>
         </tr>
     </table>
 
@@ -40,12 +44,12 @@
     <table class="info-table">
         <tr>
             <td class="label">Organization / Sponsor:</td>
-            <td class="value">{{ $sponsor->name }}</td>
+            <td class="value">{{ $formattedSponsorName }}</td>
         </tr>
         @if(!empty($sponsor->contact_person))
         <tr>
             <td class="label">Contact Person:</td>
-            <td class="value">{{ $sponsor->contact_person }}</td>
+            <td class="value">{{ \App\Support\GujaratiText::reorderMatra($sponsor->contact_person) }}</td>
         </tr>
         @endif
         <tr>
@@ -61,7 +65,7 @@
         @if(!empty($sponsor->city))
         <tr>
             <td class="label">City / Location:</td>
-            <td class="value">{{ $sponsor->city }}</td>
+            <td class="value">{{ \App\Support\GujaratiText::reorderMatra($sponsor->city) }}</td>
         </tr>
         @endif
     </table>
@@ -79,10 +83,10 @@
         <tbody>
             <tr>
                 <td>
-                    <strong>{{ $event->title }} &mdash; Event Sponsorship Contribution</strong><br>
-                    <span style="font-size: 10px; color: #64748b;">Package: {{ $packageTitle }}</span>
+                    <strong>{{ $formattedEventTitle }} &mdash; Event Sponsorship Contribution</strong><br>
+                    <span style="font-size: 10px; color: #64748b;">Package: {{ $formattedPackageTitle }}</span>
                     @if($sponsorshipType && !empty($sponsorshipType->description))
-                    <br><span style="font-size: 9px; color: #94a3b8;">{{ \Illuminate\Support\Str::limit(strip_tags($sponsorshipType->description), 120) }}</span>
+                    <br><span style="font-size: 9px; color: #94a3b8;">{{ \Illuminate\Support\Str::limit(strip_tags(\App\Support\GujaratiText::reorderMatra($sponsorshipType->description)), 120) }}</span>
                     @endif
                 </td>
                 <td style="text-align: center;">

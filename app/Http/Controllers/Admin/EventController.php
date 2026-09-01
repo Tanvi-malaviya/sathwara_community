@@ -944,4 +944,67 @@ class EventController extends Controller
 
         return redirect()->route('admin.events.show', $event->id)->with('success', 'Candidate registration details updated successfully.');
     }
+
+    /**
+     * Show Live Mobile Web Camera Gate Scanner
+     */
+    public function showScanner($id)
+    {
+        $event = Event::findOrFail($id);
+
+        // Ensure pass tokens exist for all pass registrations
+        $registrations = EventRegistration::where('event_id', $event->id)->passes()->get();
+        foreach ($registrations as $reg) {
+            \App\Services\PassTokenService::getOrGenerateTokens($reg);
+        }
+
+        $totalPasses = $event->total_passes_count;
+        $checkedInCount = $event->checked_in_passes_count;
+
+        return view('admin.events.scanner', compact('event', 'totalPasses', 'checkedInCount'));
+    }
+
+    /**
+     * Verify QR Pass Token (AJAX API Endpoint)
+     */
+    public function verifyPass(Request $request, $id)
+    {
+        $event = Event::findOrFail($id);
+        $qrToken = trim((string)($request->input('qr_token') ?? $request->input('pass_code')));
+
+        if (empty($qrToken)) {
+            return response()->json([
+                'success' => false,
+                'status' => 'empty',
+                'message' => 'No QR Code payload provided.',
+                'detail' => 'Please position the QR code inside the scanner frame.',
+            ], 400);
+        }
+
+        $result = \App\Services\PassTokenService::verifyAndCheckIn($qrToken, $event->id, auth()->id());
+
+        $tokenData = null;
+        if (!empty($result['token'])) {
+            $t = $result['token'];
+            $reg = $t->registration;
+            $tokenData = [
+                'pass_code' => $t->pass_code,
+                'pass_index' => $t->pass_index,
+                'attendee' => $reg->form_data['full_name'] ?? ($reg->user->name ?? 'Guest Attendee'),
+                'mobile' => $reg->form_data['mobile'] ?? ($reg->user->phone ?? '-'),
+                'is_checked_in' => $t->is_checked_in,
+                'checked_in_at' => $t->checked_in_at ? $t->checked_in_at->format('d M Y, h:i A') : null,
+            ];
+        }
+
+        return response()->json([
+            'success' => $result['success'],
+            'status' => $result['status'],
+            'message' => $result['message'],
+            'detail' => $result['detail'],
+            'token' => $tokenData,
+            'checked_in_count' => $event->checked_in_passes_count,
+            'total_passes' => $event->total_passes_count,
+        ]);
+    }
 }
